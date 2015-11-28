@@ -1,33 +1,48 @@
-# 译注
-这是《游戏编程模式》的中文翻译版本现在仍在第一轮作业中，请切换分支到cn查看。
+# 游戏编程模式中文版
+###### 点击上面标题在线阅读（尚未完成~）
 
-第一轮作业：将整书翻译一遍，翻译质量略高于谷歌机翻。（在这步完成之前，基本不能看）。
-第二轮作业：修复漏洞，并平滑语言。
-第三轮作业：校订。
+《游戏编程模式》是由曾在EA工作八年的Bob Nystrom写就，讲述在游戏开发中各种常见的编程模式。通过阅读此书，可以更好的理解设计模式和工程化开发，适用于有C++开发经验的游戏编程者。
 
-如果有任何问题，请pull issue。
+英文版在线阅读：[Game Programming Patterns](http://gameprogrammingpatterns.com/)
 
-# 原先的readme如下：
+Bob Nystrom同时在Github上无私地提供原本：[munificent/game-programming-patterns](https://github.com/munificent/game-programming-patterns)
 
-This is the source repo for the in-progress book [Game Programming Patterns][].
-Issues and pull requests are more than welcome!
+这是《游戏编程模式》的中文翻译版本。仍处于第一轮作业中。
 
-## Building the Book
+如果有任何问题，欢迎提出Issues 和 pull requests，谢谢您的帮助。
 
-The book is written in Markdown (in `book/`). A little Python script (`script/format.py`) converts that along with a SASS file (`asset/style.scss`) and HTML template (`asset/template.html`) to the final HTML (in `html/`). To run the format script locally, you'll need to have Python 2.7-ish, and install Python Markdown, Pygments, and SmartyPants:
+## 进度
 
-    $ pip install markdown
-    $ pip install pygments
-    $ pip install smartypants
+1. 第一轮作业：将整书翻译一遍，翻译质量预期略高于谷歌机翻。
+2. 第二轮作业：修复漏洞，翻译所有的旁注并添加链接，同时平滑语言。
+3. 第三轮作业：校订。
 
-You may need `sudo` for those. Once that's done, you can run:
-
-    $ python script/format.py
-
-Make sure to run this from the root directory of the repo. That will regenerate all of the chapter and section intro HTML files. If you're editing stuff, the script can also be run in watch mode:
-
-    $ python script/format.py --watch
-
-That will monitor the file system for changes to the markdown files, SASS file, or HTML template, and reprocess them as needed.
-
-[game programming patterns]: http://gameprogrammingpatterns.com/
+|章节|试译|初稿|校正|二审|
+|----|----|----|----|----|
+| 致谢 | + | | |
+| 序 |  | | |
+| 架构，性能和游戏 | + | | |
+| 重访设计模式 | + | | |
+| 命令 | + | | |
+| 享元 | + | | |
+| 观察者 | + | | |
+| 原型 | + | | |
+| 单例 | + | | |
+| 状态 | + | | |
+| 序列模式 | + | | |
+| 双缓冲 | + | | |
+| 游戏循环 | + | | |
+| 更新方法 | + | | |
+| 行为模式 | + | | |
+| 字节码 | + | | |
+| 子类沙箱 | + | | |
+| 类型对象 | + | | |
+| 解耦模式 | + | | |
+| 组件 | + | | |
+| 事件队列 | + | | |
+| 服务定位器 | + | | |
+| 优化模式 | + | | |
+| 数据局部性 | + | | |
+| 脏标识 | + | | |
+| 对象池 | + | | |
+| 空间分区 | + | | |
