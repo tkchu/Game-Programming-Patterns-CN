@@ -1,0 +1,607 @@
+$primary: hsl(200, 80%, 40%);
+$serif: "Merriweather", Georgia, serif;
+$mono: "Source Code Pro", Menlo, Consolas, Monaco, monospace;
+$sans: "Source Sans Pro", "Lucida Grande", "Lucida Sans Unicode",
+    Verdana, sans-serif;
+$header: "Source Sans Pro", Georgia, serif;
+
+$hairline: #eee;
+
+body, h1, h2, h3, h4, p, blockquote, code, ul, ol, dl, dd, img {
+  margin: 0;
+}
+
+body {
+  line-height: 24px;
+  color: #222;
+  font: normal 14px/24px $serif;
+
+  background: hsl(40, 10%, 90%);
+  background-image: url("images/background.png");
+}
+
+nav {
+  background: hsl(200, 50%, 96%);
+
+  color: hsl(200, 20%, 60%);
+  font: 14px $sans;
+  margin: 40px -38px 0 -38px;
+  padding: 10px 38px;
+
+  .toc {
+    display: block;
+    width: 150px;
+    text-align: center;
+    margin: 0 auto;
+  }
+
+  .prev {
+    float: left;
+  }
+
+  .next {
+    float: right;
+  }
+}
+
+nav.top {
+  margin-top: 0;
+}
+
+.page {
+  background: hsl(40, 30%, 98%);
+  max-width: 640px;
+  margin: 0 auto;
+
+  border-left: solid 1px #bbb;
+  border-right: solid 1px #bbb;
+  border-bottom: solid 1px #999;
+
+  // So that asides are positioned relative to it.
+  position: relative;
+
+  box-shadow: 0 0 40px hsla(30, 40%, 20%, 0.2);
+}
+
+.content {
+  padding: 0 40px 2px 40px;
+
+  background: white;
+  box-shadow: 0 0 30px hsla(30, 40%, 20%, 0.05);
+}
+
+// Note: We use explicit line heights here so that the positions of the
+// elements don't change after the fonts are loaded asynchronously. That way,
+// when we position the asides procedurally, they are in the right place.
+
+h1 {
+  font: 200 60px $header;
+  padding: 100px 0 4px 0;
+  border-bottom: solid 1px $hairline;
+}
+
+h1.book {
+  color: #777;
+  font: normal 16px/20px $header;
+  padding: 6px 0 30px 0;
+  border: none;
+}
+
+.section:before {
+  content: " / ";
+}
+
+h2 {
+  color: $primary;
+  font: 300 35px $header;
+  margin: 20px 0 15px -38px;
+  padding: 0 0 2px 30px;
+  border-left: solid 8px hsl(200, 50%, 90%);
+}
+
+h3 {
+  color: $primary;
+  font: 400 20px $header;
+  margin: 20px 0 0 -38px;
+  padding-left: 30px;
+  border-left: solid 8px hsl(200, 50%, 90%);
+}
+
+p {
+  margin: 15px 0;
+}
+
+ul, ol {
+  padding: 0 0 0 24px;
+}
+
+a {
+  color: $primary;
+  text-decoration: none;
+  outline: none;
+
+  border-bottom: solid 1px hsla(200, 80%, 90%, 0);
+
+  transition: color 0.2s ease,
+              border-color 0.2s ease;
+}
+
+img {
+  max-width: 100%;
+
+  border: solid 1px hsl(40, 30%, 95%);
+  border-radius: 3px;
+}
+
+// Hackish way of scaling it down for retina.
+img.arrow {
+  vertical-align: middle;
+  margin-top: -2px;
+  width: 30px;
+  height: 20px;
+}
+
+img.profile {
+  width: 150px;
+  float: right;
+  margin: 0 0 0 15px;
+  padding: 10px;
+
+  background: hsl(40, 35%, 93%);
+  border: solid 1px hsl(40, 40%, 90%);
+  border-bottom: solid 1px hsl(40, 40%, 85%);
+  border-radius: 3px;
+}
+
+blockquote {
+  padding: 10px;
+  background: hsl(200, 20%, 98%);
+  border: solid 1px hsl(200, 20%, 96%);
+  border-bottom: solid 1px hsl(200, 30%, 90%);
+  border-radius: 3px;
+
+  p {
+    font: italic 14px/24px $serif;
+    color: hsl(200, 10%, 50%);
+  }
+
+  p:first-child {
+    margin-top: 0;
+  }
+
+  p:last-child {
+    margin-bottom: 0;
+  }
+}
+
+code {
+  color: hsl(200, 20%, 40%);
+  font: normal 15px $mono;
+  white-space: nowrap;
+}
+
+a code {
+  color: $primary;
+}
+
+pre {
+  color: #444;
+  font: normal 13px/16px $mono;
+  padding: 10px;
+
+  background: hsl(200, 40%, 98%);
+  border: solid 1px hsl(200, 40%, 96%);
+  border-bottom: solid 1px hsl(200, 50%, 90%);
+  border-radius: 3px;
+
+  // Scroll horizontally if not wide enough.
+  overflow: auto;
+}
+
+td {
+  vertical-align: top;
+}
+
+// Asides.
+
+aside {
+  color: hsl(40, 5%, 50%);
+
+  // These are only used when the asides are inline with the text.
+  padding: 10px 10px;
+  background: hsl(40, 30%, 97%);
+  border: solid 1px hsl(40, 40%, 95%);
+  border-bottom: solid 1px hsl(40, 40%, 90%);
+  border-radius: 3px;
+
+  h2 {
+    color: hsl(40, 5%, 60%);
+    font-size: 24px;
+    border: none;
+    margin: 20px 0 10px 0;
+    padding: 0;
+  }
+
+  p, li {
+    font: 15px/22px $sans;
+  }
+
+  li {
+    line-height: 20px;
+  }
+
+  >p:first-child {
+    margin-top: 0;
+  }
+
+  >p:last-child {
+    margin-bottom: 0;
+  }
+
+  ul, ol {
+    padding: 0 0 0 18px;
+  }
+
+  code {
+    color: #666;
+    font: normal 13px $mono;
+  }
+
+  img {
+    padding: 0;
+  }
+}
+
+aside + aside {
+  margin-top: 10px;
+}
+
+// The front page gets a bit of special styling.
+.index {
+  h1 {
+    border: none;
+  }
+
+  aside {
+    display: none;
+  }
+
+  // No little tab boxes next to the headers.
+  h2, h3 {
+    border-left: none;
+    margin-left: 0;
+    padding-left: 0;
+  }
+}
+
+.rhetorical {
+  font: 16px $sans;
+  font-weight: 400;
+
+  background: hsl(200, 80%, 95%);
+  color: hsl(200, 30%, 40%);
+  border-radius: 4px;
+  margin-top: 20px;
+  padding: 20px;
+
+  border: solid 1px hsl(200, 85%, 90%);
+  border-bottom: solid 1px hsl(200, 85%, 85%);
+
+  h2 {
+    font: normal 19px/30px "Rock Salt", $sans;
+    color: hsl(200, 80%, 50%);
+    margin: 0 0 10px 0;
+    padding: 0;
+  }
+
+  li + li {
+    margin-top: 10px;
+  }
+}
+
+a.start-reading {
+  display: block;
+  width: 40%;
+  margin: 20px auto;
+  padding: 8px 0;
+  border-radius: 4px;
+  background: hsl(200, 80%, 45%);
+  border: solid 1px hsl(200, 85%, 35%);
+  border-bottom: solid 3px hsl(200, 85%, 35%);
+  box-shadow: 0 0 0 hsl(200, 100%, 70%);
+  color: white;
+  font: 300 18px $header;
+  font-weight: 400;
+  text-align: center;
+
+  transition: background-color 0.2s ease,
+              border-color 0.2s ease,
+              box-shadow 0.2s ease;
+}
+
+a.start-reading:hover {
+  background-color: hsl(200, 85%, 55%);
+  border-color: hsl(200, 85%, 40%);
+  border-bottom: solid 3px hsl(200, 85%, 40%);
+  box-shadow: 0 0 10px hsl(200, 100%, 80%);
+}
+
+// Sign-up box on front page.
+.sign-up {
+  background: hsl(40, 90%, 95%);
+
+  margin: 0;
+  padding: 5px 15px;
+  font: normal 16px $sans;
+  color: hsl(40, 50%, 50%);
+
+  border-bottom-left-radius: 4px;
+  border-bottom-right-radius: 4px;
+
+  border-left: solid 1px hsl(40, 80%, 90%);
+  border-right: solid 1px hsl(40, 80%, 90%);
+  border-bottom: solid 1px hsl(40, 80%, 80%);
+
+  p {
+    margin: 5px 0;
+  }
+
+  h2 {
+    font: normal 19px/30px "Rock Salt", $sans;
+    color: hsl(40, 80%, 55%);
+    border: none;
+    margin: 10px 0;
+    padding: 0;
+  }
+
+  small {
+    color: hsl(40, 50%, 70%);
+    line-height: 14px;
+  }
+
+  // Based on MailChimp Form Embed Code - Slim - 08/17/2011
+  #mc_embed_signup input {
+    border: 1px solid hsl(40, 50%, 75%);
+    border-radius: 4px;
+    outline: none;
+    font-size: 13px;
+    -webkit-appearance:none;
+  }
+
+  #mc_embed_signup input:focus {
+    border-color: hsl(40, 100%, 40%);
+  }
+
+  #mc_embed_signup label {
+    white-space: nowrap;
+  }
+
+  #mc_embed_signup .button {
+    background-color: hsl(40, 100%, 55%);
+    border: solid 1px hsl(40, 100%, 45%);
+    border-radius: 4px;
+    border-bottom: solid 3px hsl(40, 100%, 45%);
+    color: #fff;
+    cursor: pointer;
+    font-size: 13px;
+    text-align: center;
+    text-decoration: none;
+    vertical-align: top;
+    width: 100%;
+    padding: 4px 16px;
+
+    box-shadow: 0 0 0 hsl(40, 100%, 65%);
+
+    transition: background-color 0.2s ease,
+                border-color 0.2s ease,
+                box-shadow 0.2s ease;
+  }
+
+  #mc_embed_signup .button:hover {
+    background-color: hsl(40, 100%, 65%);
+    border-color: hsl(40, 100%, 50%);
+    box-shadow: 0 0 10px hsl(40, 100%, 65%);
+  }
+
+  #mc_embed_signup .small-meta {font-size: 11px;}
+
+  #mc_embed_signup input.email {
+    padding: 5px 0;
+    text-indent: 5px;
+    width: 100%;
+  }
+
+  // Generic Mailchimp stuff.
+  #mc_embed_signup div#mce-responses {float:left; top:-1.4em; padding:0em .5em 0em .5em; overflow:hidden; width:90%;margin: 0 5%; clear: both;}
+  #mc_embed_signup div.response {margin:1em 0; padding:1em .5em .5em 0; font-weight:bold; float:left; top:-1.5em; z-index:1; width:80%;}
+  #mc_embed_signup #mce-error-response {display:none;}
+  #mc_embed_signup #mce-success-response {color:#529214; display:none;}
+  #mc_embed_signup label.error {display:block; float:none; width:auto; margin-left:1.05em; text-align:left; padding:.5em 0;}
+}
+
+// Pattern links.
+a.pattern,
+a.gof-pattern {
+}
+
+a:hover {
+  border-bottom: solid 1px hsl(200, 80%, 90%);
+}
+
+a.pattern:after,
+a.gof-pattern:after,
+a.pdf:after {
+  font: 9px $sans;
+  color: mix($primary, #fff, 50%);
+  vertical-align: super;
+}
+
+a.pattern:after {
+  content: "\00A0\2192";
+}
+
+a.gof-pattern:after {
+  content: "\00A0GoF";
+}
+
+a.pdf:after {
+  content: "\00A0PDF";
+}
+
+// Footer.
+footer {
+  max-width: 640px;
+  margin: 20px auto;
+
+  text-align: center;
+  color: #aaa;
+  font: 14px $sans;
+}
+
+.narrow-sign-up {
+  border-radius: 4px;
+  border-top: solid 1px hsl(40, 80%, 85%);
+}
+
+// Syntax highlighting.
+.codehilite .k  { color: $primary; } // keyword
+.codehilite .kd { color: $primary; } // keyword declaration
+.codehilite .kt { color: #09a; }     // keyword type
+.codehilite .s  { color: #c70; }     // string
+.codehilite .sc { color: #c70; }     // string
+.codehilite .s2 { color: #c70; }     // string
+.codehilite .c  { color: #999; }     // comment
+.codehilite .c1 { color: #999; }     // comment
+.codehilite .cm { color: #999; }     // comment
+.codehilite .cp { color: #594; }     // preprocessor
+.codehilite .nl { color: $primary; } // keyword label (private: etc.)
+.codehilite .nt { color: $primary; } // json key
+
+// Hack: Pygments isn't recognizing preprocessor directives, so just color the
+// error like a keyword.
+.codehilite .err { color: $primary; }
+
+// On phone-size screens, shrink all of the text a bit.
+@media only screen and (max-width: 479px) {
+  .content {
+    padding: 0 20px 2px 20px;
+  }
+
+  h1 {
+    font-size: 50px;
+    padding-top: 70px;
+  }
+
+  h1.book {
+    padding-bottom: 20px;
+  }
+
+  .section {
+    display: block;
+  }
+
+  .section:before {
+    content: "";
+  }
+
+  h2 {
+    font-size: 25px;
+    margin-left: -18px;
+    padding-left: 10px;
+    border-left: solid 6px hsl(200, 50%, 90%);
+  }
+
+  h3 {
+    font-size: 18px;
+    margin-left: -18px;
+    padding-left: 10px;
+    border-left: solid 6px hsl(200, 50%, 90%);
+  }
+
+  p, li {
+    font: normal 13px/22px $serif;
+  }
+
+  blockquote p {
+    font: italic 13px/22px $serif;
+  }
+
+  code {
+    font-size: 14px;
+  }
+
+  pre {
+    padding: 6px;
+    font: normal 12px/16px $mono;
+
+    // Scroll horizontally if not wide enough.
+    overflow: auto;
+  }
+
+  ul, ol {
+    padding: 0 0 0 20px;
+  }
+
+  aside {
+    p, li {
+      font: 14px/22px $sans;
+    }
+  }
+
+  nav {
+    margin: 20px -18px 0 -18px;
+    padding: 6px 18px;
+    font-size: 13px;
+  }
+
+  footer {
+    font-size: 13px;
+  }
+}
+
+// On wide enough screens, put the asides on the... side.
+@media only screen and (min-width: 800px) {
+  .page {
+    padding-right: 300px;
+  }
+
+  aside {
+    position: absolute;
+    width: 240px;
+    right: 30px;
+
+    // Clear out the inline aside styles.
+    padding: 0;
+    background: none;
+    border: none;
+
+    padding-left: 22px;
+    border-radius: 0;
+    border-left: solid 8px hsl(40, 40%, 90%);
+
+    p, li {
+      font: 14px/20px $sans;
+    }
+  }
+
+
+  // The front page gets a bit of special styling.
+  .index {
+    // Don't highlight the aside.
+    aside {
+      display: block;
+      border-left: none;
+    }
+  }
+
+  // Normally, show the chapter list in the sidebar, so don't show it here.
+  .page {
+    .narrow-toc {
+      display: none;
+    }
+
+    .narrow-sign-up {
+      display: none;
+    }
+  }
+}

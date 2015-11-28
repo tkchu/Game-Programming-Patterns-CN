@@ -1,0 +1,8 @@
+code/cpp/build/
+code/flyweight/tiles/Build/
+.sass-cache/
+xcuserdata/
+*.xcuserstate
+project.xcworkspace/
+
+xml/

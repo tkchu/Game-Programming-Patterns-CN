@@ -1,0 +1,947 @@
+2014-10-08 - finish layout, proofread, re-upload to createspace for review
+2014-10-07 - layout through data locality
+2014-10-06 - layout through event queue
+2014-10-05 - layout through subclass sandbox
+2014-10-04 - layout through behavioral patterns
+2014-10-03 - layout through singleton (!)
+2014-10-02 - decimal inches page layout
+2014-10-01 - work on new page layout
+2014-09-30 - work on new page layout
+2014-09-29 - cover and other epub front matter
+2014-09-28 - email
+2014-09-27 - go through bugs and pull requests
+2014-09-26 - finish applying proofreading, tweak other web stuff
+2014-09-25 - apply proofreading to web of six chapters, top nav
+2014-09-24 - more kdp and bowker stuff, description, cover
+2014-09-23 - fill in stuff on createspace and kdp
+2014-09-22 - finish proofreading
+2014-09-21 - apply proofreading through type object
+2014-09-20 - apply proofreading through game loop
+2014-09-19 - apply proofreading through observer
+2014-09-18 - proofread last three chapters!
+2014-09-17 - proofread data locality
+2014-09-16 - proofread through service locator
+2014-09-15 - proofread through component
+2014-09-14 - proofread through bytecode
+2014-09-13 - proofread through double buffer
+2014-09-12 - update enter actions in print version
+2014-09-11 - redo enter actions in state
+2014-09-10 - proofread through half of state
+2014-09-09 - proofread through flyweight
+2014-09-08 - cover!
+2014-09-07 - print!
+2014-09-06 - finish front matter
+2014-09-05 - acknowledgements
+2014-09-04 - more index revision, grep styles
+2014-09-03 - more index revision, grep styles
+2014-09-02 - index last three chapters, and revise index!
+2014-09-01 - index data locality
+2014-08-31 - index component, event queue, and service locator
+2014-08-30 - index subclass sandbox and type object
+2014-08-29 - index update method and bytecode
+2014-08-28 - index double buffer and game loop
+2014-08-27 - clean up indexes so far
+2014-08-26 - index singleton and state
+2014-08-25 - index flyweight, observer, prototype
+2014-08-24 - index intro, architecture, command
+2014-08-23 - start working on index
+2014-08-22 - fix all the cross refs
+2014-08-21 - work on cross references
+2014-08-20 - clean up blank pages, fix bugs, pay lauren
+2014-08-19 - layout spatial partition (last chapter!)
+2014-08-18 - fix #253, merge spatial partition, layout object pool
+2014-08-17 - fix #252
+2014-08-16 - merge object pool changes
+2014-08-15 - email, set up group for translators
+2014-08-14 - finish dirty flag, renumber front matter
+2014-08-13 - start laying out dirty flag
+2014-08-12 - rescan illustrations
+2014-08-11 - merge dirty flag
+2014-08-10 - figure out which illustrations need rescanning
+2014-08-09 - email (1 :( )
+2014-08-08 - layout data locality
+2014-08-07 - merge data locality changes
+2014-08-06 - layout service locator
+2014-08-05 - merge service locator
+2014-08-04 - layout event queue
+2014-08-03 - merge event queue
+2014-08-02 - layout component
+2014-08-01 - merge component changes
+2014-07-28 - email
+2014-07-27 - layout type object
+2014-07-26 - merge type object changes
+2014-07-25 - print table of contents
+2014-07-24 - email
+2014-07-23 - ebook table of contents
+2014-07-22 - layout subclass sandbox
+2014-07-21 - fix #234 and merge subclass sandbox changes
+2014-07-20 - email
+2014-07-19 - start sketching cover illustration
+2014-07-18 - more cover comps
+2014-07-17 - finish bytecode
+2014-07-16 - layout behavioral patterns, start on bytecode
+2014-07-15 - merge bytecode changes
+2014-07-14 - layout update method
+2014-07-13 - merge update method changes
+2014-07-08 - email
+2014-07-07 - layout game loop
+2014-07-06 - merge in changes to game loop
+2014-07-05 - work on toc for epub
+2014-07-04 - work on styling for epub
+2014-07-03 - more work on format script for epub, alt text for images
+2014-07-02 - more work on epub
+2014-07-01 - start working on epub version
+2014-06-30 - finish double buffer
+2014-06-29 - sequencing patterns, start working on double buffer
+2014-06-28 - merge changes from lauren
+2014-06-27 - layout state
+2014-06-26 - 6 emails
+2014-06-25 - lay out singleton
+2014-06-24 - lay out prototype
+2014-06-23 - lay out observer
+2014-06-22 - finish command, lay out flyweight
+2014-06-21 - start laying out command
+2014-06-20 - layout architecture, start building book
+2014-06-19 - akkurat -> source, layout intro
+2014-06-18 - merge pull requests, including lauren's changes
+2014-06-17 - figure captions and start working on front matter
+2014-06-16 - turn links to chapter references
+2014-06-15 - title and section pages
+2014-06-14 - running footer, new column proportion
+2014-06-13 - work on illustration workflow
+2014-06-12 - 13.5pt baseline grid
+2014-06-11 - more hand layout and style tweaking
+2014-06-10 - start hand laying out object pool, more style work
+2014-06-09 - massage xml a bunch to make indesign happy
+2014-06-08 - more work on xml and masters
+2014-06-07 - fight with xml
+2014-06-06 - work on masters and styling xml
+2014-06-05 - add xml support to format script, start figuring out how to import
+2014-06-04 - fix four bugs, send money to lauren
+2014-06-03 - pick body font, start laying out masters
+2014-06-02 - lots of design work
+2014-06-01 - start playing with design
+2014-05-30 - start learning indesign and toying with design
+2014-05-29 - fix bugs in one chapter
+2014-05-28 - fix bugs in two chapters, four emails
+2014-05-27 - fix four bugs
+2014-05-26 - fix #207, reformat event queue
+2014-05-26 - four bugs
+2014-05-25 - revise last 2182 words of component
+2014-05-24 - revise 2449 words component
+2014-05-23 - revise type object
+2014-05-22 - revise subclass sandbox and behavioral patterns. reformat bytecode
+2014-05-21 - revise update method
+2014-05-20 - revise game loop
+2014-05-19 - BROKE CHAIN
+2014-05-18 - 4 emails, 6 bugs
+2014-05-17 - finish revising double buffer
+2014-05-16 - revise 2526 words of double buffer
+2014-05-15 - revise state
+2014-05-14 - revise singleton
+2014-05-13 - revise prototype
+2014-05-12 - revise last 2700 words of observer
+2014-05-11 - revise 2213 words observer, handle long code lines
+2014-05-10 - revise flyweight
+2014-05-09 - catch up on email, 1 bug
+2014-05-08 - 8 bugs, photoshop illustration
+2014-05-07 - revise design patterns revisited and command
+2014-05-06 - redo illustration
+2014-05-05 - 1 bug, revise architecture chapter
+2014-05-04 - 7 bugs
+2014-05-03 - 6 bugs
+2014-05-02 - 5 bugs, 3 emails, make design sections consistent
+2014-05-01 - 3 bugs, work on style guide for chapter structure, work on making keep in mind sections more consistent
+2014-04-30 - 6 emails, 3 bugs, revise introduction
+2014-04-29 - 8 emails, 4 bugs
+2014-04-28 - 12 emails few bug fixes
+2014-04-27 - 20 emails
+2014-04-26 - 4 pull requests, 10 bugs
+2014-04-25 - 4 pull requests, 21 bugs
+2014-04-24 - redo navigation (#146, #148)
+2014-04-23 - reddit, hn, twitter, email, write blog post, research ebook
+2014-04-22 - photoshop illustrations, send to mailing list, COMPLETE
+2014-04-21 - third draft of architecture
+2014-04-20 - #130, #134, #135, #136, #139
+2014-04-19 - #123, #125, #128, #129, merge style guide
+2014-04-18 - fix #137, email
+2014-04-17 - smart quotes and design changes
+2014-04-16 - address #116 #119 #120 #122 #124 #126 #131 #133
+2014-04-15 - email lb
+2014-04-14 - 481 words, finish second draft
+2014-04-13 - 967 words, second draft, email possible proofreader
+2014-04-12 - 1194 words, second draft
+2014-04-11 - 978 words, second draft
+2014-04-10 - 883 words, finish first draft arch
+2014-04-09 - 1348 words, arch
+2014-04-08 - 265 words, first draft arch
+2014-04-07 - 710 words, first draft arch
+2014-04-06 - 715 words, first draft arch
+2014-04-05 - 852 words, finish outline arch
+2014-04-04 - 215 words, outline arch
+2014-04-03 - 313 words notes for arch chapter
+2014-04-02 - start notes for arch chapter
+2014-04-01 - finish mobile index
+2014-03-31 - work on mobile version of index
+2014-03-30 - redo front page
+2014-03-29 - finish new design
+2014-03-28 - work on new design
+2014-03-27 - email email email
+2014-03-26 - fix #103 #109 #110 #111 #115, merge #108 #114 #118, close #106
+2014-03-25 - post new chapter, mailing list, twitter, proggit, g+
+2014-03-24 - 2136 words, finish bytecode
+2014-03-23 - 2448 words (delete ~100), third draft bytecode
+2014-03-22 - 808 words, third draft bytecode
+2014-03-21 - 1521 words, third draft bytecode
+2014-03-20 - photoshop bytecode illustrations
+2014-03-19 - 9 illustrations for bytecode
+2014-03-18 - 1401 words, finish second draft bytecode
+2014-03-17 - 733 words (delete ~70), second draft bytecode
+2014-03-16 - 1433 words (delete 33), second draft bytecode
+2014-03-15 - 651 words (delete 172), second draft bytecode
+2014-03-14 - 1151 words (delete ~150), second draft bytecode
+2014-03-13 - 736 words (delete ~50), second draft bytecode
+2014-03-12 - 520 words (delete ~100), second draft bytecode
+2014-03-11 - 593 words, second draft bytecode
+2014-03-10 - 843 words second draft bytecode
+2014-03-09 - 286 words (delete 207), second draft
+2014-03-08 - 1197 words, finish first draft bytecode
+2014-03-07 - 758 words, work on design decisions
+2014-03-06 - 748 words, work on design decisions
+2014-03-05 - 708 words, finish sample code
+2014-03-04 - 678 words
+2014-03-03 - 583 words, first draft bytecode, work on sample code section
+2014-03-02 - 1373 words
+2014-03-01 - 639 words
+2014-02-28 - 615 words, finish motivation
+2014-02-27 - 785 words, catch up on email
+2014-02-26 - 482 words, first draft bytecode
+2014-02-25 - resolve 2 bugs, start writing sample code for bytecode
+2014-02-24 - 598 words, finish outline bytecode
+2014-02-23 - 1165 words, outline bytecode
+2014-02-22 - 1069 words, outline bytecode
+2014-02-21 - fix 3 (large) bugs
+2014-02-20 - fix 3 bugs, move todos to github issues, more design work
+2014-02-19 - nav bar on new design
+2014-02-18 - fix 3 bugs, close 1
+2014-02-17 - fix 9 bugs, close 3
+2014-02-16 - 5 illustrations, decoupling section intro, mail, twitter, proggit
+2014-02-15 - 548 words, finish third draft event queue
+2014-02-14 - 1879 words (delete ~90), third draft event queue
+2014-02-13 - 1420 words (delete 120), third draft event queue
+2014-02-12 - 1108 words, third draft event queue
+2014-02-11 - 994 words (delete 246), third draft event queue
+2014-02-10 - photoshop illustrations for event queue
+2014-02-09 - 6 illustrations for event queue
+2014-02-08 - 479 words (delete 58), finish second draft event queue, email
+2014-02-07 - 985 words (delete 178), second draft event queue
+2014-02-06 - 1015 words (delete 110), second draft event queue
+2014-02-05 - 1166 words (delete 271), second draft event queue
+2014-02-04 - 952 words (delete 406), second draft event queue
+2014-02-03 - 532 words (delete 99), second draft event queue
+2014-02-02 - 1206 words (delete 282), second draft event queue
+2014-02-01 - 811 words, finish first draft event queue, work on new design
+2014-01-31 - 961 words, first draft event queue
+2014-01-30 - 441 words, first draft event queue
+2014-01-29 - 378 words, first draft event queue
+2014-01-28 - 816 words, first draft event queue
+2014-01-27 - 186 words, ~100 lines of sample code
+2014-01-26 - 400 words, first draft event queue
+2014-01-25 - 535 words, first draft event queue
+2014-01-24 - 439 words, first draft event queue
+2014-01-23 - 537 words, first draft event queue
+2014-01-22 - 233 words, first draft event queue
+2014-01-21 - 854 words, first draft event queue
+2014-01-20 - 921 words, first draft event queue. fix #85, #88.
+2014-01-19 - 689 words, finish outline event queue
+2014-01-18 - 359 words outline
+2014-01-17 - 708 words outline event queue
+2014-01-16 - 305 words outline, start writing sample code
+2014-01-15 - fix/close #69, #76, #78, #79, #80, #81, #82, #83
+2014-01-14 - 767 words outline even queue
+2014-01-13 - 744 words outline event queue
+2014-01-12 - research and 718 words of notes for message queue
+2014-01-11 - research and apply for business license
+2014-01-10 - finish ape
+2014-01-09 - read half of ape
+2014-01-08 - fix or close #44, #58, #59, #63, #64, #65, #67, #68, #73. Merge #60, #66.
+2014-01-07 - publish chapter, tweet, r/gamedev, etc.
+2014-01-06 - photoshop six illustrations, finish observer
+2014-01-05 - revise section header and update prototype
+2014-01-04 - 4 illustrations for observer, 1 for object pool
+2014-01-03 - 1038 words, finish third draft observer
+2014-01-02 - 1064 words, third draft observer
+2014-01-01 - 1306 words, third draft observer
+2013-12-31 - 293 words, third draft observer
+2013-12-30 - 1228 words, third draft observer
+2013-12-29 - reorganize chapters, write revised section intro
+2013-12-28 - 2847 words, finish second draft observer
+2013-12-27 - 1512 words, second draft observer
+2013-12-26 - 703 words, second draft observer
+2013-12-25 - 451 words, second draft observer
+2013-12-24 - fix #56 and #57
+2013-12-23 - 1198 finish first draft observer
+2013-12-22 - 740 words, first draft observer
+2013-12-21 - 811 words, sample code and first draft observer
+2013-12-20 - 566 words + sample code, first draft observer
+2013-12-19 - 796 words, first draft observer
+2013-12-18 - 493 words, first draft observer
+2013-12-17 - 733 words, first draft observer
+2013-12-16 - 524 words, first draft observer
+2013-12-15 - 1022 words finish outline observer
+2013-12-14 - 876 words outline observer
+2013-12-13 - ~400 words outline observer + research
+2013-12-12 - unit tests and "pooled binding" sample code for observer
+2013-12-11 - work on sample code for observer
+2013-12-10 - take pull request for #53, fix #51, #54, #55
+2013-12-09 - post chapter online, tweet, reddit, mailing list
+2013-12-08 - 1928 words, finish data locality! optimization patterns intro
+2013-12-07 - photoshop illustrations
+2013-12-06 - 2709 words, third draft of data locality
+2013-12-05 - 1817 words, third draft of data locality
+2013-12-04 - 5 illustrations for data locality
+2013-12-03 - 1982 words, finish second draft of data locality
+2013-12-02 - 2267 words, second draft data locality
+2013-12-01 - 616 words (cut 185) second draft data locality
+2013-11-30 - 1821 words (cut 366) second draft data locality
+2013-11-29 - address #48, #49, #46, #45
+2013-11-28 - fix #35, #34, #41, #42, #43
+2013-11-27 - 1287 words, finish first draft data locality!
+2013-11-26 - 1189 words, sample code and start design decisions
+2013-11-25 - 861 words, first draft of data locality
+2013-11-24 - 763 words, first draft of data locality
+2013-11-23 - 798 words, first draft of data locality
+2013-11-22 - 1241 words, first draft of data locality
+2013-11-21 - 877 words, first draft structure of arrays
+2013-11-20 - 677 words, finish outline structure of arrays
+2013-11-19 - 792 words outline sample code and start design decisions
+2013-11-18 - 845 words, redoing sample code section
+2013-11-17 - ugh more work trying to get a clean benchmark sample
+2013-11-16 - work on sample code benchmark code
+2013-11-15 - 92 lines of sample code, more outlining
+2013-11-14 - 453 words, outline structure of arrays
+2013-11-13 - 1059 words, outline structure of arrays
+2013-11-12 - 394 words, outline structure of arrays
+2013-11-11 - 672 words, outline structure of arrays
+2013-11-10 - more research, benchmark with actors changing active state
+2013-11-09 - component comparison benchmark
+2013-11-08 - benchmarking, got array access one working
+2013-11-07 - ugh more research
+2013-11-06 - research and benchmarks, get cachegrind
+2013-11-05 - research and benchmark for structure of arrays
+2013-11-04 - post chapter to /r/gamedev
+2013-11-03 - 1126 words, finish third draft prototype, publish
+2013-11-02 - 1355 words, third draft prototype
+2013-11-01 - 1110 words, third draft prototype
+2013-10-31 - photoshop 6 images for prototype
+2013-10-30 - 846 words, finish second draft prototype
+2013-10-29 - 1709 words, second draft prototype
+2013-10-28 - 953 words, second draft prototype
+2013-10-27 - draw five illustrations for prototype
+2013-10-26 - 739 words, finish first draft prototype
+2013-10-25 - 702 words, first draft prototype
+2013-10-24 - 992 words, first draft prototype
+2013-10-23 - 1040 words, first draft prototype
+2013-10-22 - 115 lines of code for prototype
+2013-10-21 - 547 words, finish outline for prototype
+2013-10-20 - 898 words outline for prototype
+2013-10-19 - 89 loc and notes for observer
+2013-10-18 - 387 words outline context parameter
+2013-10-17 - fix four bugs
+2013-10-16 - upload chapter, send to list, tweet, reddit, etc.
+2013-10-15 - complete third draft for command
+2013-10-14 - scan and photoshop command illustrations
+2013-10-13 - draw 4 illustrations for command
+2013-10-12 - 1564 words, finish second draft command
+2013-10-11 - 1086 words, second draft command
+2013-10-10 - 631 words, finish first draft command
+2013-10-09 - 750 words first draft command
+2013-10-08 - 669 words first draft command
+2013-10-07 - 178 lines of code, 338 words first draft command
+2013-10-06 - 876 words first draft command
+2013-10-05 - 679 words finish outline command
+2013-10-04 - 622 words outline command
+2013-10-03 - ~300 words real outline for command
+2013-10-02 - notes for command
+2013-10-01 - reorganize table of contents, ditch message chapter
+2013-09-30 - reddit comments, fix #27, #28, #31, #32, #33
+2013-09-29 - tweak flyweight, fix #26 and #30, upload, email, social
+2013-09-28 - scan and process 10 illustrations
+2013-09-27 - three illustrations for flyweight
+2013-09-26 - revise all 2193 words, finish third draft of flyweight
+2013-09-25 - revise all 2178 words, finish second draft flyweight
+2013-09-24 - finish converting to tree then revise 965 words
+2013-09-23 - add 298 words to flyweight, revise 1084 words to different example
+2013-09-22 - finish first draft of flyweight
+2013-09-21 - create real code for code samples for flyweight
+2013-09-20 - 618 words, first draft flyweight
+2013-09-19 - 449 words, first draft flyweight
+2013-09-18 - 327 words, first draft flyweight
+2013-09-17 - 863 words, first draft flyweight
+2013-09-16 - revise sequencing patterns intro, draw bunch of illustrations
+2013-09-15 - take notes for flyweight, write sequencing patterns section
+2013-09-14 - write and profile different flyweight examples
+2013-09-13 - fix nine bugs
+2013-09-12 - publish dirty flag, post to twitter, reddit, mailing list
+2013-09-11 - two more illustrations, finish 3rd draft dirty flag
+2013-09-10 - 1633 words (keep in mind, sample code) 3rd draft dirty flag
+2013-09-09 - process illustrations and draw two more
+2013-09-08 - revise 1362 words, 3rd draft dirty flag
+2013-09-07 - revise 367 words, finish 2nd draft dirty flag
+2013-09-06 - revise 541 words (delete ~200) 2nd draft dirty flag
+2013-09-05 - revise 800 words, write real sample code, 2nd draft dirty flag
+2013-09-04 - revise 1285 words, trim another 100, 2nd draft dirty flag
+2013-09-03 - revise 1357 words, trim about 200, 2nd draft dirty flag
+2013-09-02 - 4 illustrations for dirty flag
+2013-09-01 - 1019 revise design decisions, finish first draft of dirty flag
+2013-08-31 - 916+ rewrite sample code and revise other stuff
+2013-08-30 - 1454 rewrite first draft motivation in dirty flag
+2013-08-29 - 1447 words revised in dirty flag
+2013-08-28 - 723 words outline new motivation section for dirty flag
+2013-08-27 - 372 words finish draft, research how it's used in other things
+2013-08-26 - 1148 words, first draft of dirty flag
+2013-08-25 - 841 words, first draft of dirty flag
+2013-08-24 - 1104 words, first draft of dirty bits
+2013-08-23 - 575 words, first draft of dirty bits
+2013-08-22 - 600 words, finish outline dirty bits
+2013-08-21 - 726 words outline dirty bits
+2013-08-20 - 126 words outline dirty bits, photoshop 3 illustrations
+2013-08-19 - fix 8 bugs, draw 3 illustrations
+2013-08-18 - photoshop illustrations, then post update method chapter
+2013-08-17 - 1500 words, finish 3rd draft of update method
+2013-08-16 - 2027 words, 3rd draft of update method
+2013-08-15 - drew a couple of illustrations for update method and others
+2013-08-14 - 1511 words, finish 2nd draft of update method
+2013-08-13 - 1090 words, 2nd draft of update method
+2013-08-12 - 952 words, 2nd draft of update method
+2013-08-11 - finish first draft of update method
+2013-08-10 - ??? words on update method
+2013-08-09 - 751 words on update method
+2013-08-08 - fix #1, #2, #3. merge #6, 533 words on update method
+2013-08-07 - 812 words, first draft update method
+2013-08-06 - 895 words, first draft update method
+2013-08-05 - 651 words outline update method
+2013-08-04 - 1043 words outline update method
+2013-08-03 - illustration for state, put online, mail list, reddit, etc.
+2013-08-02 - 1837 words revised, third draft
+2013-08-01 - 2118 words revised, third draft
+2013-07-31 - embed sign-up form in call to action box and style it
+2013-07-30 - call to action box, redo index, and make watch script watch css and template
+2013-07-29 - create mailchimp account, add google analytics
+2013-07-28 - 1041, finished second draft
+2013-07-27 - 1434 words revised second draft
+2013-07-26 - 895 words revised second draft
+2013-07-25 - 713 words revised second draft
+2013-07-24 - 183 lines, finish sample code for state
+2013-07-23 - 409 lines of sample code for state
+2013-07-22 - 217 words, end of first draft
+2013-07-21 - 1138 words first draft of state
+2013-07-20 - 771 words first draft of state
+2013-07-19 - 932 words first draft of state
+2013-07-18 - 772 words first draft of state
+2013-07-17 - 860 words first draft of state
+2013-07-16 - 535 words first draft of state
+2013-07-15 - 736 words first draft of state
+2013-07-14 - ~150 lines of code for state
+2013-07-13 - put on github, ~200 lines of code for state
+2013-07-12 - 684 words, finish outline for state
+2013-07-11 - bunch of research on fsms and hierarchical fsms
+2013-07-10 - 1268 words of tight outline for State
+2013-07-09 - 298 words of outline for State
+2013-07-08 - Pile of notes for State, make format script estimate
+2013-07-07 - Finish third draft of Spatial Partition
+2013-07-06 - revised 1524 words, finished second draft
+2013-07-05 - revised 2577 words
+2013-07-04 - 870 words, finish first draft of spatial partition
+2013-07-03 - 636 words on design decisions
+2013-07-02 - 622 words on design decisions
+2013-07-01 - 329 words, really finished sample code section
+2013-06-30 - 548 words, finished sample code section
+2013-06-29 - [see 2013-06-25(2)]
+2013-06-28 - 87 works on sample code, a bit more code
+2013-06-27 - 581 works on motivation and sample code, some more code too
+2013-06-26(2) - 373 words of sample code, ~50 lines of code, test script
+2013-06-26 - More work on grid sample code
+2013-06-25(2) - Unit tests and get grid working
+2013-06-25 - Start writing grid code and tests for sample code, ~150 lines of code
+2013-06-24 - 276 words on Sample Code for Spatial Partition, 100+ lines of code
+2013-06-23 - 874 words on first draft of Spatial Partition
+2013-06-22 - Outline Spatial Partition (743 words)
+2013-06-21 - Finish updating asides and publish Game Loop
+2013-06-20 - Work on CSS and asides
+2013-06-19 - Figure out CSS/JS solution for asides on mobile
+2013-06-18 - Finish third draft of Game Loop
+2013-06-17 - 1,280 words revised in third draft of Game Loop
+2013-06-16 - ~1,000 words revised in third draft of Game Loop
+2013-06-15 - Finish second draft of Game Loop
+2013-06-14 - Revise couple of paragraphs of Game Loop
+2013-06-13 - Revise ~500 words of second draft of Game Loop
+2013-06-12 - Revise ~900 words of second draft of Game Loop
+2013-06-11 - Finish first draft of Game Loop
+2013-06-10 - 489 words on first draft of Game Loop
+2013-06-09 - 178 words on first draft of Game Loop
+2013-06-08 - 889 words on first draft of Game Loop
+2013-06-07 - 777 words on first draft of Game Loop
+
+2012/08/16 (:30)
+- read a bunch of blog posts on game loops
+- start outlining game loop
+- revise index to link to twitter instead of blog
+
+-- big gap here where I wasn't taking notes
+
+04/13 (:45)
++ Install Office
++ Download and read Apress docs
+
+02/14
+- Revise Component (1:45)
+  text : 8 files, 3419 non-empty lines, 31327 words
+  note : 11 files, 1244 non-empty lines, 7039 words
+  code : 11 files, 1860 lines, 288 comments
+
+02/08
++ Revise Component down to "How do components communicate..." (:45)
+
+01/28
++ Revise Component down to Sample Code (:30)
+
+01/24
++ Singleton / taking Andy's changes (:30)
+
+01/23
++ Component / design decisions (1:50) 5,591 words
+  text : 8 files, 3379 non-empty lines, 31413 words
+  note : 11 files, 1225 non-empty lines, 6945 words
+  code : 11 files, 1852 lines, 288 comments
+
+01/22
++ Component first draft / Sample code (2:10)
+  text : 8 files, 3263 non-empty lines, 30178 words
+  note : 11 files, 1220 non-empty lines, 6910 words
+  code : 11 files, 1784 lines, 282 comments
+
+01/21
++ Component first draft / Keep in Mind (:45)
+  text : 8 files, 3164 non-empty lines, 28632 words
+  note : 11 files, 1213 non-empty lines, 6860 words
+  code : 10 files, 1931 lines, 293 comments
+
+01/17
++ Component first draft / Motivation (1:00)
+
+01/17
++ Component sample code (1:30)
++ Component outline (:20)
+  text : 8 files, 3120 non-empty lines, 28076 words
+  note : 11 files, 1206 non-empty lines, 6808 words
+  code : 10 files, 1931 lines, 293 comments
+
+01/16
+- Component sample code (1:30)
+
+01/12
+- outline Component (:20)
+
+01/10
++ Type Object second revision (:20)
+
+01/09
+/ outline component / sample code (:40)
++ revise Type Object (1:40) (4973 words)
+  text : 7 files, 2774 non-empty lines, 25270 words
+  note : 11 files, 1194 non-empty lines, 6754 words
+  code : 9 files, 1431 lines, 233 comments
+
+01/07
++ outline component / keep in mind (:20)
+  text : 7 files, 2639 non-empty lines, 24565 words
+  note : 11 files, 1193 non-empty lines, 6744 words
+  code : 9 files, 1431 lines, 233 comments
+
+01/04
++ outline intro (:50)
+/ outline subcomponent (1:10)
++ research game engines for entity class (:20)
+- revise type object
+
+12/26
++ take andy's fixes for object pool
++ switch section order for object pool
+~ 1:00 hr
+
+12/22
+/ take andy's fixes for object pool
+~ 2:00
+
+12/21
+/ take andy's fixes for object pool
++ css support for definition lists
+~ :30 hr
+
+12/21
++ format script skips up-to-date chapters
++ draft type object / design alternatives
+~ 1:45 hr
+  text : 6 files, 2460 non-empty lines, 22916 words
+  note : 11 files, 993 non-empty lines, 4920 words
+  code : 9 files, 1428 lines, 231 comments
+
+12/18
+/ draft type object / sample code
+~ :30 hr
+
+12/14
+/ draft type object / sample code
+~ :40 hr
+
+12/09
+/ draft type object / sample code
+~ :45 hr
+  text : 6 files, 2420 non-empty lines, 22318 words
+  note : 11 files, 950 non-empty lines, 4645 words
+  code : 7 files, 1281 lines, 202 comments
+
+12/06
+/ draft type object / sample code
+~ :30 hr
+  text : 6 files, 2377 non-empty lines, 21915 words
+  note : 11 files, 947 non-empty lines, 4619 words
+  code : 7 files, 1231 lines, 193 comments
+
+12/05
++ draft type object / motivation
++ draft type object / when to use it
++ draft type object / keep in mind
+~ 2:20 hr
+  text : 6 files, 2376 non-empty lines, 21859 words
+  note : 11 files, 941 non-empty lines, 4582 words
+  code : 0 files, 0 lines, 0 comments
+
+12/04
++ outline type object
+~ :45 hr
+
+12/03
++ reorganize to support obj-c code
+/ outline type object
+~ 1:00 hr
+
+12/02
+/ outline type object
+~ :30 hr
+
+12/01
+- research metaclass (type object)
+~ 8:30
+
+11/27
++ revise double buffer
+~ :45 hr
+
+11/22
+/ revise double buffer (done down to play analogy)
+~ 1:00 hr
+  text : 5 files, 1978 non-empty lines, 18565 words
+  note : 10 files, 671 non-empty lines, 4154 words
+  code : 5 files, 1144 lines, 178 comments
+
+11/16
+/ double buffer / design alternatives
++ added 'back to top' to html
+~ :45 hr
+
+11/15
++ double buffer / sample code
+~ 3:30 hr
+  text : 5 files, 1882 non-empty lines, 17626 words
+  note : 10 files, 661 non-empty lines, 4104 words
+  code : 5 files, 1114 lines, 175 comments
+
+11/13
++ first draft double buffer / when to use it
++ first draft double buffer / keep in mind
+/ double buffer code
+~ :40 hr
+  text : 5 files, 1821 non-empty lines, 16818 words
+  note : 10 files, 655 non-empty lines, 4067 words
+  code : 5 files, 914 lines, 145 comments
+
+11/11
++ first draft double buffer / motivation
+~ 1:00 hr
+  text : 5 files, 1807 non-empty lines, 16584 words
+  note : 10 files, 647 non-empty lines, 4014 words
+  code : 4 files, 815 lines, 135 comments
+
+11/10
++ outline double buffer
+~ 1:00 hr
+
+11/03
+/ outline double buffer
+~ :30 hr
+
+11/02
++ service locator 2nd revision design alternatives
+~ :30 hr
+
+10/29
++ service locator second revision down to design alternatives
+  (down to 4559 words)
+~ 1:15hr
+
+10/27
++ revise service locator / motivation
+~ 1:00 hr
+  text : 4 files, 1567 non-empty lines, 14872 words
+  note : 9 files, 618 non-empty lines, 3842 words
+  code : 4 files, 813 lines, 139 comments
+
+10/22
++ revise service locator / design alternatives
++ revise service locator / see also
+~ :45 hr
+
+10/21
+/ revise service locator / design alternatives (down to 4930)
+~ :45 hr
+  text : 4 files, 1560 non-empty lines, 14615 words
+  note : 9 files, 612 non-empty lines, 3805 words
+  code : 4 files, 797 lines, 135 comments
+
+10/21
++ revise service locator / keep in mind
++ revise service locator / sample code (down to 5105 words)
+~ :45 hr
+  text : 4 files, 1575 non-empty lines, 14790 words
+  note : 9 files, 605 non-empty lines, 3755 words
+  code : 4 files, 797 lines, 135 comments
+
+10/20
+/ service locator revision (removed 31 words, down to 5341)
+~ :45 hr
+
+10/18
++ service locator / design decisions
++ service locator / sample code
+~ 2:30 hr
+  text : 4 files, 1599 non-empty lines, 15026 words
+  note : 8 files, 632 non-empty lines, 3890 words
+  code : 4 files, 961 lines, 144 comments
+
+10/14
+- service locator / design decisions
+~ 1:00 hr
+  text : 4 files, 1390 non-empty lines, 12990 words
+  note : 8 files, 622 non-empty lines, 3822 words
+  code : 4 files, 840 lines, 115 comments
+
+10/13
+- service locator / design decisions
+~ :30 hr
+  text : 4 files, 1332 non-empty lines, 12407 words
+  note : 8 files, 616 non-empty lines, 3786 words
+  code : 4 files, 825 lines, 110 comments
+
+10/10
++ service locator / when to use it
++ service locator / keep in mind
+~ :45 hr
+  text : 4 files, 1264 non-empty lines, 11774 words
+  note : 8 files, 606 non-empty lines, 3712 words
+  code : 4 files, 785 lines, 102 comments
+
+10/08
+/ work on service locator
+~ :30 hr
+
+09/22
++ revise singleton
++ remove feedback stuff
++ smart quotes
+~ 2:00 hr
+  text : 3 files, 1062 non-empty lines, 10025 words
+  note : 8 files, 531 non-empty lines, 3180 words
+  code : 4 files, 744 lines, 98 comments
+
+09/20
++ revise singleton
+~ 1:30 hr
+  text : 6 files, 1265 non-empty lines, 11787 words
+  note : 8 files, 520 non-empty lines, 3114 words
+  code : 4 files, 744 lines, 99 comments
+
+09/17
+/ revise singleton
+~ 1:15 hr
+
+09/16
+/ revise singleton
+~ :30 hr
+  text : 6 files, 1214 non-empty lines, 11381 words
+  note : 8 files, 506 non-empty lines, 3047 words
+  code : 4 files, 696 lines, 95 comments
+
+09/15
+/ revise singleton
+~ :20 hr
+
+09/14
++ draft singleton
++ revise introduction
+~ :40 hr
+
+09/13
+/ draft singleton
+~ :40 hr
+  text : 6 files, 1190 non-empty lines, 11195 words
+  note : 8 files, 490 non-empty lines, 2971 words
+  code : 4 files, 696 lines, 95 comments
+
+09/12
+/ draft singleton
+~ 2:30 hr
+  text : 6 files, 1142 non-empty lines, 10717 words
+  note : 8 files, 485 non-empty lines, 2941 words
+  code : 4 files, 610 lines, 86 comments
+
+09/08
++ service sample code
+~ :45 hr
+  text : 5 files, 844 non-empty lines, 7990 words
+  note : 8 files, 476 non-empty lines, 2900 words
+  code : 3 files, 323 lines, 59 comments
+
+09/07
++ css for links to other patterns
++ service motivation
++ service pattern and parts
+~ 1:00 hr
+
+09/04
++ Megan's revisions
++ revise fragments in outline
++ revise proposal
++ revise outline
++ put outline online
++ upload sample chapters and index
++ verify links in proposal work
++ illustrations
++ submit proposal!!!
+~ 3:00 hr
+
+09/03
++ revise outline to be full sentences
++ figure out other patterns to add
++ add example sections to each revisited pattern
++ fill in proposal
++ outline Area Effect
++ outline Update Method
++ outline Domain Component
++ outline Virtual Machine
++ outline Hit chapter
++ outline Metaclass chapter
++ outline Dead Pool chapter
+~ 4:20 hr
+  6:00 pm
+
+09/02
++ outline html generator
++ outline css
++ outline 4 more patterns
+~ 3:50 hr
+
+09/01
++ research how Service compares to Singleton
++ outline Service
++ outline Sandbox Method
+- outline Context Object
+~ 3:30 hr
+
+08/31
++ proposal
+  + tools
+  + writing sample
++ figure out average word count of oreilly book
+~ 1:15 hr
+
+08/28
++ feedback system
++ last modified on html
++ theme in title
++ upload html
++ tell people
++ script to upload html
+~ 4:00 hr
+  text : 2 files, 647 non-empty lines, 6234 words
+  note : 7 files, 444 non-empty lines, 3061 words
+  code : 2 files, 252 lines, 57 comments
+
+08/27
++ revise object pool
++ add feedback box to html
+~ 3:30 hr
+  text : 2 files, 645 non-empty lines, 6230 words
+  note : 7 files, 431 non-empty lines, 3001 words
+  code : 2 files, 252 lines, 57 comments
+
+
+08/26
++ revise intro
++ improve nav bar in html
+~ 2:30 hours
+  text : 2 files, 623 non-empty lines, 6043 words
+  note : 7 files, 424 non-empty lines, 2961 words
+  code : 2 files, 252 lines, 57 comments
+
+08/18
+~ 1:00 hour
+
+08/14
++ draft object pool pattern
+~ 3:15 hours
+  text : 2 files, 617 non-empty lines, 6032 words
+  note : 7 files, 414 non-empty lines, 2912 words
+  code : 2 files, 252 lines, 57 comments
+
+08/13
+/ draft object pool pattern
+  (in progress, still figuring out best structure)
++ fix list css
+~ 3.5 hours
+  text : 2 files, 509 non-empty lines, 4932 words
+  note : 7 files, 413 non-empty lines, 2911 words
+  code : 2 files, 217 lines, 41 comments
+
+08/11
++ research object pool
++ outline object pool chapter (all except implementation)
++ sample code for object pool chapter
++ first draft object pool intro
+~ 3 hours
+
+08/10
++ write first draft of intro chapter
++ simple navigation bar in generated html
+  + link to each generated page
+  + basic stylesheet
+- stretch: outline object pool chapter
+  - research it online (take notes!)
+  - outline
+~ 4 hours
+
+08/09
++ create a hello world pattern chapter
++ figure out a format for chapters
+  + markdown
++ create a stylesheet
+  . base off existing one from ruby stuff
++ get a hello world in c++ working
++ get code inclusion working
++ clean up directories
++ commit
++ figure out a format for the main book outline
+  ? separate html pages for each chapter?
++ outline the introduction
+~ 3 hours

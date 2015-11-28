@@ -1,0 +1,4 @@
+- Fix prose references to hyperlinks to make them make sense
+- Index
+  - Go through indexes for Intro - Singleton and use multi-page references
+    where appropriate
