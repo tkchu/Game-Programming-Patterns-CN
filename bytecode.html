@@ -1,0 +1,1518 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+<meta http-equiv="Content-type" content="text/html;charset=UTF-8" />
+
+<title>Bytecode &middot; Behavioral Patterns &middot; Game Programming Patterns</title>
+
+<!-- Tell mobile browsers we're optimized for them and they don't need to crop
+     the viewport. -->
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<link rel="stylesheet" type="text/css" href="style.css" />
+<link href="http://fonts.googleapis.com/css?family=Merriweather:400,400italic,700,700italic|Source+Code+Pro|Source+Sans+Pro:200,300,400,600,400italic,600italic|Rock+Salt" rel="stylesheet" type="text/css">
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-42804721-1', 'gameprogrammingpatterns.com');
+  ga('send', 'pageview');
+</script>
+<script src="jquery-1.10.1.min.js"></script>
+<script src="script.js"></script>
+</head>
+<body id="top">
+<div class="page sidebar">
+<div class="content">
+<nav class="top">
+  <span class="prev">&larr; <a href="behavioral-patterns.html">Previous Chapter</a></span>
+  <span class="next"><a href="subclass-sandbox.html">Next Chapter</a> &rarr;</span>
+  <span class="toc">&equiv; <a href="/">The Book</a></span>
+</nav>
+<h1>Bytecode</h1>
+<h1 class="book"><a href="/">Game Programming Patterns</a><span class="section"><a href="behavioral-patterns.html">Behavioral Patterns</a></span></h1>
+<h2><a href="#intent" name="intent">Intent</a></h2>
+<h2><a href="#意图" name="意图">意图</a></h2>
+<p><em>Give behavior the flexibility of data by encoding it as instructions for a
+virtual machine.</em></p>
+<p><em>将行为编码为虚拟机器上的指令来赋予其数据的灵活性</em></p>
+<h2><a href="#motivation" name="motivation">Motivation</a></h2>
+<h2><a href="#动机" name="动机">动机</a></h2>
+<p>Making games may be fun, but it certainly ain&#8217;t easy. Modern games require <span
+name="sprawling">enormous</span>, complex codebases. Console manufacturers and
+app marketplace gatekeepers have stringent quality requirements, and a single
+crash bug can prevent your game from shipping.</p>
+<p>制作游戏也许很有趣，但绝不容易。现代的游戏需要庞杂的代码库。游戏机制造商和应用程序市场看门人有着严格的质量要求，一个小小的崩溃漏洞就能阻止你的游戏发售。</p>
+<aside name="sprawling">
+<p>I worked on a game that had six million lines of C++ code. For comparison, the
+software controlling the Mars Curiosity rover is less than half that.</p>
+</aside>
+<p>At the same time, we&#8217;re expected to squeeze every drop of performance out of the
+platform. Games push hardware like nothing else, and we have to optimize
+relentlessly just to keep pace with the competition.</p>
+<p>与此同时，我们希望榨干平台的最后一点性能。游戏推动硬件发展首屈一指，我们坚持不懈的优化只是为了跟上竞争。</p>
+<p>To handle these high stability and performance requirements, we reach for
+heavyweight languages like C++ that have both low-level expressiveness to make
+the most of the hardware and rich type systems to prevent or at least corral
+bugs.</p>
+<p>为了控制稳定和性能需求，我们使用重量级的编程语言比如C++，来同时保证容纳大多数硬件的底层和防止漏洞的丰富类型系统。</p>
+<p>We pride ourselves on our skill at this, but it has its cost. Being a proficient
+programmer takes years of dedicated training, after which you must contend with
+the sheer scale of your codebase. Build times for large games can vary somewhere
+between &#8220;go get a coffee&#8221; and &#8220;go roast your own beans, hand-grind them, pull an
+espresso, foam some milk, and practice your latte art in the froth&#8221;.</p>
+<p>我们对自己的手艺感到自豪，但它有其代价。做一个精通的程序员需要多年的训练，之后你要对抗代码库的规模增长。构建大型游戏的时间可能在“喝杯咖啡”和“烤自己的咖啡店，手磨它们，弄杯espresso，把牛奶打到发泡，在你的拿铁咖啡做一些艺术图案。”</p>
+<p>On top of these challenges, games have one more nasty constraint: <em>fun</em>. Players
+demand a play experience that&#8217;s both novel and yet carefully balanced. That
+requires constant iteration, but if every tweak requires bugging an engineer to
+muck around in piles of low-level code and then waiting for a glacial recompile,
+you&#8217;ve killed your creative flow.</p>
+<p>在这些挑战之上，游戏多了一个讨厌的限制：“乐趣”。玩家需要仔细权衡过的新奇体验。那需要不断的重复，但是如果每一个调整都需要让工程师调整底层的代码然后等待漫长的编译过程，你就毁掉了你的创意流程。</p>
+<h3><a href="#spell-fight" name="spell-fight">Spell fight!</a></h3>
+<h3><a href="#法术战斗！" name="法术战斗！">法术战斗！</a></h3>
+<p>Let&#8217;s say we&#8217;re working on a magic-based fighting game. A pair of wizards square
+off and fling enchantments at each other until a victor is pronounced. We could
+define these spells in code, but that means an engineer has to be involved every
+time one is modified. When a designer wants to tweak a few numbers and get a
+feel for them, they have to recompile the entire game, reboot it, and get back
+into a fight.</p>
+<p>假设我们在完成一个基于魔法的格斗游戏。一对巫师在广场上飞行互相丢法术，直到胜负已分。我们可以将这些法术都定义在代码中，但这就意味着每当法术修改，工程师就被牵扯进来了。当设计者想要修改一两个数字感觉一下效果，就要重新编译整个工程，重启它，然后重新回到战斗。</p>
+<p>Like most games these days, we also need to be able to update the game after it ships,
+both to fix bugs and to add new content. If all of these spells are hard-coded,
+then updating them means patching the actual game executable.</p>
+<p>像现在的许多游戏一样，我们需要在发售之后更新游戏，修复漏洞或是添加新的内容。如果所有的的法术都是硬编码的，那么修改他们意味着向游戏的运行文件上打补丁。</p>
+<p>Let&#8217;s take things a bit further and say that we also want to support <em>modding</em>.
+We want <em>users</em> to be able to create their own spells. If those are in code,
+that means every modder needs a full compiler toolchain to build the game, and
+we have to release the sources. Worse, if they have a bug in their spell, it can
+crash the game on some other player&#8217;s machine.</p>
+<p>再扯得远一点，我们还想支持<em>MOD</em>。我们想让<em>玩家</em>能创造他们自己的法术。如果这些是在代码中，那么意味着每个MODDER都得拥有编译游戏的整套工具链，而我们得发布那些资源，如果他们在他们的法术上有个漏洞，那么会把其他人的游戏也搞崩溃。</p>
+<h3><a href="#data-&gt;-code" name="data-&gt;-code">Data &gt; code</a></h3>
+<h3><a href="#数据和代码" name="数据和代码">数据和代码</a></h3>
+<p>It&#8217;s pretty clear that our engine&#8217;s implementation language isn&#8217;t the right fit.
+We need spells to be safely sandboxed from the core game. We want them to be
+easy to modify, easy to reload, and physically separate from the rest of the
+executable.</p>
+<p>很明显我们实现引擎的编程语言不是好的选择。我们需要法术放在与核心游戏隔绝的沙箱中。我们想要他们容易的修改，容易的加载，与其他可执行部分隔绝开来。</p>
+<p>I don&#8217;t know about you, but to me that sounds a lot like <em>data</em>. If we can
+define our behavior in separate data files that the game engine loads and
+&#8220;executes&#8221; in some way, we can achieve all of our goals.</p>
+<p>我不知道你是怎么想到，但我听上去这有点像是<em>数据</em>。如果我们能够在分立的数据文件中定义我们的行为，而游戏引擎还能加载并“执行”它们，我们就可以实现所有的目标。</p>
+<p>We just need to figure out what &#8220;execute&#8221; means for data. How do you make some
+bytes in a file express behavior? There are a few ways to do this. I think it
+will help you get a picture of <em>this</em> pattern&#8217;s strengths and weaknesses if we
+compare it to another one: the <a
+href="http://en.wikipedia.org/wiki/Interpreter_pattern"
+class="gof-pattern">Interpreter</a> pattern.</p>
+<p>我们需要指出“执行”对于数据的意义。你如何让文件中的数据指示为行为呢？这里有几种方式。我认为给你一副与<a
+href="http://en.wikipedia.org/wiki/Interpreter_pattern"
+class="gof-pattern">编译模式</a> 对比的强弱图会好理解些。</p>
+<h3><a href="#the-interpreter-pattern" name="the-interpreter-pattern">The Interpreter pattern</a></h3>
+<h3><a href="#编译模式" name="编译模式">编译模式</a></h3>
+<p>I could write a whole chapter on this pattern, but four other guys already
+covered that for me. Instead, I&#8217;ll cram the briefest of introductions in here.
+It starts with a language&#8202;&mdash;&#8202;think <em>programming</em> language&#8202;&mdash;&#8202;that you want to
+execute. Say, for example, it supports arithmetic expressions like this:</p>
+<p>关于这个模式我就能写一章，但是有四个家伙的工作早就涵盖了我的，相反，我会给一些补习班的简短介绍在这里。他从一种语言开始——想想<em>编程语言</em>——从你想要执行的语言开始。比如，他会支持这样的算术表达式</p>
+<div class="codehilite"><pre>(1 + 2) * (3 - 4)
+</pre></div>
+
+
+<p>Then, you take each piece of that expression, each rule in the language&#8217;s
+grammar, and turn it into an <em>object</em>. The number literals will be objects:</p>
+<p>然后，你把每一块的表达式，每一条语言中的规则，都装到一个<em>对象</em>中去。数字都变成对象：</p>
+<p><img src="images/bytecode-numbers.png" alt="A series of number literal objects." /></p>
+<p>Basically, they&#8217;re little wrappers around the raw value. The operators will be
+objects too, and they&#8217;ll have references to their operands. If you take into
+account the parentheses and precedence, that expression <span
+name="magic">magically</span> turns into a little tree of objects like so:</p>
+<p>基本上，他们是原始值的小包装。操作符也是对象，他们拥有他们操作的值的引用。如果你考虑了括号和优先级，那么表达式就会变成这样的小树：</p>
+<p><img src="images/bytecode-ast.png" alt="A syntax tree. The number literals are connected by operator objects." /></p>
+<aside name="magic">
+<p>What &#8220;magic&#8221; is this? It&#8217;s simple&#8202;&mdash;&#8202;<em>parsing</em>. A parser takes a string of
+characters and turns it into an <em>abstract syntax tree</em>, a collection of objects
+representing the grammatical structure of the text.</p>
+<p>Whip up one of these and you&#8217;ve got yourself half of a compiler.</p>
+</aside>
+<p>The Interpreter pattern isn&#8217;t about <em>creating</em> that tree; it&#8217;s about <em>executing</em>
+it. The way it works is pretty clever. Each object in the tree is an expression
+or a subexpression. In true object-oriented fashion, we&#8217;ll let expressions
+evaluate themselves.</p>
+<p>解释器模式与<em>创建</em>这棵树无关，他是关于<em>执行</em>这棵树。它工作的方式非常聪明。树中的每个对象是表达
+或子表达式。用真正的面向对象的方式描述，我们会让表达式自己执行自己。</p>
+<p>First, we define a base interface that all expressions implement:</p>
+<p>首先，我们定义所有表达式都实现了的基本接口：</p>
+<div class="codehilite"><pre><span class="k">class</span> <span class="nc">Expression</span>
+<span class="p">{</span>
+<span class="k">public</span><span class="o">:</span>
+  <span class="k">virtual</span> <span class="o">~</span><span class="n">Expression</span><span class="p">()</span> <span class="p">{}</span>
+  <span class="k">virtual</span> <span class="kt">double</span> <span class="n">evaluate</span><span class="p">()</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+<span class="p">};</span>
+</pre></div>
+
+
+<p>Then, we define a class that implements this interface for each kind of expression in our
+language&#8217;s grammar. The simplest one is numbers:</p>
+<p>然后，我们定义一个类，为我们语法中的每种表达式实现这个接口。最简单的是数字：</p>
+<div class="codehilite"><pre><span class="k">class</span> <span class="nc">NumberExpression</span> <span class="o">:</span> <span class="k">public</span> <span class="n">Expression</span>
+<span class="p">{</span>
+<span class="k">public</span><span class="o">:</span>
+  <span class="n">NumberExpression</span><span class="p">(</span><span class="kt">double</span> <span class="n">value</span><span class="p">)</span>
+  <span class="o">:</span> <span class="n">value_</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+  <span class="p">{}</span>
+
+  <span class="k">virtual</span> <span class="kt">double</span> <span class="n">evaluate</span><span class="p">()</span>
+  <span class="p">{</span>
+    <span class="k">return</span> <span class="n">value_</span><span class="p">;</span>
+  <span class="p">}</span>
+
+<span class="k">private</span><span class="o">:</span>
+  <span class="kt">double</span> <span class="n">value_</span><span class="p">;</span>
+<span class="p">};</span>
+</pre></div>
+
+
+<p>A literal number expression simply evaluates to its value. Addition and
+multiplication are a bit more complex because they contain subexpressions.
+Before they can evaluate themselves, they need to recursively evaluate their
+subexpressions. Like so:</p>
+<p>一个数字表达式简单的等于它的值。加法和乘法是有点复杂，因为它们包含子表达式。在递归地计算其子表达式之后，才能计算自己的值。像这样：</p>
+<p><span name="addition"></span></p>
+<div class="codehilite"><pre><span class="k">class</span> <span class="nc">AdditionExpression</span> <span class="o">:</span> <span class="k">public</span> <span class="n">Expression</span>
+<span class="p">{</span>
+<span class="k">public</span><span class="o">:</span>
+  <span class="n">AdditionExpression</span><span class="p">(</span><span class="n">Expression</span><span class="o">*</span> <span class="n">left</span><span class="p">,</span> <span class="n">Expression</span><span class="o">*</span> <span class="n">right</span><span class="p">)</span>
+  <span class="o">:</span> <span class="n">left_</span><span class="p">(</span><span class="n">left</span><span class="p">),</span>
+    <span class="n">right_</span><span class="p">(</span><span class="n">right</span><span class="p">)</span>
+  <span class="p">{}</span>
+
+  <span class="k">virtual</span> <span class="kt">double</span> <span class="n">evaluate</span><span class="p">()</span>
+  <span class="p">{</span>
+    <span class="c1">// Evaluate the operands.</span>
+    <span class="kt">double</span> <span class="n">left</span> <span class="o">=</span> <span class="n">left_</span><span class="o">-&gt;</span><span class="n">evaluate</span><span class="p">();</span>
+    <span class="kt">double</span> <span class="n">right</span> <span class="o">=</span> <span class="n">right_</span><span class="o">-&gt;</span><span class="n">evaluate</span><span class="p">();</span>
+
+    <span class="c1">// Add them.</span>
+    <span class="k">return</span> <span class="n">left</span> <span class="o">+</span> <span class="n">right</span><span class="p">;</span>
+  <span class="p">}</span>
+
+<span class="k">private</span><span class="o">:</span>
+  <span class="n">Expression</span><span class="o">*</span> <span class="n">left_</span><span class="p">;</span>
+  <span class="n">Expression</span><span class="o">*</span> <span class="n">right_</span><span class="p">;</span>
+<span class="p">};</span>
+</pre></div>
+
+
+<aside name="addition">
+<p>I&#8217;m sure you can figure out what the implementation of multiply looks like.</p>
+</aside>
+<p>Pretty neat right? Just a couple of simple classes and now we can represent and
+evaluate arbitrarily complex arithmetic expressions. We just need to create the
+right objects and wire them up correctly.</p>
+<p>整齐漂亮吧？只是一对简单的类，现在我们可以表示和计算任意复杂的算术表达式。我们只需要创建正确的对象，并正确连起来。</p>
+<aside name="ruby">
+<p>Ruby was implemented like this for something like 15 years. At version 1.9, they
+switched to bytecode like this chapter describes. Look how much time I&#8217;m saving
+you!</p>
+</aside>
+<p>It&#8217;s a <span name="ruby">beautiful</span>, simple pattern, but it has some
+problems. Look up at the illustration. What do you see? Lots of little boxes,
+and lots of arrows between them. Code is represented as a sprawling fractal tree
+of tiny objects. That has some unpleasant consequences:</p>
+<p>这是一个优美简单的模式，但它有自己的问题。看看插图，你看到了什么？大量的小盒子，以及在他们之间大量的箭头。代码别表示为小物体组成的巨大分形树。这有一些令人不快的后果：</p>
+<ul>
+<li>
+<p>Loading it from disk requires instantiating and wiring up tons of these
+    small objects.</p>
+</li>
+<li>
+<p>从磁盘上加载它需要实例化并连接大量这种小对象。</p>
+</li>
+<li>
+<p>Those objects and the pointers between them use a lot of <span
+    name="vtable">memory</span>. On a 32-bit machine, that little arithmetic
+    expression up there takes up at least 68 bytes, not including padding.</p>
+</li>
+<li>
+<p>这些对象和他们之间的指针会占据大量的内存。在32位机器上，那个小的算术表达式至少占据68字节，还不包括填充的部分。</p>
+<aside name="vtable">
+
+<p>If you&#8217;re playing along at home, don&#8217;t forget to take into account the
+vtable pointers.</p>
+</aside>
+
+</li>
+<li>
+<p>Traversing the pointers into subexpressions is murder on your <span
+    name="cache">data cache</span>. Meanwhile, all of those virtual method calls
+    wreak carnage on your instruction cache.</p>
+</li>
+<li>
+<p>遍历到子表达式的指针是对你数据缓存的谋杀。同时所有的虚函数调用是对你指令缓存的屠杀。</p>
+<aside name="cache">
+
+<p>See the chapter on <a href="data-locality.html" class="pattern">Data
+Locality</a> for more on what the cache is and how it affects your
+performance.</p>
+</aside>
+
+</li>
+</ul>
+<p>Put those together, and what do they spell? S-L-O-W. There&#8217;s a reason most
+programming languages in wide use aren&#8217;t based on the Interpreter pattern. It&#8217;s
+just too slow, and it uses up too much memory.</p>
+<p>将这些拼到一起，你怎么念？M-A-N。这就是为什么大多数广泛应用的编程语言不基于解释器模式。这太慢了，也太消耗内存了。</p>
+<h3><a href="#machine-code,-virtually" name="machine-code,-virtually">Machine code, virtually</a></h3>
+<h3><a href="#机器码，虚拟的" name="机器码，虚拟的">机器码，虚拟的</a></h3>
+<p>Consider our game. When we run it, the player&#8217;s computer doesn&#8217;t traverse a
+bunch of C++ grammar tree structures at runtime. Instead, we compile it ahead of
+time to machine code, and the CPU runs that. What&#8217;s machine code got going for
+it?</p>
+<p>想想我们的游戏。当我们运行时，玩家的电脑在运行时不会遍历一堆C++语法结构树。相反地，我们踢球为其编译成了机器码，CPU基于机器码运行。机器码有什么好处呢？</p>
+<ul>
+<li>
+<p><em>It&#8217;s dense.</em> It&#8217;s a solid, contiguous blob of binary data, and no bit goes
+    to waste.</p>
+</li>
+<li>
+<p><em>它是密集的。</em>它是一块坚实连续的二进制数据块，没有一位被浪费了。</p>
+</li>
+<li>
+<p><em>It&#8217;s linear.</em> Instructions are packed together and executed one right after
+    another. No jumping around in memory (unless you&#8217;re doing actual control
+    flow, of course).</p>
+</li>
+<li>
+<p><em>它是线性的。</em>指令被打成一包，一条接一条的执行。没有在内存里到处乱跳（除非你控制代码流这么干）</p>
+</li>
+<li>
+<p><em>It&#8217;s low-level.</em> Each instruction does one relatively minimal thing, and
+    interesting behavior comes from <em>composing</em> them.</p>
+</li>
+<li>
+<p><em>它是底层的。</em>每一条指令都做一件很小的事，有趣的行为从他们的<em>组织</em>中诞生。</p>
+</li>
+<li>
+<p><em>It&#8217;s fast.</em> As a consequence of all of these (well, and the fact that it&#8217;s
+    implemented directly in hardware), machine code runs like the wind.</p>
+</li>
+<li>
+<p><em>它速度快。</em>在所有以上的要素作用下（当然，还有它是直接在硬件上实现的），机器码跑的跟风一样快。</p>
+</li>
+</ul>
+<p>This sounds swell, but we don&#8217;t want actual machine code for our spells. Letting
+users provide machine code which our game executes is just begging for <span
+name="jit">security problems</span>. What we need is a compromise between the
+performance of machine code and the safety of the Interpreter pattern.</p>
+<p>这听起来很好，但我们不希望为我们的番薯提供真正的机器码。让玩家提供游戏运行时的机器码简直就是在乞求安全问题。我们需要的是机器代码性能和解释器模式的安全性之间的一种妥协方案。</p>
+<p>What if instead of loading actual machine code and executing it directly, we
+defined our own <em>virtual</em> machine code? We&#8217;d then write a little emulator for it
+in our game. It would be similar to machine code&#8202;&mdash;&#8202;dense, linear, relatively
+low-level&#8202;&mdash;&#8202;but would also be handled entirely by our game so we could safely
+sandbox it.</p>
+<p>如果我们不是加载机器码并直接执行它，而是定义我们自己的<em>虚拟</em>机器码？然后，我们会在我们的游戏写一个小模拟器。这将与机器码类似——密集，线性，相对底层——但也由游戏直接掌控，所以我们可以放心地将其放入沙箱。</p>
+<aside name="jit">
+<p>This is why many game consoles and iOS don&#8217;t allow programs to execute machine
+code loaded or generated at runtime. That&#8217;s a drag because the fastest
+programming language implementations do exactly that. They contain a
+&#8220;just-in-time&#8221; compiler, or <em>JIT</em>, that translates the language to optimized
+machine code on the fly.</p>
+</aside>
+<p>We&#8217;d call our little emulator a <span name="virtual"><em>virtual machine</em></span>
+(or &#8220;VM&#8221; for short), and the synthetic binary machine code it runs <em>bytecode</em>.
+It&#8217;s got the flexibility and ease of use of defining things in data, but it has better
+performance than higher-level representations like the Interpreter pattern.</p>
+<p>我们将小模拟器称为<em>虚拟机</em>（或简称“VM”），它运行<em>字节码</em>合成二进制机器码。它有数据的灵活性和易用性，但它比高层的解释器模式有更好的性能。</p>
+<aside name="virtual">
+<p>In programming language circles, &#8220;virtual machine&#8221; and &#8220;interpreter&#8221; are
+synonymous, and I use them interchangeably here. When I refer to the Gang of
+Four&#8217;s Interpreter pattern, I&#8217;ll use &#8220;pattern&#8221; to make it clear.</p>
+</aside>
+<p>This sounds daunting, though. My goal for the rest of this chapter is to show
+you that if you keep your feature list pared down, it&#8217;s actually pretty
+approachable. Even if you end up not using this pattern yourself, you&#8217;ll at
+least have a better understanding of Lua and many other languages which are
+implemented using it.</p>
+<p>这听起来有点吓人。这章的其余部分目的是展示，如果把功能列表缩减下来，它实际上是相当通俗易懂。即使你最终没有使用这个模式，你至少对Lua和许多其他语言有一个更好的了解。</p>
+<h2><a href="#the-pattern" name="the-pattern">The Pattern</a></h2>
+<h2><a href="#模式" name="模式">模式</a></h2>
+<p>An <strong>instruction set</strong> defines the low-level operations that can be performed.
+A series of instructions is encoded as a <strong>sequence of bytes</strong>. A <strong>virtual machine</strong> executes
+these instructions one at a time, using a <strong>stack for intermediate values</strong>. By
+combining instructions, complex high-level behavior can be defined.</p>
+<p>一个<strong>指令集</strong>定义了可以执行的低层操作。一系列的指令被编码为<strong>字节序列</strong>。<strong>虚拟机</strong>使用<strong>堆栈中间值</strong>一个一个执行这些指令。通过结合指令，复杂的高层行为可以被定义。</p>
+<h2><a href="#when-to-use-it" name="when-to-use-it">When to Use It</a></h2>
+<h2><a href="#何时使用" name="何时使用">何时使用</a></h2>
+<p>This is the most complex pattern in this book, and it&#8217;s not something to throw into
+your game lightly. Use it when you have a lot of behavior you need to define and
+your game&#8217;s implementation language isn&#8217;t a good fit because:</p>
+<p>这是本书中最复杂的模式，它不能轻易的加入游戏中。使用之当需要定义很多行为，而游戏的实现语言因为以下原因不能很好的完成任务时：</p>
+<ul>
+<li>
+<p>It&#8217;s too low-level, making it tedious or error-prone to program in.</p>
+</li>
+<li>
+<p>它太过于底层，容易制造乏味或者充满错误的程序。</p>
+</li>
+<li>
+<p>Iterating on it takes too long due to slow compile times or other tooling
+    issues.</p>
+</li>
+<li>
+<p>由于缓慢的编译时间或者其他工具的文件需要很久才能迭代。</p>
+</li>
+<li>
+<p>It has too much trust. If you want to ensure the behavior being defined
+    can&#8217;t break the game, you need to sandbox it from the rest of the codebase.</p>
+</li>
+<li>
+<p>它肩负了太多信任。如果你想保证行为不会破坏游戏，你需要将其与代码的其他部分隔开。</p>
+</li>
+</ul>
+<p>Of course, that list describes a bunch of your game. Who doesn&#8217;t want a faster
+iteration loop or more safety? However, that doesn&#8217;t come for free. Bytecode is
+slower than native code, so it isn&#8217;t a good fit for performance-critical parts
+of your engine.</p>
+<p>当然，该列表描述了一堆你的游戏。谁不希望有一个更快的迭代循环和更多的安全？然而，世上没有免费的午餐。字节码比本地代码慢，所以它不适合引擎的性能关键部分。</p>
+<h2><a href="#keep-in-mind" name="keep-in-mind">Keep in Mind</a></h2>
+<h2><a href="#记住" name="记住">记住</a></h2>
+<p>There&#8217;s something <span name="seductive">seductive</span> about creating your
+own language or system-within-a-system. I&#8217;ll be doing a minimal example here,
+but in the real world, these things tend to grow like vines.</p>
+<p>创建自己的语言或者建立系统中的系统是很有趣的。我在这里做一个小小的演示，但在真实世界，这些东西会像藤蔓一样蔓延。</p>
+<aside name="seductive">
+<p>For me, game development is seductive in the same way. In both cases, I&#8217;m
+striving to create a virtual space for others to play and be creative in.</p>
+</aside>
+<p>Every time I see someone define a little language or a scripting system, they
+say, &#8220;Don&#8217;t worry, it will be tiny.&#8221; Then, inevitably, they add more and more
+little features until it&#8217;s a full-fledged <span name="template">language</span>.
+Except, unlike some other languages, it grew in an ad-hoc, organic fashion and
+has all of the architectural elegance of a shanty town.</p>
+<p>每当我看到有人定义一个小语言或脚本系统，他们都说，“别担心，它很小。”于是，不可避免地，他们增加更多
+小功能，直到完成了一个完整的语言。除了，和其它语言不同，它长成了特设的，绿色的，并拥有棚户区建筑般的优雅。</p>
+<aside name="template">
+<p>For example, see every templating language ever.</p>
+</aside>
+<p>Of course, there&#8217;s nothing <em>wrong</em> with making a full-fledged language. Just
+make sure you do so deliberately. Otherwise, be very careful to control the
+scope of what your bytecode can express. Put a short leash on it before it runs
+away from you.</p>
+<p>当然，做一个完整的语言并没有什么错。只是确保你是故意这么做的。否则，小心的控制字节码可以表达的含义。在其失控前为其系上皮带。</p>
+<h3><a href="#you'll-need-a-front-end" name="you'll-need-a-front-end">You&#8217;ll need a front-end</a></h3>
+<h3><a href="#你需要一个前端" name="你需要一个前端">你需要一个前端</a></h3>
+<p>Low-level bytecode instructions are great for performance, but a binary bytecode
+format is <em>not</em> what your users are going to author. One reason we&#8217;re moving
+behavior out of code is so that we can express it at a <em>higher</em> level. If C++ is
+too low-level, making your users effectively write in <span
+name="assembly">assembly language</span>&#8202;&mdash;&#8202;even one of your own design&#8202;&mdash;&#8202;isn&#8217;t
+an improvement!</p>
+<p>底层的字节码指令有利于性能，但是二进制的字节码格式<em>不是</em>你用户能写的。一个我们将行为移出代码的原因是我们想要在<em>高层</em>表现它。如果C++太过底层，那么让你的用户有效的写汇编——虽然是你的设计——不是一个改进方案！</p>
+<aside name="assembly">
+<p>Challenging that assertion is the venerable game
+<a href="http://en.wikipedia.org/wiki/RoboWar">RoboWar</a>. In that game, <em>players</em> write
+little programs to control a robot in a language very similar to assembly and
+the kind of instruction sets we&#8217;ll be discussing here.</p>
+<p>It was my first introduction to assembly-like languages.</p>
+</aside>
+<p>Much like the Gang of Four&#8217;s Interpreter pattern, it&#8217;s assumed that you also
+have some way to <em>generate</em> the bytecode. Usually, users author their behavior
+in some higher-level format, and a tool translates that to the bytecode that our
+virtual machine understands. In other words, a compiler.</p>
+<p>就像GoF的解释器模式，它假设有一些方法来<em>生成</em>字节码。通常情况下，用户通过顶层格式编写行为，再用工具将其翻译为虚拟机理解的字节码。换言之，一个解释器。</p>
+<p>I know, that sounds scary. That&#8217;s why I&#8217;m mentioning it here. If you don&#8217;t have
+the resources to build an authoring tool, then bytecode isn&#8217;t for you. But as
+we&#8217;ll see later, it may not be as bad as you think.</p>
+<p>我知道，这听起来很吓人。这就是为什么我在这里提到它。如果你没有资源打造一个创作工具，那么字节码不适合你。但是，以后我们会看到，它可能不像你想象的那样糟。</p>
+<h3><a href="#you'll-miss-your-debugger" name="you'll-miss-your-debugger">You&#8217;ll miss your debugger</a></h3>
+<h3><a href="#你会想念你的调试器" name="你会想念你的调试器">你会想念你的调试器</a></h3>
+<p>Programming is hard. We know what we want the machine to do, but we don&#8217;t always
+communicate that correctly&#8202;&mdash;&#8202;we write bugs. To help find and fix those, we&#8217;ve
+amassed a pile of tools to understand what our code is doing wrong, and how to
+right it. We have debuggers, static analyzers, decompilers, etc. All of those tools are
+designed to work with some existing language: either machine code or something
+higher level.</p>
+<p>编程是很难的。我们知道我们想要机器做什么，但我们并不总能正确的传达——我们写出了漏洞。为了帮助查找和解决这些，我们已经积累了一堆工具来了解我们的代码做错什么，以及如何修正。我们有调试器，静态分析器，反编译工具等。所有这些工具都是为现有的语言设计的：无论是机器码还是某些更高层次的东西。</p>
+<p>When you define your own bytecode VM, you leave those tools behind. Sure, you
+can step through the VM in your debugger, but that tells you what the VM
+<em>itself</em> is doing, and not what the bytecode it&#8217;s interpreting is up to. It
+certainly doesn&#8217;t help you map that bytecode back to the high-level form it was
+compiled from.</p>
+<p>当你定义自己的虚拟机字节码，你离开了这些工具。当然，你可以通过调试器进入虚拟机，但它告诉你虚拟机
+<em>本身</em>在做什么，而不是字节码被翻译成了什么。它不能把字节码映射回原先的高层次的形式。</p>
+<p>If the behavior you&#8217;re defining is simple, you can scrape by without too much
+tooling to help you debug it. But as the scale of your content grows, plan to
+invest real time into features that help users see what their bytecode is doing.
+Those features might not <span name="debugger">ship</span> in your game, but
+they&#8217;ll be critical to ensure that you actually <em>can</em> ship your game.</p>
+<p>如果你定义的行为很简单，你可能无需太多工具帮助调试就能勉强坚持下来。但随着内容的规模增长，计划
+投入些时间完成一些功能，让用户看到他们的字节码在做什么。这些功能也许不随着你的游戏发售，但
+他们至关重要，他们能确保你确实<em>能</em>发售您的游戏。</p>
+<aside name="debugger">
+<p>Of course, if you want your game to be moddable, then you <em>will</em> ship those
+features, and they&#8217;ll be even more important.</p>
+</aside>
+<h2><a href="#sample-code" name="sample-code">Sample Code</a></h2>
+<h2><a href="#示例代码" name="示例代码">示例代码</a></h2>
+<p>After the previous couple of sections, you might be surprised how
+straightforward the implementation is. First, we need to craft an instruction
+set for our VM. Before we start thinking about bytecode and stuff, let&#8217;s just
+think about it like an API.</p>
+<p>经历了前面几个章节后，你也许会为实现有多么直接而感到惊讶。首先我们需要为我们的VM设定一套指令集。在我们开始考虑字节码之类的东西前，我们先像思考API一样的思考它。</p>
+<h3><a href="#a-magical-api" name="a-magical-api">A magical API</a></h3>
+<h3><a href="#法术的api" name="法术的api">法术的API</a></h3>
+<p>If we were defining spells in straight C++ code, what kind of API would we need
+for that code to call into? What are the basic operations in the game engine
+that spells are defined in terms of?</p>
+<p>如果你直接使用C++代码定义法术，代码需要定义何种API？在游戏引擎中定义的法术的基本行为是什么样的？</p>
+<p>Most spells ultimately change one of the stats of a wizard, so we&#8217;ll start with
+a couple for that:</p>
+<p>大多数法术最终改变一个巫师的状态，因此我们先从一对这样的代码开始。</p>
+<div class="codehilite"><pre><span class="kt">void</span> <span class="nf">setHealth</span><span class="p">(</span><span class="kt">int</span> <span class="n">wizard</span><span class="p">,</span> <span class="kt">int</span> <span class="n">amount</span><span class="p">);</span>
+<span class="kt">void</span> <span class="nf">setWisdom</span><span class="p">(</span><span class="kt">int</span> <span class="n">wizard</span><span class="p">,</span> <span class="kt">int</span> <span class="n">amount</span><span class="p">);</span>
+<span class="kt">void</span> <span class="nf">setAgility</span><span class="p">(</span><span class="kt">int</span> <span class="n">wizard</span><span class="p">,</span> <span class="kt">int</span> <span class="n">amount</span><span class="p">);</span>
+</pre></div>
+
+
+<p>The first parameter identifies which wizard is affected, say <code>0</code> for the
+player&#8217;s and <code>1</code> for their opponent. This way, healing spells can affect the
+player&#8217;s own wizard, while damaging attacks harm their nemesis. These three
+little methods cover a surprisingly wide variety of magical effects.</p>
+<p>第一个个参数指定哪个巫师被影响力，<code>0</code>代表玩家而<code>1</code>代表对手。以这种方式，治愈法术可以影响玩家自己的巫师，而伤害法术攻击他的敌人。这三个小方法覆盖了出人意料多的法术影响。</p>
+<p>If the spells just silently tweaked stats, the game logic would be fine, but
+playing it would bore players to tears. Let&#8217;s fix that:</p>
+<p>如果法术只是默默地调整统计数据，游戏逻辑就已经完成了，但玩这样的游戏会让玩家流泪。让我们修复之：</p>
+<div class="codehilite"><pre><span class="kt">void</span> <span class="nf">playSound</span><span class="p">(</span><span class="kt">int</span> <span class="n">soundId</span><span class="p">);</span>
+<span class="kt">void</span> <span class="nf">spawnParticles</span><span class="p">(</span><span class="kt">int</span> <span class="n">particleType</span><span class="p">);</span>
+</pre></div>
+
+
+<p>These don&#8217;t affect gameplay, but they crank up the intensity of the gameplay
+<em>experience</em>. We could add more for camera shake, animation, etc., but this is
+enough to get us started.</p>
+<p>这并不影响游戏，但它们增强了游戏的<em>体验</em>。我们可以增加一些镜头晃动，动画之类的，但这已经足以作为开始的部分了。</p>
+<h3><a href="#a-magical-instruction-set" name="a-magical-instruction-set">A magical instruction set</a></h3>
+<h3><a href="#法术的指令集" name="法术的指令集">法术的指令集</a></h3>
+<p>Now let&#8217;s see how we&#8217;d turn this <em>programmatic</em> API into something that can be
+controlled from data. Let&#8217;s start small and then we&#8217;ll work our way up to the
+whole shebang. For now, we&#8217;ll ditch all of the parameters to these methods.
+We&#8217;ll say the <code>set___()</code> methods always affect the player&#8217;s own wizard and
+always max out the stat. Likewise, the FX operations always play a single
+hard-coded sound and particle effect.</p>
+<p>现在让我们把这种<em>程序化</em>的API转化为可以被数据控制的东西。我们从小处开始，然后我们慢慢拓展到整个部分。现在，我们要抛弃方法的所有参数。我们假设<code>set__()</code>方法影响玩家自己的巫师，总是直接将状态最大化。同样，FX操作一直播放硬编码的声音和粒子效果。</p>
+<p>Given that, a spell is just a series of instructions. Each one identifies which
+operation you want to perform. We can enumerate them:</p>
+<p>这样，一个法术就只是一系列指令。每一条都代表了你想要呈现的操作。我们可以列举出来：</p>
+<div class="codehilite"><pre><span class="k">enum</span> <span class="n">Instruction</span>
+<span class="p">{</span>
+  <span class="n">INST_SET_HEALTH</span>      <span class="o">=</span> <span class="mh">0x00</span><span class="p">,</span>
+  <span class="n">INST_SET_WISDOM</span>      <span class="o">=</span> <span class="mh">0x01</span><span class="p">,</span>
+  <span class="n">INST_SET_AGILITY</span>     <span class="o">=</span> <span class="mh">0x02</span><span class="p">,</span>
+  <span class="n">INST_PLAY_SOUND</span>      <span class="o">=</span> <span class="mh">0x03</span><span class="p">,</span>
+  <span class="n">INST_SPAWN_PARTICLES</span> <span class="o">=</span> <span class="mh">0x04</span>
+<span class="p">};</span>
+</pre></div>
+
+
+<p>To encode a spell in data, we store an array of <code>enum</code> values. We&#8217;ve only got
+a few different primitives, so the range of <code>enum</code> values easily fits into a byte.
+This means the code for a spell is just a list of <span name="byte">bytes</span>&#8202;&mdash;&#8202;ergo
+&#8220;bytecode&#8221;.</p>
+<p>将法术编码进数据，我们存储了一数组<code>enum</code>值。我们几个不同的原语，因此<code>enum</code>值的范围可以存储到一个字节中。这就意味着法术的代码就是一系列字节——就是“字节码”。</p>
+<p><img src="images/bytecode-code.png" alt="A sequence of bytecode instructions: 0x00 HEALTH, 0x03 SOUND, 0x004 PARTICLES, ..." /></p>
+<aside name="byte">
+<p>Some bytecode VMs use more than a single byte for each instruction and have more
+complicated rules for how they are decoded. Actual machine code on common chips
+like x86 is a good bit more complex.</p>
+<p>But a single byte is good enough for the <a href="http://en.wikipedia.org/wiki/Java_virtual_machine">Java Virtual
+Machine</a> and Microsoft&#8217;s
+<a href="http://en.wikipedia.org/wiki/Common_Language_Runtime">Common Language Runtime</a>,
+which forms the backbone of the .NET platform, and it&#8217;s good enough for us.</p>
+</aside>
+<p>To execute a single instruction, we see which primitive it is and dispatch to
+the right API method:</p>
+<p>为了执行一条指令，我们看看它的原语是什么，然后调用正确的API方法。</p>
+<div class="codehilite"><pre><span class="k">switch</span> <span class="p">(</span><span class="n">instruction</span><span class="p">)</span>
+<span class="p">{</span>
+  <span class="k">case</span> <span class="nl">INST_SET_HEALTH</span><span class="p">:</span>
+    <span class="n">setHealth</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">100</span><span class="p">);</span>
+    <span class="k">break</span><span class="p">;</span>
+
+  <span class="k">case</span> <span class="nl">INST_SET_WISDOM</span><span class="p">:</span>
+    <span class="n">setWisdom</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">100</span><span class="p">);</span>
+    <span class="k">break</span><span class="p">;</span>
+
+  <span class="k">case</span> <span class="nl">INST_SET_AGILITY</span><span class="p">:</span>
+    <span class="n">setAgility</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">100</span><span class="p">);</span>
+    <span class="k">break</span><span class="p">;</span>
+
+  <span class="k">case</span> <span class="nl">INST_PLAY_SOUND</span><span class="p">:</span>
+    <span class="n">playSound</span><span class="p">(</span><span class="n">SOUND_BANG</span><span class="p">);</span>
+    <span class="k">break</span><span class="p">;</span>
+
+  <span class="k">case</span> <span class="nl">INST_SPAWN_PARTICLES</span><span class="p">:</span>
+    <span class="n">spawnParticles</span><span class="p">(</span><span class="n">PARTICLE_FLAME</span><span class="p">);</span>
+    <span class="k">break</span><span class="p">;</span>
+<span class="p">}</span>
+</pre></div>
+
+
+<p>In this way, our interpreter forms the bridge between code world and data world.
+We can wrap this in a little VM that executes an entire spell like so:</p>
+<p>用这种方式，我们的解释器建立了沟通代码世界和数据世界的桥梁。我们可以将一个执行法术的VM实现如下：</p>
+<div class="codehilite"><pre><span class="k">class</span> <span class="nc">VM</span>
+<span class="p">{</span>
+<span class="k">public</span><span class="o">:</span>
+  <span class="kt">void</span> <span class="n">interpret</span><span class="p">(</span><span class="kt">char</span> <span class="n">bytecode</span><span class="p">[],</span> <span class="kt">int</span> <span class="n">size</span><span class="p">)</span>
+  <span class="p">{</span>
+    <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">size</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span>
+    <span class="p">{</span>
+      <span class="kt">char</span> <span class="n">instruction</span> <span class="o">=</span> <span class="n">bytecode</span><span class="p">[</span><span class="n">i</span><span class="p">];</span>
+      <span class="k">switch</span> <span class="p">(</span><span class="n">instruction</span><span class="p">)</span>
+      <span class="p">{</span>
+        <span class="c1">// Cases for each instruction...</span>
+      <span class="p">}</span>
+    <span class="p">}</span>
+  <span class="p">}</span>
+<span class="p">};</span>
+</pre></div>
+
+
+<p>Type that in and you&#8217;ll have written your first virtual machine. Unfortunately,
+it&#8217;s not very flexible. We can&#8217;t define a spell that touches the player&#8217;s
+opponent or lowers a stat. We can only play one sound!</p>
+<p>输入它，你就写好了你第一个虚拟机。不幸的是，它并不灵活。我们不能设定一个接触对手的法术，也不能减少状态值。我们只能播放一个声音！</p>
+<p>To get something that starts to have the expressive feel of an actual language,
+we need to get parameters in here.</p>
+<p>为了有一点真正语言的感觉，我们需要在这里引入参数。</p>
+<h3><a href="#a-stack-machine" name="a-stack-machine">A stack machine</a></h3>
+<h3><a href="#栈式机器" name="栈式机器">栈式机器</a></h3>
+<p>To execute a complex nested expression, you start with the innermost
+subexpressions. You calculate those, and the results flow outward as arguments to
+the expressions that contain them until eventually, the whole expression has been
+evaluated.</p>
+<p>要执行复杂的嵌套表达式，得先从最里面的子表达式开始。你计算完里面的，结果向外作为参数流向
+包含它们的表达式，直到得出最终结果，整个表达式都算完了。</p>
+<p>The Interpreter pattern models this explicitly as a tree of nested objects, but
+we want the speed of a flat list of instructions. We still need to ensure
+results from subexpressions flow to the right surrounding expressions. But,
+since our data is flattened, we&#8217;ll have to use the <em>order</em> of the instructions
+to control that. We&#8217;ll do it the same way your CPU does&#8202;&mdash;&#8202;<span
+name="stack-machine">with a stack</span>.</p>
+<p>解释器模式将这一明确的嵌套对象表现为树，但我们需要指令速度达到平面列表的速度。我们仍然需要确保
+子表达式的结果流向正确的表达式。 但是由于我们的数据是平面的，我们使用的指令<em>顺序</em>来控制这一点。我们用CPU同样的方式执行——用栈。</p>
+<aside name="stack-machine">
+<p>This architecture is unimaginatively called a <a href="http://en.wikipedia.org/wiki/Stack_machine"><em>stack
+machine</em></a>. Programming languages
+like <a href="http://en.wikipedia.org/wiki/Forth_(programming_language)">Forth</a>,
+<a href="http://en.wikipedia.org/wiki/PostScript">PostScript</a>, and
+<a href="http://en.wikipedia.org/wiki/Factor_(programming_language)">Factor</a> expose this
+model directly to the user.</p>
+</aside>
+<div class="codehilite"><pre><span class="k">class</span> <span class="nc">VM</span>
+<span class="p">{</span>
+<span class="k">public</span><span class="o">:</span>
+  <span class="n">VM</span><span class="p">()</span>
+  <span class="o">:</span> <span class="n">stackSize_</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+  <span class="p">{}</span>
+
+  <span class="c1">// Other stuff...</span>
+
+<span class="k">private</span><span class="o">:</span>
+  <span class="k">static</span> <span class="k">const</span> <span class="kt">int</span> <span class="n">MAX_STACK</span> <span class="o">=</span> <span class="mi">128</span><span class="p">;</span>
+  <span class="kt">int</span> <span class="n">stackSize_</span><span class="p">;</span>
+  <span class="kt">int</span> <span class="n">stack_</span><span class="p">[</span><span class="n">MAX_STACK</span><span class="p">];</span>
+<span class="p">};</span>
+</pre></div>
+
+
+<p>The VM maintains an internal stack of values. In our example, the only kinds of
+values our instructions work with are numbers, so we can use a simple array
+of <code>int</code>s. Whenever a bit of data needs to work its way from one instruction to
+another, it gets there through the stack.</p>
+<p>虚拟机用内部栈保存值。在我们的例子中，我们的指令交互的值只有一种，那就是数字，所以我们可以使用简单的<code>int</code>数组。每比特数据需要从一条指令到另一条指令，它得通过堆栈。</p>
+<p>Like the name implies, values can be pushed onto or popped off of the stack, so
+let&#8217;s add a couple of methods for that:</p>
+<p>顾名思义，值可以压入栈或者从栈弹出，所以让我们加一对方法。</p>
+<div class="codehilite"><pre><span class="k">class</span> <span class="nc">VM</span>
+<span class="p">{</span>
+<span class="k">private</span><span class="o">:</span>
+  <span class="kt">void</span> <span class="n">push</span><span class="p">(</span><span class="kt">int</span> <span class="n">value</span><span class="p">)</span>
+  <span class="p">{</span>
+    <span class="c1">// Check for stack overflow.</span>
+    <span class="n">assert</span><span class="p">(</span><span class="n">stackSize_</span> <span class="o">&lt;</span> <span class="n">MAX_STACK</span><span class="p">);</span>
+    <span class="n">stack_</span><span class="p">[</span><span class="n">stackSize_</span><span class="o">++</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span><span class="p">;</span>
+  <span class="p">}</span>
+
+  <span class="kt">int</span> <span class="n">pop</span><span class="p">()</span>
+  <span class="p">{</span>
+    <span class="c1">// Make sure the stack isn&#39;t empty.</span>
+    <span class="n">assert</span><span class="p">(</span><span class="n">stackSize_</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">);</span>
+    <span class="k">return</span> <span class="n">stack_</span><span class="p">[</span><span class="o">--</span><span class="n">stackSize_</span><span class="p">];</span>
+  <span class="p">}</span>
+
+  <span class="c1">// Other stuff...</span>
+<span class="p">};</span>
+</pre></div>
+
+
+<p>When an instruction needs to receive parameters, it pops them off the stack like
+so:</p>
+<p>当一条指令需要接受参数，它将参数从栈弹出，如下所示：</p>
+<div class="codehilite"><pre><span class="k">switch</span> <span class="p">(</span><span class="n">instruction</span><span class="p">)</span>
+<span class="p">{</span>
+  <span class="k">case</span> <span class="nl">INST_SET_HEALTH</span><span class="p">:</span>
+  <span class="p">{</span>
+    <span class="kt">int</span> <span class="n">amount</span> <span class="o">=</span> <span class="n">pop</span><span class="p">();</span>
+    <span class="kt">int</span> <span class="n">wizard</span> <span class="o">=</span> <span class="n">pop</span><span class="p">();</span>
+    <span class="n">setHealth</span><span class="p">(</span><span class="n">wizard</span><span class="p">,</span> <span class="n">amount</span><span class="p">);</span>
+    <span class="k">break</span><span class="p">;</span>
+  <span class="p">}</span>
+
+  <span class="k">case</span> <span class="nl">INST_SET_WISDOM</span><span class="p">:</span>
+  <span class="k">case</span> <span class="nl">INST_SET_AGILITY</span><span class="p">:</span>
+    <span class="c1">// Same as above...</span>
+
+  <span class="k">case</span> <span class="nl">INST_PLAY_SOUND</span><span class="p">:</span>
+    <span class="n">playSound</span><span class="p">(</span><span class="n">pop</span><span class="p">());</span>
+    <span class="k">break</span><span class="p">;</span>
+
+  <span class="k">case</span> <span class="nl">INST_SPAWN_PARTICLES</span><span class="p">:</span>
+    <span class="n">spawnParticles</span><span class="p">(</span><span class="n">pop</span><span class="p">());</span>
+    <span class="k">break</span><span class="p">;</span>
+<span class="p">}</span>
+</pre></div>
+
+
+<p>To get some values <em>onto</em> that stack, we need one more instruction: a literal.
+It represents a raw integer value. But where does <em>it</em> get its value from? How
+do we avoid some turtles-all-the-way-down infinite regress here?</p>
+<p>为了将一些值<em>存入</em>栈中，我们需要另一条指令：字面量。它代表了一个原始的整数值。但是<em>它</em>的值又是从哪里来的呢？我们怎么样避免这样追根溯源到无穷无尽呢？</p>
+<p>The trick is to take advantage of the fact that our instruction stream is a
+sequence of bytes&#8202;&mdash;&#8202;we can stuff the number directly in the byte array.
+We define another instruction type for a number literal like so:</p>
+<p>技巧是利用我们的指令路是一系列字节这一事实——我们可以直接将数值存储在字节数组中。如下，我们为数值字面量定义了另一条指令类型：</p>
+<div class="codehilite"><pre><span class="k">case</span> <span class="nl">INST_LITERAL</span><span class="p">:</span>
+<span class="p">{</span>
+  <span class="c1">// Read the next byte from the bytecode.</span>
+  <span class="kt">int</span> <span class="n">value</span> <span class="o">=</span> <span class="n">bytecode</span><span class="p">[</span><span class="o">++</span><span class="n">i</span><span class="p">];</span>
+  <span class="n">push</span><span class="p">(</span><span class="n">value</span><span class="p">);</span>
+  <span class="k">break</span><span class="p">;</span>
+<span class="p">}</span>
+</pre></div>
+
+
+<aside name="single">
+<p>Here, I&#8217;m reading a single byte for the value to avoid the fiddly code
+required to decode a multiple-byte integer, but in a real implementation, you&#8217;ll
+want to support literals that cover your full numeric range.</p>
+</aside>
+<p><img src="images/bytecode-literal.png" alt="Binary encoding of a literal instruction: 0x05 (LITERAL) followed by 123 (the value)." /></p>
+<p>It reads the next <span name="single">byte</span> in the bytecode stream <em>as a
+number</em> and pushes it onto the stack.</p>
+<p>它读取字节码流中的字节<em>作为数值</em>并将其压入栈。</p>
+<p>Let&#8217;s string a few of these instructions together and watch the interpreter
+execute them to get a feel for how the stack works. We start with an empty stack
+and the interpreter pointing to the first instruction:</p>
+<p>让我们串起来其中的几条指令看看解释器如何执行它们，来感受栈如何工作。我们从一个空栈开始，解释器指向第一个指令：</p>
+<p><img src="images/bytecode-stack-1.png" alt="Executing a bytecode sequence. The execution pointer points to the first literal instruction and the stack is empty." /></p>
+<p>First, it executes the first <code>INST_LITERAL</code>. That reads the next byte from the
+bytecode (<code>0</code>) and pushes it onto the stack:</p>
+<p>首先，他执行第一条<code>INST_LITERAL</code>。他读取字节码流的下一个字节(<code>0</code>)并压入栈中。</p>
+<p><img src="images/bytecode-stack-2.png" alt="The next step. The literal 0 has been pushed onto the stack and the execution pointer is on the next literal." /></p>
+<p>Then, it executes the second <code>INST_LITERAL</code>. That reads the <code>10</code> and pushes it:</p>
+<p>然后，他执行流第二条<code>INST_LITERAL</code>。读取<code>10</code>然后压入。</p>
+<p><img src="images/bytecode-stack-3.png" alt="The next step. Now 10 has been pushed onto the stack and the execution pointer is at the Health instruction." /></p>
+<p>Finally, it executes <code>INST_SET_HEALTH</code>. That pops <code>10</code> and stores it in
+<code>amount</code>, then pops <code>0</code> and stores it in <code>wizard</code>. Then, it calls <code>setHealth()</code>
+with those parameters.</p>
+<p>最后，他执行<code>INST_SET_HEALTH</code>。这弹出<code>10</code>存进<code>amount</code>，弹出<code>0</code>存进<code>wizard</code>。然后它用这两个参数调用<code>setHealth()</code>。</p>
+<p>Ta-da! We&#8217;ve got a spell that sets the player&#8217;s wizard&#8217;s health to ten points.
+Now, we&#8217;ve got enough flexibility to define spells that set either wizard&#8217;s stats
+to whatever amounts we want. We can also play different sounds and spawn
+particles.</p>
+<p>完成！我们获得了将玩家巫师血量设为10点的法术。现在我们获得了足够的灵活度来定义修改任一巫师的状态到任意值的法术。我们还可以放不同的声音和粒子效果。</p>
+<p>But&#8230; this still feels like a <em>data</em> format. We can&#8217;t, for example, raise
+a wizard&#8217;s health by half of their wisdom. Our designers want to be able to
+express <em>rules</em> for spells, not just <em>values</em>.</p>
+<p>但是……站感觉还是像<em>数据</em>格式。比如，我们不能将巫师的血量提升他智力的一半。我们的设计者想要有能力为法术设计<em>规则</em>，而不仅仅是<em>数值</em>。</p>
+<h3><a href="#behavior-=-composition" name="behavior-=-composition">Behavior = composition</a></h3>
+<h3><a href="#行为-=-组合" name="行为-=-组合">行为 = 组合</a></h3>
+<p>If we think of our little VM like a programming language, all it supports now is
+a couple of built-in functions and constant parameters for them. To get bytecode
+to feel like <em>behavior</em>, what we&#8217;re missing is <em>composition</em>.</p>
+<p>如果我们认为我们的小虚拟机像一门编程语言，现在支持的只有一些内置函数，以及调用用的参数。为了字节码
+感觉像<em>行为</em>，我们需要<em>组合</em>。</p>
+<p>Our designers need to be able to create expressions that combine different
+values in interesting ways. For a simple example, they want spells that modify a
+stat <em>by</em> a certain amount instead of <em>to</em> a certain amount.</p>
+<p>我们的设计师需要能够创建以有趣的方式组合不同的值的表达式。举个简单的例子，他们希望一个法术<em>变化</em>一个数值而不是<em>修改到</em>一个数值。</p>
+<p>That requires taking into account a stat&#8217;s current value. We have instructions
+for <em>writing</em> a stat, but we need to add a couple to <em>read</em> stats:</p>
+<p>这需要考虑到状态的当前值。我们有指令来<em>修改</em>状态，现在需要添加方法<em>读取</em>状态：</p>
+<div class="codehilite"><pre><span class="k">case</span> <span class="nl">INST_GET_HEALTH</span><span class="p">:</span>
+<span class="p">{</span>
+  <span class="kt">int</span> <span class="n">wizard</span> <span class="o">=</span> <span class="n">pop</span><span class="p">();</span>
+  <span class="n">push</span><span class="p">(</span><span class="n">getHealth</span><span class="p">(</span><span class="n">wizard</span><span class="p">));</span>
+  <span class="k">break</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="k">case</span> <span class="nl">INST_GET_WISDOM</span><span class="p">:</span>
+<span class="k">case</span> <span class="nl">INST_GET_AGILITY</span><span class="p">:</span>
+  <span class="c1">// You get the idea...</span>
+</pre></div>
+
+
+<p>As you can see, these work with the stack in both directions. They pop a
+parameter to determine which wizard to get the stat for, and then they look up the stat&#8217;s
+value and push that back onto the stack.</p>
+<p>正如你所看到的，这些以两种凡是与堆栈交互。他们弹出一个参数来确定获取哪个巫师的状态，然后他们查找状态的值压入堆栈。</p>
+<p>This lets us write spells that copy stats around. We could create a spell that
+set a wizard&#8217;s agility to their wisdom or a strange incantation that set one
+wizard&#8217;s health to mirror his opponent&#8217;s.</p>
+<p>这允许我们写复制状态的法术。我们可以创建一个法术，以巫师的智慧设定敏捷度，或者一个法术让巫师的血量等于对方的。</p>
+<p>Better, but still quite limited. Next, we need arithmetic. It&#8217;s time our baby VM
+learned how to add 1 + 1. We&#8217;ll add a few more instructions. By now, you&#8217;ve
+probably got the hang of it and can guess how they look. I&#8217;ll just show
+addition:</p>
+<p>有改进，但还是有限制。接下来，我们需要算术。现在是时候我们的小VM学习了如何计算1 + 1，我们将添加更多的指令。到现在为止，你可能已经知道如何去做，知道他们大概的模样。我只展示加法：</p>
+<div class="codehilite"><pre><span class="k">case</span> <span class="nl">INST_ADD</span><span class="p">:</span>
+<span class="p">{</span>
+  <span class="kt">int</span> <span class="n">b</span> <span class="o">=</span> <span class="n">pop</span><span class="p">();</span>
+  <span class="kt">int</span> <span class="n">a</span> <span class="o">=</span> <span class="n">pop</span><span class="p">();</span>
+  <span class="n">push</span><span class="p">(</span><span class="n">a</span> <span class="o">+</span> <span class="n">b</span><span class="p">);</span>
+  <span class="k">break</span><span class="p">;</span>
+<span class="p">}</span>
+</pre></div>
+
+
+<p>Like our other instructions, it pops a couple of values, does a bit of work, and
+then pushes the result back. Up until now, every new instruction gave us an
+incremental improvement in expressiveness, but we just made a big leap. It isn&#8217;t
+obvious, but we can now handle all sorts of complicated, deeply nested
+arithmetic expressions.</p>
+<p>像我们的其他指令，它弹出一对数值，做一点工作，然后压入结果。直到现在，每一个新指令看起来在逐步改善，但其实我们完成一个大飞跃。这并不显而易见，但我们现在可以处理各种复杂的，深层嵌套的算术表达式。</p>
+<p>Let&#8217;s walk through a slightly more complex example. Say we want a spell that
+increases the player&#8217;s wizard&#8217;s health by the average of their agility and
+wisdom. In code, that&#8217;s:</p>
+<p>让我们来看个稍微复杂点的例子。假设我们希望有法术将巫师的血量增加敏捷和智慧的平均值。用代码表示如下：</p>
+<div class="codehilite"><pre><span class="n">setHealth</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">getHealth</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="o">+</span>
+    <span class="p">(</span><span class="n">getAgility</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="o">+</span> <span class="n">getWisdom</span><span class="p">(</span><span class="mi">0</span><span class="p">))</span> <span class="o">/</span> <span class="mi">2</span><span class="p">);</span>
+</pre></div>
+
+
+<p>You might think we&#8217;d need instructions to handle the explicit grouping that
+parentheses give you in the expression here, but the stack supports that
+implicitly. Here&#8217;s how you could evaluate this by hand:</p>
+<p>你可能会认为我们需要指令来处理括号表达的分组，但栈隐式支持了这一点。你可以手算如下：</p>
+<ol>
+<li>Get the wizard&#8217;s current health and remember it.</li>
+<li>Get the wizard&#8217;s agility and remember it.</li>
+<li>Do the same for their wisdom.</li>
+<li>Get those last two, add them, and remember the result.</li>
+<li>Divide that by two and remember the result.</li>
+<li>Recall the wizard&#8217;s health and add it to that result.</li>
+<li>
+<p>Take that result and set the wizard&#8217;s health to that value.</p>
+</li>
+<li>
+<p>获取巫师当前的血量并记录结果。</p>
+</li>
+<li>获取巫师当前的血量并记录结果。</li>
+<li>对智慧执行同样的操作。</li>
+<li>获取最后两个值，加起来并记录结果。</li>
+<li>除以二并记录结果。</li>
+<li>回想巫师的血量，并它与这结果加和。</li>
+<li>取出结果，设置巫师的血量为这一结果。</li>
+</ol>
+<p>Do you see all of those &#8220;remembers&#8221; and &#8220;recalls&#8221;? Each &#8220;remember&#8221; corresponds
+to a push, and the &#8220;recalls&#8221; are pops. That means we can translate this to
+bytecode pretty easily. For example, the first line to get the wizard&#8217;s current
+health is:</p>
+<p>你看到这些“记录”和“回想”了吗？每个“记录”对应一个压入，“召回”对应弹出。这意味着我们可以很容易转化为字节码。例如，获得向导的当前血量的第一行：</p>
+<div class="codehilite"><pre>LITERAL 0
+GET_HEALTH
+</pre></div>
+
+
+<p>This bit of bytecode pushes the wizard&#8217;s health onto the stack. If we
+mechanically translate each line like that, we end up with a chunk of bytecode
+that evaluates our original expression. To give you a feel for how the
+instructions compose, I&#8217;ve done that below.</p>
+<p>这些字节码将巫师的血量压入堆栈。 如果我们机械地将每个行都这样转化，我们最终得到一大块等价于我们原来表达式的字节码。为了让你感觉这些指令如何撰写的，我已经在下面完成了。</p>
+<p>To show how the stack changes over time, we&#8217;ll walk through a sample execution
+where the wizard&#8217;s current stats are 45 health, 7 agility, and 11 wisdom. Next
+to each instruction is what the stack looks like after executing it and then a
+little comment explaining the instruction&#8217;s purpose:</p>
+<p>为了展示堆栈如何随着时间推移而变化，我们将使用一个样本来执行。巫师目前有45血量，7敏捷，和11智慧。 每条指令的旁边是栈在执行指令之后的模样，再旁边是一些解释了指令意图的注释：</p>
+<div class="codehilite"><pre>LITERAL 0    [0]            # Wizard index
+LITERAL 0    [0, 0]         # Wizard index
+GET_HEALTH   [0, 45]        # getHealth()
+LITERAL 0    [0, 45, 0]     # Wizard index
+GET_AGILITY  [0, 45, 7]     # getAgility()
+LITERAL 0    [0, 45, 7, 0]  # Wizard index
+GET_WISDOM   [0, 45, 7, 11] # getWisdom()
+ADD          [0, 45, 18]    # Add agility and wisdom
+LITERAL 2    [0, 45, 18, 2] # Divisor
+DIVIDE       [0, 45, 9]     # Average agility and wisdom
+ADD          [0, 54]        # Add average to current health
+SET_HEALTH   []             # Set health to result
+</pre></div>
+
+
+<p>If you watch the stack at each step, you can see how data flows through it
+almost like <span name="threshold">magic</span>. We push <code>0</code> for the wizard
+index at the beginning, and it just hangs around at the bottom of the stack until
+we finally need it for the last <code>SET_HEALTH</code> at the end.</p>
+<p>如果你注意力每一步的栈，你可以看到数据如何像魔法一样流动在其中。我们最开始压入<code>0</code>来查找巫师，然后它一直挂在栈的底部，直到最终的<code>SET_HEALTH</code>才用到它。</p>
+<aside name="threshold">
+<p>Maybe my threshold for &#8220;magic&#8221; is a little too low here.</p>
+</aside>
+<h3><a href="#a-virtual-machine" name="a-virtual-machine">A virtual machine</a></h3>
+<h3><a href="#一台虚拟机" name="一台虚拟机">一台虚拟机</a></h3>
+<p>I could keep going, adding more and more instructions, but this is a good place
+to stop. As it is, we&#8217;ve got a nice little VM that lets us define fairly
+open-ended behavior using a simple, compact data format. While &#8220;bytecode&#8221; and
+&#8220;virtual machines&#8221; sound intimidating, you can see they&#8217;re often as simple as a
+stack, a loop, and a switch statement.</p>
+<p>我可以继续下去，添加越来越多的指令，但是时候适可而止了。如上所述，我们已经有了一个可爱的小虚拟机，可以让我们定义开放式的行为，使用简单，紧凑的数据格式。虽然“字节码”和“虚拟机”的听起来很吓人，你可以看到他们往往简单到了只需栈，循环，和switch语句。</p>
+<p>Remember our original goal to have behavior be nicely sandboxed? Now that you&#8217;ve
+seen exactly how the VM is implemented, it&#8217;s obvious that we&#8217;ve accomplished
+that. The bytecode can&#8217;t do anything malicious or reach out into weird parts of
+the game engine because we&#8217;ve only defined a few instructions that touch the
+rest of the game.</p>
+<p>还记得我们最初让行为呆在沙盒中的目标吗？现在，你已经看到虚拟机是如何实现的，很明显，我们已经完成那个目标。字节码不能伸出恶意的触角到游戏引擎的其他部分，因为我们只定义了接触几个指令可以与剩下的比赛相关的指令。</p>
+<p>We control how much memory it uses by how big of a stack we create, and we&#8217;re
+careful to make sure it can&#8217;t overflow that. We can even <span
+name="looping">control how much <em>time</em></span> it uses. In our instruction loop,
+we can track how many we&#8217;ve executed and bail out if it goes over some limit.</p>
+<p>我们通过控制我们创造栈的大小来控制内存使用量，我们很小心地确保不会溢出。我们甚至可以控制它使用多少<em>时间</em>。在我们的指令循环里，我们可以追踪有多少指令已经执行，如果它遇到了问题我们也可以帮其摆脱困境。</p>
+<aside name="looping">
+<p>Controlling execution time isn&#8217;t necessary in our sample because we don&#8217;t have
+any instructions for looping. We could limit execution time by limiting the
+total size of the bytecode. This also means our bytecode isn&#8217;t Turing-complete.</p>
+</aside>
+<p>There&#8217;s just one problem left: actually creating the bytecode. So far, we&#8217;ve
+taken bits of pseudocode and compiled them to bytecode by hand. Unless you&#8217;ve
+got a <em>lot</em> of free time, that&#8217;s not going to work in practice.</p>
+<p>这里还有一个问题：创建字节码。到目前为止，我们使用伪代码再手工编写为字节码。除非你有<em>很多</em>的空闲时间，这种方式并不实用。</p>
+<h3><a href="#spellcasting-tools" name="spellcasting-tools">Spellcasting tools</a></h3>
+<h3><a href="#施法工具" name="施法工具">施法工具</a></h3>
+<p>One of our initial goals was to have a <em>higher</em>-level way to author behavior,
+but we&#8217;ve gone and created something <em>lower</em>-level than C++. It has the runtime
+performance and safety we want, but absolutely none of the designer-friendly
+usability.</p>
+<p>我们的最初的目标是创造<em>高层</em>方式来控制行为，但是，我们却创造了比C++更<em>底层</em>的东西。它具有我们想要的运行性能和安全性，但绝对没有对设计师友好的可用性。</p>
+<p>To fill that gap, we need some tooling. We need a program that lets users define
+the high-level behavior of a spell and then takes that and generates the
+appropriate low-level stack machine bytecode.</p>
+<p>为了填补这一空白，我们需要一些工具。我们需要一个程序，让用户定义法术的高层次的行为，然后需要的，并生成适当的低层次的栈式机器的字节码。</p>
+<p>That probably sounds way harder than making the VM. Many programmers were
+dragged through a compilers class in college and took away from it nothing but
+PTSD triggered by the sight of a <span name="dragon">book</span> with a dragon
+on the cover or the words &#8220;<a href="http://en.wikipedia.org/wiki/Lex_(software)">lex</a>&#8221;
+and &#8220;<a href="http://en.wikipedia.org/wiki/Yacc">yacc</a>&rdquo;.</p>
+<p>这可能听起来比虚拟机更难。许多程序员都在大学参加编译器课程并被龙书或者&#8221;<a href="http://en.wikipedia.org/wiki/Lex_(software)">lex</a>&#8220;和&#8221;<a href="http://en.wikipedia.org/wiki/Yacc">yacc</a>&rdquo;引发了PTSD。</p>
+<aside name="dragon">
+<p>I&#8217;m referring, of course, to the classic text <a href="http://en.wikipedia.org/wiki/Compilers:_Principles,_Tech
+niques,_and_Tools"><em>Compilers: Principles,
+Techniques, and Tools</em></a>.</p>
+</aside>
+<p>In truth, compiling a text-based language isn&#8217;t that bad, though it&#8217;s a <em>bit</em>
+too broad of a topic to cram in here. However, you don&#8217;t have to do that. What I
+said we need is a <em>tool</em>&#8202;&mdash;&#8202;it doesn&#8217;t have to be a <em>compiler</em> whose input
+format is a <em>text file</em>.</p>
+<p>事实上，编译一个基于文本的语言并不那么糟，可能有<em>一点</em>宽泛的话题在这里需要补习研究。但是，你不需要那么做。我说，我们需要的是<em>工具</em>——它并不一定是一个<em>编译器</em>，其输入格式是<em>文本文件</em>。</p>
+<p>On the contrary, I encourage you to consider building a graphical interface to
+let users define their behavior, especially if the people using it won&#8217;t be
+highly technical. Writing text that&#8217;s free of syntax errors is difficult for
+people who haven&#8217;t spent years getting used to a compiler yelling at them.</p>
+<p>相反，我建议你考虑构建一个图形界面让用户定义自己的行为，尤其是在使用它的人没有很强的技术。一个没有花几年时间习惯编译器怒吼的人很难写出没有语法错误文字。</p>
+<p>Instead, you can build an app that lets users &#8220;script&#8221; by clicking and dragging
+little boxes, pulling down menu items, or whatever else makes sense for the
+kind of behavior you want them to create.</p>
+<p>相反，你可以建立一个应用程序，用户通过单击拖动小盒子，下拉菜单项，或任何你创造的有意义的行为创建“脚本”。</p>
+<p><span name="text"></span></p>
+<p><img src="images/bytecode-ui.png" alt="A mock-up of a little tree-based UI for authoring behavior." /></p>
+<aside name="text">
+<p>The scripting system I wrote for <a href="http://en.wikipedia.org/wiki/Henry_Hatsworth_in_the_Puzzling_Adventure">Henry Hatsworth in the Puzzling
+Adventure</a> worked like this.</p>
+</aside>
+<p>The nice thing about this is that your UI can make it impossible for users to
+create <span name="errors">&#8220;invalid&#8221;</span> programs. Instead of vomiting error
+messages on them, you can proactively disable buttons or provide default
+values to ensure that the thing they&#8217;ve created is valid at all points in time.</p>
+<p>这样做的好处是，你的UI可以让用户无法创建的“无效的”程序。与其向他们喷洒错误警告，不如主动关闭按钮或提供默认值，以确保他们创造的东西在任何时间点上都有效。</p>
+<aside name="errors">
+<p>I want to stress how important error-handling is. As programmers, we tend to
+view human error as a shameful personality flaw that we strive to eliminate in
+ourselves.</p>
+<p>To make a system that users enjoy, you have to embrace their humanity,
+<em>including their fallibility</em>. Making mistakes is what people do, and is a
+fundamental part of the creative process. Handling them gracefully with features
+like undo helps your users be more creative and create better work.</p>
+</aside>
+<p>This spares you from designing a grammar and writing a parser for a little
+language. But, I know, some of you find UI programming equally unpleasant. Well,
+in that case, I don&#8217;t have any good news for you.</p>
+<p>这免去了设计语法和编写解析器的工作。但是，我知道，你会发现UI设计同样令人不快。好吧，在这种情况下，我没法提供给你你什么好消息。</p>
+<p>Ultimately, this pattern is about expressing behavior in a user-friendly,
+high-level way. You have to craft the user experience. To execute the behavior
+efficiently, you then need to translate that into a lower-level form. It is real
+work, but if you&#8217;re up to the challenge, it can pay off.</p>
+<p>毕竟，这种模式是关于用对用户友好的高层方式表达行为。你必须设计用户体验。要有效地执行行为，需要转换成一个底层形式。这是必做的工作，但如果你准备好迎接挑战，最终会有所回报。</p>
+<h2><a href="#design-decisions" name="design-decisions">Design Decisions</a></h2>
+<h2><a href="#设计决策" name="设计决策">设计决策</a></h2>
+<p>I <span name="failed">tried</span> to keep this chapter as simple as I could,
+but what we&#8217;re really doing is creating a language. That&#8217;s a pretty open-ended
+design space. Exploring it can be tons of fun, so make sure you don&#8217;t forget to
+finish your game.</p>
+<p>我尽可能让本章简单，但我们真正做的事情是创造一门语言。有很开放的设计空间，你可以从中获得很多乐趣，所以别忘了完成你的游戏。</p>
+<aside name="failed">
+<p>Since this is the longest chapter in the book, it seems I failed that task.</p>
+</aside>
+<h3><a href="#how-do-instructions-access-the-stack" name="how-do-instructions-access-the-stack">How do instructions access the stack?</a></h3>
+<h3><a href="#指令如何访问堆栈？" name="指令如何访问堆栈？">指令如何访问堆栈？</a></h3>
+<p>Bytecode VMs come in two main flavors: stack-based and register-based. In a
+stack-based VM, instructions always work from the top of the stack, like in our
+sample code. For example, <code>INST_ADD</code> pops two values, adds them, and pushes the
+result.</p>
+<p>有两种主要类型的字节码虚拟机：基于栈的和基于寄存器的。栈式虚拟机中，指令总是在栈的顶部工作，如同我们的示例代码所示。例如，<code>INST_ADD</code>弹出两个值，将它们相加，并将结果压入。</p>
+<p>Register-based VMs still have a stack. The only difference is that instructions
+can read their inputs from deeper in the stack. Instead of <code>INST_ADD</code> always <em>popping</em>
+its operands, it has two indexes stored in the bytecode that identify where in
+the stack to read the operands from.</p>
+<p>基于寄存器的虚拟机也有栈。唯一的不同是指令可以从栈的深处读取值。不像<code>INST_ADD</code>始终<em>弹出</em>
+其操作数，它在字节码存储两个索引指示了从栈的何处读取操作数。</p>
+<ul>
+<li>
+<p><strong>With a stack-based VM:</strong></p>
+</li>
+<li>
+<p><strong>基于栈的虚拟机：</strong></p>
+<ul>
+<li>
+<p><em>Instructions are small.</em> Since each instruction implicitly finds its
+    arguments on top of the stack, you don&#8217;t need to encode any data for
+    that. This means each instruction can be pretty small, usually a single
+    byte.</p>
+</li>
+<li>
+<p><em>指令短小。</em>由于每个指令隐性认定其在栈顶部寻找参数，则不需要为之编码任何数据。这意味着每条指令可能会非常短，一般只需一个字节。</p>
+</li>
+<li>
+<p><em>Code generation is simpler.</em> When you get around to writing the
+    compiler or tool that outputs bytecode, you&#8217;ll find it simpler to
+    generate stack-based bytecode. Since each instruction implicitly works
+    from the top of the stack, you just need to output instructions in the
+    right order to pass parameters between them.</p>
+</li>
+<li>
+<p><em>代码容易生成。</em>当你需要为生成字节码写编译器或工具时，你会发现它更容易生成基于栈的字节码。由于每个指令隐性在栈顶部工作，你只需要以正确的顺序输出指令就可以在它们之间传递参数。</p>
+</li>
+<li>
+<p><em>You have more instructions.</em> Each instruction only sees the very top of
+    the stack. This means that to generate code for something like <code>a = b +
+    c</code>, you need separate instructions to move <code>b</code> and <code>c</code> to the top of the
+    stack, perform the operation, then move the result into <code>a</code>.</p>
+</li>
+<li>
+<p><em>会生成更多的指令。</em>每条指令只能看到栈的最顶端。这意味着，产生用于像<code>a = b + c</code>这样的代码，你需要单独的指令将<code>b</code>和<code>c</code>压入栈的顶部，执行操作，再将结果压入<code>a</code>。</p>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>With a register-based VM:</strong></p>
+</li>
+<li>
+<p><strong>基于寄存器的虚拟机：</strong></p>
+<ul>
+<li>
+<p><em>Instructions are larger.</em> Since instructions need arguments for stack
+    offsets, a single instruction needs more bits. For example, an
+    instruction in <span name="lua">Lua</span>&#8202;&mdash;&#8202;probably the most
+    well-known register-based VM&#8202;&mdash;&#8202;is a full 32-bits. It uses 6 bits for
+    the instruction type, and the rest are arguments.</p>
+</li>
+<li>
+<p><em>指令较长。</em>由于指令需要参数做栈偏移量，单个指令需要更多的比特。例如，一个<span name="lua">Lua</span>指令——可能是最知名的的基于寄存器的虚拟机——使用一个完整的32位。它采用6位做指令类型，其余的是参数。</p>
+<aside name="lua">
+
+<p>The Lua folks don&#8217;t specify Lua&#8217;s bytecode format, and it changes from version to
+version. What I&#8217;m describing here is true as of Lua 5.1. For an
+absolutely amazing deep dive into Lua&#8217;s internals, read <a href="http://lu
+aforge.net/docman/83/98/ANoFrillsIntroToLua51VMInstructions.pdf">this</a>.</p>
+</aside>
+
+</li>
+<li>
+<p><em>You have fewer instructions.</em> Since each instruction can do more work,
+    you don&#8217;t need as many of them. Some say you get a performance
+    improvement since you don&#8217;t have to shuffle values around in the stack
+    as much.</p>
+</li>
+<li>
+<p><em>您有较少的指令。</em>由于每一个指令可以做更多的工作，你并不需要那么多的指令。有人说，性能会得以提升，因为在栈中将值移来移去了。</p>
+</li>
+</ul>
+</li>
+</ul>
+<p>So which should you do? My recommendation is to stick with a stack-based VM.
+They&#8217;re simpler to implement and much simpler to generate code for.
+Register-based VMs got a reputation for being a bit faster after Lua converted
+to that style, but it depends <em>deeply</em> on your actual instructions and on lots of
+other details of your VM.</p>
+<p>所以，应该选哪一种？我的建议是坚持使用基于栈的虚拟机。他们更容易实现的，更容易的生成代码。Lua转换为基于寄存器的虚拟机从而变得更快，这为其博得了声誉，但是这<em>强烈</em>依赖于您的实际的指令和大量的虚拟机的其他细节。</p>
+<h3><a href="#what-instructions-do-you-have" name="what-instructions-do-you-have">What instructions do you have?</a></h3>
+<h3><a href="#你有什么样的指令？" name="你有什么样的指令？">你有什么样的指令？</a></h3>
+<p>Your instruction set defines the boundaries of what can and cannot be expressed
+in bytecode, and it also has a big impact on the performance of your VM. Here&#8217;s a
+laundry list of the different kinds of instructions you may want:</p>
+<p>你的指令集定义了你在字节码中可以干什么，不能干什么的边界，它对你的虚拟机性能也有很大的影响。这里有一个清单，记录了不同种类的，你可能要的指令：</p>
+<ul>
+<li><strong>External primitives.</strong> These are the ones that reach out of the VM into
+    the rest of the game engine and do stuff that the user can see. They control
+    what kinds of real behavior can be expressed in bytecode. Without these,
+    your VM can&#8217;t do anything more than burn CPU cycles.</li>
+</ul>
+<p>*  <strong>外部原语。</strong>这是虚拟机可以与游戏引擎其他部分交互并影响玩家看到的部分。他们控制了字节码可以表达的真实行为。如果没有这些，你的虚拟机除了消耗CPU循环以外一无所得。</p>
+<ul>
+<li>
+<p><strong>Internal primitives.</strong> These manipulate values inside the VM&#8202;&mdash;&#8202;things
+    like literals, arithmetic, comparison operators, and instructions that juggle
+    the stack around.</p>
+</li>
+<li>
+<p><strong>内部原语</strong>这些在虚拟机内操作数值——比如文字，算术，比较操作，以及操纵栈的指令。</p>
+</li>
+<li>
+<p><strong>Control flow.</strong> Our example didn&#8217;t cover these, but when you want behavior
+    that&#8217;s imperative and conditionally executes instructions or loops and
+    executes instructions more than once, you need control flow. In the
+    low-level language of bytecode, they&#8217;re surprisingly simple: jumps.</p>
+</li>
+</ul>
+<p>*  <strong>控制流。</strong>我们的例子并不包括这些，但是当你需要有条件执行或循环执行地行为，你需要控制流。   字节码这样底层的语言，他们出奇的简单：跳转。</p>
+<div class="codehilite"><pre>In our instruction loop, we had an index to track where we were in the
+bytecode. All a jump instruction does is modify that variable and change
+where we&#39;re currently executing. In other words, it&#39;s a `goto`. You can
+build all kinds of higher-level control flow using that.
+
+在我们的指令循环中，我们有一个索引来跟踪我们到了字节码的哪里。跳转指令所做的是修改这个索引并改变我们将要执行的。换句话说，这是一个`goto`。您可以制定各种更高级别的控制流。
+</pre></div>
+
+
+<ul>
+<li><strong>Abstraction.</strong> If your users start defining a <em>lot</em> of stuff in data,
+    eventually they&#8217;ll want to start reusing bits of bytecode instead of having
+    to copy and paste it. You may want something like callable procedures.</li>
+</ul>
+<p><strong>抽象。</strong>如果你的用户开始在数据中定义<em>很多</em>的东西，最终他们要重用字节码的部分位，而不必复制和粘贴。您可能需要调用过程这样的东西。</p>
+<div class="codehilite"><pre>In their simplest form, procedures aren&#39;t much more complex than a jump. The only
+difference is that the VM maintains a second *return* stack. When it
+executes a &quot;call&quot; instruction, it pushes the current instruction index onto
+the return stack and then jumps to the called bytecode. When it hits a &quot;return&quot;,
+the VM pops the index from the return stack and jumps back to it.
+</pre></div>
+
+
+<p>最简单的形式中，过程并不比跳转复杂得多。唯一不同的是，在VM运行后者时，栈会存储第二次<em>返回</em>的位置。当执行“call”指令时，将当前指令索引压入栈中，然后跳转到被调用的字节码。当它到了“return”，虚拟机从堆栈弹出索引，然后调回索引指示的位置。</p>
+<h3><a href="#how-are-values-represented" name="how-are-values-represented">How are values represented?</a></h3>
+<h3><a href="#数值是如何表示的？" name="数值是如何表示的？">数值是如何表示的？</a></h3>
+<p>Our sample VM only works with one kind of value, integers. That makes answering this easy &#8212;
+the stack is just a stack of <code>int</code>s. A more full-featured VM will support
+different data types: strings, objects, lists, etc. You&#8217;ll have to decide how
+those are stored internally.</p>
+<p>我们的样本虚拟机只与一种数值打交道：整数。回答这个问题很简单——栈只是一堆<code>int</code>。一个更加完整的虚拟机将支持不同的数据类型：字符串，对象，列表等。你必须决定如何在内部存储这些值。</p>
+<ul>
+<li><strong>A single datatype:</strong></li>
+</ul>
+<p>* <strong>单一数据类型：</strong></p>
+<div class="codehilite"><pre> *  *It&#39;s simple.* You don&#39;t have to worry about tagging, conversions, or
+    type-checking.
+
+ *  *简单易用*你不必担心标记，转换，或类型检查。
+
+ *  *You can&#39;t work with different data types.* This is the obvious downside.
+    Cramming different types into a single representation&amp;#8202;&amp;mdash;&amp;#8202;think storing
+    numbers as strings&amp;#8202;&amp;mdash;&amp;#8202;is asking for pain.
+
+ *  *无法使用不同的数据类型。*这是明显的缺点。将不同类型成塞进单一的表示方式——想想用存储字符串的方式存储数字——这是找打。
+</pre></div>
+
+
+<ul>
+<li>
+<p><strong>A tagged variant:</strong></p>
+</li>
+<li>
+<p><strong>有标记的类型：</strong></p>
+<p>This is the common representation for dynamically typed languages. Every
+value has two pieces. The first is a type tag&#8202;&mdash;&#8202;an <code>enum</code>&#8202;&mdash;&#8202;that identifies
+what data type is being stored. The rest of the bits are then interpreted
+appropriately according to that type, like:</p>
+<p>这是动态类型语言中常见的表示法。所有的值有两部分。第一个是类型标记——一个<code>enum</code>——标识存储了什么数据类型。这些位的其余部分会被解释为这种类型：</p>
+<div class="codehilite"><pre><span class="k">enum</span> <span class="n">ValueType</span>
+<span class="p">{</span>
+  <span class="n">TYPE_INT</span><span class="p">,</span>
+  <span class="n">TYPE_DOUBLE</span><span class="p">,</span>
+  <span class="n">TYPE_STRING</span>
+<span class="p">};</span>
+
+<span class="k">struct</span> <span class="n">Value</span>
+<span class="p">{</span>
+  <span class="n">ValueType</span> <span class="n">type</span><span class="p">;</span>
+  <span class="k">union</span>
+  <span class="p">{</span>
+    <span class="kt">int</span>    <span class="n">intValue</span><span class="p">;</span>
+    <span class="kt">double</span> <span class="n">doubleValue</span><span class="p">;</span>
+    <span class="kt">char</span><span class="o">*</span>  <span class="n">stringValue</span><span class="p">;</span>
+  <span class="p">};</span>
+<span class="p">};</span>
+</pre></div>
+
+
+<ul>
+<li><em>Values know their type.</em> The nice thing about this representation is
+    that you can check the type of a value at runtime. That&#8217;s important for
+    dynamic dispatch and for ensuring that you don&#8217;t try to perform operations on
+    types that don&#8217;t support it.</li>
+</ul>
+</li>
+</ul>
+<p>*  <em>数值知道其类型。</em>这个表示法的好处是您可以在运行时检查值的类型。这对动态分配是很重要的，可以确保你没有在类型上面执行其不支持的操作。</p>
+<div class="codehilite"><pre> *  *It takes more memory.* Every value has to carry around a few extra bits
+    with it to identify its type. In something as low-level as a VM, a few
+    bits here and there add up quickly.
+</pre></div>
+
+
+<p><em>它需要更多的内存。</em>每个值都有随身携带一些额外的位
+        用它来识别其类型。在一些作为低级别作为VM，几
+        位在这里和那里迅速增加。</p>
+<ul>
+<li><strong>An untagged union:</strong></li>
+</ul>
+<p>* <strong>未标记的union：</strong></p>
+<div class="codehilite"><pre>This uses a union like the previous form, but it does *not* have a type tag
+that goes along with it. You have a little blob of bits that could represent
+more than one type, and it&#39;s up to you to ensure you don&#39;t misinterpret
+them.
+
+这像前面一样使用union，但是它*没有*类型标识。你可以将这些位表示为不同的类型，由你确保没有搞错值的类型。
+
+This is how <span class="nt">&lt;span</span> <span class="na">name=</span><span class="s">&quot;untyped&quot;</span><span class="nt">&gt;</span>statically typed<span class="nt">&lt;/span&gt;</span> languages represent
+things in memory. Since the type system ensures at compile time that you
+aren&#39;t misinterpreting values, you don&#39;t need to validate it at runtime.
+</pre></div>
+
+
+<p>这是静态类型语言在内存中如何表示事物的方式。由于类型系统在编译期保证你没弄错值的类型，你不需要在运行时对其进行验证。</p>
+<div class="codehilite"><pre><span class="nt">&lt;aside</span> <span class="na">markdown=</span><span class="s">&quot;1&quot;</span> <span class="na">name=</span><span class="s">&quot;untyped&quot;</span><span class="nt">&gt;</span>
+
+This is also how *untyped* languages like assembly and Forth store values.
+Those languages leave it to the *user* to make sure they don&#39;t write code
+that misinterprets a value&#39;s type. Not for the faint of heart!
+
+<span class="nt">&lt;/aside&gt;</span>
+
+ *  *It&#39;s compact.* You can&#39;t get any more efficient than storing just the
+    bits you need for the value itself.
+</pre></div>
+
+
+<p>*  <em>结构紧凑。</em>你找不到比只存储你需要的值更加有效率的存储方式。</p>
+<div class="codehilite"><pre> *  *It&#39;s fast.* Not having type tags implies you&#39;re not spending cycles
+    checking them at runtime either. This is one of the reasons
+    statically typed languages tend to be faster than dynamic ones.
+</pre></div>
+
+
+<p>*  <em>速度快。</em>没有类型标识意味着你在运行时无需消耗周期检查它们的类型。这是静态类型语言往往比动态类型语言快的原因之一。</p>
+<div class="codehilite"><pre> *  *It&#39;s unsafe.* <span class="nt">&lt;span</span> <span class="na">name=</span><span class="s">&quot;unsafe&quot;</span><span class="nt">&gt;</span>This<span class="nt">&lt;/span&gt;</span> is the real cost, of
+    course. A bad chunk of bytecode that causes you to misinterpret a value and
+    treat a number like a pointer or vice versa can violate the security of
+    your game or make it crash.
+</pre></div>
+
+
+<p><em>不安全的。</em>这是真正的代价，当然。一块坏的字节码，让你把值误解为指针，会打破你游戏的安全或使其崩溃。</p>
+<div class="codehilite"><pre>    <span class="nt">&lt;aside</span> <span class="na">markdown=</span><span class="s">&quot;1&quot;</span> <span class="na">name=</span><span class="s">&quot;unsafe&quot;</span><span class="nt">&gt;</span>
+
+    If your bytecode was compiled from a statically typed language, you
+    might think you&#39;re safe here because the compiler won&#39;t generate unsafe
+    bytecode. That may be true, but remember that malicious users may hand-craft
+    evil bytecode without going through your compiler.
+
+    That&#39;s why, for example, the Java Virtual Machine has to do *bytecode
+    verification* when it loads a program.
+
+    <span class="nt">&lt;/aside&gt;</span>
+</pre></div>
+
+
+<ul>
+<li><strong>An interface:</strong></li>
+</ul>
+<p>*  <strong>接口：</strong></p>
+<div class="codehilite"><pre>The object-oriented solution for a value that maybe be one of several
+different types is through polymorphism. An interface provides virtual
+methods for the various type tests and conversions, along the lines of:
+</pre></div>
+
+
+<p>多种类型值的面向对象的解决方案是通过多态。接口提供虚拟方法为不同的类型测试和转换，如下：</p>
+<div class="codehilite"><pre>    :::cpp
+    class Value
+    {
+    public:
+      virtual ~Value() {}
+
+      virtual ValueType type() = 0;
+
+      virtual int asInt() {
+        // Can only call this on ints.
+        assert(false);
+        return 0;
+      }
+
+      // Other conversion methods...
+    };
+
+Then you have concrete classes for each specific data type, like:
+</pre></div>
+
+
+<p>然后你为每个特定的数据类型设计特定的类，如：</p>
+<div class="codehilite"><pre>    :::cpp
+    class IntValue : public Value
+    {
+    public:
+      IntValue(int value)
+      : value_(value)
+      {}
+
+      virtual ValueType type() { return TYPE_INT; }
+      virtual int asInt() { return value_; }
+
+    private:
+      int value_;
+    };
+
+ *  *It&#39;s open-ended.* You can define new value types outside of the core VM
+    as long as they implement the base interface.
+</pre></div>
+
+
+<p>*  <em>开放。</em>您可以在虚拟机的核心之外定义新的值类型，只要它们实现了基本接口就行。</p>
+<div class="codehilite"><pre> *  *It&#39;s object-oriented.* If you adhere to OOP principles, this does
+    things the &quot;right&quot; way and uses polymorphic dispatch for type-specific
+    behavior instead of something like switching on a type tag.
+</pre></div>
+
+
+<p>*   <em>面向对象。</em>如果你坚持OOP原则，这是做事情的“正确”的方式，使用多态为特定类型分配行为，而不是标签交换之类的。</p>
+<div class="codehilite"><pre> *  *It&#39;s verbose.* You have to define a separate class with all of the
+    associated ceremonial verbiage for each data type. Note that in the
+    previous examples, we showed the entire definition of *all* of the value
+    types. Here, we only cover one!
+</pre></div>
+
+
+<p>*  <em>冗长。</em>您必须定义一个单独的类，包含了每个数据类型的相关行为。注意，在前面的例子中，整个定义定义了<em>所有</em>的类型。在这里，我们只覆盖了一个！</p>
+<div class="codehilite"><pre> *  *It&#39;s inefficient.* To get polymorphism, you have to go through a
+    pointer, which means even tiny values like Booleans and numbers get
+    wrapped in objects that are allocated on the heap. Every time you touch
+    a value, you have to do a virtual method call.
+</pre></div>
+
+
+<p>*  <em>低效。</em>为了多态，你必须使用指针，这意味着即使是短小的值，如布尔和数字，得裹在分配在堆中的对象里。你每使用一个值，你就得做一次虚方法调用。</p>
+<div class="codehilite"><pre>    In something like the core of a virtual machine, small performance hits
+    like this quickly add up. In fact, this suffers from many of the
+    problems that caused us to avoid the Interpreter pattern, except now the
+    problem is in our *values* instead of our *code*.
+</pre></div>
+
+
+<p>在虚拟机核心之类的地方，小的性能影响像这样迅速叠加。事实上，这引起了许多我们试图避免的解释器模式中的问题。除了现在的问题不在我们的<em>代码</em>中，而是在我们的<em>值</em>中。</p>
+<p>My recommendation is that if you can stick with a single data type, do that. Otherwise,
+do a tagged union. That&#8217;s what almost every language interpreter in the world
+does.</p>
+<p>我的建议是，如果你可以只用单一数据类型，那就这么做。除此以外，使用标记的union。这是世界上几乎每一个语言解释器做的事情。</p>
+<h3><a href="#how-is-the-bytecode-generated" name="how-is-the-bytecode-generated">How is the bytecode generated?</a></h3>
+<h3><a href="#如何生成字节码？" name="如何生成字节码？">如何生成字节码？</a></h3>
+<p>I saved the most important question for last. I&#8217;ve walked you through the code
+to <em>consume</em> and <em>interpret</em> bytecode, but it&#8217;s up to you to build something to
+<em>produce</em> it. The typical solution here is to write a compiler, but it&#8217;s not the
+only option.</p>
+<p>我将最重要的问题留到最后。我们已经完成了<em>消耗</em>和<em>解释</em>字节码的代码，但需要你写些<em>制造</em>字节码的工具。典型的解决方案是写一个编译器，但它不是唯一的选择。</p>
+<ul>
+<li><strong>If you define a text-based language:</strong></li>
+</ul>
+<p>*  <strong>如果你定义一个基于文本的语言：</strong></p>
+<div class="codehilite"><pre> *  *You have to define a syntax.* Both amateur and professional language
+    designers categorically underestimate how difficult this is to do.
+    Defining a grammar that makes parsers happy is easy. Defining one that
+    makes *users* happy is *hard*.
+</pre></div>
+
+
+<p>*  <em>你必须定义语法。</em>业余和专业的语言设计师小看这件困难的事情。让解析器快乐很简单，让<em>用户</em>快乐很<em>难</em>。</p>
+<div class="codehilite"><pre>    Syntax design is user interface design, and that process doesn&#39;t get
+    easier when you constrain the user interface to a string of characters.
+</pre></div>
+
+
+<p>语法设计是用户界面设计，当你将用户界面限制到字符构成的字符串，这可没把事情变简单。</p>
+<div class="codehilite"><pre> *  *You have to implement a parser.* Despite their reputation, this part is
+    pretty easy. Either use a parser generator like ANTLR or Bison, or --
+    like I do&amp;#8202;&amp;mdash;&amp;#8202;hand-roll a little recursive descent one, and you&#39;re good to
+    go.
+</pre></div>
+
+
+<p>*  <em>你必须实现解析器。</em>不管他们的名声，这部分其实非常的简单。无论是使用ANTLR或Bison，还是——像我做的那样——手写递归下降，都可以完成。</p>
+<div class="codehilite"><pre> *  *You have to handle syntax errors.* This is one of the most important
+    and most difficult parts of the process. When users make syntax and
+    semantic errors&amp;#8202;&amp;mdash;&amp;#8202;which they will, constantly&amp;#8202;&amp;mdash;&amp;#8202;it&#39;s your job to guide
+    them back onto the right path. Giving helpful feedback isn&#39;t easy when
+    all you know is that your parser is sitting on some unexpected
+    punctuation.
+</pre></div>
+
+
+<p>*  <em>您必须处理语法错误。</em>这是最重要和最困难的部分。当用户制造了语法和语义错误——他们总会这么干——这是你的任务引导他们返回到正确的道路。只知道解析器接到意外的符号，给予有用的的反馈并不容易。</p>
+<div class="codehilite"><pre> *  *It will likely turn off non-technical users.* We programmers like text
+    files. Combined with powerful command-line tools, we think of them as
+    the LEGO blocks of computing&amp;#8202;&amp;mdash;&amp;#8202;simple, but easily composable in a million
+    ways.
+</pre></div>
+
+
+<p>*  <em>它可能会对非技术用户关上大门。</em>我们程序员喜欢的文本文件。结合强大的命令行工具，我们把它们当作计算用的乐高积木——简单，易于用百万种方式组合</p>
+<div class="codehilite"><pre>    Most non-programmers don&#39;t think of plaintext like that. To them, text
+    files feel like filling in tax forms for an angry robotic auditor that yells at
+    them if they forget a single semicolon.
+</pre></div>
+
+
+<p>非程序员大部分不这样想文本。对他们来说，文本文件感觉就像为愤怒机器人审核员填写税表，如果他们忘记了一个分号就会痛斥他们。</p>
+<ul>
+<li><strong>If you define a graphical authoring tool:</strong></li>
+</ul>
+<p>* <strong>如果你定义了一个图形化创作工具：</strong></p>
+<div class="codehilite"><pre> *  *You have to implement a user interface.* Buttons, clicks, drags, stuff
+    like that. Some cringe at the idea of this, but I personally love it. If
+    you go down this route, it&#39;s important to treat designing the user
+    interface as a core part of doing your job well&amp;#8202;&amp;mdash;&amp;#8202;not just an
+    unpleasant task to be muddled through.
+</pre></div>
+
+
+<p>*  <em>您必须实现用户界面。</em>按钮，点击，拖动，诸如此类。有些人畏惧它，但我喜欢它。如果你沿着这条路走下去，设计用户界面和你的工作的核心部分同等重要——而不是一个硬着头皮完成的乱七八糟的工作。</p>
+<div class="codehilite"><pre>    Every little bit of extra work you do here will make your tool easier
+    and more pleasant to use, and that directly leads to better content in
+    your game. If you look behind many of the games you love, you&#39;ll often
+    find the secret was fun authoring tools.
+</pre></div>
+
+
+<p>每一点额外的工作都会让你的工具更容易更舒适的使用，并直接导致了你的游戏能有更好的内容。如果你看看很多你喜欢的游戏的内部，你经常会发现制作有趣的创造工具是秘诀之一。</p>
+<div class="codehilite"><pre> *  *You have fewer error cases.* Because the user is building behavior
+    interactively one step at a time, your application can guide them away
+    from mistakes as soon as they happen.
+</pre></div>
+
+
+<p>*  <em>您有较少的错误情况。</em>由于用户通过交换式一步一步地设计行为，你的应用程序尽快可以引导他们走出错误。</p>
+<div class="codehilite"><pre>    With a text-based language, the tool doesn&#39;t see *any* of the user&#39;s
+    content until they throw an entire file at it. That makes it harder to
+    prevent and handle errors.
+</pre></div>
+
+
+<p>使用基于文本的语言，该工具直到用户输入整个文件<em>才能</em>看到用户的内容。这使得它更难预防和处理错误。</p>
+<div class="codehilite"><pre> *  *Portability is harder.* The nice thing about text compilers is that
+    text files are <span class="nt">&lt;span</span> <span class="na">name=</span><span class="s">&quot;lines&quot;</span><span class="nt">&gt;</span>universal<span class="nt">&lt;/span&gt;</span>. A simple compiler
+    just reads in one file and writes one out. Porting that across operating
+    systems is trivial.
+
+ * *更难实现便携性。*文本编译器的好处是，文本文件是通用的。编译器简单的读入文件并写出。跨平台移植的工作实在微不足道。
+
+    <span class="nt">&lt;aside</span> <span class="na">markdown=</span><span class="s">&quot;1&quot;</span> <span class="na">name=</span><span class="s">&quot;lines&quot;</span><span class="nt">&gt;</span>
+
+    Except for line endings. And encodings.
+
+    <span class="nt">&lt;/aside&gt;</span>
+
+    When you&#39;re building a UI, you have to choose which framework to use,
+    and many of those are specific to one OS. There are cross-platform UI
+    toolkits too, but those often get ubiquity at the expense of
+    familiarity<span class="ni">&amp;#8202;&amp;mdash;&amp;#8202;</span>they feel equally foreign on all of platforms.
+</pre></div>
+
+
+<p>当你构建用户界面，你必须选择要使用的架构，其中很多是基于一个操作系统。也有跨平台的用户界面工具包，但他们往往会付出对所有平台适用的代价——他们对所有的平台上同样不适用。</p>
+<h2><a href="#see-also" name="see-also">See Also</a></h2>
+<h2><a href="#参见" name="参见">参见</a></h2>
+<ul>
+<li>
+<p>This pattern&#8217;s close sister is the Gang of Four&#8217;s <a
+    href="http://en.wikipedia.org/wiki/Interpreter_pattern"
+    class="gof-pattern">Interpreter</a> pattern. Both give you a way to express
+    composable behavior in terms of data.</p>
+</li>
+<li>
+<p>这一章节的近亲是GoF的<a href="http://en.wikipedia.org/wiki/Interpreter_pattern" class="gof-pattern">解释器模式</a>。两种方式都能让你用数据组合行为。</p>
+<p>In fact, you&#8217;ll often end up using <em>both</em> patterns. The tool you use to
+generate bytecode will have an internal tree of objects that represents the
+code. This is exactly what the Interpreter pattern expects.</p>
+</li>
+</ul>
+<p>事实上，最终你两种模式<em>都</em>会使用。你用来构造字节码的工具会有内部的对象树。这也是解释器模式所预料的。</p>
+<div class="codehilite"><pre>In order to compile that to bytecode, you&#39;ll recursively walk the tree, just
+like you do to interpret it with the Interpreter pattern. The *only*
+difference is that instead of executing a primitive piece of behavior
+immediately, you output the bytecode instruction to perform that later.
+
+为了编译到字节码，你需要递归回溯整棵树，就像你用解释器模式去解释它一样。*唯一的*不同在于不是立即的执行一段行为，你生成了整个字节码然后再去执行。
+</pre></div>
+
+
+<ul>
+<li>
+<p>The <a href="http://www.lua.org/">Lua</a> programming language is the most widely used
+    scripting language in games. It&#8217;s implemented internally as a very compact
+    register-based bytecode VM.</p>
+</li>
+<li>
+<p><a href="http://www.lua.org/">Lua</a>是游戏中最被广泛应用的脚本语言。它的内部被实现为一个非常紧凑的，基于寄存器的字节码虚拟机。</p>
+</li>
+<li>
+<p><a href="http://en.wikipedia.org/wiki/UnrealEd#Kismet">Kismet</a> is a graphical
+    scripting tool built into UnrealEd, the editor for the Unreal engine.</p>
+</li>
+<li>
+<p><a href="http://en.wikipedia.org/wiki/UnrealEd#Kismet">Kismet</a>是个可视化脚本编辑工具，应用于Unreal引擎的编辑器UnrealEd。</p>
+</li>
+<li>
+<p>My own little scripting language,
+    <a href="https://github.com/munificent/wren">Wren</a>, is a simple stack-based bytecode
+    interpreter.</p>
+</li>
+<li>
+<p>我的脚本语言<a href="https://github.com/munificent/wren">Wren</a>，是一个简单的，基于栈的字节码解释器。</p>
+</li>
+</ul>
+<nav>
+  <span class="prev">&larr; <a href="behavioral-patterns.html">Previous Chapter</a></span>
+  <span class="next"><a href="subclass-sandbox.html">Next Chapter</a> &rarr;</span>
+  <span class="toc">&equiv; <a href="/">The Book</a></span>
+</nav>
+</div>
+</div>
+<footer>&copy; 2009-2015 Robert Nystrom</footer>
+</body>
+</html>

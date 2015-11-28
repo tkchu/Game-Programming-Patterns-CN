@@ -1,0 +1,1020 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+<meta http-equiv="Content-type" content="text/html;charset=UTF-8" />
+
+<title>State &middot; Design Patterns Revisited &middot; Game Programming Patterns</title>
+
+<!-- Tell mobile browsers we're optimized for them and they don't need to crop
+     the viewport. -->
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<link rel="stylesheet" type="text/css" href="style.css" />
+<link href="http://fonts.googleapis.com/css?family=Merriweather:400,400italic,700,700italic|Source+Code+Pro|Source+Sans+Pro:200,300,400,600,400italic,600italic|Rock+Salt" rel="stylesheet" type="text/css">
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-42804721-1', 'gameprogrammingpatterns.com');
+  ga('send', 'pageview');
+</script>
+<script src="jquery-1.10.1.min.js"></script>
+<script src="script.js"></script>
+</head>
+<body id="top">
+<div class="page sidebar">
+<div class="content">
+<nav class="top">
+  <span class="prev">&larr; <a href="singleton.html">Previous Chapter</a></span>
+  <span class="next"><a href="sequencing-patterns.html">Next Chapter</a> &rarr;</span>
+  <span class="toc">&equiv; <a href="/">The Book</a></span>
+</nav>
+<h1>State</h1>
+<h1 class="book"><a href="/">Game Programming Patterns</a><span class="section"><a href="design-patterns-revisited.html">Design Patterns Revisited</a></span></h1>
+<p>Confession time: I went a little overboard and packed way too much into this
+chapter. It&#8217;s ostensibly about the <a
+href="http://en.wikipedia.org/wiki/State_pattern" class="gof-pattern">State</a>
+design pattern, but I can&#8217;t talk about that and games without going into the
+more fundamental concept of <em>finite state machines</em> (or &#8220;FSMs&#8221;). But then once I
+went there, I figured I might as well introduce <em>hierarchical state machines</em>
+and <em>pushdown automata</em>.</p>
+<p>忏悔时间：我有些越界将太多的东西打包到了这章中。表面上它是关于状态设计模式，但我无法仅仅只讨论它和游戏而不涉及更加基础的<em>有限状态机</em>（FSMs）。但是一旦我讲了那个，我发现我也想要介绍<em>层次状态机</em>和<em>下推自动机</em>。</p>
+<p>That&#8217;s a lot to cover, so to keep things as short as possible, the code samples
+here leave out a few details that you&#8217;ll have to fill in on your own. I hope
+they&#8217;re still clear enough for you to get the big picture.</p>
+<p>有很多要讲，我会尽可能简短，这里的示例代码留下了一些你需要自己填补 的细节。我希望他们仍然足够清晰的让你获取一份全图。</p>
+<p>Don&#8217;t feel sad if you&#8217;ve never heard of a state machine. While well known to
+<span name="two-camps">AI and compiler</span> hackers, they aren&#8217;t that familiar
+to other programming circles. I think they should be more widely known, so I&#8217;m
+going to throw them at a different kind of problem here.</p>
+<p>如果你从来没有听说过状态机，不要难过。虽然在AI和编译器程序员界很知名，在其他编程圈就没有那么知名了。我认为应该有更多人知道它，所以在这里我们将它运用在不同种的问题。</p>
+<aside name="two-camps">
+<p>This pairing echoes the early days of artificial intelligence. In the &rsquo;50s and
+&rsquo;60s, much of AI research was focused on language processing. Many of the
+techniques compilers now use for parsing programming languages were invented for
+parsing human languages.</p>
+</aside>
+<h2><a href="#we've-all-been-there" name="we've-all-been-there">We&#8217;ve All Been There</a></h2>
+<h2><a href="#我们都到了" name="我们都到了">我们都到了</a></h2>
+<p>We&#8217;re working on a little side-scrolling platformer. Our job is to implement the
+heroine that is the player&#8217;s avatar in the game world. That means making her
+respond to user input. Push the B button and she should jump. Simple enough:</p>
+<p>我们在完成一个卷轴平台游戏。我们的工作是实现玩家在游戏世界中操作的女英雄。这就意味着他需要对玩家的输入做出响应。按B键她应该跳跃。够简单了：</p>
+<div class="codehilite"><pre><span class="kt">void</span> <span class="n">Heroine</span><span class="o">::</span><span class="n">handleInput</span><span class="p">(</span><span class="n">Input</span> <span class="n">input</span><span class="p">)</span>
+<span class="p">{</span>
+  <span class="k">if</span> <span class="p">(</span><span class="n">input</span> <span class="o">==</span> <span class="n">PRESS_B</span><span class="p">)</span>
+  <span class="p">{</span>
+    <span class="n">yVelocity_</span> <span class="o">=</span> <span class="n">JUMP_VELOCITY</span><span class="p">;</span>
+    <span class="n">setGraphics</span><span class="p">(</span><span class="n">IMAGE_JUMP</span><span class="p">);</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+
+
+<p>Spot the bug?</p>
+<p>看到漏洞了吗？</p>
+<p>There&#8217;s nothing to prevent &#8220;air jumping&#8221;&#8202;&mdash;&#8202;keep hammering B while she&#8217;s in the
+air, and she will float forever. The simple <span name="landing">fix</span> is to
+add an <code>isJumping_</code> Boolean field to <code>Heroine</code> that tracks when she&#8217;s jumping,
+and then do:</p>
+<p>这个没有东西阻止“空气跳”——在她空中时狂按B，她就会浮空。简单的修复是增加一个<code>isJumping_</code>的布尔字段给<code>Heroine</code>以追踪它跳跃的状态。然后这样做：</p>
+<div class="codehilite"><pre><span class="kt">void</span> <span class="n">Heroine</span><span class="o">::</span><span class="n">handleInput</span><span class="p">(</span><span class="n">Input</span> <span class="n">input</span><span class="p">)</span>
+<span class="p">{</span>
+  <span class="k">if</span> <span class="p">(</span><span class="n">input</span> <span class="o">==</span> <span class="n">PRESS_B</span><span class="p">)</span>
+  <span class="p">{</span>
+    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">isJumping_</span><span class="p">)</span>
+    <span class="p">{</span>
+      <span class="n">isJumping_</span> <span class="o">=</span> <span class="nb">true</span><span class="p">;</span>
+      <span class="c1">// Jump...</span>
+    <span class="p">}</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+
+
+<aside name="landing">
+<p>There should also be code that sets <code>isJumping_</code> back to <code>false</code> when the
+heroine touches the ground. I&#8217;ve omitted that here for brevity&#8217;s sake.</p>
+</aside>
+<p>Next, we want the heroine to duck if the player presses down while she&#8217;s on the
+ground and stand back up when the button is released:</p>
+<p>下面，当玩家按下键时，我们想要她在地上时卧倒，而松开下键的时候站起来：</p>
+<div class="codehilite"><pre><span class="kt">void</span> <span class="n">Heroine</span><span class="o">::</span><span class="n">handleInput</span><span class="p">(</span><span class="n">Input</span> <span class="n">input</span><span class="p">)</span>
+<span class="p">{</span>
+  <span class="k">if</span> <span class="p">(</span><span class="n">input</span> <span class="o">==</span> <span class="n">PRESS_B</span><span class="p">)</span>
+  <span class="p">{</span>
+    <span class="c1">// Jump if not jumping...</span>
+  <span class="p">}</span>
+  <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">input</span> <span class="o">==</span> <span class="n">PRESS_DOWN</span><span class="p">)</span>
+  <span class="p">{</span>
+    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">isJumping_</span><span class="p">)</span>
+    <span class="p">{</span>
+      <span class="n">setGraphics</span><span class="p">(</span><span class="n">IMAGE_DUCK</span><span class="p">);</span>
+    <span class="p">}</span>
+  <span class="p">}</span>
+  <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">input</span> <span class="o">==</span> <span class="n">RELEASE_DOWN</span><span class="p">)</span>
+  <span class="p">{</span>
+    <span class="n">setGraphics</span><span class="p">(</span><span class="n">IMAGE_STAND</span><span class="p">);</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+
+
+<p>Spot the bug this time?</p>
+<p>这次看到了错误了吗？</p>
+<p>With this code, the player could:</p>
+<p>用这个代码，玩家可以：</p>
+<ol>
+<li>Press down to duck.</li>
+<li>Press B to jump from a ducking position.</li>
+<li>
+<p>Release down while still in the air.</p>
+</li>
+<li>
+<p>按下键卧倒。</p>
+</li>
+<li>按B从卧倒状态跳起。</li>
+<li>在空中放开下键。</li>
+</ol>
+<p>The heroine will switch to her standing graphic in the middle of the jump. Time
+for another flag&#8230;</p>
+<p>英雄会在跳跃的半路上变成站立图片。增加另一个标识的时候到了……</p>
+<div class="codehilite"><pre><span class="kt">void</span> <span class="n">Heroine</span><span class="o">::</span><span class="n">handleInput</span><span class="p">(</span><span class="n">Input</span> <span class="n">input</span><span class="p">)</span>
+<span class="p">{</span>
+  <span class="k">if</span> <span class="p">(</span><span class="n">input</span> <span class="o">==</span> <span class="n">PRESS_B</span><span class="p">)</span>
+  <span class="p">{</span>
+    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">isJumping_</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="n">isDucking_</span><span class="p">)</span>
+    <span class="p">{</span>
+      <span class="c1">// Jump...</span>
+    <span class="p">}</span>
+  <span class="p">}</span>
+  <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">input</span> <span class="o">==</span> <span class="n">PRESS_DOWN</span><span class="p">)</span>
+  <span class="p">{</span>
+    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">isJumping_</span><span class="p">)</span>
+    <span class="p">{</span>
+      <span class="n">isDucking_</span> <span class="o">=</span> <span class="nb">true</span><span class="p">;</span>
+      <span class="n">setGraphics</span><span class="p">(</span><span class="n">IMAGE_DUCK</span><span class="p">);</span>
+    <span class="p">}</span>
+  <span class="p">}</span>
+  <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">input</span> <span class="o">==</span> <span class="n">RELEASE_DOWN</span><span class="p">)</span>
+  <span class="p">{</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">isDucking_</span><span class="p">)</span>
+    <span class="p">{</span>
+      <span class="n">isDucking_</span> <span class="o">=</span> <span class="nb">false</span><span class="p">;</span>
+      <span class="n">setGraphics</span><span class="p">(</span><span class="n">IMAGE_STAND</span><span class="p">);</span>
+    <span class="p">}</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+
+
+<p>Next, it would be cool if the heroine did a dive attack if the player presses
+down in the middle of a jump:</p>
+<p>下面，如果玩家在跳跃途中按下下键，英雄能够做一个速降攻击就太酷了：</p>
+<div class="codehilite"><pre><span class="kt">void</span> <span class="n">Heroine</span><span class="o">::</span><span class="n">handleInput</span><span class="p">(</span><span class="n">Input</span> <span class="n">input</span><span class="p">)</span>
+<span class="p">{</span>
+  <span class="k">if</span> <span class="p">(</span><span class="n">input</span> <span class="o">==</span> <span class="n">PRESS_B</span><span class="p">)</span>
+  <span class="p">{</span>
+    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">isJumping_</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="n">isDucking_</span><span class="p">)</span>
+    <span class="p">{</span>
+      <span class="c1">// Jump...</span>
+    <span class="p">}</span>
+  <span class="p">}</span>
+  <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">input</span> <span class="o">==</span> <span class="n">PRESS_DOWN</span><span class="p">)</span>
+  <span class="p">{</span>
+    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">isJumping_</span><span class="p">)</span>
+    <span class="p">{</span>
+      <span class="n">isDucking_</span> <span class="o">=</span> <span class="nb">true</span><span class="p">;</span>
+      <span class="n">setGraphics</span><span class="p">(</span><span class="n">IMAGE_DUCK</span><span class="p">);</span>
+    <span class="p">}</span>
+    <span class="k">else</span>
+    <span class="p">{</span>
+      <span class="n">isJumping_</span> <span class="o">=</span> <span class="nb">false</span><span class="p">;</span>
+      <span class="n">setGraphics</span><span class="p">(</span><span class="n">IMAGE_DIVE</span><span class="p">);</span>
+    <span class="p">}</span>
+  <span class="p">}</span>
+  <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">input</span> <span class="o">==</span> <span class="n">RELEASE_DOWN</span><span class="p">)</span>
+  <span class="p">{</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">isDucking_</span><span class="p">)</span>
+    <span class="p">{</span>
+      <span class="c1">// Stand...</span>
+    <span class="p">}</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+
+
+<p>Bug hunting time again. Find it?</p>
+<p>又是查找漏洞的时候了。找到了吗？</p>
+<p>We check that you can&#8217;t air jump while jumping, but not while diving. Yet
+another field&#8230;</p>
+<p>我们检查了跳跃时不能做空气跳，但是速降时没有。又是另一个字段……</p>
+<p>Something is clearly <span name="se">wrong</span> with our approach. Every time
+we touch this handful of code, we break something. We need to add a bunch more
+moves&#8202;&mdash;&#8202;we haven&#8217;t even added <em>walking</em> yet&#8202;&mdash;&#8202;but at this rate, it will
+collapse into a heap of bugs before we&#8217;re done with it.</p>
+<p>我们的实现方法有很明显的错误。每一次我们改变这些代码时，我们就破坏了什么东西。我们需要增加更多的动作——我们甚至还没有增加<em>走路</em>呢——但是以这种速度，在我们完成之前就会遇到一堆错误。</p>
+<aside name="se">
+<p>Those coders you idolize who always seem to create flawless code aren&#8217;t simply
+superhuman programmers. Instead, they have an intuition about which <em>kinds</em> of
+code are error-prone, and they steer away from them.</p>
+<p>Complex branching and mutable state&#8202;&mdash;&#8202;fields that change over time&#8202;&mdash;&#8202;are two
+of those error-prone kinds of code, and the examples above have both.</p>
+</aside>
+<h2><a href="#finite-state-machines-to-the-rescue" name="finite-state-machines-to-the-rescue">Finite State Machines to the Rescue</a></h2>
+<h2><a href="#有限状态机前来救援" name="有限状态机前来救援">有限状态机前来救援</a></h2>
+<p>In a fit of frustration, you sweep everything off your desk except a pen and
+paper and start drawing a flowchart. You draw a box for each thing the heroine
+can be doing: standing, jumping, ducking, and diving. When she can respond to a
+button press in one of those states, you draw an arrow from that box, label it
+with that button, and connect it to the state she changes to.</p>
+<p>在挫败之后，你把桌子一扫而空，只留下纸笔开始画流程图。你给英雄每一个能做的事情都画了一个盒子：站立，跳跃，俯卧，速降。当她能够回应在这些状态之一时，你从那个盒子画出一个箭头，标记上按钮，然后连接到她改变的状态。</p>
+<p><img src="images/state-flowchart.png" alt="A flowchart containing boxes for Standing, Jumping, Diving, and Ducking. Arrows for button presses and releases connect some of the boxes." /></p>
+<p>Congratulations, you&#8217;ve just created a <em>finite state machine</em>. These came out of
+a branch of computer science called <em>automata theory</em> whose family of data
+structures also includes the famous Turing machine. FSMs are the simplest member
+of that family.</p>
+<p>祝贺，你刚刚建好了一个<em>有限状态机</em>。它来自计算机科学的一个分支“自动理论”，那里有很多著名的数据结构，包括著名的图灵机。FSMs是其中最简单的成员。</p>
+<p>The <span name="adventure">gist</span> is:</p>
+<p>要点是：</p>
+<ul>
+<li>
+<p><strong>You have a fixed <em>set of states</em> that the machine can be in.</strong> For our
+    example, that&#8217;s standing, jumping, ducking, and diving.</p>
+</li>
+<li>
+<p><strong>你有机器可以处于的固定数量的<em>状态</em>集合。</strong>在我们的例子中，是站立，跳跃，俯卧和速降。</p>
+</li>
+<li>
+<p><strong>The machine can only be in <em>one</em> state at a time.</strong> Our heroine can&#8217;t be
+    jumping and standing simultaneously. In fact, preventing that is one reason
+    we&#8217;re going to use an FSM.</p>
+</li>
+<li>
+<p><strong>机器同时只能在<em>一个</em>状态。</strong>我们的英雄不可能同时初一跳跃和站立。事实上，防止这一点是我们的使用FSM的理由之一。</p>
+</li>
+<li>
+<p><strong>A sequence of <em>inputs</em> or <em>events</em> is sent to the machine.</strong> In our example,
+    that&#8217;s the raw button presses and releases.</p>
+</li>
+<li>
+<p><strong>一连串的<em>输入</em>或<em>事件</em>被发送给机器。</strong>在我们的例子中，就是按键按下和松开。</p>
+</li>
+<li>
+<p><strong>Each state has a <em>set of transitions</em>, each associated with an input and
+    pointing to a state.</strong> When an input comes in, if it matches a transition for
+    the current state, the machine changes to the state that transition points
+    to.</p>
+</li>
+<li>
+<p><strong>每一个状态都有<em>一系列的转换</em>，而且与一个输入和另一个状态相关。</strong>当一个输入进来，如果它与当前状态的某一个转换匹配，机器转为转换所指的状态。</p>
+<p>For example, pressing down while standing transitions to the ducking state. Pressing down while jumping transitions to diving. If no transition is defined for an input on the current state, the input is ignored.</p>
+<p>举个例子，在站立状态时，按下下键转换为俯卧状态。在跳跃时按下下键转换为速降。如果输入在当前状态没有定义转换，输入就被合适。</p>
+</li>
+</ul>
+<p>In their pure form, that&#8217;s the whole banana: states, inputs, and transitions.
+You can draw it out like a little flowchart. Unfortunately, the compiler doesn&#8217;t
+recognize our scribbles, so how do we go about <em>implementing</em> one? The Gang of
+Four&#8217;s State pattern is one method&#8202;&mdash;&#8202;which we&#8217;ll get to&#8202;&mdash;&#8202;but let&#8217;s start simpler.</p>
+<p>在他们的核心形式，这就是全部了：状态，输入，和转换。你可以用一张流程图把它画出来。不幸的是，编译器不认我们画出的，所以我们如何<em>实现</em>一个？GoF的状态模式是一个方法——我们会谈到的——但先从简单的开始。</p>
+<aside name="adventure">
+<p>My favorite analogy for FSMs is the old text adventure games like Zork. You have
+a world of rooms that are connected to each other by exits. You explore them by
+entering commands like &#8220;go north&#8221;.</p>
+<p>This maps directly to a state machine: Each room is a state. The room you&#8217;re in
+is the current state. Each room&#8217;s exits are its transitions. The navigation
+commands are the inputs.</p>
+</aside>
+<h2><a href="#enums-and-switches" name="enums-and-switches">Enums and Switches</a></h2>
+<h2><a href="#枚举和分支" name="枚举和分支">枚举和分支</a></h2>
+<p>One problem our <code>Heroine</code> class has is some combinations of those Boolean fields
+aren&#8217;t valid: <code>isJumping_</code> and <code>isDucking_</code> should never both be true, for
+example. When you have a handful of flags where only one is <code>true</code> at a time,
+that&#8217;s a hint that what you really want is an <code>enum</code>.</p>
+<p>我们<code>Heroine</code>累的问题来自将一些不独立的布尔字段绑在了一起：<code>isJumping_</code>和<code>isDucking_</code>，比如不会同时为真。但你有一些标识同时只有一个是·true·，有个小技巧是你真正需要的其实是<code>enum</code>。 </p>
+<p>In this case, that <code>enum</code> is exactly the set of states for our FSM, so let&#8217;s
+define that:</p>
+<p>在这个例子中 <code>enum</code>就是FSM的状态集合，所以让我们定义它：</p>
+<div class="codehilite"><pre><span class="k">enum</span> <span class="n">State</span>
+<span class="p">{</span>
+  <span class="n">STATE_STANDING</span><span class="p">,</span>
+  <span class="n">STATE_JUMPING</span><span class="p">,</span>
+  <span class="n">STATE_DUCKING</span><span class="p">,</span>
+  <span class="n">STATE_DIVING</span>
+<span class="p">};</span>
+</pre></div>
+
+
+<p>Instead of a bunch of flags, <code>Heroine</code> will just have one <code>state_</code> field. We
+also flip the order of our branching. In the previous code, we switched on
+input, <em>then</em> on state. This kept the code for handling one button press
+together, but it smeared around the code for one state. We want to keep that
+together, so we switch on state first. That gives us:</p>
+<p>不是用一堆标识，<code>Heroine</code>只有一个<code>state_</code>状态。我们同样改变了我们的分支顺序。在前面的代码中，我们先在输入上做分支，<em>然后</em>是状态。这让代码同一处理某个按键，但一个状态分布到了代码各处。我们想让它们聚在一起，所以我们先对状态做分支。这样的话：</p>
+<div class="codehilite"><pre><span class="kt">void</span> <span class="n">Heroine</span><span class="o">::</span><span class="n">handleInput</span><span class="p">(</span><span class="n">Input</span> <span class="n">input</span><span class="p">)</span>
+<span class="p">{</span>
+  <span class="k">switch</span> <span class="p">(</span><span class="n">state_</span><span class="p">)</span>
+  <span class="p">{</span>
+    <span class="k">case</span> <span class="nl">STATE_STANDING</span><span class="p">:</span>
+      <span class="k">if</span> <span class="p">(</span><span class="n">input</span> <span class="o">==</span> <span class="n">PRESS_B</span><span class="p">)</span>
+      <span class="p">{</span>
+        <span class="n">state_</span> <span class="o">=</span> <span class="n">STATE_JUMPING</span><span class="p">;</span>
+        <span class="n">yVelocity_</span> <span class="o">=</span> <span class="n">JUMP_VELOCITY</span><span class="p">;</span>
+        <span class="n">setGraphics</span><span class="p">(</span><span class="n">IMAGE_JUMP</span><span class="p">);</span>
+      <span class="p">}</span>
+      <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">input</span> <span class="o">==</span> <span class="n">PRESS_DOWN</span><span class="p">)</span>
+      <span class="p">{</span>
+        <span class="n">state_</span> <span class="o">=</span> <span class="n">STATE_DUCKING</span><span class="p">;</span>
+        <span class="n">setGraphics</span><span class="p">(</span><span class="n">IMAGE_DUCK</span><span class="p">);</span>
+      <span class="p">}</span>
+      <span class="k">break</span><span class="p">;</span>
+
+    <span class="k">case</span> <span class="nl">STATE_JUMPING</span><span class="p">:</span>
+      <span class="k">if</span> <span class="p">(</span><span class="n">input</span> <span class="o">==</span> <span class="n">PRESS_DOWN</span><span class="p">)</span>
+      <span class="p">{</span>
+        <span class="n">state_</span> <span class="o">=</span> <span class="n">STATE_DIVING</span><span class="p">;</span>
+        <span class="n">setGraphics</span><span class="p">(</span><span class="n">IMAGE_DIVE</span><span class="p">);</span>
+      <span class="p">}</span>
+      <span class="k">break</span><span class="p">;</span>
+
+    <span class="k">case</span> <span class="nl">STATE_DUCKING</span><span class="p">:</span>
+      <span class="k">if</span> <span class="p">(</span><span class="n">input</span> <span class="o">==</span> <span class="n">RELEASE_DOWN</span><span class="p">)</span>
+      <span class="p">{</span>
+        <span class="n">state_</span> <span class="o">=</span> <span class="n">STATE_STANDING</span><span class="p">;</span>
+        <span class="n">setGraphics</span><span class="p">(</span><span class="n">IMAGE_STAND</span><span class="p">);</span>
+      <span class="p">}</span>
+      <span class="k">break</span><span class="p">;</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+
+
+<p>This seems trivial, but it&#8217;s a real improvement over the previous code. We still
+have some conditional branching, but we simplified the <span
+name="invalid">mutable</span> state to a single field. All of the code for
+handling a single state is now nicely lumped together. This is the simplest way
+to implement a state machine and is fine for some uses.</p>
+<p>这看起来很琐碎，但是比起前面的代码是一个很大的进步了。我们仍然有一些条件分支，但是我们简化了变化的状态成一个字段。所有的处理同一个状态的代码都聚到了一起。这是实现状态机最简单的方法，对于某些使用情况也不错。</p>
+<aside name="invalid">
+<p>In particular, the heroine can no longer be in an <em>invalid</em> state. With the
+Boolean flags, some sets of values were possible but meaningless. With the <code>enum</code>,
+each value is valid.</p>
+</aside>
+<p>Your problem may outgrow this solution, though. Say we want to add a move where
+our heroine can duck for a while to charge up and unleash a special attack.
+While she&#8217;s ducking, we need to track the charge time.</p>
+<p>但是，你的问题也许超过了这个解法的控制。假设我们想增加一个动作，当我们的英雄可以速降一段时间来充能，之后释放一次特殊攻击。当她速降时，我们需要追踪它的充能时间。</p>
+<p>We add a <code>chargeTime_</code> field to <code>Heroine</code> to store how long the attack has
+charged. Assume we already have an <span name="update"><code>update()</code></span> that
+gets called each frame. In there, we add:</p>
+<p>我们为<code>Heroine</code>添加了<code>chargeTime_</code>字段来保存攻击被充能的时间。假设我们已经有一个<code>update()</code>方法每帧都会调用。在那里，我们添加：</p>
+<div class="codehilite"><pre><span class="kt">void</span> <span class="n">Heroine</span><span class="o">::</span><span class="n">update</span><span class="p">()</span>
+<span class="p">{</span>
+  <span class="k">if</span> <span class="p">(</span><span class="n">state_</span> <span class="o">==</span> <span class="n">STATE_DUCKING</span><span class="p">)</span>
+  <span class="p">{</span>
+    <span class="n">chargeTime_</span><span class="o">++</span><span class="p">;</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">chargeTime_</span> <span class="o">&gt;</span> <span class="n">MAX_CHARGE</span><span class="p">)</span>
+    <span class="p">{</span>
+      <span class="n">superBomb</span><span class="p">();</span>
+    <span class="p">}</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+
+
+<aside name="update">
+<p>If you guessed that this is the <a href="update-method.html"
+class="pattern">Update Method</a> pattern, you win a prize!</p>
+</aside>
+<p>We need to reset the timer when she starts ducking, so we modify
+<code>handleInput()</code>:</p>
+<p>我们需要在她开始速降的时候重置计时器，所以我们修改<code>handleInput()</code>：</p>
+<div class="codehilite"><pre><span class="kt">void</span> <span class="n">Heroine</span><span class="o">::</span><span class="n">handleInput</span><span class="p">(</span><span class="n">Input</span> <span class="n">input</span><span class="p">)</span>
+<span class="p">{</span>
+  <span class="k">switch</span> <span class="p">(</span><span class="n">state_</span><span class="p">)</span>
+  <span class="p">{</span>
+    <span class="k">case</span> <span class="nl">STATE_STANDING</span><span class="p">:</span>
+      <span class="k">if</span> <span class="p">(</span><span class="n">input</span> <span class="o">==</span> <span class="n">PRESS_DOWN</span><span class="p">)</span>
+      <span class="p">{</span>
+        <span class="n">state_</span> <span class="o">=</span> <span class="n">STATE_DUCKING</span><span class="p">;</span>
+        <span class="n">chargeTime_</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+        <span class="n">setGraphics</span><span class="p">(</span><span class="n">IMAGE_DUCK</span><span class="p">);</span>
+      <span class="p">}</span>
+      <span class="c1">// Handle other inputs...</span>
+      <span class="k">break</span><span class="p">;</span>
+
+      <span class="c1">// Other states...</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+
+
+<p>All in all, to add this charge attack, we had to modify two methods and add a
+<code>chargeTime_</code> field onto <code>Heroine</code> even though it&#8217;s only meaningful while in
+the ducking state. What we&#8217;d prefer is to have all of that code and data nicely
+wrapped up in one place. The Gang of Four has us covered.</p>
+<p>总而言之，为了增加这个充能攻击，我们需要修改两个方法，添加一个<code>chargeTime_</code>字段到<code>Heroine</code>，哪怕它只在速降时有意义。我们更喜欢的是让所有的代码和数据都待在同一个地方。GoF完成了这个。</p>
+<h2><a href="#the-state-pattern" name="the-state-pattern">The State Pattern</a></h2>
+<h2><a href="#状态模式" name="状态模式">状态模式</a></h2>
+<p>For people deeply into the object-oriented mindset, every conditional <span
+name="branch">branch</span> is an opportunity to use dynamic dispatch (in other
+words a virtual method call in C++). I think you can go too far down that
+rabbit hole. Sometimes an <code>if</code> is all you need.</p>
+<p>对于那些深深沉浸在面向对象思维方式的人，每一个分支都是使用动态分配（在C++中被叫做虚方法调用）。我觉得那就在兔子洞里挖得太深了。有时候一个<code>if</code>就能满足你的需要了。</p>
+<aside name="branch">
+<p>There&#8217;s a historical basis for this. Many of the original object-oriented
+apostles like <em>Design Patterns</em>&#8216; Gang of Four, and <em>Refactoring</em>&#8216;s Martin Fowler
+came from Smalltalk. There, <code>ifThen:</code> is just a method you invoke on the
+condition, which is implemented differently by the <code>true</code> and <code>false</code> objects.</p>
+</aside>
+<p>But in our example, we&#8217;ve reached a tipping point where something
+object-oriented is a better fit. That gets us to the State pattern. In the words
+of the Gang of Four:</p>
+<p>但是在我们的例子中，我们抵达了面向对象是更好的方式的转折点。这带领我们走向状态模式。在GoF中这样描述：</p>
+<blockquote>
+<p>Allow an object to alter its behavior when its internal state changes. The object will appear to change its class.</p>
+<p>允许一个对象当他的内部状态改变时改变其行为。对象好像改变了类一样。</p>
+</blockquote>
+<p>That doesn&#8217;t tell us much. Heck, our <code>switch</code> does that. The concrete pattern
+they describe looks like this when applied to our heroine:</p>
+<p>这可没太多帮助。我们的<code>switch</code>也完成了这一点。他们描述的东西应用在我们的英雄身上是这样的：</p>
+<h3><a href="#a-state-interface" name="a-state-interface">A state interface</a></h3>
+<h3><a href="#一个状态接口" name="一个状态接口">一个状态接口</a></h3>
+<p>First, we define an interface for the state. Every bit of behavior that is
+state-dependent&#8202;&mdash;&#8202;every place we had a <code>switch</code> before&#8202;&mdash;&#8202;becomes a virtual
+method in that interface. For us, that&#8217;s <code>handleInput()</code> and <code>update()</code>:</p>
+<p>首先，我们为状态定义一个接口。状态相关的行为——我们之前用<code>switch</code>的每一处——成为了接口中的一个虚方法。对于我们来说，那是<code>handleInput()</code>和<code>update()</code>：</p>
+<div class="codehilite"><pre><span class="k">class</span> <span class="nc">HeroineState</span>
+<span class="p">{</span>
+<span class="k">public</span><span class="o">:</span>
+  <span class="k">virtual</span> <span class="o">~</span><span class="n">HeroineState</span><span class="p">()</span> <span class="p">{}</span>
+  <span class="k">virtual</span> <span class="kt">void</span> <span class="n">handleInput</span><span class="p">(</span><span class="n">Heroine</span><span class="o">&amp;</span> <span class="n">heroine</span><span class="p">,</span> <span class="n">Input</span> <span class="n">input</span><span class="p">)</span> <span class="p">{}</span>
+  <span class="k">virtual</span> <span class="kt">void</span> <span class="n">update</span><span class="p">(</span><span class="n">Heroine</span><span class="o">&amp;</span> <span class="n">heroine</span><span class="p">)</span> <span class="p">{}</span>
+<span class="p">};</span>
+</pre></div>
+
+
+<h3><a href="#classes-for-each-state" name="classes-for-each-state">Classes for each state</a></h3>
+<h3><a href="#为每个状态写类" name="为每个状态写类">为每个状态写类</a></h3>
+<p>For each state, we define a class that implements the interface. Its methods
+define the heroine&#8217;s behavior when in that state. In other words, take each <code>case</code>
+from the earlier <code>switch</code> statements and move them into their state&#8217;s class. For example:</p>
+<p>对于每一个状态，我们定义一个类实现了接口。它的方法定义了英雄在那个状态的行为。换言之，取出之前的<code>switch</code>中每一个<code>case</code>然后将他们移动到状态类中。举个例子：</p>
+<div class="codehilite"><pre><span class="k">class</span> <span class="nc">DuckingState</span> <span class="o">:</span> <span class="k">public</span> <span class="n">HeroineState</span>
+<span class="p">{</span>
+<span class="k">public</span><span class="o">:</span>
+  <span class="n">DuckingState</span><span class="p">()</span>
+  <span class="o">:</span> <span class="n">chargeTime_</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+  <span class="p">{}</span>
+
+  <span class="k">virtual</span> <span class="kt">void</span> <span class="n">handleInput</span><span class="p">(</span><span class="n">Heroine</span><span class="o">&amp;</span> <span class="n">heroine</span><span class="p">,</span> <span class="n">Input</span> <span class="n">input</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">input</span> <span class="o">==</span> <span class="n">RELEASE_DOWN</span><span class="p">)</span>
+    <span class="p">{</span>
+      <span class="c1">// Change to standing state...</span>
+      <span class="n">heroine</span><span class="p">.</span><span class="n">setGraphics</span><span class="p">(</span><span class="n">IMAGE_STAND</span><span class="p">);</span>
+    <span class="p">}</span>
+  <span class="p">}</span>
+
+  <span class="k">virtual</span> <span class="kt">void</span> <span class="n">update</span><span class="p">(</span><span class="n">Heroine</span><span class="o">&amp;</span> <span class="n">heroine</span><span class="p">)</span> <span class="p">{</span>
+    <span class="n">chargeTime_</span><span class="o">++</span><span class="p">;</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">chargeTime_</span> <span class="o">&gt;</span> <span class="n">MAX_CHARGE</span><span class="p">)</span>
+    <span class="p">{</span>
+      <span class="n">heroine</span><span class="p">.</span><span class="n">superBomb</span><span class="p">();</span>
+    <span class="p">}</span>
+  <span class="p">}</span>
+
+<span class="k">private</span><span class="o">:</span>
+  <span class="kt">int</span> <span class="n">chargeTime_</span><span class="p">;</span>
+<span class="p">};</span>
+</pre></div>
+
+
+<p>Note that we also moved <code>chargeTime_</code> out of <code>Heroine</code> and into the <code>DuckingState</code>
+class. This is great&#8202;&mdash;&#8202;that piece of data is only meaningful while in that state,
+and now our object model reflects that explicitly.</p>
+<p>注意我们也将<code>chargeTime_</code>移出了<code>Heroine</code>然后放到了<code>DuckingState</code>类中。这很好——那部分数据只在这个状态有用，现在我们的对象模型直接反射了这一点。</p>
+<h3><a href="#delegate-to-the-state" name="delegate-to-the-state">Delegate to the state</a></h3>
+<h3><a href="#状态委托" name="状态委托">状态委托</a></h3>
+<p>Next, we give the <code>Heroine</code> a pointer to her current state, lose each big <code>switch</code>, and delegate to the state instead:</p>
+<p>然后，我们给<code>Heroine</code>一个指针指向她的当前状态，放弃巨大的<code>switch</code>，转而委托给状态。</p>
+<p><span name="delegate"></span></p>
+<div class="codehilite"><pre><span class="k">class</span> <span class="nc">Heroine</span>
+<span class="p">{</span>
+<span class="k">public</span><span class="o">:</span>
+  <span class="k">virtual</span> <span class="kt">void</span> <span class="n">handleInput</span><span class="p">(</span><span class="n">Input</span> <span class="n">input</span><span class="p">)</span>
+  <span class="p">{</span>
+    <span class="n">state_</span><span class="o">-&gt;</span><span class="n">handleInput</span><span class="p">(</span><span class="o">*</span><span class="k">this</span><span class="p">,</span> <span class="n">input</span><span class="p">);</span>
+  <span class="p">}</span>
+
+  <span class="k">virtual</span> <span class="kt">void</span> <span class="n">update</span><span class="p">()</span>
+  <span class="p">{</span>
+    <span class="n">state_</span><span class="o">-&gt;</span><span class="n">update</span><span class="p">(</span><span class="o">*</span><span class="k">this</span><span class="p">);</span>
+  <span class="p">}</span>
+
+  <span class="c1">// Other methods...</span>
+<span class="k">private</span><span class="o">:</span>
+  <span class="n">HeroineState</span><span class="o">*</span> <span class="n">state_</span><span class="p">;</span>
+<span class="p">};</span>
+</pre></div>
+
+
+<p>In order to &#8220;change state&#8221;, we just need to assign <code>state_</code> to point to a
+different <code>HeroineState</code> object. That&#8217;s the State pattern in its entirety.</p>
+<aside name="delegate">
+<p>This looks like the <a href="http://en.wikipedia.org/wiki/Strategy_pattern"
+class="gof-pattern">Strategy</a> and <a href="type-object.html"
+class="pattern">Type Object</a> patterns. In all three, you have a main object
+that delegates to another subordinate one. The difference is <em>intent</em>.</p>
+<p>这看上去有些像策略模式和类型对象模式。在三者中，你都有一个主要对象委托给下属。区别在于<em>意图</em>。</p>
+<ul>
+<li>
+<p>With Strategy, the goal is to <em>decouple</em> the main class from some portion of
+    its behavior.</p>
+</li>
+<li>
+<p>With Type Object, the goal is to make a <em>number</em> of objects behave similarly
+    by <em>sharing</em> a reference to the same type object.</p>
+</li>
+<li>
+<p>With State, the goal is for the main object to <em>change</em> its behavior by
+    <em>changing</em> the object it delegates to.</p>
+</li>
+</ul>
+</aside>
+<h2><a href="#where-are-the-state-objects" name="where-are-the-state-objects">Where Are the State Objects?</a></h2>
+<h2><a href="#状态对象在哪里？" name="状态对象在哪里？">状态对象在哪里？</a></h2>
+<p>I did gloss over one bit here. To change states, we need to assign <code>state_</code> to
+point to the new one, but where does that object come from? With our <code>enum</code>
+implementation, that was a no-brainer&#8202;&mdash;&#8202;<code>enum</code> values are primitives like
+numbers. But now our states are classes, which means we need an actual instance
+to point to. There are two common answers to this:</p>
+<p>我这里掩盖了一点。为了改变状态，我们需要声明<code>state_</code>指向新的，但是那个对象从哪里来呢？通过我们的<code>enum</code>实现，这都不用过脑子——<code>enum</code>实际上就像数字一样。但是现在状态时类了，意味着我们需要指向实例。通常这有两种回答：</p>
+<h3><a href="#static-states" name="static-states">Static states</a></h3>
+<h3><a href="#静态状态" name="静态状态">静态状态</a></h3>
+<p>If the state object doesn&#8217;t have any other <span name="fn">fields</span>, then
+the only data it stores is a pointer to the internal virtual method table so
+that its methods can be called. In that case, there&#8217;s no reason to ever have
+more than one instance of it. Every instance would be identical anyway.</p>
+<p>如果状态对象没有其他字段，那么它存储的多有数据就是一个指针指向虚方法表，这样他的方法可以被调用。在这种情况下，没理由产生超过一个实例。毕竟每一个实例都完全一样。</p>
+<aside name="fn">
+<p>If your state has no fields and only <em>one</em> virtual method in it, you can
+simplify this pattern even more. Replace each state <em>class</em> with a state
+<em>function</em>&#8202;&mdash;&#8202;just a plain vanilla top-level function. Then, the <code>state_</code> field
+in your main class becomes a simple function pointer.</p>
+</aside>
+<p>In that case, you can make a single <em>static</em> instance. Even if you have a
+bunch of FSMs all going at the same time in that same state, they can all point
+to the <span name="flyweight">same instance</span> since it has nothing
+machine-specific about it.</p>
+<p>在那种情况下，你可以制造一个<em>静态</em>实例。哪怕你有一堆FSM在同时在同一状态上运行，他们都能接触到同样的实例，因为没有机器特定的部分。</p>
+<aside name="flyweight">
+<p>This is the <a href="flyweight.html" class="gof-pattern">Flyweight</a> pattern.</p>
+</aside>
+<p><em>Where</em> you put that static instance is up to you. Find a place that makes
+sense. For no particular reason, let&#8217;s put ours inside the base state class:</p>
+<p>你在*那里放置静态实例取决于你。找一个合理的地方。没有特殊的原因，把我们的放在状态基类中。</p>
+<div class="codehilite"><pre><span class="k">class</span> <span class="nc">HeroineState</span>
+<span class="p">{</span>
+<span class="k">public</span><span class="o">:</span>
+  <span class="k">static</span> <span class="n">StandingState</span> <span class="n">standing</span><span class="p">;</span>
+  <span class="k">static</span> <span class="n">DuckingState</span> <span class="n">ducking</span><span class="p">;</span>
+  <span class="k">static</span> <span class="n">JumpingState</span> <span class="n">jumping</span><span class="p">;</span>
+  <span class="k">static</span> <span class="n">DivingState</span> <span class="n">diving</span><span class="p">;</span>
+
+  <span class="c1">// Other code...</span>
+<span class="p">};</span>
+</pre></div>
+
+
+<p>Each of those static fields is the one instance of that state that the game
+uses. To make the heroine jump, the standing state would do something like:</p>
+<p>每一个静态字段都是游戏使用的状态的一个实例。为了让英雄跳跃，站立状态会做些这样的事情：</p>
+<div class="codehilite"><pre><span class="k">if</span> <span class="p">(</span><span class="n">input</span> <span class="o">==</span> <span class="n">PRESS_B</span><span class="p">)</span>
+<span class="p">{</span>
+  <span class="n">heroine</span><span class="p">.</span><span class="n">state_</span> <span class="o">=</span> <span class="o">&amp;</span><span class="n">HeroineState</span><span class="o">::</span><span class="n">jumping</span><span class="p">;</span>
+  <span class="n">heroine</span><span class="p">.</span><span class="n">setGraphics</span><span class="p">(</span><span class="n">IMAGE_JUMP</span><span class="p">);</span>
+<span class="p">}</span>
+</pre></div>
+
+
+<h3><a href="#instantiated-states" name="instantiated-states">Instantiated states</a></h3>
+<h3><a href="#实例化状态" name="实例化状态">实例化状态</a></h3>
+<p>Sometimes, though, this doesn&#8217;t fly. A static state won&#8217;t work for the ducking
+state. It has a <code>chargeTime_</code> field, and that&#8217;s specific to the heroine that
+happens to be ducking. This may coincidentally work in our game if there&#8217;s only
+one heroine, but if we try to add two-player co-op and have two heroines on
+screen at the same time, we&#8217;ll have problems.</p>
+<p>有时，没那么容易。一个静态状态对俯卧不起作用。他有一个<code>chargeTime_</code>字段，与那个正在俯卧的英雄特定相关。在我们的游戏中如果只有一个英雄也能工作，但是如果我们要添加双人合作并同时在平面上要有两个英雄，我们就遇到麻烦了。</p>
+<p>In that case, we have to <span name="fragment">create</span> a state
+object when we transition to it. This lets each FSM have its own instance of the state. Of course, if we&#8217;re allocating a <em>new</em> state, that means we need to free the <em>current</em> one. We have to be careful here, since the code that&#8217;s triggering the change is in a method in the current state. We don&#8217;t want to delete <code>this</code> out from under ourselves.</p>
+<p>在那种情况下，转换时需要创建一个状态对象。这让每一个FSM拥有它自己的状态实例。单人，如果我们分配一个<em>新</em>状态，那意味着我们需要释放<em>当前的</em>。我们在这里要小心，由于触发变化的代码是当前状态中的一个方法。我们不想自己删除<code>this</code>。</p>
+<p>Instead, we&#8217;ll allow <code>handleInput()</code> in <code>HeroineState</code> to optionally return a new state. When it does, <code>Heroine</code> will delete the old one and swap in the new one, like so:</p>
+<p>相反，我们允许<code>HeroineState</code>中的<code>handleInput()</code>随机的返回一个新状态。如果它那么做了，<code>Heroine</code>会删除旧的，然后换成新的，就像这样：</p>
+<div class="codehilite"><pre><span class="kt">void</span> <span class="n">Heroine</span><span class="o">::</span><span class="n">handleInput</span><span class="p">(</span><span class="n">Input</span> <span class="n">input</span><span class="p">)</span>
+<span class="p">{</span>
+  <span class="n">HeroineState</span><span class="o">*</span> <span class="n">state</span> <span class="o">=</span> <span class="n">state_</span><span class="o">-&gt;</span><span class="n">handleInput</span><span class="p">(</span><span class="o">*</span><span class="k">this</span><span class="p">,</span> <span class="n">input</span><span class="p">);</span>
+  <span class="k">if</span> <span class="p">(</span><span class="n">state</span> <span class="o">!=</span> <span class="nb">NULL</span><span class="p">)</span>
+  <span class="p">{</span>
+    <span class="k">delete</span> <span class="n">state_</span><span class="p">;</span>
+    <span class="n">state_</span> <span class="o">=</span> <span class="n">state</span><span class="p">;</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+
+
+<p>That way, we don&#8217;t delete the previous state until we&#8217;ve returned from its method. Now, the standing state can transition to ducking by creating a new instance:</p>
+<p>这样，我们直到我们从之前的状态返回，我们才需要删除它。现在，站立状态可以通过创建一个新实例转换为俯卧状态。</p>
+<div class="codehilite"><pre><span class="n">HeroineState</span><span class="o">*</span> <span class="n">StandingState</span><span class="o">::</span><span class="n">handleInput</span><span class="p">(</span><span class="n">Heroine</span><span class="o">&amp;</span> <span class="n">heroine</span><span class="p">,</span>
+                                         <span class="n">Input</span> <span class="n">input</span><span class="p">)</span>
+<span class="p">{</span>
+  <span class="k">if</span> <span class="p">(</span><span class="n">input</span> <span class="o">==</span> <span class="n">PRESS_DOWN</span><span class="p">)</span>
+  <span class="p">{</span>
+    <span class="c1">// Other code...</span>
+    <span class="k">return</span> <span class="k">new</span> <span class="n">DuckingState</span><span class="p">();</span>
+  <span class="p">}</span>
+
+  <span class="c1">// Stay in this state.</span>
+  <span class="k">return</span> <span class="nb">NULL</span><span class="p">;</span>
+<span class="p">}</span>
+</pre></div>
+
+
+<p>When I can, I prefer to use static states since they don&#8217;t burn memory and CPU cycles allocating objects
+each state change. For states that are more, uh, <em>stateful</em>, though, this is the
+way to go.</p>
+<p>如果可以，我倾向于使用静态状态，因为他们不会在每个状态转换时消耗太多的内存和CPU。但是，对于那些有更多的状态，额，<em>多状态的</em>，这是一条可选的路。</p>
+<aside name="fragment">
+<p>When you dynamically allocate states, you may have to worry about fragmentation.
+The <a href="object-pool.html" class="pattern">Object Pool</a> pattern can help.</p>
+</aside>
+<h2><a href="#enter-and-exit-actions" name="enter-and-exit-actions">Enter and Exit Actions</a></h2>
+<h2><a href="#进入和退出行为" name="进入和退出行为">进入和退出行为</a></h2>
+<p>The goal of the State pattern is to encapsulate all of the behavior and data for
+one state in a single class. We&#8217;re partway there, but we still have
+some loose ends.</p>
+<p>状态模式的目标是将一个状态的行为和数据封装到单一类中。我们部分的完成了，但是还有一些未了之事。</p>
+<p>When the heroine changes state, we also switch her sprite. Right now, that code is owned by the state she&#8217;s switching <em>from</em>. When she goes from ducking to standing, the ducking state sets her image:</p>
+<p>当英雄改变状态，我们也改变她的图片。现在，那部分代码在她转换<em>前</em>的状态上。当她从俯卧转为站立，俯卧状态设置了她的图片：</p>
+<div class="codehilite"><pre><span class="n">HeroineState</span><span class="o">*</span> <span class="n">DuckingState</span><span class="o">::</span><span class="n">handleInput</span><span class="p">(</span><span class="n">Heroine</span><span class="o">&amp;</span> <span class="n">heroine</span><span class="p">,</span>
+                                        <span class="n">Input</span> <span class="n">input</span><span class="p">)</span>
+<span class="p">{</span>
+  <span class="k">if</span> <span class="p">(</span><span class="n">input</span> <span class="o">==</span> <span class="n">RELEASE_DOWN</span><span class="p">)</span>
+  <span class="p">{</span>
+    <span class="n">heroine</span><span class="p">.</span><span class="n">setGraphics</span><span class="p">(</span><span class="n">IMAGE_STAND</span><span class="p">);</span>
+    <span class="k">return</span> <span class="k">new</span> <span class="nf">StandingState</span><span class="p">();</span>
+  <span class="p">}</span>
+
+  <span class="c1">// Other code...</span>
+<span class="p">}</span>
+</pre></div>
+
+
+<p>What we really want is each state to control its own graphics. We can
+handle that by giving the state an <em>entry action</em>:</p>
+<p>我们想做的是每个状态控制她自己的图像。我们可以给状态一个<em>行为入口</em>来处理它。</p>
+<div class="codehilite"><pre><span class="k">class</span> <span class="nc">StandingState</span> <span class="o">:</span> <span class="k">public</span> <span class="n">HeroineState</span>
+<span class="p">{</span>
+<span class="k">public</span><span class="o">:</span>
+  <span class="k">virtual</span> <span class="kt">void</span> <span class="n">enter</span><span class="p">(</span><span class="n">Heroine</span><span class="o">&amp;</span> <span class="n">heroine</span><span class="p">)</span>
+  <span class="p">{</span>
+    <span class="n">heroine</span><span class="p">.</span><span class="n">setGraphics</span><span class="p">(</span><span class="n">IMAGE_STAND</span><span class="p">);</span>
+  <span class="p">}</span>
+
+  <span class="c1">// Other code...</span>
+<span class="p">};</span>
+</pre></div>
+
+
+<p>Back in <code>Heroine</code>, we modify the code for handling state changes to call that
+on the new state:</p>
+<p>在<code>Heroine</code>中，我们修改了处理状态改变的代码，在新的状态上上调用：</p>
+<div class="codehilite"><pre><span class="kt">void</span> <span class="n">Heroine</span><span class="o">::</span><span class="n">handleInput</span><span class="p">(</span><span class="n">Input</span> <span class="n">input</span><span class="p">)</span>
+<span class="p">{</span>
+  <span class="n">HeroineState</span><span class="o">*</span> <span class="n">state</span> <span class="o">=</span> <span class="n">state_</span><span class="o">-&gt;</span><span class="n">handleInput</span><span class="p">(</span><span class="o">*</span><span class="k">this</span><span class="p">,</span> <span class="n">input</span><span class="p">);</span>
+  <span class="k">if</span> <span class="p">(</span><span class="n">state</span> <span class="o">!=</span> <span class="nb">NULL</span><span class="p">)</span>
+  <span class="p">{</span>
+    <span class="k">delete</span> <span class="n">state_</span><span class="p">;</span>
+    <span class="n">state_</span> <span class="o">=</span> <span class="n">state</span><span class="p">;</span>
+
+    <span class="c1">// Call the enter action on the new state.</span>
+    <span class="n">state_</span><span class="o">-&gt;</span><span class="n">enter</span><span class="p">(</span><span class="o">*</span><span class="k">this</span><span class="p">);</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+
+
+<p>This lets us simplify the ducking code to:</p>
+<p>这让我们将俯卧代码简化为：</p>
+<div class="codehilite"><pre><span class="n">HeroineState</span><span class="o">*</span> <span class="n">DuckingState</span><span class="o">::</span><span class="n">handleInput</span><span class="p">(</span><span class="n">Heroine</span><span class="o">&amp;</span> <span class="n">heroine</span><span class="p">,</span>
+                                        <span class="n">Input</span> <span class="n">input</span><span class="p">)</span>
+<span class="p">{</span>
+  <span class="k">if</span> <span class="p">(</span><span class="n">input</span> <span class="o">==</span> <span class="n">RELEASE_DOWN</span><span class="p">)</span>
+  <span class="p">{</span>
+    <span class="k">return</span> <span class="k">new</span> <span class="n">StandingState</span><span class="p">();</span>
+  <span class="p">}</span>
+
+  <span class="c1">// Other code...</span>
+<span class="p">}</span>
+</pre></div>
+
+
+<p>All it does is switch to standing and the standing state takes care of
+the graphics. Now our states really are encapsulated. One particularly nice thing
+about entry actions is that they run when you enter the state regardless of
+which state you&#8217;re coming <em>from</em>.</p>
+<p>他做的所有事情就是转换为站立，然后站立状态控制图形。现在我们的状态真的封装了。关于行为入口特别好的事情就是当你进入状态的时候，不必关系你是从哪个状态转换<em>来的</em>。</p>
+<p>Most real-world state graphs have multiple transitions into the same state. For
+example, our heroine will also end up standing after she lands a jump or dive. That means we would end up duplicating some code everywhere that transition
+occurs. Entry actions give us a place to consolidate that.</p>
+<p>大多数现实世界的状态图形都有从多个转换进入同一个状态。举个例子，我们的英雄在它跳跃或速降后追踪进入站立状态。这意味着我们在转换发生的最后到处复制相同的代码。行为入口给了我们一个好地方来巩固那一点。</p>
+<p>We can, of course, also extend this to support an <em>exit action</em>. This is just a
+method we call on the state we&#8217;re <em>leaving</em> right before we switch to the new
+state.</p>
+<p>我们能，当然，扩展来支持一个<em>行为出口</em>。这只是在我们<em>离开</em>现有状态转换到新状态之前调用的一个方法。</p>
+<h2><a href="#what's-the-catch" name="what's-the-catch">What&#8217;s the Catch?</a></h2>
+<h2><a href="#有什么收获？" name="有什么收获？">有什么收获？</a></h2>
+<p>I&#8217;ve spent all this time selling you on FSMs, and now I&#8217;m going to pull the rug
+out from under you. Everything I&#8217;ve said so far is true, and FSMs are a good fit
+for some problems. But their greatest virtue is also their greatest flaw.</p>
+<p>我花了这么长时间向您推销FSMs，现在我要从你脚下抽走地毯了。我讲的到现在都是真的，而FSM能很好解决一些问题。但是他们最大的优点也是他们最大的缺点。</p>
+<p>State machines help you untangle hairy code by enforcing a very <span
+name="turing">constrained</span> structure on it. All you&#8217;ve got is a fixed set
+of states, a single current state, and some hardcoded transitions.</p>
+<p>状态机通过使用一个有约束的结构来理清杂乱的代码。你得到的是一些固定状态，单一的当前状态，和一些硬编码的转换。</p>
+<aside name="turing">
+<p>A finite state machine isn&#8217;t even <em>Turing complete</em>. Automata theory describes
+computation using a series of abstract models, each more complex than the
+previous. A <em>Turing machine</em> is one of the most expressive models.</p>
+<p>&#8220;Turing complete&#8221; means a system (usually a programming language) is powerful
+enough to implement a Turing machine in it, which means all Turing complete
+languages are, in some ways, equally expressive. FSMs are not flexible enough
+to be in that club.</p>
+</aside>
+<p>If you try using a state machine for something more complex like game AI, you
+will slam face-first into the limitations of that model. Thankfully, our
+forebears have found ways to dodge some of those barriers. I&#8217;ll close this
+chapter out by walking you through a couple of them.</p>
+<p>如果你需要为更复杂的东西比如游戏AI使用状态机，你的脸会撞到这个模型的限制上。感谢上天，我们的前辈找到了一些方法来闪避这些障碍。我会浏览他们中的一些来结束这一章。</p>
+<h2><a href="#concurrent-state-machines" name="concurrent-state-machines">Concurrent State Machines</a></h2>
+<h2><a href="#并发状态机" name="并发状态机">并发状态机</a></h2>
+<p>We&#8217;ve decided to give our heroine the ability to carry a gun. When she&#8217;s packing
+heat, she can still do everything she could before: run, jump, duck, etc. But
+she also needs to be able to fire her weapon while doing it.</p>
+<p>我们决定给我们的英雄带枪的能力。当她拿着枪的时候，她还是能做她之前能做的任何事情：跑，跳，速降，等等。但是她也需要在做这些的同时开火。</p>
+<p>If we want to stick to the confines of an FSM, we have to <em>double</em> the number of
+states we have. For each existing state, we&#8217;ll need another one for doing the
+same thing while she&#8217;s armed: standing, standing with gun, jumping, jumping with
+gun, you get the idea.</p>
+<p>如果我们绑定在FSM上，我们需要<em>翻倍</em>我们有的状态。对于每一个现存状态，我们需要另一个她武装时候的状态：站立，持枪站立，跳跃，持枪跳跃，你知道我的意思。</p>
+<p>Add a couple of more weapons and the number of states explodes combinatorially.
+Not only is it a huge number of states, it&#8217;s a huge amount of redundancy: the
+unarmed and armed states are almost identical except for the little bit of code
+to handle firing.</p>
+<p>多加几种武器，状态就会指数爆炸。这不但有大量的状态，这也是大量的冗余：武装和非武装状态集合是完全一致的，只是多了一点负责设计的代码。</p>
+<p>The problem is that we&#8217;ve <span name="combination">jammed</span> two pieces of
+state&#8202;&mdash;&#8202;what she&#8217;s <em>doing</em> and what she&#8217;s <em>carrying</em>&#8202;&mdash;&#8202;into a single machine.
+To model all possible combinations, we would need a state for each <em>pair</em>. The
+fix is obvious: have two separate state machines.</p>
+<p>问题在于我们绑定了两种状态——她<em>做的</em>和她<em>携带的</em>——到了一个状态机上。为了处理所有可能的结合，我们需要为每一<em>对</em>写一个状态。修复很明显：使用两个单独的状态机。</p>
+<aside name="combination">
+<p>If we want to cram <em>n</em> states for what she&#8217;s doing and <em>m</em> states for what she&#8217;s
+carrying into a single machine, we need <em>n &times; m</em> states. With two machines,
+it&#8217;s just <em>n + m</em>.</p>
+</aside>
+<p>We keep our original state machine for what she&#8217;s doing and leave it alone. Then
+we define a separate state machine for what she&#8217;s carrying. <code>Heroine</code> will have
+<em>two</em> &#8220;state&#8221; references, one for each, like:</p>
+<p>我们保留原来的记录她在做什么的状态机，不再管它。然后我们定义一个她携带了什么的单独状态机。<code>Heroine</code>将会有<em>两个</em>“状态”引用，每个对应一个状态机，就像这样：
+<span name="equip-state"></span></p>
+<div class="codehilite"><pre><span class="k">class</span> <span class="nc">Heroine</span>
+<span class="p">{</span>
+  <span class="c1">// Other code...</span>
+
+<span class="k">private</span><span class="o">:</span>
+  <span class="n">HeroineState</span><span class="o">*</span> <span class="n">state_</span><span class="p">;</span>
+  <span class="n">HeroineState</span><span class="o">*</span> <span class="n">equipment_</span><span class="p">;</span>
+<span class="p">};</span>
+</pre></div>
+
+
+<aside name="equip-state">
+<p>For illustrative purposes, we&#8217;re using the full State pattern for her equipment.
+In practice, since it only has two states, a Boolean flag would work too.</p>
+</aside>
+<p>When the heroine delegates inputs to the states, she hands it to both of them:</p>
+<p>当英雄把输入委托给了状态，她将其交给两个：</p>
+<p><span name="consume"></span></p>
+<div class="codehilite"><pre><span class="kt">void</span> <span class="n">Heroine</span><span class="o">::</span><span class="n">handleInput</span><span class="p">(</span><span class="n">Input</span> <span class="n">input</span><span class="p">)</span>
+<span class="p">{</span>
+  <span class="n">state_</span><span class="o">-&gt;</span><span class="n">handleInput</span><span class="p">(</span><span class="o">*</span><span class="k">this</span><span class="p">,</span> <span class="n">input</span><span class="p">);</span>
+  <span class="n">equipment_</span><span class="o">-&gt;</span><span class="n">handleInput</span><span class="p">(</span><span class="o">*</span><span class="k">this</span><span class="p">,</span> <span class="n">input</span><span class="p">);</span>
+<span class="p">}</span>
+</pre></div>
+
+
+<aside name="consume">
+<p>A more full-featured system would probably have a way for one state machine to
+<em>consume</em> an input so that the other doesn&#8217;t receive it. That would prevent both
+machines from erroneously trying to respond to the same input.</p>
+</aside>
+<p>Each state machine can then respond to inputs, spawn behavior, and change its
+state independently of the other machine. When the two sets of states are mostly
+unrelated, this works well.</p>
+<p>每一个状态机之后都能响应输入，发生行为，独立于另外其他机器改变状态。当两个状态集合几乎没有联系的时候，这能工作的不错。</p>
+<p>In practice, you&#8217;ll find a few cases where the states do interact. For example,
+maybe she can&#8217;t fire while jumping, or maybe she can&#8217;t do a dive attack if she&#8217;s
+armed. To handle that, in the code for one state, you&#8217;ll probably just do some
+crude <code>if</code> tests on the <em>other</em> machine&#8217;s state to coordinate them. It&#8217;s not the most
+elegant solution, but it gets the job done.</p>
+<p>在实践中，你会发现有些时候状态子啊交互。举个例子，也许她在跳跃时不能开火，或者他在武装时不能速降攻击。为了处理这个，在一个状态的代码中，你也许会做一些粗糙的<code>if</code>测试<em>其他</em>机器的状态来与他们协同，这不是最优雅的解决方案，但这可以搞定工作。</p>
+<h2><a href="#hierarchical-state-machines" name="hierarchical-state-machines">Hierarchical State Machines</a></h2>
+<h2><a href="#分层状态机" name="分层状态机">分层状态机</a></h2>
+<p>After fleshing out our heroine&#8217;s behavior some more, she&#8217;ll likely have a bunch
+of similar states. For example, she may have standing, walking, running, and
+sliding states. In any of those, pressing B jumps and pressing down ducks.</p>
+<p>在充实我们英雄的行为，她可能会有更多相似的状态。举个例子，他也许有站立，行走，奔跑，和滑铲状态。在他们中的每一个，按B跳按下蹲。</p>
+<p>With a simple state machine implementation, we have to duplicate that code in
+each of those states. It would be better if we could implement that once and
+reuse it across all of the states.</p>
+<p>通过一个简单的状态机实现，我们子啊这些状态中的每一个都重复了代码。如果我们能够实现一次然后在多个状态间重用就好了。</p>
+<p>If this was just object-oriented code instead of a state machine, one way to
+share code across those states would be using <span
+name="inheritance">inheritance</span>. We could define a class for an &#8220;on
+ground&#8221; state that handles jumping and ducking. Standing, walking, running, and
+sliding would then inherit from that and add their own additional behavior.</p>
+<p>如果这是一个面向对象的代码而不是一个状态机，一种在这些状态间分享代码的方式是通过继承。我们可以为“在地面上”定义一个类处理跳跃和速降。站立，行走，奔跑和滑铲都会从它继承，然后增加他们的附加行为。</p>
+<aside name="inheritance">
+<p>This has both good and bad implications. Inheritance is a powerful means of code
+reuse, but it&#8217;s also a very strong coupling between two chunks of code. It&#8217;s a big
+hammer, so swing it carefully.</p>
+</aside>
+<p>It turns out, this is a common structure called a <em>hierarchical state machine</em>.
+A state can have a <em>superstate</em> (making itself a <em>substate</em>). When an event
+comes in, if the substate doesn&#8217;t handle it, it rolls up the chain of
+superstates. In other words, it works just like overriding inherited methods.</p>
+<p>你会发现，这是一个通用结构被称为<em>分层状态机</em>。一个状态可以有<em>父状态</em>（这让他变为<em>子状态</em>）。当一个事件进来，如果子状态没有处理，它就会交给链上的父状态。换言之，它像重载的继承方法那样运作。</p>
+<p>In fact, if we&#8217;re using the State pattern to implement our FSM, we can
+use class inheritance to implement the hierarchy. Define a base class for the
+superstate:</p>
+<p>事实上，如果我们使用状态模式实现FSM，我们可以使用继承来实现层次。定义一个基类作为父状态：</p>
+<div class="codehilite"><pre><span class="k">class</span> <span class="nc">OnGroundState</span> <span class="o">:</span> <span class="k">public</span> <span class="n">HeroineState</span>
+<span class="p">{</span>
+<span class="k">public</span><span class="o">:</span>
+  <span class="k">virtual</span> <span class="kt">void</span> <span class="n">handleInput</span><span class="p">(</span><span class="n">Heroine</span><span class="o">&amp;</span> <span class="n">heroine</span><span class="p">,</span> <span class="n">Input</span> <span class="n">input</span><span class="p">)</span>
+  <span class="p">{</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">input</span> <span class="o">==</span> <span class="n">PRESS_B</span><span class="p">)</span>
+    <span class="p">{</span>
+      <span class="c1">// Jump...</span>
+    <span class="p">}</span>
+    <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">input</span> <span class="o">==</span> <span class="n">PRESS_DOWN</span><span class="p">)</span>
+    <span class="p">{</span>
+      <span class="c1">// Duck...</span>
+    <span class="p">}</span>
+  <span class="p">}</span>
+<span class="p">};</span>
+</pre></div>
+
+
+<p>And then each substate inherits it:</p>
+<p>每个子状态继承它：</p>
+<div class="codehilite"><pre><span class="k">class</span> <span class="nc">DuckingState</span> <span class="o">:</span> <span class="k">public</span> <span class="n">OnGroundState</span>
+<span class="p">{</span>
+<span class="k">public</span><span class="o">:</span>
+  <span class="k">virtual</span> <span class="kt">void</span> <span class="n">handleInput</span><span class="p">(</span><span class="n">Heroine</span><span class="o">&amp;</span> <span class="n">heroine</span><span class="p">,</span> <span class="n">Input</span> <span class="n">input</span><span class="p">)</span>
+  <span class="p">{</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">input</span> <span class="o">==</span> <span class="n">RELEASE_DOWN</span><span class="p">)</span>
+    <span class="p">{</span>
+      <span class="c1">// Stand up...</span>
+    <span class="p">}</span>
+    <span class="k">else</span>
+    <span class="p">{</span>
+      <span class="c1">// Didn&#39;t handle input, so walk up hierarchy.</span>
+      <span class="n">OnGroundState</span><span class="o">::</span><span class="n">handleInput</span><span class="p">(</span><span class="n">heroine</span><span class="p">,</span> <span class="n">input</span><span class="p">);</span>
+    <span class="p">}</span>
+  <span class="p">}</span>
+<span class="p">};</span>
+</pre></div>
+
+
+<p>This isn&#8217;t the only way to implement the hierarchy, of course. If you aren&#8217;t
+using the Gang of Four&#8217;s State pattern, this won&#8217;t work. Instead, you can model
+the current state&#8217;s chain of superstates explicitly using a <em>stack</em> of states
+instead of a single state in the main class.</p>
+<p>这当然不是唯一实现层次的方法。如果你没有使用GoF的状态模式，这不会有用。相反，你可以显式的使用状态<em>栈</em>而不是单一的状态来表示当前状态的父状态链。</p>
+<p>The current state is the one on the top of the stack, under that is its
+immediate superstate, and then <em>that</em> state&#8217;s superstate and so on. When you
+dish out some state-specific behavior, you start at the top of the stack and
+walk down until one of the states handles it. (If none do, you ignore it.)</p>
+<p>当前状态时栈顶的状态，在他下面是它的直接父状态，然后是<em>那个</em>状态的父状态，一直下去。但你发现了一些特定状态的行为，你从栈的顶端开始，然后向下移动知道某一个状态处理了它。（如果没有，你忽视它。）</p>
+<h2><a href="#pushdown-automata" name="pushdown-automata">Pushdown Automata</a></h2>
+<h2><a href="#下推自动机" name="下推自动机">下推自动机</a></h2>
+<p>There&#8217;s another common extension to finite state machines that also uses a stack
+of states. Confusingly, the stack represents something entirely different, and
+is used to solve a different problem.</p>
+<p>还有一种有限自动机的扩展也用了状态栈。令人困惑的是，栈表示的是完全不同的事物，被用作解决不同的问题。</p>
+<p>The problem is that finite state machines have no concept of <em>history</em>. You know
+what state you <em>are</em> in, but have no memory of what state you <em>were</em> in. There&#8217;s
+no easy way to go back to a previous state.</p>
+<p>问题是有限自动机没有任何<em>历史</em>的概念。你知道你<em>在</em>什么状态中，但是不记得你<em>曾在</em>什么状态。这没有简单的办法回到上一状态。</p>
+<p>Here&#8217;s an example: Earlier, we let our fearless heroine arm herself to the
+teeth. When she fires her gun, we need a new state that plays the firing
+animation and spawns the bullet and any visual effects. So we slap together a
+<code>FiringState</code> and make <span name="shared">all of the states</span> that she can
+fire from transition into that when the fire button is pressed.</p>
+<p>这里是个例子：早先，我们让我们的无畏英雄武装到了牙齿。当她开火，我们需要一个新状态播放开火动画，产生子弹和视觉效果。所以我们拼凑了一个<code>FiringState</code>，让所有的状态都能在开火按钮按下的时候跳转过去。</p>
+<aside name="shared">
+<p>Since this behavior is duplicated across several states, it may also be a good
+place to use a hierarchical state machine to reuse that code.</p>
+</aside>
+<p>The tricky part is what state she transitions to <em>after</em> firing. She can pop off
+a round while standing, running, jumping, and ducking. When the firing sequence
+is complete, she should transition back to what she was doing before.</p>
+<p>有技巧的部分是它开火<em>后</em>转换到的状态。她可以在站立，奔跑，跳跃，速降时开火。当开火序列完成了，它应该转换为她之前的状态。</p>
+<p>If we&#8217;re sticking with a vanilla FSM, we&#8217;ve already forgotten what state she was
+in. To keep track of it, we&#8217;d have to define a slew of nearly identical states
+&#8212; firing while standing, firing while running, firing while jumping, and so on
+&#8212; just so that each one can have a hardcoded transition that goes back to the
+right state when it&#8217;s done.</p>
+<p>如果我们固执于纯粹的FSM，我们已经忘了她所处的状态。为了继续追踪它，我们定义了很多差不多完全一样的类——站立开火，跑步开火，跳跃开火，诸如此类——每一个都有硬编码的转换回到她刚刚在做的事情。</p>
+<p>What we&#8217;d really like is a way to <em>store</em> the state she was in before firing and
+then <em>recall</em> it later. Again, automata theory is here to help. The relevant
+data structure is called a <a href="http://en.wikipedia.org/wiki/Pushdown_automaton"><em>pushdown
+automaton</em></a>.</p>
+<p>我们真正喜欢的是<em>存储</em>它在开火前所处的状态然后等会<em>回想</em>起来。又一次，自动理论来帮忙了，相关的数据结构被称为下推自动机。</p>
+<p>Where a finite state machine has a <em>single</em> pointer to a state, a pushdown
+automaton has a <em>stack</em> of them. In an FSM, transitioning to a new state
+<em>replaces</em> the previous one. A pushdown automaton lets you do that, but it also
+gives you two additional operations:</p>
+<p>当有限自动机有<em>一个</em>指针指向状态，一个下推自动机有<em>一栈</em>。在FSM中，转换到新状态<em>代替</em>了之前的那个。下推状态机不仅能让你完成那个，还能给你两个额外操作：</p>
+<ol>
+<li>
+<p>You can <em>push</em> a new state onto the stack. The &#8220;current&#8221; state is always the
+    one on top of the stack, so this transitions to the new state. But it leaves
+    the previous state directly under it on the stack instead of discarding it.</p>
+</li>
+<li>
+<p>你可以将一个新状态<em>推入</em>栈中。“当前的”状态总是在栈顶，所以这会转到新的状态。但它让之前的状态待在栈中而不是销毁它。</p>
+</li>
+<li>
+<p>You can <em>pop</em> the topmost state off the stack. That state is discarded, and
+    the state under it becomes the new current state.</p>
+</li>
+<li>
+<p>你可以<em>弹出</em>最上面的状态。这个状态会被销毁，在它下面的状态成为新的状态。</p>
+</li>
+</ol>
+<p><img src="images/state-pushdown.png" alt="The stack for a pushdown automaton. First it just contains a Standing state. A Firing state is pushed on top, then popped back off when done." /></p>
+<p>This is just what we need for firing. We create a <em>single</em> firing state. When
+the fire button is pressed while in any other state, we <em>push</em> the firing state
+onto the stack. When the firing animation is done, we <em>pop</em> that state off, and
+the pushdown automaton automatically transitions us right back to the state we
+were in before.</p>
+<p>这正是我们开火需要的。我们创建<em>单一</em>开火状态。当开火按钮在其他状态按下时，我们<em>推入</em>开火状态。当开火动画结束，我们<em>弹出</em>状态，然后下推自动机自动转回我们之前的状态。</p>
+<h2><a href="#so-how-useful-are-they" name="so-how-useful-are-they">So How Useful Are They?</a></h2>
+<h2><a href="#所以他们有多有用呢？" name="所以他们有多有用呢？">所以他们有多有用呢？</a></h2>
+<p>Even with those common extensions to state machines, they are still pretty
+limited. The trend these days in game AI is more toward exciting things like
+<em><a href="http://web.archive.org/web/20140402204854/http://www.altdevblogaday.com/2011/02/24/introduction-to-behavior-trees/">behavior trees</a></em> and <em><a href="http://web.media.mit.edu/~jorkin/goap.html">planning systems</a></em>. If complex AI is what you&#8217;re interested in,
+all this chapter has done is whet your appetite. You&#8217;ll want to read other books
+to satisfy it.</p>
+<p>即使状态机有这些常见的扩展，他们还是很受限制。这让今日游戏AI移向了更加激动人心的事情比如<em>行为树</em>和<em>计划系统</em>。如果复制的AI是你关注的，这一整章只是勾起了你的食欲。你需要阅读其他书来满足它。</p>
+<p>This doesn&#8217;t mean finite state machines, pushdown automata, and other simple
+systems aren&#8217;t useful. They&#8217;re a good modeling tool for certain kinds of
+problems. Finite state machines are useful when:</p>
+<p>这不意味着有限自动机，下推自动机，和其他简单的系统无用。他们是特定问题的好工具。有限自动机在以下情况有用：</p>
+<ul>
+<li>
+<p>You have an entity whose behavior changes based on some internal state.</p>
+</li>
+<li>
+<p>你有个实体它的行为基于一些内在状态。</p>
+</li>
+<li>
+<p>That state can be rigidly divided into one of a relatively small number of
+    distinct options.</p>
+</li>
+<li>
+<p>这个状态可以被有效的分割为一系列互不相干的选项。</p>
+</li>
+<li>
+<p>The entity responds to a series of inputs or events over time.</p>
+</li>
+<li>
+<p>实体随着时间响应一系列输入或事件。</p>
+</li>
+</ul>
+<p>In games, they are most known for being used in AI, but they are also common in
+implementations of user input handling, navigating menu screens, parsing text,
+network protocols, and other asynchronous behavior.</p>
+<p>在游戏中，他们因在AI中使用而闻名，但是它常见子啊其他实现比如处理玩家输入，导航菜单界面，分析文字，网络协议以及其他异步行为。</p>
+<nav>
+  <span class="prev">&larr; <a href="singleton.html">Previous Chapter</a></span>
+  <span class="next"><a href="sequencing-patterns.html">Next Chapter</a> &rarr;</span>
+  <span class="toc">&equiv; <a href="/">The Book</a></span>
+</nav>
+</div>
+</div>
+<footer>&copy; 2009-2015 Robert Nystrom</footer>
+</body>
+</html>

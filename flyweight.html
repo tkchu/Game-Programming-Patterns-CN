@@ -1,0 +1,521 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+<meta http-equiv="Content-type" content="text/html;charset=UTF-8" />
+
+<title>Flyweight &middot; Design Patterns Revisited &middot; Game Programming Patterns</title>
+
+<!-- Tell mobile browsers we're optimized for them and they don't need to crop
+     the viewport. -->
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<link rel="stylesheet" type="text/css" href="style.css" />
+<link href="http://fonts.googleapis.com/css?family=Merriweather:400,400italic,700,700italic|Source+Code+Pro|Source+Sans+Pro:200,300,400,600,400italic,600italic|Rock+Salt" rel="stylesheet" type="text/css">
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-42804721-1', 'gameprogrammingpatterns.com');
+  ga('send', 'pageview');
+</script>
+<script src="jquery-1.10.1.min.js"></script>
+<script src="script.js"></script>
+</head>
+<body id="top">
+<div class="page sidebar">
+<div class="content">
+<nav class="top">
+  <span class="prev">&larr; <a href="command.html">Previous Chapter</a></span>
+  <span class="next"><a href="observer.html">Next Chapter</a> &rarr;</span>
+  <span class="toc">&equiv; <a href="/">The Book</a></span>
+</nav>
+<h1>Flyweight</h1>
+<h1 class="book"><a href="/">Game Programming Patterns</a><span class="section"><a href="design-patterns-revisited.html">Design Patterns Revisited</a></span></h1>
+<h1><a href="#享元模式" name="享元模式">享元模式</a></h1>
+<p>The fog lifts, revealing a majestic old growth forest. Ancient hemlocks,
+countless in number, tower over you forming a cathedral of greenery. The stained
+glass canopy of leaves fragments the sunlight into golden shafts of mist.
+Between giant trunks, you can make out the massive forest receding into the
+distance.</p>
+<p>迷雾散尽，露出了古朴庄严的森林。无数古老的铁杉，在你头顶编制成绿色的穹顶。阳光在树叶间破碎成金色的顶棚。在巨大的树干间眺望，远处的森林渐渐隐去。</p>
+<p>This is the kind of otherworldly setting we dream of as game developers, and
+scenes like these are often enabled by a pattern whose name couldn&#8217;t possibly be
+more modest: the humble Flyweight.</p>
+<p>这是我们游戏开发者梦想的超凡设置，这样的场景通常由一个模式支撑着，他的名字谦虚至极：享元模式。</p>
+<h2><a href="#forest-for-the-trees" name="forest-for-the-trees">Forest for the Trees</a></h2>
+<p>I can describe a sprawling woodland with just a few sentences, but actually
+<em>implementing</em> it in a realtime game is another story. When you&#8217;ve got an entire
+forest of individual trees filling the screen, all that a graphics programmer
+sees is the millions of polygons they&#8217;ll have to somehow shovel onto the GPU
+every sixtieth of a second.</p>
+<p>我用几句话就能描述一片巨大的森林，但是在实时游戏中做这件事就完全是另外一件事了。当你的屏幕上需要一整个森林的时候，程序员看到的是每秒需要送到GPU六十次的百万多边形。</p>
+<p>We&#8217;re talking thousands of trees, each with detailed geometry containing
+thousands of polygons. Even if you have enough <em>memory</em> to describe that forest,
+in order to render it, that data has to make its way over the bus from the CPU
+to the GPU.</p>
+<p>我们讨论的是成千上万的树，每一棵都有上千的多边形组成。就算你有足够的内存空间描述森林，渲染的过程中，CPU到GPU的部分也太过繁忙了。</p>
+<p>Each tree has a bunch of bits associated with it:</p>
+<p>每棵树都有一系列与之相关的位：</p>
+<ul>
+<li>A mesh of polygons that define the shape of the trunk, branches, and greenery.</li>
+<li>Textures for the bark and leaves.</li>
+<li>Its location and orientation in the forest.</li>
+<li>
+<p>Tuning parameters like size and tint so that each tree looks different.</p>
+</li>
+<li>
+<p>定义树干，树枝和树叶的形状的多边形网格。</p>
+</li>
+<li>树皮和树叶的纹理。</li>
+<li>在森林中它的位置和方向。</li>
+<li>栗色大小和色彩的参数，使每一棵树都看起来与众不同。</li>
+</ul>
+<p>If you were to sketch it out in code, you&#8217;d have something like this:</p>
+<p>如果你用代码表示，那么你会有这样的一些东西：</p>
+<div class="codehilite"><pre><span class="k">class</span> <span class="nc">Tree</span>
+<span class="p">{</span>
+<span class="k">private</span><span class="o">:</span>
+  <span class="n">Mesh</span> <span class="n">mesh_</span><span class="p">;</span>
+  <span class="n">Texture</span> <span class="n">bark_</span><span class="p">;</span>
+  <span class="n">Texture</span> <span class="n">leaves_</span><span class="p">;</span>
+  <span class="n">Vector</span> <span class="n">position_</span><span class="p">;</span>
+  <span class="kt">double</span> <span class="n">height_</span><span class="p">;</span>
+  <span class="kt">double</span> <span class="n">thickness_</span><span class="p">;</span>
+  <span class="n">Color</span> <span class="n">barkTint_</span><span class="p">;</span>
+  <span class="n">Color</span> <span class="n">leafTint_</span><span class="p">;</span>
+<span class="p">};</span>
+</pre></div>
+
+
+<p>That&#8217;s a lot of data, and the mesh and textures are particularly large. An entire
+forest of these objects is too much to throw at the GPU in one frame.
+Fortunately, there&#8217;s a time-honored trick to handling this.</p>
+<p>这是一大堆数据，多边形网格和纹理体积非常大。整个这样的森林在一帧的时间就交给GPU是太过了。幸运的是，有一种时间技巧来处理它。</p>
+<p>The key observation is that even though there may be thousands of trees in the
+forest, they mostly look similar. They will likely all use the <span
+name="same">same</span> mesh and textures. That means most of the fields in
+these objects are the <em>same</em> between all of those instances.</p>
+<p>关键点在于，哪怕森林里有千千万万的树，他们大多数看起来长得一模一样。他们也许使用了<em>相同的</em>网格和纹理。这意味着大多数树对象内部存储的数据是一样的。</p>
+<aside name="same">
+<p>You&#8217;d have to be crazy or a billionaire to budget for the artists to
+individually model each tree in an entire forest.</p>
+</aside>
+<p><span name="trees"></span></p>
+<p><img src="images/flyweight-trees.png" alt="A row of trees, each of which has its own Mesh, Bark, Leaves, Params, and Position." /></p>
+<aside name="trees">
+<p>Note that the stuff in the small boxes is the same for each tree.</p>
+<p>注意小盒子中的东西对每一棵树都是一样的。</p>
+</aside>
+<p>We can model that explicitly by splitting the object in half. First, we pull
+out the data that all trees have <span name="type">in common</span> and move it
+into a separate class:</p>
+<p>我们可以通过将对象切为两部分来更加明确的定义它。第一，我们将树共有的数据拿出来放到另一个类中：</p>
+<div class="codehilite"><pre><span class="k">class</span> <span class="nc">TreeModel</span>
+<span class="p">{</span>
+<span class="k">private</span><span class="o">:</span>
+  <span class="n">Mesh</span> <span class="n">mesh_</span><span class="p">;</span>
+  <span class="n">Texture</span> <span class="n">bark_</span><span class="p">;</span>
+  <span class="n">Texture</span> <span class="n">leaves_</span><span class="p">;</span>
+<span class="p">};</span>
+</pre></div>
+
+
+<p>The game only needs a single one of these, since there&#8217;s no reason to have the
+same meshes and textures in memory a thousand times. Then, each <em>instance</em> of a
+tree in the world has a <em>reference</em> to that shared <code>TreeModel</code>. What remains in
+<code>Tree</code> is the state that is instance-specific:</p>
+<p>游戏只需要一个这种类，因为没有必要在内存中把相同的网格和纹理重复一千遍。然后每个游戏世界中类的实例有一个对这个共享TreeModel的引用。留在树对象中的是那些与单个树相关的数据：</p>
+<div class="codehilite"><pre><span class="k">class</span> <span class="nc">Tree</span>
+<span class="p">{</span>
+<span class="k">private</span><span class="o">:</span>
+  <span class="n">TreeModel</span><span class="o">*</span> <span class="n">model_</span><span class="p">;</span>
+
+  <span class="n">Vector</span> <span class="n">position_</span><span class="p">;</span>
+  <span class="kt">double</span> <span class="n">height_</span><span class="p">;</span>
+  <span class="kt">double</span> <span class="n">thickness_</span><span class="p">;</span>
+  <span class="n">Color</span> <span class="n">barkTint_</span><span class="p">;</span>
+  <span class="n">Color</span> <span class="n">leafTint_</span><span class="p">;</span>
+<span class="p">};</span>
+</pre></div>
+
+
+<p>You can visualize it like this:</p>
+<p>你可以将其想象成这样：</p>
+<p><img src="images/flyweight-tree-model.png" alt="A row of trees each with its own Params and Position, but pointing to a shared Model with a Mesh, Bark, and Leaves." /></p>
+<aside name="type">
+<p>This looks a lot like the <a href="type-object.html" class="pattern">Type
+Object</a> pattern. Both involve delegating part of an object&#8217;s state to some
+other object shared between a number of instances. However, the intent behind
+the patterns differs.</p>
+<p>这有点像类型对象模式。两者都涉及将一个类中的状态分给另外的类，来达到在不同实例间分享状态的目的。但是，这两种模式背后的意图不同。</p>
+<p>With a type object, the goal is to minimize the number of classes you have to
+define by lifting &#8220;types&#8221; into your own object model. Any memory sharing you get
+from that is a bonus. The Flyweight pattern is purely about efficiency.</p>
+<p>使用类型对象，目标是通过将类型引入你的对象模型来减少你需要定义的类。伴随而来的内容分享是额外的好处。享元模式则是纯粹的为了效率。</p>
+</aside>
+<p>This is all well and good for storing stuff in main memory, but that doesn&#8217;t
+help rendering. Before the forest gets on screen, it has to work its way over to
+the GPU. We need to express this resource sharing in a way that the graphics
+card understands.</p>
+<p>把所有的东西都存在主存里是很好的，但是这不利于渲染。在森林到屏幕上之前，它得先到GPU。我们需要用显卡可以理解的方式共享</p>
+<h2><a href="#a-thousand-instances" name="a-thousand-instances">A Thousand Instances</a></h2>
+<h2><a href="#一千个实例" name="一千个实例">一千个实例</a></h2>
+<p>To minimize the amount of data we have to push to the GPU, we want to be able to
+send the shared data&#8202;&mdash;&#8202;the <code>TreeModel</code>&#8202;&mdash;&#8202;just <em>once</em>. Then, separately, we
+push over every tree instance&#8217;s unique data&#8202;&mdash;&#8202;its position, color, and scale.
+Finally, we tell the GPU, &#8220;Use that one model to render each of these
+instances.&#8221;</p>
+<p>为了减少我们需要推送到GPU的数据量，我们想要只把共享的数据——TreeModel——只发送一次。然后，我们分别把每个树独特的数据——位置，颜色，大小。最后，我们告诉GPU，“使用这一个模型渲染每一个实例”。</p>
+<p>Fortunately, today&#8217;s graphics APIs and <span name="hardware">cards</span>
+support exactly that. The details are fiddly and out of the scope of this book,
+but both Direct3D and OpenGL can do something called <a href="http://en.wikipedia.org/wiki/Geometry_instancing"><em>instanced
+rendering</em></a>.</p>
+<p>幸运的是，今日的图形接口和显卡正好支持这一点。这些细节繁琐且超出了这部书的范围，但是Direct3D和OpenGL都可以做实例渲染。</p>
+<p>In both APIs, you provide two streams of data. The first is the blob of common
+data that will be rendered multiple times&#8202;&mdash;&#8202;the mesh and textures in our
+arboreal example. The second is the list of instances and their parameters that
+will be used to vary that first chunk of data each time it&#8217;s drawn. With a
+single draw call, an entire forest grows.</p>
+<p>在这些接口中，你提供两个两个数据流。第一部分是一块需要渲染多次的共同数据——在我们的例子中是树的网格和纹理。第二部分是实例的列表以及每次绘制第一部分时需要使用的参数。只要调用一次绘图，整个森林都会生长出来。</p>
+<aside name="hardware">
+<p>The fact that this API is implemented directly by the graphics card means the
+Flyweight pattern may be the only Gang of Four design pattern to have actual
+hardware support.</p>
+</aside>
+<h2><a href="#the-flyweight-pattern" name="the-flyweight-pattern">The Flyweight Pattern</a></h2>
+<h2><a href="#享元模式" name="享元模式">享元模式</a></h2>
+<p>Now that we&#8217;ve got one concrete example under our belts, I can walk you through
+the general pattern. Flyweight, like its name implies, comes into play when you
+have objects that need to be more lightweight, generally because you have too
+many of them.</p>
+<p>好了，我们已经看了一个具体的例子，下面我介绍模式的通用部分。享元，就像它名字暗示的那样，当你需要更加轻量级的类事使用，大多数情况是因为你有太多这种类了。</p>
+<p>With instanced rendering, it&#8217;s not so much that they take up too much memory as
+it is they take too much <em>time</em> to push each separate tree over the bus to the
+GPU, but the basic idea is the same.</p>
+<p>渲染的实例中，消耗的内存没有将每棵树通过总线送到GPU消耗的<em>时间</em>多，但是基本要点是一样的。</p>
+<p>The pattern solves that by separating out an object&#8217;s data into two kinds. The
+first kind of data is the stuff that&#8217;s not specific to a single <em>instance</em> of
+that object and can be shared across all of them. The Gang of Four calls this
+the <em>intrinsic</em> state, but I like to think of it as the &#8220;context-free&#8221; stuff. In
+the example here, this is the geometry and textures for the tree.</p>
+<p>这个模式通过将对对象的数据分为两种来解决这个问题。第一种数据是没有特定字幕是哪一个对象的<em>实例</em>，因此可以在对象间分享。Gof称之为<em>固有</em>状态，但是我更喜欢将其视为<em>上下文无关</em>部分。在这里的例子中，这是苏的网格和纹理。</p>
+<p>The rest of the data is the <em>extrinsic</em> state, the stuff that is unique to that
+instance. In this case, that is each tree&#8217;s position, scale, and color. Just
+like in the chunk of sample code up there, this pattern saves memory by sharing
+one copy of the intrinsic state across every place where an object appears.</p>
+<p>数据的剩余部分是<em>外在</em>状态，那些对实例独一无二的东西。在这个例子中，是每棵树的位置，拉伸和颜色。就像这里显示的示例代码块一样，这种模式通过在每个对象出现的时候共享一份固有状态，来节约内存。</p>
+<p>From what we&#8217;ve seen so far, this seems like basic resource sharing,
+hardly worth being called a pattern. That&#8217;s partially because in this example
+here, we could come up with a clear separate <em>identity</em> for the shared state:
+the <code>TreeModel</code>.</p>
+<p>就我们目前而言就，这看上去像是一个基础的资源共享，很难被称为一种模式。这部分是因为在这个例子中，我们可以为共享状态划出一个清晰的<em>身份</em>：<code>TreeModel</code>。</p>
+<p>I find this pattern to be less obvious (and thus more clever) when used in cases
+where there isn&#8217;t a really well-defined identity for the shared object. In those
+cases, it feels more like an object is magically in multiple places at the same
+time. Let me show you another example.</p>
+<p>我发现当共享对象没有一个好好设计的实体时，使用这种模式就不那么明显（使用者也就越发精明）。在这些情况下，这看上去是一个对象在同时被魔术般的分配到了多个地方。让我展示给你另外一个例子。</p>
+<h2><a href="#a-place-to-put-down-roots" name="a-place-to-put-down-roots">A Place To Put Down Roots</a></h2>
+<h2><a href="#放根的地方" name="放根的地方">放根的地方</a></h2>
+<p>The ground these trees are growing on needs to be represented in our game too.
+There can be patches of grass, dirt, hills, lakes, rivers, and whatever other
+terrain you can dream up. We&#8217;ll make the ground <em>tile-based</em>: the surface of the
+world is a huge grid of tiny tiles. Each tile is covered in one kind of terrain.</p>
+<p>这些树长出来的地方也需要在我们的游戏中表示。这里可能有草，泥土，丘陵，湖泊，河流，以及其它任何你可以想到的地形。我们<em>基于区块</em>建立地表：世界的表面被划分为由微小区块组成的巨大网格。每一个区块都是由一种地形覆盖。</p>
+<p>Each terrain type has a number of properties that affect gameplay:</p>
+<p>每一种地形类型都有一系列特性会影响游戏玩法：</p>
+<ul>
+<li>A movement cost that determines how quickly players can move through it.</li>
+<li>A flag for whether it&#8217;s a watery terrain that can be crossed by boats.</li>
+<li>
+<p>A texture used to render it.</p>
+</li>
+<li>
+<p>一个移动代价决定了玩家能够多快的穿过它。</p>
+</li>
+<li>一个标识表面了这是不是一个我们能够通过船穿过的有水的地形。</li>
+<li>一个纹理用来渲染它。</li>
+</ul>
+<p>Because we game programmers are paranoid about efficiency, there&#8217;s no way we&#8217;d
+store all of that state in <span name="learned">each</span> tile in the world.
+Instead, a common approach is to use an enum for terrain types:</p>
+<p>因为我们游戏程序员偏执于效率，我们不会在每一个区块中保存这些状态。相反，一个通用的方式是为每一种地形使用一个枚举类型。</p>
+<aside name="learned">
+<p>After all, we already learned our lesson with those trees.</p>
+</aside>
+<div class="codehilite"><pre><span class="k">enum</span> <span class="n">Terrain</span>
+<span class="p">{</span>
+  <span class="n">TERRAIN_GRASS</span><span class="p">,</span>
+  <span class="n">TERRAIN_HILL</span><span class="p">,</span>
+  <span class="n">TERRAIN_RIVER</span>
+  <span class="c1">// Other terrains...</span>
+<span class="p">};</span>
+</pre></div>
+
+
+<p>Then the world maintains a huge grid of those:</p>
+<p>然后，这个世界这样管理巨大的网格：</p>
+<p><span name="grid"></span></p>
+<div class="codehilite"><pre><span class="k">class</span> <span class="nc">World</span>
+<span class="p">{</span>
+<span class="k">private</span><span class="o">:</span>
+  <span class="n">Terrain</span> <span class="n">tiles_</span><span class="p">[</span><span class="n">WIDTH</span><span class="p">][</span><span class="n">HEIGHT</span><span class="p">];</span>
+<span class="p">};</span>
+</pre></div>
+
+
+<aside name="grid">
+<p>Here I&#8217;m using a nested array to store the 2D grid. That&#8217;s efficient in C/C++
+because it will pack all of the elements together. In Java or other memory-
+managed languages, doing that will actually give you an array of rows where each
+element is a <em>reference</em> to the array of columns, which may not be as memory-
+friendly as you&#8217;d like.</p>
+<p>In either case, real code would be better served by hiding this implementation
+detail behind a nice 2D grid data structure. I&#8217;m doing this here just to keep it
+simple.</p>
+</aside>
+<p>To actually get the useful data about a tile, we do something like:</p>
+<p>为了实际获得区块的有用数据，我们做了一些这样的事情：</p>
+<div class="codehilite"><pre><span class="kt">int</span> <span class="n">World</span><span class="o">::</span><span class="n">getMovementCost</span><span class="p">(</span><span class="kt">int</span> <span class="n">x</span><span class="p">,</span> <span class="kt">int</span> <span class="n">y</span><span class="p">)</span>
+<span class="p">{</span>
+  <span class="k">switch</span> <span class="p">(</span><span class="n">tiles_</span><span class="p">[</span><span class="n">x</span><span class="p">][</span><span class="n">y</span><span class="p">])</span>
+  <span class="p">{</span>
+    <span class="k">case</span> <span class="nl">TERRAIN_GRASS</span><span class="p">:</span> <span class="k">return</span> <span class="mi">1</span><span class="p">;</span>
+    <span class="k">case</span> <span class="nl">TERRAIN_HILL</span><span class="p">:</span>  <span class="k">return</span> <span class="mi">3</span><span class="p">;</span>
+    <span class="k">case</span> <span class="nl">TERRAIN_RIVER</span><span class="p">:</span> <span class="k">return</span> <span class="mi">2</span><span class="p">;</span>
+      <span class="c1">// Other terrains...</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="kt">bool</span> <span class="n">World</span><span class="o">::</span><span class="n">isWater</span><span class="p">(</span><span class="kt">int</span> <span class="n">x</span><span class="p">,</span> <span class="kt">int</span> <span class="n">y</span><span class="p">)</span>
+<span class="p">{</span>
+  <span class="k">switch</span> <span class="p">(</span><span class="n">tiles_</span><span class="p">[</span><span class="n">x</span><span class="p">][</span><span class="n">y</span><span class="p">])</span>
+  <span class="p">{</span>
+    <span class="k">case</span> <span class="nl">TERRAIN_GRASS</span><span class="p">:</span> <span class="k">return</span> <span class="nb">false</span><span class="p">;</span>
+    <span class="k">case</span> <span class="nl">TERRAIN_HILL</span><span class="p">:</span>  <span class="k">return</span> <span class="nb">false</span><span class="p">;</span>
+    <span class="k">case</span> <span class="nl">TERRAIN_RIVER</span><span class="p">:</span> <span class="k">return</span> <span class="nb">true</span><span class="p">;</span>
+      <span class="c1">// Other terrains...</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+
+
+<p>You get the idea. This works, but I find it ugly. I think of movement cost and
+wetness as <em>data</em> about a terrain, but here that&#8217;s embedded in code. Worse, the
+data for a single terrain type is smeared across a bunch of methods. It would be
+really nice to keep all of that encapsulated together. After all, that&#8217;s what
+objects are designed for.</p>
+<p>你知道我的意思了。这可行，但是我觉得很丑。运行代价和湿度是地形的<em>数据</em>，但这嵌入了代码。更糟的是，一个简单地形的数据在横跨在一堆代码中。如果能够将这些包裹起来就好了。毕竟，那是为什么我们设计了对象。</p>
+<p>It would be great if we could have an actual terrain <em>class</em>, like:</p>
+<p>如果我们有实际的地形<em>类</em>就好了，像这样：</p>
+<p><span name="const"></span></p>
+<div class="codehilite"><pre><span class="k">class</span> <span class="nc">Terrain</span>
+<span class="p">{</span>
+<span class="k">public</span><span class="o">:</span>
+  <span class="n">Terrain</span><span class="p">(</span><span class="kt">int</span> <span class="n">movementCost</span><span class="p">,</span>
+          <span class="kt">bool</span> <span class="n">isWater</span><span class="p">,</span>
+          <span class="n">Texture</span> <span class="n">texture</span><span class="p">)</span>
+  <span class="o">:</span> <span class="n">movementCost_</span><span class="p">(</span><span class="n">movementCost</span><span class="p">),</span>
+    <span class="n">isWater_</span><span class="p">(</span><span class="n">isWater</span><span class="p">),</span>
+    <span class="n">texture_</span><span class="p">(</span><span class="n">texture</span><span class="p">)</span>
+  <span class="p">{}</span>
+
+  <span class="kt">int</span> <span class="n">getMovementCost</span><span class="p">()</span> <span class="k">const</span> <span class="p">{</span> <span class="k">return</span> <span class="n">movementCost_</span><span class="p">;</span> <span class="p">}</span>
+  <span class="kt">bool</span> <span class="n">isWater</span><span class="p">()</span> <span class="k">const</span> <span class="p">{</span> <span class="k">return</span> <span class="n">isWater_</span><span class="p">;</span> <span class="p">}</span>
+  <span class="k">const</span> <span class="n">Texture</span><span class="o">&amp;</span> <span class="n">getTexture</span><span class="p">()</span> <span class="k">const</span> <span class="p">{</span> <span class="k">return</span> <span class="n">texture_</span><span class="p">;</span> <span class="p">}</span>
+
+<span class="k">private</span><span class="o">:</span>
+  <span class="kt">int</span> <span class="n">movementCost_</span><span class="p">;</span>
+  <span class="kt">bool</span> <span class="n">isWater_</span><span class="p">;</span>
+  <span class="n">Texture</span> <span class="n">texture_</span><span class="p">;</span>
+<span class="p">};</span>
+</pre></div>
+
+
+<aside name="const">
+<p>You&#8217;ll notice that all of the methods here are <code>const</code>. That&#8217;s no coincidence.
+Since the same object is used in multiple contexts, if you were to modify it,
+the changes would appear in multiple places simultaneously.</p>
+<p>That&#8217;s probably not what you want. Sharing objects to save memory should be an
+optimization that doesn&#8217;t affect the visible behavior of the app. Because of
+this, Flyweight objects are almost always immutable.</p>
+</aside>
+<p>But we don&#8217;t want to pay the cost of having an instance of that for each tile in
+the world. If you look at that class, you&#8217;ll notice that there&#8217;s actually
+<em>nothing</em> in there that&#8217;s specific to <em>where</em> that tile is. In flyweight terms,
+<em>all</em> of a terrain&#8217;s state is &#8220;intrinsic&#8221; or &#8220;context-free&#8221;.</p>
+<p>但是我们不想为每一个区块都保存一个实例。如果你看看这个类里面，你会发现里面实际上<em>什么也没有</em>，唯一特别的是区块在<em>哪里</em>。用享元的术语讲，区块的所有状态都是“内在的”或者说“上下文无关的”。</p>
+<p>Given that, there&#8217;s no reason to have more than one of each terrain type. Every
+grass tile on the ground is identical to every other one. Instead of having the
+world be a grid of enums or Terrain objects, it will be a grid of <em>pointers</em> to
+<code>Terrain</code> objects:</p>
+<p>鉴于此，我们没有必要保持多余一个地形类型。每一种地面上的草区块和其他的没有什么不同。游戏世界不是由地形区块对象网格组成的，而是由<code>Terrain</code>对象<em>指针</em>网格组成的：</p>
+<div class="codehilite"><pre><span class="k">class</span> <span class="nc">World</span>
+<span class="p">{</span>
+<span class="k">private</span><span class="o">:</span>
+  <span class="n">Terrain</span><span class="o">*</span> <span class="n">tiles_</span><span class="p">[</span><span class="n">WIDTH</span><span class="p">][</span><span class="n">HEIGHT</span><span class="p">];</span>
+
+  <span class="c1">// Other stuff...</span>
+<span class="p">};</span>
+</pre></div>
+
+
+<p>Each tile that uses the same terrain will point to the same terrain instance.</p>
+<p>每一个使用相同地形的区块会指向相同的地形实例。</p>
+<p><img src="images/flyweight-tiles.png" alt="A row of tiles. Each tile points to either a shared Grass, River, or Hill object." /></p>
+<p>Since the terrain instances are used in multiple places, their lifetimes would
+be a little more complex to manage if you were to dynamically allocate them.
+Instead, we&#8217;ll just store them directly in the world:</p>
+<p>由于地形实例在很多地方使用，如果你想要动态组织他们，他们的生命周期会有点复杂。取而代之的是，我们直接字啊游戏世界中存储他们。</p>
+<div class="codehilite"><pre><span class="k">class</span> <span class="nc">World</span>
+<span class="p">{</span>
+<span class="k">public</span><span class="o">:</span>
+  <span class="n">World</span><span class="p">()</span>
+  <span class="o">:</span> <span class="n">grassTerrain_</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">false</span><span class="p">,</span> <span class="n">GRASS_TEXTURE</span><span class="p">),</span>
+    <span class="n">hillTerrain_</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="nb">false</span><span class="p">,</span> <span class="n">HILL_TEXTURE</span><span class="p">),</span>
+    <span class="n">riverTerrain_</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="nb">true</span><span class="p">,</span> <span class="n">RIVER_TEXTURE</span><span class="p">)</span>
+  <span class="p">{}</span>
+
+<span class="k">private</span><span class="o">:</span>
+  <span class="n">Terrain</span> <span class="n">grassTerrain_</span><span class="p">;</span>
+  <span class="n">Terrain</span> <span class="n">hillTerrain_</span><span class="p">;</span>
+  <span class="n">Terrain</span> <span class="n">riverTerrain_</span><span class="p">;</span>
+
+  <span class="c1">// Other stuff...</span>
+<span class="p">};</span>
+</pre></div>
+
+
+<p>Then we can use those to paint the ground like this:</p>
+<p>然后我们可以像这样来描绘地面：</p>
+<p><span name="generate"></span></p>
+<div class="codehilite"><pre><span class="kt">void</span> <span class="n">World</span><span class="o">::</span><span class="n">generateTerrain</span><span class="p">()</span>
+<span class="p">{</span>
+  <span class="c1">// Fill the ground with grass.</span>
+  <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">x</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">x</span> <span class="o">&lt;</span> <span class="n">WIDTH</span><span class="p">;</span> <span class="n">x</span><span class="o">++</span><span class="p">)</span>
+  <span class="p">{</span>
+    <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">y</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">y</span> <span class="o">&lt;</span> <span class="n">HEIGHT</span><span class="p">;</span> <span class="n">y</span><span class="o">++</span><span class="p">)</span>
+    <span class="p">{</span>
+      <span class="c1">// Sprinkle some hills.</span>
+      <span class="k">if</span> <span class="p">(</span><span class="n">random</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span>
+      <span class="p">{</span>
+        <span class="n">tiles_</span><span class="p">[</span><span class="n">x</span><span class="p">][</span><span class="n">y</span><span class="p">]</span> <span class="o">=</span> <span class="o">&amp;</span><span class="n">hillTerrain_</span><span class="p">;</span>
+      <span class="p">}</span>
+      <span class="k">else</span>
+      <span class="p">{</span>
+        <span class="n">tiles_</span><span class="p">[</span><span class="n">x</span><span class="p">][</span><span class="n">y</span><span class="p">]</span> <span class="o">=</span> <span class="o">&amp;</span><span class="n">grassTerrain_</span><span class="p">;</span>
+      <span class="p">}</span>
+    <span class="p">}</span>
+  <span class="p">}</span>
+
+  <span class="c1">// Lay a river.</span>
+  <span class="kt">int</span> <span class="n">x</span> <span class="o">=</span> <span class="n">random</span><span class="p">(</span><span class="n">WIDTH</span><span class="p">);</span>
+  <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">y</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">y</span> <span class="o">&lt;</span> <span class="n">HEIGHT</span><span class="p">;</span> <span class="n">y</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+    <span class="n">tiles_</span><span class="p">[</span><span class="n">x</span><span class="p">][</span><span class="n">y</span><span class="p">]</span> <span class="o">=</span> <span class="o">&amp;</span><span class="n">riverTerrain_</span><span class="p">;</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+
+
+<aside name="generate">
+<p>I&#8217;ll admit this isn&#8217;t the world&#8217;s greatest procedural terrain generation
+algorithm.</p>
+</aside>
+<p>Now instead of methods on <code>World</code> for accessing the terrain properties, we can
+expose the <code>Terrain</code> object directly:</p>
+<p>现在不需要<code>World</code>中的方法来接触到地形属性，我们可以直接暴露出<code>Terrain</code>对象。</p>
+<div class="codehilite"><pre><span class="k">const</span> <span class="n">Terrain</span><span class="o">&amp;</span> <span class="n">World</span><span class="o">::</span><span class="n">getTile</span><span class="p">(</span><span class="kt">int</span> <span class="n">x</span><span class="p">,</span> <span class="kt">int</span> <span class="n">y</span><span class="p">)</span> <span class="k">const</span>
+<span class="p">{</span>
+  <span class="k">return</span> <span class="o">*</span><span class="n">tiles_</span><span class="p">[</span><span class="n">x</span><span class="p">][</span><span class="n">y</span><span class="p">];</span>
+<span class="p">}</span>
+</pre></div>
+
+
+<p>This way, <code>World</code> is no longer coupled to all sorts of details of terrains. If
+you want some property of the tile, you can get it right from that object:</p>
+<p>用这种方式，<code>World</code>不再是存储各种地形的细节。如果你想要某一区块的属性，你可以直接从你那个对象获得：</p>
+<div class="codehilite"><pre><span class="kt">int</span> <span class="n">cost</span> <span class="o">=</span> <span class="n">world</span><span class="p">.</span><span class="n">getTile</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">).</span><span class="n">getMovementCost</span><span class="p">();</span>
+</pre></div>
+
+
+<p>We&#8217;re back to the pleasant API of working with real objects, and we did this
+with almost no overhead&#8202;&mdash;&#8202;a pointer is often no larger than an enum.</p>
+<p>我们回到了与真实对象工作的愉快API，我们也几乎没有开销——一个指针通常不比一个枚举大。</p>
+<h2><a href="#what-about-performance" name="what-about-performance">What About Performance?</a></h2>
+<h2><a href="#性能如何？" name="性能如何？">性能如何？</a></h2>
+<p>I say &#8220;almost&#8221; here because the performance bean counters will rightfully want
+to know how this compares to using an enum. Referencing the terrain by pointer
+implies an indirect lookup. To get to some terrain data like the movement cost,
+you first have to follow the pointer in the grid to find the terrain object and
+then find the movement cost there. Chasing a pointer like this can cause a <span
+name="cache">cache miss</span>, which can slow things down.</p>
+<p>我在这里说几乎是因为性能偏执狂肯定会想要知道它和使用枚举比起来如何。通过指针解引用获取地形需要一次间接跳转。为了获得移动代价这样的地形数据，你首先需要跟着网格中的指针找到地形对象，然后再找到移动代价。跟踪这样的指针会导致缓存不命中，降低运行速度。</p>
+<aside name="cache">
+<p>For lots more on pointer chasing and cache misses, see the chapter on <a href
+="data-locality.html" class="pattern">Data Locality</a>.</p>
+</aside>
+<p>As always, the golden rule of optimization is <em>profile first</em>. Modern computer
+hardware is too complex for performance to be a game of pure reason anymore. In
+my tests for this chapter, there was no penalty for using a flyweight over an
+enum. Flyweights were actually noticeably faster. But that&#8217;s entirely dependent
+on how other stuff is laid out in memory.</p>
+<p>就像往常一样，优化的金科玉律是<em>概述有限</em>。现代计算机硬件过于复杂，性能只是游戏的一个原因。在我这章做的测试中，享元较枚举没有什么性能的优势。享元实际上明显更快。但是这也完全取决于内存中的事物是如何排列的。</p>
+<p>What I <em>am</em> confident of is that using flyweight objects shouldn&#8217;t be dismissed
+out of hand. They give you the advantages of an object-oriented style without
+the expense of tons of objects. If you find yourself creating an enum and doing
+lots of switches on it, consider this pattern instead. If you&#8217;re worried about
+performance, at least profile first before changing your code to a less
+maintainable style.</p>
+<p>我<em>可以</em>自信使用享元对象不会被搞到不可收拾。他给了你面向对象的优势，而没有牺牲一堆对象。如果你发现自己创建了一个枚举，然后在他上面做了很多分支跳转，考虑一下这个模式吧。如果你担心性能，在你把代码编程更加不可控的风格之前至少测试一下。</p>
+<h2><a href="#see-also" name="see-also">See Also</a></h2>
+<h2><a href="#参见" name="参见">参见</a></h2>
+<ul>
+<li>
+<p>In the tile example, we just eagerly created an instance for each terrain
+    type and stored it in <code>World</code>. That made it easy to find and reuse the
+    shared instances. In many cases, though, you won&#8217;t want to create <em>all</em> of
+    the flyweights up front.</p>
+<p>在区块的例子中，我们只是为每一种地形创建一个实例然后存储在<code>World</code>中。这也许更好找到和重用这些实例。但是在很多情况下，你不会在一开始就创建<em>所有</em>享元。</p>
+<p>If you can&#8217;t predict which ones you actually need, it&#8217;s better to create
+them on demand. To get the advantage of sharing, when you request one, you
+first see if you&#8217;ve already created an identical one. If so, you just return
+that instance.</p>
+<p>如果你不能预料到哪一个是你实际上需要的，最好在需要时采取创建。为了保持共享的优势，当你请求一个的时候，你首先看看你是否已经创建了一个相同的实例。如果确实如此，那么你只需返回那个实例。</p>
+<p>This usually means that you have to encapsulate construction behind some
+interface that can first look for an existing object. Hiding a constructor
+like this is an example of the <a
+href="http://en.wikipedia.org/wiki/Factory_method_pattern" class="gof-
+pattern">Factory Method</a> pattern.</p>
+<p>这通常意味着你需要将构建指令封装在一个首先查询对象是否存在的接口之后。像这样隐藏构造指令是工厂模式的一个例子。</p>
+</li>
+<li>
+<p>In order to return a previously created flyweight, you&#8217;ll have to keep track
+    of the pool of ones that you&#8217;ve already instantiated. As the name implies,
+    that means that an <a href="object-pool.html" class="pattern">Object
+    Pool</a> might be a helpful place to store them.</p>
+</li>
+<li>
+<p>为了返回一个已经创建的享元，你需要追踪那些你已经实例化的对象池。就像名字暗示的那样，这就意味着对象池是一个存储他们的好地方。</p>
+</li>
+<li>
+<p>When you&#8217;re using the <a class="pattern" href="state.html">State</a>
+    pattern, you often have &#8220;state&#8221; objects that don&#8217;t have any fields specific
+    to the machine that the state is being used in. The state&#8217;s
+    identity and methods are enough to be useful. In that case, you can apply
+    this pattern and reuse that same state instance in multiple state machines
+    at the same time without any problems.</p>
+</li>
+<li>
+<p>当你使用状态模式的时候，你通常有不具有任何特定字段的“状态对象”。这个状态的身份和方法都足够有用。在这种情况下，你可以使用这个模式，然后在不同的状态机上使用相同的对象实例。</p>
+</li>
+</ul>
+<nav>
+  <span class="prev">&larr; <a href="command.html">Previous Chapter</a></span>
+  <span class="next"><a href="observer.html">Next Chapter</a> &rarr;</span>
+  <span class="toc">&equiv; <a href="/">The Book</a></span>
+</nav>
+</div>
+</div>
+<footer>&copy; 2009-2015 Robert Nystrom</footer>
+</body>
+</html>

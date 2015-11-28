@@ -1,0 +1,815 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+<meta http-equiv="Content-type" content="text/html;charset=UTF-8" />
+
+<title>Subclass Sandbox &middot; Behavioral Patterns &middot; Game Programming Patterns</title>
+
+<!-- Tell mobile browsers we're optimized for them and they don't need to crop
+     the viewport. -->
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<link rel="stylesheet" type="text/css" href="style.css" />
+<link href="http://fonts.googleapis.com/css?family=Merriweather:400,400italic,700,700italic|Source+Code+Pro|Source+Sans+Pro:200,300,400,600,400italic,600italic|Rock+Salt" rel="stylesheet" type="text/css">
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-42804721-1', 'gameprogrammingpatterns.com');
+  ga('send', 'pageview');
+</script>
+<script src="jquery-1.10.1.min.js"></script>
+<script src="script.js"></script>
+</head>
+<body id="top">
+<div class="page sidebar">
+<div class="content">
+<nav class="top">
+  <span class="prev">&larr; <a href="bytecode.html">Previous Chapter</a></span>
+  <span class="next"><a href="type-object.html">Next Chapter</a> &rarr;</span>
+  <span class="toc">&equiv; <a href="/">The Book</a></span>
+</nav>
+<h1>Subclass Sandbox</h1>
+<h1 class="book"><a href="/">Game Programming Patterns</a><span class="section"><a href="behavioral-patterns.html">Behavioral Patterns</a></span></h1>
+<h2><a href="#intent" name="intent">Intent</a></h2>
+<h2><a href="#意图" name="意图">意图</a></h2>
+<p><em>Define behavior in a subclass using a set of operations provided by its
+base class.</em></p>
+<p><em>用一系列由基类定义的操作定义子类中的行为。</em></p>
+<h2><a href="#motivation" name="motivation">Motivation</a></h2>
+<h2><a href="#动机" name="动机">动机</a></h2>
+<p>Every kid has dreamed of being a superhero, but unfortunately, cosmic rays are
+in short supply here on Earth. Games that let you pretend to be a superhero are
+the closest approximation. Because our game designers have never learned to say,
+&#8220;no&#8221;, <em>our</em> superhero game aims to feature dozens, if not hundreds, of
+different superpowers that heroes may choose from.</p>
+<p>每个孩子都梦想过变成超级英雄，但是不幸的是，高能射线在地球上很短缺。游戏是让你假装是超级英雄的最简单的方法。因为我们的游戏设计者从来没有学会说“不”，<em>我们的</em>超级英雄游戏面向成打，如果不是成百的，不同的超级能力可以选择。</p>
+<p>Our plan is that we&#8217;ll have a <code>Superpower</code> base class. Then, we&#8217;ll have a <span
+name="lots">derived</span> class that implements each superpower. We&#8217;ll divvy up
+the design doc among our team of programmers and get coding. When we&#8217;re done,
+we&#8217;ll have a hundred superpower classes.</p>
+<p>我们的集合是有一个<code>Superpower</code>基类。然后我们有它推导出各种超级能力的实现。我们在我们的程序员队伍中分发设计文档，然后开始变成，当我们完成后，我们就会有上百的超级能力类。</p>
+<aside name="lots">
+<p>When you find yourself with a <em>lot</em> of subclasses, like in this example, that
+often means a data-driven approach is better. Instead of lots of <em>code</em> for
+defining different powers, try finding a way to define that behavior in <em>data</em>
+instead.</p>
+<p>Patterns like <a class="pattern" href="type-object.html">Type Object</a>, <a
+class="pattern" href="bytecode.html">Bytecode</a>, and <a class="gof-pattern"
+href="http://en.wikipedia.org/wiki/Interpreter_pattern">Interpreter</a> can all
+help.</p>
+</aside>
+<p>We want to immerse our players in a world teeming with variety. Whatever power
+they dreamed up when they were a kid, we want in our game. That means these
+superpower subclasses will be able to do just about everything: play sounds,
+spawn visual effects, interact with AI, create and destroy other game entities,
+and mess with physics. There&#8217;s no corner of the codebase that they won&#8217;t touch.</p>
+<p>我们想让玩家处于充满变化的游戏世界中。无论他们在孩子时想象过什么能力，我们都要在游戏中表现。这就意味着这些超级能力子类需要做任何事情：播放声音，产生视觉此熬过，与AI交互，创建和销毁其他游戏实体，与物理打交道。没有哪处嗲吗是他们不能碰到的。</p>
+<p>Let&#8217;s say we unleash our team and get them writing superpower classes. What&#8217;s
+going to happen?</p>
+<p>假设我们让团队信马由缰的写超级能力类。会发生什么？</p>
+<ul>
+<li>
+<p><em>There will be lots of redundant code.</em> While the different powers will be
+    wildly varied, we can still expect plenty of overlap. Many of them will
+    spawn visual effects and play sounds in the same way. A freeze ray, heat
+    ray, and Dijon mustard ray are all pretty similar when you get down to it.
+    If the people implementing those don&#8217;t coordinate, there&#8217;s going to be a lot
+    of duplicate code and effort.</p>
+</li>
+<li>
+<p><em>会有很多冗余代码。</em>当有非常不同的各种能力，我们可以预期有很多重叠。他们很多都会用相同的方式发出视觉效果并播放声音。当你坐下来看看，冷冻光线，加热光线，芥末酱光线都很相似。如果人们实现这些的时候没有协同，那就会有很多冗余的代码和付出。</p>
+</li>
+<li>
+<p><em>Every part of the game engine will get coupled to these classes.</em> Without
+    knowing better, people will write code that calls into subsystems that were
+    never meant to be tied directly to the superpower classes. If our renderer
+    is organized into several nice neat layers, only one of which is intended to
+    be used by code outside of the graphics engine, we can bet that we&#8217;ll end up
+    with superpower code that pokes into every one of them.</p>
+</li>
+<li>
+<p><em>游戏引擎中的每一部分都会与这些类耦合。</em>没有其他信息的话，任何会写直接调用子系统的代码，它们从来没打算直接与超级能力类绑定。如果我们的渲染系统被好好组织成多个层次，只有其中之一能被外部的图形引擎使用，我们可以大度我的超级能力代码与它们中的每一个回到它们中的每一个。</p>
+</li>
+<li>
+<p><em>When these outside systems need to change, odds are good some random
+    superpower code will get broken.</em> Once we have different superpower classes
+    coupling themselves to various and sundry parts of the game engine, it&#8217;s
+    inevitable that changes to those systems will impact the power classes.
+    That&#8217;s no fun because your graphics, audio, and UI programmers probably
+    don&#8217;t want to also have to be gameplay programmers <em>too</em>.</p>
+</li>
+<li>
+<p><em>当外部代码需要改变是，有很大几率一些随机超能力代码会损坏。</em>一旦我们有了不同的超能力类绑定到多种杂乱的游戏引擎部分，改变那些期限必然影响能力类。这没什么意思，因为你的图形，音频，UI程序员很可能不想<em>也</em>成为玩法程序员。</p>
+</li>
+<li>
+<p><em>It&#8217;s hard to define invariants that all superpowers obey.</em> Let&#8217;s say we
+    want to make sure that all audio played by our powers gets properly queued
+    and prioritized. There&#8217;s no easy way to do that if our hundred classes are
+    all directly calling into the sound engine on their own.</p>
+</li>
+<li>
+<p><em>很难定义所有超能力遵守的不变量。</em>假设我们想保证我们能力播放的所有音频都正确的排序和优先化。如果我们几百个类都直接自己调用音频引擎就没什么好办法来完成那一点。</p>
+</li>
+</ul>
+<p>What we want is to give each of the gameplay programmers who is implementing a
+superpower a set of primitives they can play with. You want your power to play a
+sound? Here&#8217;s your <code>playSound()</code> function. You want particles? Here&#8217;s
+<code>spawnParticles()</code>. We&#8217;ll make sure these operations cover everything you need
+to do so that you don&#8217;t need to <code>#include</code> random headers and nose your way into
+the rest of the codebase.</p>
+<p>我们想要的是给么一个实现超能力的玩法程序员一系列他们可以使用的基本单元。你想要播放声音？这是你的<code>playSound()</code>函数。你想要粒子？这是<code>spawnParticles()</code>。我们保证了这些操作覆盖了你需要做的事情，所以你不需要<code>#include</code>随机的头文件，干扰到代码库的其他部分。</p>
+<p>We do this by making these operations <em>protected methods of the</em> <code>Superpower</code>
+<em>base class</em>. Putting them in the base class gives every power subclass direct,
+easy access to the methods. Making them protected (and likely non-virtual) communicates
+that they exist specifically to be <em>called</em> by subclasses.</p>
+<p>我们通过定义这些操作为<code>Superpower</code><em>基类</em>的<em>保护方法</em>。将它们放在基类给了每个能力子类直接，方便的途径获取方法。让它们保护（有些像非虚）暗示了他们存在就是为了被子类<em>调用</em>。</p>
+<p>Once we have these toys to play with, we need a place to use them. For that,
+we&#8217;ll define a <em>sandbox method</em>, an abstract protected method that subclasses
+must implement. Given those, to implement a new kind of power, you:</p>
+<p>一旦我们有了这些东西来玩耍，我们需要一个地方使用他们。为了那个，我们定义一个<em>沙箱方法</em>，一个子类必须实现的抽象的保护方法。获得了那些，要实现一种新的能力，你需要：</p>
+<ol>
+<li>
+<p>Create a new class that inherits from <code>Superpower</code>.</p>
+</li>
+<li>
+<p>Override <code>activate()</code>, the sandbox method.</p>
+</li>
+<li>
+<p>Implement the body of that by calling the protected methods that
+    <code>Superpower</code> provides.</p>
+</li>
+<li>
+<p>创建一个从<code>Superpower</code>继承的新类。</p>
+</li>
+<li>
+<p>重载<code>activate()</code>，沙箱方法。</p>
+</li>
+<li>
+<p>通过调用<code>Superpower</code>提供的保护方法实现主体。</p>
+</li>
+</ol>
+<p>We can fix our redundant code problem now by making those provided operations as
+high-level as possible. When we see code that&#8217;s duplicated between lots of the
+subclasses, we can always roll it up into <code>Superpower</code> as a new operation that
+they can all use.</p>
+<p>我们现在可以使用这些尽可能高层次的操作来解决我们的冗余代码问题了。当我们看到代码在多个子类间重复，我们总可以将其打包到<code>Superpower</code>中，作为他们都可以使用的新操作。</p>
+<p>We&#8217;ve addressed our coupling problem by constraining the coupling to one place.
+<code>Superpower</code> itself will end up coupled to the different game systems, but our
+hundred derived classes will not. Instead, they are <em>only</em> coupled to their base
+class. When one of those game systems changes, modification to <code>Superpower</code> may
+be necessary, but dozens of subclasses shouldn&#8217;t have to be touched.</p>
+<p>我们通过将耦合约束到一个地方解决了我们的耦合问题。<code>Superpower</code>最终与不同的系统耦合，但是我们继承的几百个类不会。相反，他们<em>唯一</em>耦合他们的基类。当其中一个游戏系统改变时，修改<code>Superpower</code>也许是必须的，但是成打的子类不需要修改。</p>
+<p>This pattern leads to an architecture where you have a shallow but wide class
+hierarchy. Your <span name="wide">inheritance</span> chains aren&#8217;t <em>deep</em>, but
+there are a <em>lot</em> of classes that hang off <code>Superpower</code>. By having a single
+class with a lot of direct subclasses, we have a point of leverage in our
+codebase. Time and love that we put into <code>Superpower</code> can benefit a wide set of
+classes in the game.</p>
+<p>这个模式指向浅层但是广泛的类层次。你的继承链不<em>深</em>，但是有<em>很多</em>类挂在<code>Superpower</code>上。通过有很多直接子类的基类，我们在代码库中创造了一个支撑点。我们投入到<code>Superpower</code>的时间和爱可以让游戏中广泛的类收益。</p>
+<aside name="wide">
+<p>Lately, you find a lot of people criticizing inheritance in object-oriented
+languages. Inheritance <em>is</em> problematic&#8202;&mdash;&#8202;there&#8217;s really no deeper coupling in
+a codebase than the one between a base class and its subclass&#8202;&mdash;&#8202;but I find
+<em>wide</em> inheritance trees to be easier to work with than <em>deep</em> ones.</p>
+</aside>
+<h2><a href="#the-pattern" name="the-pattern">The Pattern</a></h2>
+<h2><a href="#模式" name="模式">模式</a></h2>
+<p>A <strong>base class</strong> defines an abstract <strong>sandbox method</strong> and several <strong>provided
+operations</strong>. Marking them protected makes it clear that they are for use by
+derived classes. Each derived <strong>sandboxed subclass</strong> implements the sandbox
+method using the provided operations.</p>
+<p>一个<strong>基类</strong>顶一个一个抽象的<strong>沙箱方法</strong>和几个<strong>提供的操作</strong>。让他们处于保护表面他们只为继承类所使用。每一个推导出的<strong>沙箱子类</strong>用提供的操作实现了沙箱方法。</p>
+<h2><a href="#when-to-use-it" name="when-to-use-it">When to Use It</a></h2>
+<h2><a href="#何时使用" name="何时使用">何时使用</a></h2>
+<p>The Subclass Sandbox pattern is a very simple, common pattern lurking in lots of codebases, even outside
+of games. If you have a non-virtual protected method laying around, you&#8217;re
+probably already using something like this. Subclass Sandbox is a good fit
+when:</p>
+<p>子类沙箱模式是潜伏在代码库中简单常用的模式，哪怕是在游戏之外的地方。乳沟你有一个非虚方法的保护方法，你可能已经在用某些类似的东西了。沙箱方法在以下情况适用：</p>
+<ul>
+<li>
+<p>You have a base class with a number of derived classes.</p>
+</li>
+<li>
+<p>你有一个能推导很多子类的基类。</p>
+</li>
+<li>
+<p>The base class is able to provide all of the operations that a derived class
+    may need to perform.</p>
+</li>
+<li>
+<p>基类可以提供推导类需要的所有操作。</p>
+</li>
+<li>
+<p>There is behavioral overlap in the subclasses and you want to make it easier
+    to share code between them.</p>
+</li>
+<li>
+<p>在在子类总有行为重合，你想要更容易的在他们间分享代码。</p>
+</li>
+<li>
+<p>You want to minimize coupling between those derived classes and the rest of
+    the program.</p>
+</li>
+<li>
+<p>你想要最小化推导类和程序的其他部分的耦合。</p>
+</li>
+</ul>
+<h2><a href="#keep-in-mind" name="keep-in-mind">Keep in Mind</a></h2>
+<h2><a href="#记住" name="记住">记住</a></h2>
+<p>&#8220;Inheritance&#8221; is a bad word in many programming circles these days, and one
+reason is that base classes tend to accrete more and more code. This pattern is
+particularly susceptible to that.</p>
+<p>“继承”现在在很多编程圈子是一个坏词，一个原因是基类趋向于增加越来越多的代码。这个模式特别容易被感染。</p>
+<p>Since subclasses go through their base class to reach the rest of the game, the
+base class ends up coupled to every system <em>any</em> derived class needs to talk to.
+Of course, the subclasses are also intimately tied to their base class. That
+spiderweb of coupling makes it very hard to change the base class without
+breaking something&#8202;&mdash;&#8202;you&#8217;ve got the <a href="http://en.wikipedia.org/wiki/Fragile_base_class">brittle base class problem</a>.</p>
+<p>由于子类通过他们的基类接触游戏的剩余部分，基类最后和<em>每个</em>推导类需要的所有系统耦合。当然，子类也紧密的与基类相绑定。这种蛛网耦合让你很难在不破坏什么的情况下改变基类——你获得了易碎基类问题。</p>
+<p>The flip side of the coin is that since most of your coupling has been pushed up
+to the base class, the derived classes are now much more cleanly separated from
+the rest of the world. Ideally, most of your behavior will be in those
+subclasses. That means much of your codebase is isolated and easier to maintain.</p>
+<p>硬币的另一面是由于你耦合的大部分都被推到了基类，推导类现在与世界的其他部分分离。理想的，你大多数的行为都在哪些子类中。这意味着你的代码库大部分是孤立的，很容易管理。</p>
+<p>Still, if you find this pattern is turning your base class into a giant bowl of
+code stew, consider pulling some of the provided operations out into separate
+classes that the base class can dole out responsibility to. The <a
+class="pattern" href="component.html">Component</a> pattern can help here.</p>
+<p>如果你发现这个模式正把你的基类变成一锅代码糊糊，考虑将它提供的一些操作提出放入分离的类中，这样基类可以分散它的责任。组件模式可以帮得到忙。</p>
+<h2><a href="#sample-code" name="sample-code">Sample Code</a></h2>
+<h2><a href="#示例代码" name="示例代码">示例代码</a></h2>
+<p>Because this is such a simple pattern, there isn&#8217;t much to the sample code. That
+doesn&#8217;t mean it isn&#8217;t useful&#8202;&mdash;&#8202;the pattern is about the <em>intent</em>, not the
+complexity of its implementation.</p>
+<p>因为则是一个如此简单的模式，示例代码中没有太多东西。这不是说它没有用——这个模式是关于“意图”，而不是它实现复杂度。</p>
+<p>We&#8217;ll start with our <code>Superpower</code> base class:</p>
+<p>我们从<code>Superpower</code>基类开始：</p>
+<div class="codehilite"><pre><span class="k">class</span> <span class="nc">Superpower</span>
+<span class="p">{</span>
+<span class="k">public</span><span class="o">:</span>
+  <span class="k">virtual</span> <span class="o">~</span><span class="n">Superpower</span><span class="p">()</span> <span class="p">{}</span>
+
+<span class="k">protected</span><span class="o">:</span>
+  <span class="k">virtual</span> <span class="kt">void</span> <span class="n">activate</span><span class="p">()</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+
+  <span class="kt">void</span> <span class="nf">move</span><span class="p">(</span><span class="kt">double</span> <span class="n">x</span><span class="p">,</span> <span class="kt">double</span> <span class="n">y</span><span class="p">,</span> <span class="kt">double</span> <span class="n">z</span><span class="p">)</span>
+  <span class="p">{</span>
+    <span class="c1">// Code here...</span>
+  <span class="p">}</span>
+
+  <span class="kt">void</span> <span class="nf">playSound</span><span class="p">(</span><span class="n">SoundId</span> <span class="n">sound</span><span class="p">,</span> <span class="kt">double</span> <span class="n">volume</span><span class="p">)</span>
+  <span class="p">{</span>
+    <span class="c1">// Code here...</span>
+  <span class="p">}</span>
+
+  <span class="kt">void</span> <span class="nf">spawnParticles</span><span class="p">(</span><span class="n">ParticleType</span> <span class="n">type</span><span class="p">,</span> <span class="kt">int</span> <span class="n">count</span><span class="p">)</span>
+  <span class="p">{</span>
+    <span class="c1">// Code here...</span>
+  <span class="p">}</span>
+<span class="p">};</span>
+</pre></div>
+
+
+<p>The <code>activate()</code> method is the sandbox method. Since it is virtual and abstract,
+subclasses <em>must</em> override it. This makes it clear to someone creating a power
+subclass where their work has to go.</p>
+<p><code>activate()</code>方法是沙箱方法。由于它是虚和抽象的，子类<em>必须</em>重载它。这让那些需要创建子类的人知道他们需要在哪里做工作。</p>
+<p>The other protected methods, <code>move()</code>, <code>playSound()</code>, and <code>spawnParticles()</code>, are
+the provided operations. These are what the subclasses will call in their
+implementation of <code>activate()</code>.</p>
+<p>其他的保护方法，<code>move()</code>，<code>playSound()</code>，和<code>spawnParticles()</code>都是提供的操作。它们是子类在实现<code>activate()</code>要调用的。</p>
+<p>We didn&#8217;t implement the provided operations in this example, but an actual game
+would have real code there. Those methods are where <code>Superpower</code> gets coupled to
+other systems in the game&#8202;&mdash;&#8202;<code>move()</code> may call into physics code, <code>playSound()</code>
+will talk to the audio engine, etc. Since this is all in the <em>implementation</em> of
+the base class, it keeps that coupling encapsulated within <code>Superpower</code> itself.</p>
+<p>在这个例子中，我们没有实现提供的操作，但一个真正的游戏会在那里有真正的代码。那些代码是<code>Superpower</code>与游戏中其他部分的耦合——<code>move()</code>也许调用物理代码，<code>playSound()</code>会与音频引擎交互，等等。由于这都在基类的<em>实现</em>中，保证了耦合封闭在<code>Superpower</code>中。</p>
+<p>OK, now let&#8217;s get our radioactive spiders out and create a power. Here&#8217;s one:</p>
+<p>好了，让我们的放射蜘蛛侠处理创建一个能力。这里是一个：</p>
+<p><span name="jump"></span></p>
+<div class="codehilite"><pre><span class="k">class</span> <span class="nc">SkyLaunch</span> <span class="o">:</span> <span class="k">public</span> <span class="n">Superpower</span>
+<span class="p">{</span>
+<span class="k">protected</span><span class="o">:</span>
+  <span class="k">virtual</span> <span class="kt">void</span> <span class="n">activate</span><span class="p">()</span>
+  <span class="p">{</span>
+    <span class="c1">// Spring into the air.</span>
+    <span class="n">playSound</span><span class="p">(</span><span class="n">SOUND_SPROING</span><span class="p">,</span> <span class="mf">1.0f</span><span class="p">);</span>
+    <span class="n">spawnParticles</span><span class="p">(</span><span class="n">PARTICLE_DUST</span><span class="p">,</span> <span class="mi">10</span><span class="p">);</span>
+    <span class="n">move</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">20</span><span class="p">);</span>
+  <span class="p">}</span>
+<span class="p">};</span>
+</pre></div>
+
+
+<aside name="jump">
+<p>OK, maybe being able to <em>jump</em> isn&#8217;t all that <em>super</em>, but I&#8217;m trying to keep
+things basic here.</p>
+</aside>
+<p>This power springs the superhero into the air, playing an appropriate sound and
+kicking up a little cloud of dust. If all of the superpowers were this simple &#8212;
+just a combination of sound, particle effect, and motion&#8202;&mdash;&#8202;then we wouldn&#8217;t
+need this pattern at all. Instead, <code>Superpower</code> could have a baked-in
+implementation of <code>activate()</code> that accesses fields for the sound ID, particle
+type, and movement. But that only works when every power essentially works the
+same way with only some differences in data. Let&#8217;s elaborate on it a bit:</p>
+<p>这种能力将超级英雄弹射到天空，播放一阵适合的声音，踢起一堆尘土。如果所有的超能力都这样简单——声音，粒子效果，动作的组合——那么我就根本不想要这个模式了。相反，<code>Superpower</code>有内置的<code>activate()</code>获得了声音ID，粒子类型和运动的字段。但是那样只在所有能力都以相同方式工作，只有一些数据上的不同的时候可行。让我们精细一些：</p>
+<div class="codehilite"><pre><span class="k">class</span> <span class="nc">Superpower</span>
+<span class="p">{</span>
+<span class="k">protected</span><span class="o">:</span>
+  <span class="kt">double</span> <span class="n">getHeroX</span><span class="p">()</span>
+  <span class="p">{</span>
+    <span class="c1">// Code here...</span>
+  <span class="p">}</span>
+
+  <span class="kt">double</span> <span class="n">getHeroY</span><span class="p">()</span>
+  <span class="p">{</span>
+    <span class="c1">// Code here...</span>
+  <span class="p">}</span>
+
+  <span class="kt">double</span> <span class="n">getHeroZ</span><span class="p">()</span>
+  <span class="p">{</span>
+    <span class="c1">// Code here...</span>
+  <span class="p">}</span>
+
+  <span class="c1">// Existing stuff...</span>
+<span class="p">};</span>
+</pre></div>
+
+
+<p>Here, we&#8217;ve added a couple of methods to get the hero&#8217;s position. Our
+<code>SkyLaunch</code> subclass can now use those:</p>
+<p>这里我们增加了些方法获取英雄的位置。我们的<code>SkyLaunch</code>现在可以使用那些了：</p>
+<div class="codehilite"><pre><span class="k">class</span> <span class="nc">SkyLaunch</span> <span class="o">:</span> <span class="k">public</span> <span class="n">Superpower</span>
+<span class="p">{</span>
+<span class="k">protected</span><span class="o">:</span>
+  <span class="k">virtual</span> <span class="kt">void</span> <span class="n">activate</span><span class="p">()</span>
+  <span class="p">{</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">getHeroZ</span><span class="p">()</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="p">{</span>
+      <span class="c1">// On the ground, so spring into the air.</span>
+      <span class="n">playSound</span><span class="p">(</span><span class="n">SOUND_SPROING</span><span class="p">,</span> <span class="mf">1.0f</span><span class="p">);</span>
+      <span class="n">spawnParticles</span><span class="p">(</span><span class="n">PARTICLE_DUST</span><span class="p">,</span> <span class="mi">10</span><span class="p">);</span>
+      <span class="n">move</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">20</span><span class="p">);</span>
+    <span class="p">}</span>
+    <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">getHeroZ</span><span class="p">()</span> <span class="o">&lt;</span> <span class="mf">10.0f</span><span class="p">)</span>
+    <span class="p">{</span>
+      <span class="c1">// Near the ground, so do a double jump.</span>
+      <span class="n">playSound</span><span class="p">(</span><span class="n">SOUND_SWOOP</span><span class="p">,</span> <span class="mf">1.0f</span><span class="p">);</span>
+      <span class="n">move</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">getHeroZ</span><span class="p">()</span> <span class="o">+</span> <span class="mi">20</span><span class="p">);</span>
+    <span class="p">}</span>
+    <span class="k">else</span>
+    <span class="p">{</span>
+      <span class="c1">// Way up in the air, so do a dive attack.</span>
+      <span class="n">playSound</span><span class="p">(</span><span class="n">SOUND_DIVE</span><span class="p">,</span> <span class="mf">0.7f</span><span class="p">);</span>
+      <span class="n">spawnParticles</span><span class="p">(</span><span class="n">PARTICLE_SPARKLES</span><span class="p">,</span> <span class="mi">1</span><span class="p">);</span>
+      <span class="n">move</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="n">getHeroZ</span><span class="p">());</span>
+    <span class="p">}</span>
+  <span class="p">}</span>
+<span class="p">};</span>
+</pre></div>
+
+
+<p>Since we have access to some state, now our sandbox method can do actual,
+interesting control flow. Here, it&#8217;s still just a couple of simple <code>if</code>
+statements, but you can do <span name="data">anything</span> you want. By having
+the sandbox method be an actual full-fledged method that contains arbitrary
+code, the sky&#8217;s the limit.</p>
+<p>由于我们接触了些状态，现在我们的沙箱方法可以做实际有趣的控制流了。这，还只有几个简单的<code>if</code>声明，但你可以做任何你想的东西。使用完全成熟的沙箱方法，天高任鸟飞了。</p>
+<aside name="data">
+<p>Earlier, I suggested a data-driven approach for powers. This is one reason why
+you may decide <em>not</em> to do that. If your behavior is complex and imperative,
+it is more difficult to define in data.</p>
+</aside>
+<h2><a href="#design-decisions" name="design-decisions">Design Decisions</a></h2>
+<h2><a href="#设计决策" name="设计决策">设计决策</a></h2>
+<p>As you can see, Subclass Sandbox is a fairly &#8220;soft&#8221; pattern. It describes a basic idea, but
+it doesn&#8217;t have a lot of detailed mechanics. That means you&#8217;ll be making some
+interesting choices each time you apply it. Here are some questions to consider.</p>
+<p>如你所见，子类沙箱是一个“软”模式。它报数了一个基本思路，但是没有很多细节机制。这意味着每次使用可以做出有趣的选择。这里是一些需要思考的问题。</p>
+<h3><a href="#what-operations-should-be-provided" name="what-operations-should-be-provided">What operations should be provided?</a></h3>
+<h3><a href="#应该提供什么的操作？" name="应该提供什么的操作？">应该提供什么的操作？</a></h3>
+<p>This is the biggest question. It deeply affects how this pattern feels and how
+well it works. At the minimal end of the spectrum, the base class doesn&#8217;t
+provide <em>any</em> operations. It just has a sandbox method. To implement it, you&#8217;ll
+have to call into systems outside of the base class. If you take that angle,
+it&#8217;s probably not even fair to say you&#8217;re using this pattern.</p>
+<p>这是最大的问题。这深深影响了这个模式感觉上证明样和它能工作的有多好。，在一种极端中，基类几乎不提供<em>任何</em>操作。他只有一个沙箱方法。为了实现之，你需要调用基类外部的系统。如果你从那个角度看，很难说你在使用这个模式。</p>
+<p>On the other end of the spectrum, the base class provides <span
+name="include"><em>every</em></span> operation that a subclass may need. Subclasses are
+<em>only</em> coupled to the base class and don&#8217;t call into any outside systems
+whatsoever.</p>
+<p>另一个极端，基类提供了<em>所有</em>子类也许需要的操作。子类<em>只</em>与基类耦合，不调用任何外部系统的东西。</p>
+<aside name="include">
+<p>Concretely, this means each source file for a subclass would only need a single
+<code>#include</code>&#8202;&mdash;&#8202;the one for its base class.</p>
+</aside>
+<p>Between these two points, there&#8217;s a wide middle ground where some operations are
+provided by the base class and others are accessed directly from the outside
+system that defines it. The more operations you provide, the less coupled
+subclasses are to outside systems, but the <em>more</em> coupled the base class is. It
+removes coupling from the derived classes, but it does so by pushing that up to the
+base class itself.</p>
+<p>在这两点之间，操作由基类提供还是直接调用外部有很大的操作余地。你提供的操作越多，子类与外部系统耦合越少，但是与基类耦合<em>更多</em>。它从推导类中移除了耦合，但它是通过将其推给基类完成的。</p>
+<p>That&#8217;s a win if you have a bunch of derived classes that were all coupled to
+some outside system. By moving the coupling up into a provided operation, you&#8217;ve
+centralized it into one place: the base class. But the more you do this, the
+bigger and harder to maintain that one class becomes.</p>
+<p>如果你有一堆推导类与外部系统耦合的话，这是一个胜利。通过将耦合移到一个提供的操作，你将其移动到了一个地方：基类。但是你越这么做，那个类就越大越难管理。</p>
+<p>So where should you draw the line? Here are a few rules of thumb:</p>
+<p>所以分界线在哪里？这里是一些首要原则：</p>
+<ul>
+<li>
+<p>If a provided operation is only used by one or a few subclasses, you don&#8217;t
+    get a lot of bang for your buck. You&#8217;re adding complexity to the base class,
+    which affects everyone, but only a couple of classes benefit.</p>
+</li>
+<li>
+<p>如果一个提供的操作只被一个或几个子类使用，你就获益不了太多。你向基类添加了复杂性，会影响所有事物，但是只有几个类收益。</p>
+<p>This may be worth it to make the operation consistent with other
+provided operations, or it may be simpler and cleaner to let those
+special case subclasses call out to the external systems directly.</p>
+<p>也许让操作与其他提供的操作一致更有价值，或者让这些特殊情况子类直接调用外部系统更加简单明了。</p>
+</li>
+<li>
+<p>When you call a method in some other corner of the game, it&#8217;s less intrusive
+    if that method doesn&#8217;t modify any state. It still creates a coupling, but
+    it&#8217;s a <span name="safe">&#8220;safe&#8221;</span> coupling because it can&#8217;t break
+    anything in the game.</p>
+</li>
+<li>
+<p>当你调用游戏中其他交流的一个方法，如果方法没有修改任何状态就有更少的干扰。它仍然制造耦合，但是这是“安全”耦合，因为它没有打破游戏中的任何东西。</p>
+<aside name="safe">
+
+<p>&#8220;Safe&#8221; is in quotes here because technically, even just accessing data can
+cause problems. If your game is multi-threaded, you could read something at
+the same time that it&#8217;s being modified. If you aren&#8217;t careful, you could end up
+with bogus data.</p>
+<p>Another nasty case is if your game state is strictly deterministic (which
+many online games are in order to keep players in sync). If you access
+something outside of the set of synchronized game state, you can cause
+incredibly painful non-determinism bugs.</p>
+</aside>
+
+<p>Calls that do modify state, on the other hand, more deeply tie you to those
+parts of the codebase, and you need to be much more cognizant of that. That
+makes them good candidates for being rolled up into provided operations in
+the more visible base class.</p>
+<p>调用修改状态的，另一方面，将你和代码库的其他方面紧密绑定，你需要更多的审视。打包他们进一个显式基类提供的操作是一个好的候选项。</p>
+</li>
+<li>
+<p>If the implementation of a provided operation only forwards a call to some
+    outside system, then it isn&#8217;t adding much value. In that case, it may be
+    simpler to call the outside method directly.</p>
+</li>
+<li>
+<p>如果提供操作的实现之是增加了向外部系统转发调用，那它就没增加什么价值。那种情况下，也许直接调用外部方法更简单。</p>
+<p>However, even simple forwarding can still be useful&#8202;&mdash;&#8202;those methods often
+access state that the base class doesn&#8217;t want to directly expose to
+subclasses. For example, let&#8217;s say <code>Superpower</code> provided this:</p>
+<p>但是，哪怕简单的转发也是有用的——那些接触基类不想直接暴露被子类的状态的方法。举个例子，假设<code>Superpower</code>提供这个：</p>
+<div class="codehilite"><pre><span class="kt">void</span> <span class="nf">playSound</span><span class="p">(</span><span class="n">SoundId</span> <span class="n">sound</span><span class="p">,</span> <span class="kt">double</span> <span class="n">volume</span><span class="p">)</span>
+<span class="p">{</span>
+  <span class="n">soundEngine_</span><span class="p">.</span><span class="n">play</span><span class="p">(</span><span class="n">sound</span><span class="p">,</span> <span class="n">volume</span><span class="p">);</span>
+<span class="p">}</span>
+</pre></div>
+
+
+<p>It&#8217;s just forwarding the call to some <code>soundEngine_</code> field in <code>Superpower</code>.
+The advantage, though, is that it keeps that field encapsulated in
+<code>Superpower</code> so subclasses can&#8217;t poke at it.</p>
+<p>它只是转发<code>Superpower</code>中<code>soundEngine_</code>字段。但是，好处是褒词字段封装在<code>Superpower</code>中，子类不会接触它。</p>
+</li>
+</ul>
+<h3><a href="#should-methods-be-provided-directly,-or-through-objects-that-contain-them" name="should-methods-be-provided-directly,-or-through-objects-that-contain-them">Should methods be provided directly, or through objects that contain them?</a></h3>
+<h3><a href="#方法应该直接提供，还是通过包含他们的对象？" name="方法应该直接提供，还是通过包含他们的对象？">方法应该直接提供，还是通过包含他们的对象？</a></h3>
+<p>The challenge with this pattern is that you can end up with a painfully large
+number of methods crammed into your base class. You can mitigate that by moving
+some of those methods over to other classes. The provided operations in the base
+class then just return one of those objects.</p>
+<p>这个模式的挑战是基类中最终闯进了很多方法。你可以将一些方法移到其他类中来缓和。基类提供的方法只是放回这些对象中的一个。</p>
+<p>For example, to let a power play sounds, we could add these directly to
+<code>Superpower</code>:</p>
+<p>举个例子，为了让一个超能力播放声音，我们可以直接将它们加到<code>Superpower</code>中：</p>
+<div class="codehilite"><pre><span class="k">class</span> <span class="nc">Superpower</span>
+<span class="p">{</span>
+<span class="k">protected</span><span class="o">:</span>
+  <span class="kt">void</span> <span class="n">playSound</span><span class="p">(</span><span class="n">SoundId</span> <span class="n">sound</span><span class="p">,</span> <span class="kt">double</span> <span class="n">volume</span><span class="p">)</span>
+  <span class="p">{</span>
+    <span class="c1">// Code here...</span>
+  <span class="p">}</span>
+
+  <span class="kt">void</span> <span class="n">stopSound</span><span class="p">(</span><span class="n">SoundId</span> <span class="n">sound</span><span class="p">)</span>
+  <span class="p">{</span>
+    <span class="c1">// Code here...</span>
+  <span class="p">}</span>
+
+  <span class="kt">void</span> <span class="n">setVolume</span><span class="p">(</span><span class="n">SoundId</span> <span class="n">sound</span><span class="p">)</span>
+  <span class="p">{</span>
+    <span class="c1">// Code here...</span>
+  <span class="p">}</span>
+
+  <span class="c1">// Sandbox method and other operations...</span>
+<span class="p">};</span>
+</pre></div>
+
+
+<p>But if <code>Superpower</code> is already getting large and unwieldy, we might want to
+avoid that. Instead, we create a <code>SoundPlayer</code> class that exposes that
+functionality:</p>
+<p>但是如果<code>Superpower</code>已经很大很宽泛，我们也许想要避免那一点。相反，我们创建一个<code>SoundPlayer</code>类暴露那个函数：</p>
+<div class="codehilite"><pre><span class="k">class</span> <span class="nc">SoundPlayer</span>
+<span class="p">{</span>
+  <span class="kt">void</span> <span class="n">playSound</span><span class="p">(</span><span class="n">SoundId</span> <span class="n">sound</span><span class="p">,</span> <span class="kt">double</span> <span class="n">volume</span><span class="p">)</span>
+  <span class="p">{</span>
+    <span class="c1">// Code here...</span>
+  <span class="p">}</span>
+
+  <span class="kt">void</span> <span class="n">stopSound</span><span class="p">(</span><span class="n">SoundId</span> <span class="n">sound</span><span class="p">)</span>
+  <span class="p">{</span>
+    <span class="c1">// Code here...</span>
+  <span class="p">}</span>
+
+  <span class="kt">void</span> <span class="n">setVolume</span><span class="p">(</span><span class="n">SoundId</span> <span class="n">sound</span><span class="p">)</span>
+  <span class="p">{</span>
+    <span class="c1">// Code here...</span>
+  <span class="p">}</span>
+<span class="p">};</span>
+</pre></div>
+
+
+<p>Then <code>Superpower</code> provides access to it:</p>
+<p><code>Superpower</code>提供了对其的接触：</p>
+<div class="codehilite"><pre><span class="k">class</span> <span class="nc">Superpower</span>
+<span class="p">{</span>
+<span class="k">protected</span><span class="o">:</span>
+  <span class="n">SoundPlayer</span><span class="o">&amp;</span> <span class="n">getSoundPlayer</span><span class="p">()</span>
+  <span class="p">{</span>
+    <span class="k">return</span> <span class="n">soundPlayer_</span><span class="p">;</span>
+  <span class="p">}</span>
+
+  <span class="c1">// Sandbox method and other operations...</span>
+
+<span class="k">private</span><span class="o">:</span>
+  <span class="n">SoundPlayer</span> <span class="n">soundPlayer_</span><span class="p">;</span>
+<span class="p">};</span>
+</pre></div>
+
+
+<p>Shunting provided operations into auxiliary classes like this can do a few
+things for you:</p>
+<p>将提供的操作分到辅助类可以为你做一些事情：</p>
+<ul>
+<li>
+<p><em>It reduces the number of methods in the base class.</em> In the example here,
+    we went from three methods to just a single getter.</p>
+</li>
+<li>
+<p><em>它减少了基类的方法。</em>在这里的例子，将三个方法变成了一个简单的获取。</p>
+</li>
+<li>
+<p><em>Code in the helper class is usually easier to maintain.</em> Core base classes
+    like <code>Superpower</code>, despite our best intentions, tend to be tricky to change
+    since so much depends on them. By moving functionality over to a less
+    coupled secondary class, we make that code easier to poke at without
+    breaking things.</p>
+</li>
+<li>
+<p><em>在辅助类中的代码通常更好管理。</em>核心基类像<code>Superpower</code>，不管我们滴最好意图，由于被如此多类依赖而很难改变。通过将函数移到一个更少耦合的二阶类，我们让代码更容易接触而没有破坏任何东西。</p>
+</li>
+<li>
+<p><em>It lowers the coupling between the base class and other systems.</em> When
+    <code>playSound()</code> was a method directly on <code>Superpower</code>, our base
+    class was directly tied to <code>SoundId</code> and whatever audio code the
+    implementation called into. Moving that over to <code>SoundPlayer</code> reduces
+    <code>Superpower</code>&#8216;s coupling to the single <code>SoundPlayer</code> class, which then
+    encapsulates all of its other dependencies.</p>
+</li>
+<li>
+<p><em>减少了基类和其他系统的耦合度。</em>当<code>playSound()</code>是<code>Superpower</code>中一个直接的方法，我们的基类与<code>SoundId</code>以及其他实现涉及的代码直接绑定。将它移动到<code>SoundPlayer</code>减少了<code>Superpower</code>与<code>SoundPlayer</code>类的耦合，这就封装了它其他的依赖。</p>
+</li>
+</ul>
+<h3><a href="#how-does-the-base-class-get-the-state-that-it-needs" name="how-does-the-base-class-get-the-state-that-it-needs">How does the base class get the state that it needs?</a></h3>
+<h3><a href="#基类如何获得它需要的状态？" name="基类如何获得它需要的状态？">基类如何获得它需要的状态？</a></h3>
+<p>Your base class will often need some data that it wants to encapsulate and keep
+hidden from its subclasses. In our first example, the <code>Superpower</code> class
+provided a <code>spawnParticles()</code> method. If the implementation of that needs some
+particle system object, how would it get one?</p>
+<p>你的基类经常需要想要封装和从子类隐藏的数据。在我们的第一个例子中，<code>Superpower</code>类提过了<code>spawnParticles()</code>方法。乳沟那个的实现需要一些粒子系统对象，它怎么获得一个呢？</p>
+<ul>
+<li>
+<p><strong>Pass it to the base class constructor:</strong></p>
+</li>
+<li>
+<p><strong>将它传给基类构造器：</strong></p>
+<p>The simplest solution is to have the base class take it as a constructor
+argument:</p>
+<p>最简单的解决方案是让基类将其作为构造器变量：</p>
+<div class="codehilite"><pre><span class="k">class</span> <span class="nc">Superpower</span>
+<span class="p">{</span>
+<span class="k">public</span><span class="o">:</span>
+  <span class="n">Superpower</span><span class="p">(</span><span class="n">ParticleSystem</span><span class="o">*</span> <span class="n">particles</span><span class="p">)</span>
+  <span class="o">:</span> <span class="n">particles_</span><span class="p">(</span><span class="n">particles</span><span class="p">)</span>
+  <span class="p">{}</span>
+
+  <span class="c1">// Sandbox method and other operations...</span>
+
+<span class="k">private</span><span class="o">:</span>
+  <span class="n">ParticleSystem</span><span class="o">*</span> <span class="n">particles_</span><span class="p">;</span>
+<span class="p">};</span>
+</pre></div>
+
+
+<p>This safely ensures that every superpower does have a particle system by the
+time it&#8217;s constructed. But let&#8217;s look at a derived class:</p>
+<p>这安全的保证了每个超能力在构造时有一个粒子系统。但是让我们看看推导类：</p>
+<div class="codehilite"><pre><span class="k">class</span> <span class="nc">SkyLaunch</span> <span class="o">:</span> <span class="k">public</span> <span class="n">Superpower</span>
+<span class="p">{</span>
+<span class="k">public</span><span class="o">:</span>
+  <span class="n">SkyLaunch</span><span class="p">(</span><span class="n">ParticleSystem</span><span class="o">*</span> <span class="n">particles</span><span class="p">)</span>
+  <span class="o">:</span> <span class="n">Superpower</span><span class="p">(</span><span class="n">particles</span><span class="p">)</span>
+  <span class="p">{}</span>
+<span class="p">};</span>
+</pre></div>
+
+
+<p>Here we see the problem. Every derived class will need to have a constructor
+that calls the base class one and passes along that argument. That exposes
+every derived class to a piece of state that we don&#8217;t want them to know
+about.</p>
+<p>这我们看到了问题。每一个推导类都需要一个构造器调用基类传递那个变量。这项推导类暴露了我们不想要他知道的状态。</p>
+<p>This is also a maintenance headache. If we later add another piece of state
+to the base class, every constructor in each of our derived classes will
+have to be modified to pass it along.</p>
+<p>这也让维护头疼。如果我们后续向基类添加了一个状态，每一个推导类都需要修改并传递它。</p>
+</li>
+<li>
+<p><strong>Do two-stage initialization:</strong></p>
+</li>
+<li>
+<p><strong>使用两阶初始化：</strong></p>
+<p>To avoid passing everything through the constructor, we can split
+initialization into two steps. The constructor will take no parameters and
+just create the object. Then, we call a separate method defined directly on
+the base class to pass in the rest of the data that it needs:</p>
+<p>为了避免通过构造器传递所有东西，我们可以将初始化划分为两个部分。构造器不接受任何参数只是创建对象。然后，我们调用一个定义在基类的分离方法传入所有他需要的数据。</p>
+<div class="codehilite"><pre><span class="n">Superpower</span><span class="o">*</span> <span class="n">power</span> <span class="o">=</span> <span class="k">new</span> <span class="n">SkyLaunch</span><span class="p">();</span>
+<span class="n">power</span><span class="o">-&gt;</span><span class="n">init</span><span class="p">(</span><span class="n">particles</span><span class="p">);</span>
+</pre></div>
+
+
+<p>Note here that since we aren&#8217;t passing anything into the constructor for
+<code>SkyLaunch</code>, it isn&#8217;t coupled to anything we want to keep private in
+<code>Superpower</code>. The trouble with this approach, though, is that you have to
+make sure you always remember to call <code>init()</code>. If you ever forget, you&#8217;ll
+have a power that&#8217;s in some twilight half-created state and won&#8217;t work.</p>
+<p>注意我们没有为<code>SkyLaunch</code>的构造器传入任何东西，它与<code>Superpower</code>中想要保持 私有的任何东西都不耦合。这种实现的问题，是你需要保证你用于记得调用<code>init()</code>，你会获得一个处于半完成的超能力，无法运行。</p>
+<p>You can fix that by encapsulating the entire process into a single function,
+like so:</p>
+<p>你可以将整个过程封装到一个函数中来修复这一点，就像这样：</p>
+<p><span name="friend"></span></p>
+<div class="codehilite"><pre><span class="n">Superpower</span><span class="o">*</span> <span class="nf">createSkyLaunch</span><span class="p">(</span><span class="n">ParticleSystem</span><span class="o">*</span> <span class="n">particles</span><span class="p">)</span>
+<span class="p">{</span>
+  <span class="n">Superpower</span><span class="o">*</span> <span class="n">power</span> <span class="o">=</span> <span class="k">new</span> <span class="n">SkyLaunch</span><span class="p">();</span>
+  <span class="n">power</span><span class="o">-&gt;</span><span class="n">init</span><span class="p">(</span><span class="n">particles</span><span class="p">);</span>
+  <span class="k">return</span> <span class="n">power</span><span class="p">;</span>
+<span class="p">}</span>
+</pre></div>
+
+
+<aside name="friend">
+
+<p>With a little trickery like private constructors and friend classes, you can
+ensure this <code>createSkylaunch()</code> function is the <em>only</em> function that can
+actually create powers. That way, you can&#8217;t forget any of the initialization
+stages.</p>
+</aside>
+
+</li>
+<li>
+<p><strong>Make the state static:</strong></p>
+</li>
+<li>
+<p><strong>让状态变为静态：</strong></p>
+<p>In the previous example, we were initializing each <code>Superpower</code> <em>instance</em>
+with a particle system. That makes sense when every power needs its own
+unique state. But let&#8217;s say that the particle system is a <a class="pattern"
+href="singleton.html">Singleton</a>, and every power will be sharing the
+same state.</p>
+<p>在前一个例子中，我们用粒子系统初始化每一个<code>Superpower</code><em>实例</em>。这在每个能力都需要它独特的状态时有意义。但是假设粒子系统是一个单例，每一个能力都会分享相同的状态。</p>
+<p>In that case, we can make the state private to the base class and also make
+it <span name="singleton"><em>static</em></span>. The game will still have to make
+sure that it initializes the state, but it only has to initialize the
+<code>Superpower</code> <em>class</em> once for the entire game, and not each instance.</p>
+<p>在那种情况下，我们可以让状态时基类私有而<em>静态</em>的。游戏仍然要保证初始化转台，但是它只需要为整个游戏初始化<code>Superpower</code><em>类</em>一次，而不是为每一个实例。</p>
+<aside name="singleton">
+
+<p>Keep in mind that this still has many of the problems of a singleton. You&#8217;ve
+got some state shared between lots and lots of objects (all of the
+<code>Superpower</code> instances). The particle system is encapsulated, so it isn&#8217;t
+globally <em>visible</em>, which is good, but it can still make reasoning about
+powers harder because they can all poke at the same object.</p>
+</aside>
+
+<div class="codehilite"><pre><span class="k">class</span> <span class="nc">Superpower</span>
+<span class="p">{</span>
+<span class="k">public</span><span class="o">:</span>
+  <span class="k">static</span> <span class="kt">void</span> <span class="n">init</span><span class="p">(</span><span class="n">ParticleSystem</span><span class="o">*</span> <span class="n">particles</span><span class="p">)</span>
+  <span class="p">{</span>
+    <span class="n">particles_</span> <span class="o">=</span> <span class="n">particles</span><span class="p">;</span>
+  <span class="p">}</span>
+
+  <span class="c1">// Sandbox method and other operations...</span>
+
+<span class="k">private</span><span class="o">:</span>
+  <span class="k">static</span> <span class="n">ParticleSystem</span><span class="o">*</span> <span class="n">particles_</span><span class="p">;</span>
+<span class="p">};</span>
+</pre></div>
+
+
+<p>Note here that <code>init()</code> and <code>particles_</code> are both static. As long as the
+game calls <code>Superpower::init()</code> once early on, every power can access the
+particle system. At the same time, <code>Superpower</code> instances can be created
+freely by calling the right derived class&#8217;s constructor.</p>
+<p>注意这里的<code>init()</code>和<code>particles_</code>都是静态的。主要游戏早先调用过一次<code>Superpower::init()</code>，每种能力都能接触粒子系统。同时，<code>Superpower</code>实例可以通过调用推导类的构造器自由创建。</p>
+<p>Even better, now that <code>particles_</code> is a <em>static</em> variable, we don&#8217;t have to
+store it for each instance of <code>Superpower</code>, so we&#8217;ve made the class use less
+memory.</p>
+<p>甚至更好的，现在<code>particles_</code>是一个<em>静态</em>变量，我们不需要在每一个<code>Superpower</code>中存储它，这样我们的类需要更少的内存。</p>
+</li>
+<li>
+<p><strong>Use a service locator:</strong></p>
+</li>
+<li>
+<p><strong>使用服务定位器：</strong></p>
+<p>The previous option requires that outside code specifically remembers to push
+in the state that the base class needs before it needs it. That places the
+burden of initialization on the surrounding code. Another option is to let
+the base class handle it by pulling in the state it needs. One way to do
+that is by using the <a class="pattern" href="service-locator.html">Service
+Locator</a> pattern:</p>
+<p>前一个选项需要外部代码记得在基类需要前设置状态。这将初始化的责任落在了周围的代码。另一个选项是让基类通过调出它需要的状态来实现。一种实现的方法是使用一个服务定位器模式：</p>
+<div class="codehilite"><pre><span class="k">class</span> <span class="nc">Superpower</span>
+<span class="p">{</span>
+<span class="k">protected</span><span class="o">:</span>
+  <span class="kt">void</span> <span class="n">spawnParticles</span><span class="p">(</span><span class="n">ParticleType</span> <span class="n">type</span><span class="p">,</span> <span class="kt">int</span> <span class="n">count</span><span class="p">)</span>
+  <span class="p">{</span>
+    <span class="n">ParticleSystem</span><span class="o">&amp;</span> <span class="n">particles</span> <span class="o">=</span> <span class="n">Locator</span><span class="o">::</span><span class="n">getParticles</span><span class="p">();</span>
+    <span class="n">particles</span><span class="p">.</span><span class="n">spawn</span><span class="p">(</span><span class="n">type</span><span class="p">,</span> <span class="n">count</span><span class="p">);</span>
+  <span class="p">}</span>
+
+  <span class="c1">// Sandbox method and other operations...</span>
+<span class="p">};</span>
+</pre></div>
+
+
+<p>Here, <code>spawnParticles()</code> needs a particle system. Instead of being <em>given</em>
+one by outside code, it fetches one itself from the service locator.</p>
+<p>这儿，<code>spawnParticles()</code>需要一个粒子系统，不是外部系统<em>给</em>它，它自己从服务定位器中拿了一个。</p>
+</li>
+</ul>
+<h2><a href="#see-also" name="see-also">See Also</a></h2>
+<h2><a href="#参见" name="参见">参见</a></h2>
+<ul>
+<li>
+<p>When you apply the <a class="pattern" href="update-method.html">Update
+    Method</a> pattern, your update method will often also be a sandbox method.</p>
+</li>
+<li>
+<p>但你使用更新模式时，你的更新模式通常也是沙箱方法。</p>
+</li>
+<li>
+<p>This pattern is a role reversal of the <a class="gof-pattern"
+    href="http://en.wikipedia.org/wiki/Template_method_pattern">Template
+    Method</a> pattern. In both patterns, you implement a method using a set of
+    primitive operations. With Subclass Sandbox, the method is in the derived
+    class and the primitive operations are in the base class. With Template
+    Method, the <em>base</em> class has the method and the primitive operations are
+    implemented by the <em>derived</em> class.</p>
+</li>
+<li>
+<p>这个模式时模板方法的反面角色。在两种模式中，你都使用一系列受限操作实现方法。子啊子类沙箱总，方法在推导类中，限制操作在基类中。在模板方法中，<em>基</em>类有方法，而受限操作被<em>推导</em>类实现。</p>
+</li>
+<li>
+<p>You can also consider this a variation on the <a class="gof-pattern"
+    href="http://en.wikipedia.org/wiki/Facade_Pattern">Facade</a> pattern. That
+    pattern hides a number of different systems behind a single simplified API.
+    With Subclass Sandbox, the base class acts as a facade thats hides the
+    entire game engine from the subclasses.</p>
+</li>
+<li>
+<p>你也可以考虑这是外观模式的变异。那个模式将一系列不同系统藏在一个简化的API后。使用子类沙箱，基类起到了在子类前隐藏整个游戏引擎的外观作用。</p>
+</li>
+</ul>
+<nav>
+  <span class="prev">&larr; <a href="bytecode.html">Previous Chapter</a></span>
+  <span class="next"><a href="type-object.html">Next Chapter</a> &rarr;</span>
+  <span class="toc">&equiv; <a href="/">The Book</a></span>
+</nav>
+</div>
+</div>
+<footer>&copy; 2009-2015 Robert Nystrom</footer>
+</body>
+</html>
