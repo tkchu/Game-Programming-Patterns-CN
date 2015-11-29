@@ -32,470 +32,289 @@
 </nav>
 <h1>Architecture, Performance, and Games</h1>
 <h1 class="book"><a href="/">Game Programming Patterns</a><span class="section"><a href="introduction.html">Introduction</a></span></h1>
-<p>Before we plunge headfirst into a pile of patterns, I thought it might help to
-give you some context about how I think about software architecture and how it
-applies to games. It may help you understand the rest of this book better. If
-nothing else, when you get dragged into an <span name="ammo">argument</span>
-about how terrible (or awesome) design patterns and software architecture are,
-it will give you some ammo to use.</p>
-<p>在我们一头扎入模式之前，我想先给你讲一些我对软件架构和其在游戏上的应用的理解这也许能帮你更好的理解这本书的其余部分。至少，在你被卷入一场关于软件架构有多么糟糕（或是多么优秀）的辩论时，可以给你一些火力支援。</p>
+<p>在我们一头扎入模式之前，我想先讲一些对软件架构和其在游戏上的应用的理解，
+也许能帮你更好的理解这本书的其余部分。
+至少，在你被卷入一场关于软件架构有多么糟糕（或多么优秀）的<span name="ammo">辩论</span>时，
+这可以给你一些武器支援。</p>
 <aside name="ammo">
-<p>Note that I didn&#8217;t presume which side you&#8217;re taking in that fight. Like any arms
-dealer, I have wares for sale to all combatants.</p>
+<p>注意我没有建议你在战斗中选哪一边。就像任何军火贩子一样，我愿意向作战双方出售武器。</p>
 </aside>
-<h2><a href="#what-is-software-architecture" name="what-is-software-architecture">What is Software Architecture?</a></h2>
 <h2><a href="#什么是软件架构？" name="什么是软件架构？">什么是软件架构？</a></h2>
-<p><span name="won't">If</span> you read this book cover to cover, you won&#8217;t come
-away knowing the linear algebra behind 3D graphics or the calculus behind game
-physics. It won&#8217;t show you how to alpha-beta prune your AI&#8217;s search tree or
-simulate a room&#8217;s reverberation in your audio playback.</p>
-<p>如果你把这本书从头到尾读一遍，你不会遇到在3D图形背后的线性代数或者游戏物理背后的微积分。
+<p><span name="won't">如果</span>你把本书从头到尾读一遍，
+你不会找到在3D图形背后的线性代数或者游戏物理背后的微积分。
 这书不会告诉你如何用α-β修剪你的AI树，也不会告诉你如何在音频中模拟房间中的混响。</p>
 <aside name="won't">
-<p>Wow, this paragraph would make a terrible ad for the book.</p>
+<p>Wow，这段给这本书打了一个糟糕的广告啊。</p>
 </aside>
-<p>Instead, this book is about the code <em>between</em> all of that. It&#8217;s less about
-writing code
-than it is about <em>organizing</em> it. Every program has <em>some</em> organization, even if
-it&#8217;s just &#8220;jam the whole thing into <code>main()</code> and see what happens&#8221;, so I think
-it&#8217;s more interesting to talk about what makes for <em>good</em> organization. How do
-we tell a good architecture from a bad one?</p>
-<p>相反，这本书告诉你在这些<em>之间</em>的事情。与其说这本书是讲如何写代码。不如说其是讲如何<em>组织</em>代码的。每一个程序都有<em>一定</em>组织，哪怕是“将所有东西都塞到<code>main()</code>中然后看看发生了什么”，所以我认为讲讲什么组成了<em>好的</em>组织。我们如何区分好架构和坏架构呢？</p>
-<p>I&#8217;ve been mulling over this question for about five years. Of course, like you,
-I have an intuition about good design. We&#8217;ve all suffered through codebases so
-<span name="suffered">bad</span>, the best you could hope to do for them is take
-them out back and put them out of their misery.</p>
-<p>我思考这个问题五年了。当然，像你一样，我有关于好设计的直觉。我们都被代码库折磨的不轻，</p>
+<p>相反，这本书告诉你在这些<em>之间</em>的事情。
+与其说这本书是关于如何写代码。不如说是关于如何<em>组织</em>代码的。
+每个程序都有<em>一定</em>组织，
+哪怕是“将所有东西都塞到<code>main()</code>中然后看看发生了什么”，
+所以我认为讲讲什么造成了<em>好的</em>组织是很有意思的。我们如何区分好架构和坏架构呢？</p>
+<p>我思考这个问题五年了。当然，像你一样，我有关于好设计的直觉。我们都被<span name="suffered">糟糕的</span>代码折磨的不轻，唯一能做的事情就是删掉它们，结束它们的痛苦。</p>
 <aside name="suffered">
-<p>Let&#8217;s admit it, most of us are <em>responsible</em> for a few of those.</p>
+<p>承认吧，我们中大多数都该对它们中的一些<em>负责</em>。</p>
 </aside>
-<p>A lucky few have had the opposite experience, a chance to work with beautifully
-designed code. The kind of codebase that feels like a perfectly appointed luxury
-hotel festooned with concierges waiting eagerly on your every whim. What&#8217;s the
-difference between the two?</p>
-<p>只有很少的幸运者有过相反的经验，有机会与好好设计的代码库一起工作。那种代码库看上去是一间豪华酒店，里面的门房随时为你的心血来潮负责。这两者之间的区别是什么呢？</p>
-<h3><a href="#what-is-*good*-software-architecture" name="what-is-*good*-software-architecture">What is <em>good</em> software architecture?</a></h3>
+<p>只有很少的幸运者有相反的经验，
+有机会在好好设计的代码库上工作。
+那种代码库看上去是间豪华酒店，里面的门房随时准备满足你心血来潮的需求。
+这两者之间的区别是什么呢？</p>
 <h3><a href="#什么是*好的*软件架构？" name="什么是*好的*软件架构？">什么是<em>好的</em>软件架构？</a></h3>
-<p>For me, good design means that when I make a change, it&#8217;s as if the entire
-program was crafted in anticipation of it. I can solve a task with just a few
-choice function calls that slot in perfectly, leaving not the slightest ripple
-on the placid surface of the code.</p>
-<p>对于我来说，好的设计是当我改了点什么，整个程序就好象构造成恰好能够期待这种改动。
-我可以通过加入几个函数调用来完成任务，同时丝毫不改变代码平静表面下的脉动。</p>
-<p>That sounds pretty, but it&#8217;s not exactly actionable. &#8220;Just write your code so
-that changes don&#8217;t disturb its placid surface.&#8221; Right.</p>
-<p>这听起来很好，只是完全不可行。“把你的代码写成改变不会影响其平静表面就好。”这样就行了。</p>
-<p>Let me break that down a bit. The first key piece is that <em>architecture is about
-change</em>. Someone has to be modifying the codebase. If no one is touching the
-code&#8202;&mdash;&#8202;whether because it&#8217;s perfect and complete or so wretched no one will
-sully their text editor with it&#8202;&mdash;&#8202;its design is irrelevant. The measure of a
-design is how easily it accommodates changes. With no changes, it&#8217;s a runner who
-never leaves the starting line.</p>
-<p>让我们通俗易懂些。第一个关键点是<em>架构是有关于变化的</em>。总有人的改动代码库。如果没人碰代码——无论是因为代码至善至美还是糟糕透顶以至于没人会为了修改它而玷污自己的文本编辑器——那么它的设计就无关紧要。评价设计就是通过评价它应对改变有多么容易。没有了改变，那就是一个永远不会离开起跑线的运动员。</p>
-<h3><a href="#how-do-you-make-a-change" name="how-do-you-make-a-change">How do you make a change?</a></h3>
-<h3><a href="#你如何做变化？" name="你如何做变化？">你如何做变化？</a></h3>
-<p>Before you can change the code to add a new feature, to fix a bug, or for whatever
-reason caused you to fire up your editor, you have to understand what the
-existing code is doing. You don&#8217;t have to know the whole program, of course, but
-you need to <span name="ocr">load</span> all of the relevant pieces of it into
-your primate brain.</p>
-<p>在你改变代码去添加一些新的特性，去修复漏洞，还是随便什么需要你使用编辑器的时候，你需要理解你现在的代码在做些什么。当然，你不需要理解整个程序，但你需要将所有相关的东西装进你的灵长类大脑。</p>
+<p>对于我来说，好的设计意味着当我改了点什么，
+整个程序就好像正等着这种改动。
+我可以加入几个函数调用完成任务，同时丝毫不改变代码平静表面下的脉动。</p>
+<p>这听起来很棒，只是完全不可行。“把代码写到改变不会影响其平静表面就好。”成了。</p>
+<p>让我们通俗些。
+第一个关键点是<em>架构是有关于变化的</em>。
+总有人改动代码库。如果没人碰代码——无论是因为代码至善至美，还是糟糕透顶以至于没人会为了修改它而玷污自己的文本编辑器——那么它的架构设计就无关紧要。
+评价架构设计就是评价它应对变化有多么轻松。
+没有了变化，它就是一个永远不会离开起跑线的运动员。</p>
+<h3><a href="#你如何处理变化？" name="你如何处理变化？">你如何处理变化？</a></h3>
+<p>在你改变代码去添加新特性，去修复漏洞，或者随便什么需要你使用编辑器的时候，
+你需要理解现在的代码在做些什么。当然，你不需要理解整个程序，
+但你需要将所有相关的东西<span name="ocr">装进</span>你的灵长类大脑。</p>
 <aside name="ocr">
-<p>It&#8217;s weird to think that this is literally an OCR process.</p>
+<p>有点诡异，这字面上是一个OCR过程。</p>
 </aside>
-<p>We tend to gloss over this step, but it&#8217;s often the most time-consuming part of
-programming. If you think paging some data from disk into RAM is slow, try
-paging it into a simian cerebrum over a pair of optical nerves.</p>
-<p>我们通常无视了这一步，但这往往是编程中最耗时的部分。如果你认为将一些数据从磁盘上分页到RAM上很慢，那么试着通过一对神经纤维将数据分页到猴子的脑子里。</p>
-<p>Once you&#8217;ve got all the right context into your wetware, you think for a bit and
-figure out your solution. There can be a lot of back and forth here, but often
-this is relatively straightforward. Once you understand the problem and the
-parts of the code it touches, the actual coding is sometimes trivial.</p>
-<p>一旦我们把所有正确的上下文都记到了你的湿件里，你想了一会，然后找到了你的解决方案。这可能会有些来回打转的时候，但通常是比较简单的部分。一旦你理解了问题和需要改动的代码，实际的编码工作有时候是微不足道的。</p>
-<p>You beat your meaty fingers on the keyboard for a while until the right colored
-lights blink on screen and you&#8217;re done, right? Not just yet! Before you write
-<span name="tests">tests</span> and send it off for code review, you often have
-some cleanup to do.</p>
-<p>你用你的肥手指在键盘上敲打一阵子直到屏幕上显示着正确的颜色的光芒，然后一切就完成了，对吧？还没呢！在你写测试并将其发送该代码评审之前，你还有些清理工作要去做。</p>
+<p>我们通常无视了这步，但这往往是编程中最耗时的部分。
+如果你认为将数据从磁盘上分页到RAM上很慢，
+那么试着通过一对神经纤维将数据分页到猴子的脑子里。</p>
+<p>一旦把所有正确的上下文都记到了你的湿件里，
+你想了一会，然后找到了解决方案。
+这可能会有来回打转的时候，但通常比较简单。
+一旦你理解了问题和需要改动的代码，实际的编码工作有时候是微不足道的。</p>
+<p>你用肥手指在键盘上敲打一阵子，直到屏幕上显示着正确颜色的光芒，
+然后就算搞定了，对吧？还没呢！
+在你为之写<span name="tests">测试</span>并发送其到代码评审之前，你通常有些清理工作要做。</p>
 <aside name="tests">
-<p>Did I say &#8220;tests&#8221;? Oh, yes, I did. It&#8217;s hard to write unit tests for some game
-code, but a large fraction of the codebase is perfectly testable.</p>
-<p>I won&#8217;t get on a soapbox here, but I&#8217;ll ask you to consider doing more automated
-testing if you aren&#8217;t already. Don&#8217;t you have better things to do than manually
-validate stuff over and over again?</p>
+<p>我是不是说了“测试”？噢，是的，我说了。为有些游戏代码写单元测试很难，但代码库的一大部分是完全可以测试的。</p>
+<p>我不会在这里发表演说，但是我建议你，如果还没有做自动测试，请考虑一下。
+除了手动验证以外你就没别的事要做了吗？</p>
 </aside>
-<p>You jammed a bit more code into your game, but you don&#8217;t want the next person to
-come along to trip over the wrinkles you left throughout the source. Unless the
-change is minor, there&#8217;s usually a bit of reorganization to do to make your new
-code integrate seamlessly with the rest of the program. If you do it right, the
-next person to come along won&#8217;t be able to tell when any line of code was
-written.</p>
-<p>你将一些代码加入了你的游戏，但你不想要下一个人被你留下来的小问题绊倒。除非改变很小，否则就还需要一些工作去微调你的新代码，使之无缝对接到程序的其他部分。如果你做对了，那么下一个看到你代码的人甚至无法说出哪些代码是新加入的。</p>
-<p>In short, the flow chart for programming is something like:</p>
+<p>你将一些代码加入了你的游戏，但你不想下一个人被你留下来的小问题绊倒。
+除非改动很小，否则就还需要一些工作去微调你的新代码，使之无缝对接到程序的其他部分。如果你做对了，那么下一个见到代码的人甚至无法说出哪些代码是新加入的。</p>
 <p>简而言之，编程的流程图看起来是这样的：</p>
-<p><span name="life-cycle"></span></p>
 <p><img src="images/architecture-cycle.png" alt="Get problem &rarr; Learn code &rarr; Code solution &rarr; Clean up &rarr; and back around to the beginning." /></p>
+<p><span name="life-cycle"></span></p>
 <aside name="life-cycle">
-<p>The fact that there is no escape from that loop is a little alarming now that I
-think about it.</p>
+<p>无法脱离循环令人震惊，我现在发现了。</p>
 </aside>
-<h3><a href="#how-can-decoupling-help" name="how-can-decoupling-help">How can decoupling help?</a></h3>
 <h3><a href="#解耦怎么帮了忙？" name="解耦怎么帮了忙？">解耦怎么帮了忙？</a></h3>
-<p>While it isn&#8217;t obvious, I think much of software architecture is about that
-learning phase. Loading code into neurons is so painfully slow that it pays to
-find strategies to reduce the volume of it. This book has an entire section on
-<a href="decoupling-patterns.html"><em>decoupling</em> patterns</a>, and a large chunk of <em>Design
-Patterns</em> is about the same idea.</p>
-<p>虽然不是很明显，但我认为很多软件架构都是有关学习阶段。将代码载入到神经元太过于缓慢，找些策略来减少载入的总量是很值得做的事情。这本书有整整一个章节是有关于<a href="decoupling-patterns.html"><em>decoupling</em> patterns</a>，还有很多<em>设计模式</em>是关于相同的主题。</p>
-<p>You can define &#8220;decoupling&#8221; a bunch of ways, but I think if two pieces of code
-are coupled, it means you can&#8217;t understand one without understanding the other.
-If you <em>de</em>-couple them, you can reason about either side independently. That&#8217;s
-great because if only one of those pieces is relevant to your problem, you just
-need to load <em>it</em> into your monkey brain and not the other half too.</p>
-<p>你可以用多种方式定义解耦，但我认为如果有两块代码是耦合的，那就意味着你无法只理解其中的一个。如果你<em>解</em>耦了他俩，你就可以独自的理解某一块。这当然很好，因为只有一块与你的问题相关，你只需要将<em>这一块</em>加载到你的猴脑中而不需要加载另外一块。</p>
-<p>To me, this is a key goal of software architecture: <strong>minimize the amount of
-knowledge you need to have in-cranium before you can make progress.</strong></p>
-<p>对于我来说，下面这是软件架构的关键目标：<em>最小化你在做出进展前需要的进入大脑的知识</em>。</p>
-<p>The later stages come into play too, of course. Another definition of decoupling
-is that a <em>change</em> to one piece of code doesn&#8217;t necessitate a change to another.
-We obviously need to change <em>something</em>, but the less coupling we have, the less
-that change ripples throughout the rest of the game.</p>
-<p>当然，还有些东西会在后期发挥作用。另一种定义解耦的方法是当一块代码有<em>变化</em>时，没必要修改另外的代码。我们肯定需要修改<em>一些东西</em>，但耦合程度越小，那变化能够波及的范围就越小。</p>
-<h2><a href="#at-what-cost" name="at-what-cost">At What Cost?</a></h2>
-<h2><a href="#额外的开销？" name="额外的开销？">额外的开销？</a></h2>
-<p>This sounds great, right? Decouple everything and you&#8217;ll be able to code like
-the wind. Each change will mean touching only one or two select methods, and you
-can dance across the surface of the codebase leaving nary a shadow.</p>
-<p>听起来很棒，对吧？解耦任何东西，然后代码就像风一样。每一个变化都只修改一两个特定的方法，你在代码库表面跳舞，只留下一两道阴影。</p>
-<p>This feeling is exactly why people get excited about abstraction, modularity,
-design patterns, and software architecture. A well-architected program really is
-a joyful experience to work in, and everyone loves being more productive. Good
-architecture makes a <em>huge</em> difference in productivity. It&#8217;s hard to overstate
-how profound an effect it can have.</p>
-<p>这就是人们对抽象，模块化，设计模式和软件架构兴奋的原因。在一个有好的架构的程序上工作实在是很好的体验，每一个人都希望更有效率的工作。好的架构能造成生产力上<em>巨大的</em>不同。很难夸大它那强有力的影响。</p>
-<p>But, like all things in life, it doesn&#8217;t come free. Good architecture takes real
-effort and discipline. Every time you make a change or implement a feature, you
-have to work hard to integrate it gracefully into the rest of the program. You
-have to take great care to both <span name="maintain">organize</span> the code
-well and <em>keep</em> it organized throughout the thousands of little changes that
-make up a development cycle.</p>
-<p>但是，就像生活中的任何事物一样，没有免费的午餐。好的设计需要汗水和纪律。每一次你做出改动或是实现特性，你都需要将它优雅的集成到程序的其他部分。你需要花费大量的努力去组织代码，并继续在开发过程中面对数千次变化仍然保持它的组织。</p>
+<p>虽然并不明显，但我认为很多软件架构都是关于学习阶段。
+将代码载入到神经元太过缓慢，找些策略减少载入的总量是很值得做的事。
+这本书有整整一个章节是关于<a href="decoupling-patterns.html"><em>解耦</em>模式</a>，
+还有很多<em>设计模式</em>是关于同样的主题。</p>
+<p>你可以用多种方式定义“解耦”，但我认为如果有两块代码是耦合的，
+那就意味着你无法只理解其中的一个。
+如果你<em>解</em>耦了他俩，你就可以独自的理解某一块。
+这当然很好，因为只有一块与你的问题相关，
+你只需要将<em>这一块</em>加载到你的猴脑中而不需要加载另外一块。</p>
+<p>对于我来说，下面是软件架构的关键目标：
+<em>最小化你在处理前需要进入大脑的知识</em>。</p>
+<p>当然，也可以从后期阶段来看。
+另一种解耦的定义是当一块代码有<em>变化</em>时，没必要修改另外的代码。
+我们肯定需要修改<em>一些东西</em>，但耦合程度越小，变化会波及的范围就越小。</p>
+<h2><a href="#以什么代价？" name="以什么代价？">以什么代价？</a></h2>
+<p>听起来很棒，对吧？解耦任何东西，然后你能像风一样编码。
+每个变化都只修改一两个特定的方法，你在代码库的水面上跳舞，只留下倒影。</p>
+<p>这就是人们对抽象，模块化，设计模式和软件架构兴奋的原因。
+在有好架构的程序上工作是很好的体验，每个人都希望能更有效率的工作。
+好架构能造成生产力上<em>巨大的</em>不同。很难再夸大它那强力的影响。</p>
+<p>但是，就像生活中的任何事物一样，没有免费的午餐。好的设计需要汗水和纪律。
+每一次做出改动或是实现特性，你都需要将它优雅的集成到程序的其他部分。
+你需要花费大量的努力去<span name="maintain">管理</span>代码，
+在开发过程中面对数千次变化仍然<em>保持</em>它的管理结构。</p>
 <aside name="maintain">
-<p>The second half of this&#8202;&mdash;&#8202;maintaining your design&#8202;&mdash;&#8202;deserves special
-attention. I&#8217;ve seen many programs start out beautifully and then die a death of a
-thousand cuts as programmers add &#8220;just one tiny little hack&#8221; over and over
-again.</p>
-<p>Like gardening, it&#8217;s not enough to put in new plants. You must also weed and
-prune.</p>
+<p>这个的第二部分——管理你的设计——需要特别关注。我看到无数的程序优雅的开始，然后结束在程序员一遍又一遍添加的“微小的黑魔法”中。</p>
+<p>就像园艺，增加新植物是不够的。你还需要除草和修剪。</p>
 </aside>
 <p>You have to think about which parts of the program should be decoupled and
 introduce abstractions at those points. Likewise, you have to determine where
 extensibility should be engineered in so future changes are easier to make.</p>
-<p>你得想想你的程序的那一部分需要解耦，然后再引入抽象。同样，你需要决定哪些部分要设计得有扩展性来方便未来的变化。</p>
-<p>People get really excited about this. They envision future developers (or just
-their future self) stepping into the codebase and finding it open-ended,
-powerful, and just beckoning to be extended. They imagine The One Game Engine To
-Rule Them All.</p>
-<p>人们变得很兴奋。他们设想未来的开发者（或者只是他们的未来的自己）步入代码库，并发现它极为开放，
-功能强大，只是需要扩展。他们想象一个游戏引擎驾驭着所有需求。</p>
-<p>But this is where it starts to get tricky. Whenever you add a layer of
-abstraction or a place where extensibility is supported, you&#8217;re <em>speculating</em>
-that you will need that flexibility later. You&#8217;re adding code and complexity to
-your game that takes time to develop, debug, and maintain.</p>
-<p>但是，这是开始变得棘手的部分。每当你添加了一层抽象或者支持可扩展的地方，你是<em>赌</em>你以后需要灵活性。您添加的代码和复杂到你的游戏，这些都需要时间来开发，调试和维护。</p>
+<p>你得考虑你的程序的哪部分需要解耦，然后再引入抽象。
+同样，你需要决定哪些部分要设计得有扩展性来方便未来的变化。</p>
+<p>人们对这点变得狂热。
+他们设想未来的开发者（或者只是他们的未来的自己）进入代码库，
+并发现它极为开放，
+功能强大，只需扩展。他们想象至尊引擎应所求。</p>
+<p>但是，这是开始棘手的部分。
+每当你添加了一层抽象或者支持扩展的部分，你是<em>赌</em>你以后需要灵活性。
+添加代码和复杂性到游戏中，这都需要时间来开发，调试和维护。</p>
 <p>That effort pays off if you guess right and end up touching that code later. But
 <span name="yagni">predicting</span> the future is <em>hard</em>, and when that
 modularity doesn&#8217;t end up being helpful, it quickly becomes actively harmful.
 After all, it is more code you have to deal with.</p>
-<p>如果你猜对了，最终接触了代码，那么功夫不负有心人。 但预测未来<em>很难</em>，并且如果模块化最终没有帮助，那它就是主动造成伤害。毕竟，你得处理更多的代码。</p>
+<p>如果你猜对了，后来接触了代码，那么功夫不负有心人。
+但<span name="yagni">预测</span>未来<em>很难</em>，如果模块化最终没有帮助，那它就有伤害。
+毕竟，你得处理更多的代码。</p>
 <aside name="yagni">
-<p>Some folks coined the term &#8220;YAGNI&#8221;&#8202;&mdash;&#8202;<a href="http://en.wikipedia.org/wiki/You_aren't_gonna_need_it">You aren&#8217;t gonna need
-it</a>&#8202;&mdash;&#8202;as a mantra to use
-to fight this urge to speculate about what your future self may want.</p>
+<p>有些人喜欢简写为术语“YAGNI”——<a href="http://en.wikipedia.org/wiki/You_aren't_gonna_need_it">You aren&#8217;t gonna need it（你不需要那个）</a>——来对抗预测将来需求的强烈欲望。</p>
 </aside>
-<p>When people get overzealous about this, you get a codebase whose architecture
-has spiraled out of control. You&#8217;ve got interfaces and abstractions everywhere.
-Plug-in systems, abstract base classes, virtual methods galore, and all sorts of
-extension points.</p>
-<p>当人们过分关注这点时，你就会得到一个架构失去控制的代码库。接口和抽象无处不在。插件系统，抽象基类，虚方法，还有各种各样的扩展点。</p>
-<p>It takes you forever to trace through all of that scaffolding to find some real
-code that does something. When you need to make a change, sure, there&#8217;s probably
-an interface there to help, but good luck finding it. In theory, all of this
-decoupling means you have less code to understand before you can extend it, but
-the layers of abstraction themselves end up filling your mental scratch disk.</p>
-<p>回溯所有的脚手架去找真正做事的代码就要消耗无尽的时间。当你需要做出改变，当然，有可能有某个接口能帮上忙，但能不能找到就只能祝你好运了。理论上，解耦意味着在扩展代码之前需要了解的代码更少，但
-抽象层本身就会会填满你的心灵暂存磁盘。</p>
+<p>当人们过分关注这点时，你会得到失去控制的代码库。
+接口和抽象无处不在。插件系统，抽象基类，虚方法，还有各种各样的扩展点。</p>
+<p>回溯所有的脚手架去找真正做事的代码就要消耗无尽的时间。
+当你需要做出改变，当然，有可能某个接口能帮上忙，但能不能找到就只能祝你好运了。
+理论上，解耦意味着在扩展代码之前需要了解的代码更少，
+但抽象层本身就会填满你的心灵暂存磁盘。</p>
 <p>Codebases like this are what turn people <em>against</em> software architecture, and
 design patterns in particular. It&#8217;s easy to get so wrapped up in the code itself
 that you lose sight of the fact that you&#8217;re trying to ship a <em>game</em>. The siren
 song of extensibility sucks in countless developers who spend years working on
 an &#8220;engine&#8221; without ever figuring out what it&#8217;s an engine <em>for</em>.</p>
-<p>像这样的代码库让人<em>反对</em>软件架构，特别是设计模式。人们很容易沉浸在代码中而忽略你要发布一个<em>游戏</em>的这一点。无数的开发者听着“加强可扩展性的警报”而花费多年时间来制作一个“引擎”，却没有搞清楚做引擎是<em>为了什么</em>。</p>
-<h2><a href="#performance-and-speed" name="performance-and-speed">Performance and Speed</a></h2>
+<p>像这样的代码库让人<em>反对</em>软件架构，特别是设计模式。
+人们很容易沉浸在代码中而忽略你要发布<em>游戏</em>的这点。
+无数的开发者听着加强可扩展性的警报，花费多年时间制作“引擎”，
+却没有搞清楚做引擎是<em>为了什么</em>。</p>
 <h2><a href="#性能和速度" name="性能和速度">性能和速度</a></h2>
-<p>There&#8217;s another critique of software architecture and abstraction that you hear
-sometimes, especially in game development: that it hurts your game&#8217;s
-performance. Many patterns that make your code more flexible rely on virtual
-dispatch, interfaces, pointers, messages, and <span name="templates">other
-mechanisms</span> that all have at least some runtime cost.</p>
-<p>软件架构和抽象有时会被批评，尤其是在游戏开发中: 它伤害了游戏的性能。许多使您的代码更灵活的模式依靠虚拟调度、 接口、 指针、 消息，和其他机制，他们都会消耗一些运行时成本。</p>
+<p>软件架构和抽象有时会被批评，尤其是在游戏开发中: 它伤害了游戏的性能。
+许多让代码更灵活的模式依靠虚拟调度、 接口、 指针、 消息，和<span name="templates">其他机制</span>，
+他们都会消耗运行时成本。</p>
 <aside name="templates">
-<p>One interesting counter-example is templates in C++. Template metaprogramming
-can sometimes give you the abstraction of interfaces without any penalty at
-runtime.</p>
-<p>There&#8217;s a spectrum of flexibility here. When you write code to call a concrete
-method in some class, you&#8217;re fixing that class at <em>author</em> time&#8202;&mdash;&#8202;you&#8217;ve
-hard-coded which class you call into. When you go through a virtual method or
-interface, the class that gets called isn&#8217;t known until <em>runtime</em>. That&#8217;s much
-more flexible but implies some runtime overhead.</p>
-<p>Template metaprogramming is somewhere between the two. There, you make the
-decision of which class to call at <em>compile time</em> when the template is
-instantiated.</p>
+<p>一个有趣的反面例子是在C++中的模板。模板编程有时可以给你抽象接口而无需运行时开销。</p>
+<p>这是灵活性的两极。但你写代码调用类中的具体方法时，你在<em>写作</em>时修改类——你硬编码了调用的是哪个类。但通过虚方法或接口时，直到<em>运行</em>时你才知道调用的类。这更加灵活但增加了运行时开销。</p>
+<p>模板编程是在两者这件。你在<em>编译时</em>初始化模板，决定调用哪些类。</p>
 </aside>
-<p>There&#8217;s a reason for this. A lot of software architecture is about making your
-program more flexible. It&#8217;s about making it take less effort to change it. That
-means encoding fewer assumptions in the program. You use interfaces so that your
-code works with <em>any</em> class that implements it instead of just the one that does
-today. You use <a href="observer.html" class="gof-pattern">observers</a> and <a
-href="event-queue.html" class="pattern">messaging</a> to let two parts of the
-game talk to each other so that tomorrow, it can easily be three or four.</p>
-<p>还有一个原因。很多软件架构的目的是使你的程序更加灵活。这让改变它需要较少的努力。编码时对程序有更少的假设。您可以使用接口，让您的代码可与<em>任何</em>实现它的类交互，而不仅仅是<em>现在</em>写的类。今天。您可以使用<a href="observer.html" class="gof-pattern">观察者</a>和<a href="event-queue.html" class="pattern">消息</a>让游戏的两部分交流，而以后它可以很容易地扩展为三个或四个部分相互交流。</p>
-<p>But performance is all about assumptions. The practice of optimization thrives
-on concrete limitations. Can we safely assume we&#8217;ll never have more than 256
-enemies? Great, we can pack an ID into a single byte. Will we only call a method
-on one concrete type here? Good, we can statically dispatch or inline it. Are
-all of the entities going to be the same class? Great, we can make a nice <a
-href="data-locality.html" class="pattern">contiguous array</a> of them.</p>
-<p>但性能与假设相关。实践优化基于确定的限制。我们永远不会有超过256种敌人吗？好，我们就可以将ID编码为为一个字节。请问我们在一个具体类型中只调用一个方法吗？好，我们可以做静态调度或内联的。所有的实体都是同一类？太好了，我们可以做一个 <a href="data-locality.html" class="pattern">连续数组</a>存储他们。</p>
-<p>This doesn&#8217;t mean flexibility is bad, though! It lets us change our game
-quickly, and <em>development</em> speed is absolutely vital for getting to a fun
-experience. No one, not even Will Wright, can come up with a balanced game
-design on paper. It demands iteration and experimentation.</p>
-<p>但这并不意味着灵活性是坏的！它可以让我们快速改进我们的游戏，<em>开发</em>速度是获取有趣开发经验的绝对重要因素。没有任何人，甚至 Will Wright，可以在纸面上构建一个平衡的游戏。这需要迭代和实验。</p>
-<p>The faster you can try out ideas and see how they feel, the more you can try and
-the more likely you are to find something great. Even after you&#8217;ve found the
-right mechanics, you need plenty of time for tuning. A tiny imbalance can wreck
-the fun of a game.</p>
-<p>越快尝试想法然后看看效果如何，你就越能尝试更多的东西，就越有可能找到有价值的东西。就算发现了正确的机制之后，你也需要充足的时间做调整。一个微小的不平衡可能破坏整个游戏的乐趣。</p>
-<p>There&#8217;s no easy answer here. Making your program more flexible so you can
-prototype faster will have some performance cost. Likewise, optimizing your code
-will make it less flexible.</p>
-<p>这里没有简单朴实的回答。让你的程序更加灵活，你就在损失一点点性能的前提下更快的做出原型。同样的优化你的代码会让它变得不那么灵活。</p>
-<p>My experience, though, is that it&#8217;s easier to make a fun game fast than it is to
-make a fast game fun. One compromise is to keep the code flexible until the
-design settles down and then tear out some of the abstraction later to improve
-your performance.</p>
-<p>就我个人经验而言，让一个有趣的游戏变快比让一个快速的游戏变有趣简单的多。一种折中的办法是保持代码灵活直到设计定下来，在抽出抽象层来提高性能。</p>
-<h2><a href="#the-good-in-bad-code" name="the-good-in-bad-code">The Good in Bad Code</a></h2>
+<p>还有一个原因。很多软件架构的目的是使程序更加灵活。
+这让改变它需要较少的努力。编码时对程序有更少的假设。
+您可以使用接口，让您的代码可与<em>任何</em>实现它的类交互，而不仅仅是<em>现在</em>写的类。
+今天。您可以使用<a href="observer.html" class="gof-pattern">观察者</a>和<a href="event-queue.html" class="pattern">消息</a>让游戏的两部分交流，
+而以后它可以很容易地扩展为三个或四个部分相互交流。</p>
+<p>但性能与假设相关。实践优化基于确定的限制。
+永远不会超过256种敌人吗？好，我们就可以将ID编码为为一个字节。
+在一个具体类型中只调用一个方法吗？好，我们可以做静态调度或内联。
+所有的实体都是同一类？太好了，我们可以做一个 <a href="data-locality.html" class="pattern">连续数组</a>存储他们。</p>
+<p>但这并不意味着灵活性是坏的！它可以让我们快速改进我们的游戏，
+<em>开发</em>速度是获取有趣开发经验的绝对重要因素。
+没有人，哪怕是Will Wright，能在纸面上构建一个平衡的游戏。这需要迭代和实验。</p>
+<p>越快尝试想法看看效果如何，你就越能尝试更多的东西，就越有可能找到有价值的东西。
+就算找到正确的机制之后，你也需要足够的时间调整。
+一个微小的不平衡可能破坏整个游戏的乐趣。</p>
+<p>这里没有简单方案。
+让你的程序更加灵活，你能在损失一点点性能的前提下更快的做出原型。
+同样的，优化代码会让它不那么灵活。</p>
+<p>就我个人经验而言，让有趣的游戏变快比让快速的游戏变有趣简单得多。
+一种折中的办法是保持代码灵活直到设计定下来，再抽出抽象层来提高性能。</p>
 <h2><a href="#糟糕代码的优势" name="糟糕代码的优势">糟糕代码的优势</a></h2>
-<p>That brings me to the next point which is that there&#8217;s a time and place for
-different styles of coding. Much of this book is about making maintainable,
-clean code, so my allegiance is pretty clearly to doing things the &#8220;right&#8221; way,
-but there&#8217;s value in slapdash code too.</p>
-<p>这就来到了我们的下一个观点：不同的代码风格各有千秋。这本书的大部分是关于保持干净可控的代码，所以我坚持应该用<em>正确</em>地方式写代码，但糟糕的代码也有一定能够的优势。</p>
-<p>Writing well-architected code takes careful thought, and that translates to
-time. Moreso, <em>maintaining</em> a good architecture over the life of a project takes
-a lot of effort. You have to treat your codebase like a good camper does their
-campsite: always try to leave it a little better than you found it.</p>
-<p>编写良好架构的代码需要仔细的思考，这就会转化为时间的代价。在项目的整个周期中<em>保持</em>良好的架构需要花费大量的努力。你需要像一名露营者处理营地一样小心处理你的代码库：总是保持其优于你接触它的时候。</p>
-<p>This is good when you&#8217;re going to be living in and working on that code for a
-long time. But, like I mentioned earlier, game design requires a lot of
-experimentation and exploration. Especially early on, it&#8217;s common to write code
-that you <em>know</em> you&#8217;ll throw away.</p>
-<p>当你要在一个项目上花费很久时间的话，这是很好的。但是，就像我早先时候提到的，游戏设计需要很多实验和探索。特别是在早期，写一些需要扔掉的代码是很普遍的事情。</p>
-<p>If you just want to find out if some gameplay idea plays right at all,
-architecting it beautifully means burning more time before you actually get it
-on screen and get some feedback. If it ends up not working, that time spent
-making the code elegant goes to waste when you delete it.</p>
-<p>如果你只想试试游戏的某些主意是不是正确的，良好的设计意味着你在屏幕上看到和获取反馈之前要消耗很长的时间。如果最后证明这个点子不对，那么当你删除代码的时候，那些你花在让代码更加优雅的时间就完全的浪费了。</p>
+<p>这就来到了下一观点：不同的代码风格各有千秋。
+这本书的大部分是关于保持干净可控的代码，所以我坚持应该用<em>正确</em>方式写代码，但糟糕的代码也有一定的优势。</p>
+<p>编写良好架构的代码需要仔细的思考，这会转为时间上的代价。
+在项目的整个周期中<em>保持</em>良好的架构需要花费大量的努力。
+你需要像露营者处理营地一样小心处理代码库：总是保持其优于你刚开始的时候。</p>
+<p>当你要在一个项目上花费很久时间的话，这很好。
+但，就像我早先提到的，游戏设计需要很多实验和探索。
+特别是在早期，写一些你<em>知道</em>要扔掉的代码是很普遍的事情。</p>
+<p>如果你只想试试游戏的某些主意是不是正确的，
+良好的设计意味着你在屏幕上看到和获取反馈之前要消耗很长时间。
+如果最后证明这个点子不对，那么当你删除代码的时候，那些花在让代码更优雅的时间就完全浪费了。</p>
 <p>Prototyping&#8202;&mdash;&#8202;slapping together code that&#8217;s just barely functional enough to
 answer a design question&#8202;&mdash;&#8202;is a perfectly legitimate programming practice.
 There is a very large caveat, though. If you write throwaway code, you <em>must</em>
 ensure you&#8217;re able to throw it away. I&#8217;ve seen bad managers play this game time
 and time again:</p>
-<p>原型——一坨勉强拼凑在一起，只能回答设计问题简单代码——是一个完全合理的编程习惯。虽然当你写一次性代码的时候，<em>必须</em>保证你可以抛弃它。我见过很多次糟糕的经理人在玩以下这种把戏：</p>
+<p>原型——一坨勉强拼凑在一起，只能回答设计问题简单代码——是一个完全合理的编程习惯。
+虽然当你写一次性代码的时候，<em>必须</em>保证你可以扔掉它。
+我见过很多次糟糕的经理人在玩这种把戏：</p>
 <blockquote>
-<p>Boss: &#8220;Hey, we&#8217;ve got this idea that we want to try out. Just a prototype, so
-don&#8217;t feel you need to do it right. How quickly can you slap something
-together?&#8221;</p>
-<p>Dev: &#8220;Well, if I cut lots of corners, don&#8217;t test it, don&#8217;t document it, and it
-has tons of bugs, I can give you some temp code in a few days.&#8221;</p>
-<p>Boss: &#8220;Great!&#8221;</p>
-</blockquote>
-<p><em>A few days pass&#8230;</em></p>
-<blockquote>
-<p>Boss: &#8220;Hey, that prototype is great. Can you just spend a few hours cleaning
-it up a bit now and we&#8217;ll call it the real thing?&#8221;</p>
 <p>老板：“嗨，我们有些想试试的点子。只要原型，不需要做的很好。你能多快搞定？”</p>
 <p>开发者：“额，如果我删掉这些部分，不测试，不写文档，允许很多的漏洞，那么几天后我能给你一个临时的代码文件。”</p>
 <p>老板：“太好了。”</p>
 </blockquote>
 <p><em>几天后</em></p>
 <blockquote>
-<p>老板：“嘿，原型很棒，你能花上几个小时清理一下然后变成成品吗？”</p>
+<p>老板：“嘿，原型很棒，你能花上几个小时清理一下然后变为成品吗？”</p>
 </blockquote>
-<p>You need to make sure the people using the <span
-name="throwaway">throwaway</span> code understand that even though it kind of
-looks like it works, it <em>cannot</em> be maintained and <em>must</em> be rewritten. If
-there&#8217;s a <em>chance</em> you&#8217;ll end up having to keep it around, you may have to
-defensively write it well.</p>
-<p>你得让人们清楚，可抛弃的代码即使看上去能够工作，也不能被<em>维护</em>，<em>必须</em>重写。如果<em>有可能</em>你要维护这段代码，你就得防御性好好编写它。</p>
+<p>你得让人们清楚，<span name="throwaway">可抛弃</span>的代码即使看上去能工作，也不能被<em>维护</em>，<em>必须</em>重写。
+如果<em>有可能</em>要维护这段代码，你就得防御性好好编写它。</p>
 <aside name="throwaway">
-<p>One trick to ensuring your prototype code isn&#8217;t obliged to become real code is
-to write it in a language different from the one your game uses. That way, you have to
-rewrite it before it can end up in your actual game.</p>
+<p>一个保证你的原型代码不会变成真正用的代码的技巧是使用一种和游戏不同的语言。这样，你在实际应用于游戏中之前必须重写。</p>
 </aside>
-<h2><a href="#striking-a-balance" name="striking-a-balance">Striking a Balance</a></h2>
 <h2><a href="#保持平衡" name="保持平衡">保持平衡</a></h2>
-<p>We have a few forces in play:</p>
-<ol>
-<li><span name="speed">We</span> want nice architecture so the code is easier to
-    understand over the lifetime of the project.</li>
-<li>We want fast runtime performance.</li>
-<li>We want to get today&#8217;s features done quickly.</li>
-</ol>
 <p>有些因素在相互角力：</p>
 <ol>
-<li>为了在项目的整个生命周期保持其可读性，我们需要好的架构。</li>
-<li>我们需要更快的运行时表现。</li>
+<li>为了在项目的整个生命周期保持其可读性，<span name="speed">我们</span>需要好架构。</li>
+<li>我们需要更好的运行时性能。</li>
 <li>我们需要让现在的特性更快的实现。</li>
 </ol>
 <aside name="speed">
-<p>I think it&#8217;s interesting that these are all about some kind of speed: our
-long-term development speed, the game&#8217;s execution speed, and our short-term
-development speed.</p>
+<p>有趣的是，这些都是速度：我们长期开发的速度，游戏运行的速度，和我们短期开发的速度。</p>
 </aside>
-<p>These goals are at least partially in opposition. Good architecture improves
-productivity over the long term, but maintaining it means every change requires
-a little more effort to keep things clean.</p>
-<p>这些目标至少是部分对立的。好的设计长期来看提高了生产力，但是维护之意味着每个变化都需要做出更多的努力让代码保持清洁。</p>
-<p>The implementation that&#8217;s quickest to write is rarely the quickest to <em>run</em>.
-Instead, optimization takes significant engineering time. Once it&#8217;s done, it
-tends to calcify the codebase: highly optimized code is inflexible and very
-difficult to change.</p>
-<p>草就的代码很少是<em>运行时</em>最快的代码。相反的是，提升性能需要很多的编程时间。一旦完成了，它会污染代码库：高度优化的代码不灵活，很难进行改动。</p>
-<p>There&#8217;s always pressure to get today&#8217;s work done today and worry about
-everything else tomorrow. But if we cram in features as quickly as we can, our
-codebase will become a mess of hacks, bugs, and inconsistencies that saps our
-future productivity.</p>
-<p>总有今日事今日毕的压力。但是我们如果尽可能快的实现我们的特性，我们的代码库就会充满黑魔法，漏洞和混乱，阻碍我们未来的生产力。</p>
-<p>There&#8217;s no simple answer here, just trade-offs. From the email I get, this
-disheartens a lot of people. Especially for novices who just want to make a
-game, it&#8217;s intimidating to hear, &#8220;There is no right answer, just different
-flavors of wrong.&#8221;</p>
-<p>这里没有简单的解决方案，只有权衡。从我收到的邮件看，这伤了很多人的心。特别是那些仅仅是想做个游戏的人，它似乎是在恐吓，“没有正确的答案，只有不同的口味。”</p>
+<p>这些目标至少是部分对立的。
+好的架构长期来看提高了生产力，
+也意味着维护每个变化都需要更多努力让代码保持整洁。</p>
+<p>草就的代码很少是<em>运行时</em>最快的。
+相反，提升性能需要很多的编程时间。
+一旦完成，它会污染代码库：高度优化的代码不灵活，很难改动。</p>
+<p>总有今日事今日毕的压力。但是如果尽可能快地实现特性，
+代码库就会充满黑魔法，漏洞和混乱，阻碍未来的产出。</p>
+<p>没有简单的解决方案，只有权衡。
+从我收到的邮件看，这伤了很多人的心，特别是那些只是想做个游戏的人。
+它似乎是在恐吓，“没有正确的答案，只有不同的口味的错误。”</p>
 <p>But, to me, this is exciting! Look at any field that people dedicate careers to
 mastering, and in the center you will always find a set of intertwined
 constraints. After all, if there was an easy answer, everyone would just do
 that. A field you can master in a week is ultimately boring. You don&#8217;t hear of
 someone&#8217;s distinguished career in <span name="ditch">ditch digging</span>.</p>
-<p>对我来说，这让人兴奋！看看人们从事的任何领域，你总能在其中发现某些相互抵触的限制。无论如何，如果有简单的答案，每个人都会执行之。一周就能掌握的领域是很无聊的。你从来没有听说过有人讨论挖坑的事业。</p>
+<p>但，对我来说，这让人兴奋！看看任何人们从事的领域，
+你总能发现某些相互抵触的限制。无论如何，如果有简单的答案，每个人都会那么做。
+一周就能掌握的领域是很无聊的。你从来没有听说过有人讨论<span name="ditch">挖坑事业</span>。</p>
 <aside name="ditch">
-<p>Maybe you do; I didn&#8217;t research that analogy. For all I know, there could be avid
-ditch digging hobbyists, ditch digging conventions, and a whole subculture
-around it. Who am I to judge?</p>
+<p>游戏你会；我没有深究这个类比。
+我知道的是，可能有挖坑热爱着，挖坑规范，以及一整套亚文化。
+我算什么人，能在此大放厥词？</p>
 </aside>
-<p>To me, this has much in common with games themselves. A game like chess
-can never be mastered because all of the pieces are so perfectly balanced
-against one another. This means you can spend your life exploring the vast space
-of viable strategies. A poorly designed game collapses to the one winning tactic
-played over and over until you get bored and quit.</p>
-<p>对我来说，这和游戏有很多相似之处。国际象棋之类的游戏永远不能被掌握，因为每一个棋子都很完美的与其他棋子相平衡。这就意味着你可以花费一生的时间探索广阔的可选策略。糟糕的游戏就像井字棋，你玩了一遍又一遍，直到你厌烦了就退出。</p>
-<h2><a href="#simplicity" name="simplicity">Simplicity</a></h2>
+<p>对我来说，这和游戏有很多相似之处。
+国际象棋之类的游戏永远不能被掌握，因为每一个棋子都很完美的与其他棋子相平衡。
+这意味你可以花费一生探索可选的广阔策略。糟糕的游戏就像井字棋，你玩了一遍又一遍，直到你厌烦了就退出。</p>
 <h2><a href="#简单" name="简单">简单</a></h2>
-<p>Lately, I feel like if there is any method that eases these constraints, it&#8217;s
-<em>simplicity</em>. In my code today, I try very hard to write the cleanest, most
-direct solution to the problem. The kind of code where after you read it, you
-understand exactly what it does and can&#8217;t imagine any other possible solution.</p>
-<p>最近，我感觉如果有什么能缓解这些限制，那就是<em>简单</em>。在我现在的代码中，我努力去写最简单，最直接的解决方案。你读过后这种代码后，完全理解了它在做什么，想不出其他完成的方法。</p>
+<p>最近，我感觉如果有什么能简化这些限制，那就是<em>简单</em>。
+在我现在的代码中，我努力去写最简单，最直接的解决方案。
+你读过这种代码后，完全理解了它在做什么，想不出其他完成的方法。</p>
 <p>I aim to get the data structures and algorithms right (in about that order) and
 then go from there. I find if I can keep things simple, there&#8217;s less code
 overall. That means less code to load into my head in order to change it.</p>
-<p>我的目的是正确获得数据结构和算法（大致在这样的顺序下）然后在从那里出发。我发现如果我能让事物变得简单，这里就会有更少的代码。这就意味着要改动时有更少的代码加入我的脑海。</p>
-<p>It often runs fast because there&#8217;s simply not as much overhead and not much code
-to execute. (This certainly isn&#8217;t always the case though. You can pack a lot of
-looping and recursion in a tiny amount of code.)</p>
-<p>它通常跑的很快，因为这里没什么开销，也没什么代码执行。（虽然大部分时候事实并非如此。你可以在一小段代码里加入大量的循环和递归）。</p>
-<p>However, note that I&#8217;m not saying <span name="simple">simple code</span> takes
-less time to <em>write</em>. You&#8217;d think it would since you end up with less total
-code, but a good solution isn&#8217;t an accretion of code, it&#8217;s a <em>distillation</em> of
-it.</p>
-<p>但是，注意我并没有说简单的代码需要更少的时间<em>编写</em>。你会这么觉得是因为你最终获得了更少的代码，但是好的解决方案不是往代码中注水，而是<em>蒸干</em>代码。</p>
+<p>我的目的是正确获得数据结构和算法（大致是这样的先后），然后在从那里开始。
+我发现如果能让事物变得简单，就有更少的代码，
+就意味着改动时有更少的代码载入脑海。</p>
+<p>它通常跑的很快，因为没什么开销，也没什么代码执行。
+（虽然大部分时候事实并非如此。你可以在一小段代码里加入大量的循环和递归。）</p>
+<p>但是，注意我并没有说<span name="simple">简单的代码</span>需要更少的时间<em>编写</em>。
+你会这么觉得是因为最终获得了更少的代码，但是好的解决方案不是往代码中注水，而是<em>蒸干</em>代码。</p>
 <aside name="simple">
-<p>Blaise Pascal famously ended a letter with, &#8220;I would have written a shorter
-letter, but I did not have the time.&#8221;</p>
-<p>Another choice quote comes from Antoine de Saint-Exupery: &#8220;Perfection is
-achieved, not when there is nothing more to add, but when there is nothing left
-to take away.&#8221;</p>
-<p>Closer to home, I&#8217;ll note that every time I revise a chapter in this book, it
-gets shorter. Some chapters are tightened by 20% by the time they&#8217;re done.</p>
+<p>Blaise Pascal有句著名的信件结尾，“我没时间写的更短。”</p>
+<p>另一句名言来自Antoine de Saint-Exupery：“完美是可达到的，不是没有东西可以添加的时候，而是没有东西可以删除的时候。”</p>
+<p>言归正传，我发现每次我重写本章，它就更短。有些章节比他们刚完成时短了20%。</p>
 </aside>
-<p>We&#8217;re rarely presented with an elegant problem. Instead, it&#8217;s a pile of use
-cases. You want the X to do Y when Z, but W when A, and so on. In other words, a
-long list of different example behaviors.</p>
-<p>我们很少遇到优雅表达的问题。实际上，是一堆用况。你想要X在Z情况下做Y，在A情况下作W，诸如此类的。换言之，一长列不同表现的例子。</p>
-<p>The solution that takes the least mental effort is to just code up those use
-cases one at a time. If you look at novice programmers, that&#8217;s what they often
-do: they churn out reams of conditional logic for each case that popped into
-their head.</p>
-<p>最不消耗心血的解决方法就是编写用况编写一段代码。如果你看看新手程序员，他们经常这么干：他们为每一个落到他手上的问题编写逻辑循环。</p>
-<p>But there&#8217;s nothing elegant in that, and code in that style tends to fall over
-when presented with input even slightly different than the examples the coder
-considered. When we think of elegant solutions, what we often have in mind is a
-<em>general</em> one: a small bit of logic that still correctly covers a large space of
-use cases.</p>
-<p>但这一点也不优雅，那种风格的代码遇到一点点程序员没想到的输入就会崩溃。当我们想象优雅的代码时，我们想的是<em>通用</em>的那一个：只需要很少的逻辑部分就可以覆盖整个用况。</p>
-<p>Finding that is a bit like pattern matching or solving a puzzle. It takes effort
-to see through the scattering of example use cases to find the hidden order
-underlying them all. It&#8217;s a great feeling when you pull it off.</p>
-<p>找到这样的方法有点像模式识别或者解决谜题。他需要努力去识别散乱的例子下隐藏的规律。当你完成的时候感觉好得不能再好。</p>
-<h2><a href="#get-on-with-it,-already" name="get-on-with-it,-already">Get On With It, Already</a></h2>
+<p>我们很少遇到优雅表达的问题。取而代之的是一堆用况。
+你想要X在Z情况下做Y，在A情况下做W，诸如此类。换言之，一长列不同行为。</p>
+<p>最不消耗心血的解决方法就是为每段用况编写一段代码。
+如果你看看新手程序员，他们经常这么干：
+他们为每个手头的问题编写逻辑循环。</p>
+<p>但这一点也不优雅，那种风格的代码遇到一点点没想到的输入就会崩溃。
+当我们想象优雅的代码时，我们想的是<em>通用</em>的那一个：
+只需要很少的逻辑就可以覆盖整个用况。</p>
+<p>找到这样的方法有点像模式识别或者解决谜题。
+需要努力去识别散乱的用例下隐藏的规律。
+完成的时候你会感觉好得不能再好。</p>
 <h2><a href="#就快完了" name="就快完了">就快完了</a></h2>
-<p>Almost everyone skips the introductory chapters, so I congratulate you on making
-it this far. I don&#8217;t have much in return for your patience, but I&#8217;ll offer up a
-few bits of advice that I hope may be useful to you:</p>
-<p>几乎每个人都会跳过介绍章节，所以祝贺你看到这里。我没有太多的东西回报你的耐心，但我还是有一些建议给你，希望对你有用：</p>
+<p>几乎每个人都会跳过介绍章节，所以祝贺你看到这里。
+我没有太多东西回报你的耐心，但我还有一些建议给你，希望对你有用：</p>
 <ul>
 <li>
-<p>Abstraction and decoupling make evolving your program faster and easier, but
-    don&#8217;t waste time doing them unless you&#8217;re confident the code in question needs
-    that flexibility.</p>
+<p>抽象和解耦让扩展代码更快更容易，但除非确信需要灵活性，否则不要做。</p>
 </li>
 <li>
-<p><span name="think">Think</span> about and design for performance throughout
-    your development cycle, but put off the low-level, nitty-gritty optimizations
-    that lock assumptions into your code until as late as possible.</p>
-</li>
-<li>
-<p>抽象和耦合让不断扩展代码更快更容易，但除非你知道你需要这样的灵活性，否则不要做。</p>
-</li>
-<li>
-<p>在你的整个开发周期中考虑并为性能设计，但是尽可能推迟那些底层的，基本事实的优化，那会锁死你的代码。</p>
+<p>在你的整个开发周期中<span name="think">考虑</span>并为性能设计，但是尽可能推迟那些底层的，基本事实的优化，那会锁死你的代码。</p>
 </li>
 </ul>
 <aside name="think">
-<p>Trust me, two months before shipping is <em>not</em> when you want to start worrying
-about that nagging little &#8220;game only runs at 1 FPS&#8221; problem.</p>
+<p>相信我，在发布前两个月<em>不是</em>你开始思考“游戏运行只有1FPS”的唠叨小问题的时候。</p>
 </aside>
 <ul>
 <li>
-<p>Move quickly to explore your game&#8217;s design space, but don&#8217;t go so fast that
-     you leave a mess behind you. You&#8217;ll have to live with it, after all.</p>
+<p>快速的探索你游戏的设计空间，但不要跑的太快，在身后留下一团乱麻。毕竟，你总得回来处理他们。</p>
 </li>
 <li>
-<p>If you are going to ditch code, don&#8217;t waste time making it pretty. Rock
-     stars trash hotel rooms because they know they&#8217;re going to check out the
-     next day.</p>
-</li>
-<li>
-<p>But, most of all, <strong>if you want to make something fun, have fun making
-     it.</strong></p>
-</li>
-<li>
-<p>快速的探索你游戏的设计空间，但不要跑的太快，在你身后留下一团乱麻。毕竟，你总得回来处理他们。</p>
-</li>
-<li>
-<p>如果你打算抛弃这段代码，就不要尝试将其写的完美。摇滚明星将旅店房间弄得一团糟，因为他们知道明天会有人来打扫干净。</p>
+<p>如果你打算抛弃这段代码，就不要尝试将其写完美。摇滚明星将旅店房间弄得一团糟，因为他们知道明天会有人来打扫干净。</p>
 </li>
 <li>
 <p>但最重要的是，<strong>如果你想要做出让人享受的东西，那就享受做它的过程。</strong></p>
