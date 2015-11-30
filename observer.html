@@ -32,61 +32,42 @@
 </nav>
 <h1>Observer</h1>
 <h1 class="book"><a href="/">Game Programming Patterns</a><span class="section"><a href="design-patterns-revisited.html">Design Patterns Revisited</a></span></h1>
-<p>You can&#8217;t throw a rock at a computer without hitting an application built using
-the <span name="devised"><a href="http://en.wikipedia.org/wiki/Model%E2%80%93view%E2%80%93controller">Model-View-Controller</a></span> architecture, and
-underlying that is the Observer pattern. Observer is so pervasive that Java put
-it in its core library (<a href="http://docs.oracle.com/javase/7/docs/api/java/util/Observer.html"><code>java.util.Observer</code></a>) and C# baked it right into
-the <em>language</em> (the <a href="http://msdn.microsoft.com/en-us/library/8627sbea.aspx"><code>event</code></a> keyword).</p>
-<p>你扔一块石头到电脑中，不可能砸不中一个不使用MVC架构的应用，根本在于观察者模式。观察者模式是如此的普遍，Java将其放到了核心库之中，而C#直接将其嵌入了<em>语言</em>。</p>
+<p>扔块石头到电脑世界中，
+不可能砸不中一个不使用<span name="devised"><a href="http://en.wikipedia.org/wiki/Model%E2%80%93view%E2%80%93controller">MVC架构</a></span>的应用，
+根本在于观察者模式。
+观察者模式非常普遍，Java将其放到了核心库之中（<a href="http://docs.oracle.com/javase/7/docs/api/java/util/Observer.html"><code>java.util.Observer</code></a>），而C#直接将其嵌入了<em>语言</em>（<a href="http://msdn.microsoft.com/en-us/library/8627sbea.aspx"><code>event</code></a>关键字）。</p>
 <aside name="devised">
-<p>Like so many things in software, MVC was invented by Smalltalkers in the
-seventies. Lispers probably claim they came up with it in the sixties but didn&#8217;t
-bother writing it down.</p>
+<p>就像软件中的很多东西，MVC是Smalltalkers在七十年代创造的。Lisp程序员也许声明他们在六十年代就发明了但懒得记下来。</p>
 </aside>
-<p>Observer is one of the most widely used and widely known of the original Gang of
-Four patterns, but the game development world can be strangely cloistered at
-times, so maybe this is all news to you. In case you haven&#8217;t left the abbey in a
-while, let me walk you through a motivating example.</p>
-<p>观察者模式是最广泛使用和最广为人知的GOF模式，但是游戏开发世界与世隔绝，所以这个也许对你是全新的领域。防止你还没有从修道院中走出来，让我带你走到一个更加形象的例子。</p>
-<h2><a href="#achievement-unlocked" name="achievement-unlocked">Achievement Unlocked</a></h2>
+<p>观察者模式是最广泛使用和最广为人知的GoF模式，
+但是游戏开发世界与世隔绝，
+所以这对你也许是全新的领域。
+防止你还没有从修道院中走出来，
+让我带你看看一个更加形象的例子。</p>
 <h2><a href="#成就解锁" name="成就解锁">成就解锁</a></h2>
-<p>Say we&#8217;re adding an <span name="weasel">achievements</span> system to our game.
-It will feature dozens of different badges players can earn for completing
-specific milestones like &#8220;Kill 100 Monkey Demons&#8221;, &#8220;Fall off a Bridge&#8221;, or
-&#8220;Complete a Level Wielding Only a Dead Weasel&#8221;.</p>
-<p>假设我们向游戏中添加了一个成就系统。它存储了玩家可以完成的各种各样的成就，比如“杀死1000只猴子恶魔”，“从桥上掉下去”，或者“一命通关”。</p>
+<p>假设我们向游戏中添加了<span name="weasel">成就系统</span>。
+它存储了玩家可以完成的各种各样的成就，比如“杀死1000只猴子恶魔”，“从桥上掉下去”，或者“一命通关”。</p>
 <aside name="weasel">
 <p><img src="images/observer-weasel-wielder.png" width="240" alt="Achievement: Weasel Wielder" />
 
-I swear I had no double meaning in mind when I drew this.</p>
+我发誓画的这个没有第二个意思。</p>
 </aside>
-<p>This is tricky to implement cleanly since we have such a wide range of
-achievements that are unlocked by all sorts of different behaviors. If we aren&#8217;t
-careful, tendrils of our achievement system will twine their way through every
-dark corner of our codebase. Sure, &#8220;Fall off a Bridge&#8221; is somehow tied to the
-<span name="physics">physics engine</span>, but do we really want to see a call
-to <code>unlockFallOffBridge()</code> right in the middle of the linear algebra in our
-collision resolution algorithm?</p>
-<p>有如此之多的行为可以完成的如此宽泛的成就系统，清晰的实现它是很有技巧的。如果我们不够小心，成就系统会缠绕在我们代码库的每一个黑暗角落。当然，“从桥上掉落”被绑定到物理引擎上，在处理撞击代码的线性代数时有一个对<code>unlockFallOffBridge()</code>的调用不是我们想看到的，对吧？</p>
+<p>有这么多行为可以解锁的成就系统，清晰地实现它是很有技巧的。
+如果我们不够小心，成就系统会缠绕在代码库的每个黑暗角落。
+当然，“从桥上掉落”被绑定到<span name="physics">物理引擎</span>上，
+但我们并不想看到的在处理撞击代码的线性代数时，
+有个对<code>unlockFallOffBridge()</code>的调用是不？</p>
 <aside name="physics">
-<p>This is a rhetorical question. No self-respecting physics programmer would ever
-let us sully their beautiful mathematics with something as pedestrian as
-<em>gameplay</em>.</p>
+<p>这是个尊严问题。
+任何有自尊的物理程序员都不会允许我们用像<em>游戏玩法</em>这样平常的东西玷污优美的算式。</p>
 </aside>
-<p>What we&#8217;d like, as always, is to have all the code concerned with one facet of
-the game nicely lumped in one place. The challenge is that achievements are
-triggered by a bunch of different aspects of gameplay. How can that work without
-coupling the achievement code to all of them?</p>
-<p>我们喜欢的是，总是，让所有的代码都关注游戏代码中集成的一块。挑战是成就在游戏的不同层面被触发。我们怎么能解耦成就系统和他们呢？</p>
-<p>That&#8217;s what the observer pattern is for. It lets one piece of code announce that
-something interesting happened <em>without actually caring who receives the
-notification</em>.</p>
-<p>这就是观察者模式出现的原因。这让代码的一块宣称有些有趣的事情发生了<em>而不必指定谁接受通知。</em></p>
-<p>For example, we&#8217;ve got some physics code that handles gravity and tracks which
-bodies are relaxing on nice flat surfaces and which are plummeting toward sure
-demise. To implement the &#8220;Fall off a Bridge&#8221; badge, we could just jam the
-achievement code right in there, but that&#8217;s a mess. Instead, we can just do:</p>
-<p>举个例子，我们有一些物理代码处理重力，追踪那些物体轻松待在地表，哪些坠入深渊。为了实现“桥上掉落”的徽章，我们可以直接把成就代码放在那里，但这就会一团糟。相反，我们可以这样做：</p>
+<p>我们喜欢的是，照旧，让所有的关注游戏一部分的代码集成一块。
+挑战在于成就在游戏的不同层面被触发。我们怎么解耦成就系统和其他部分呢？</p>
+<p>这就是观察者模式出现的原因。
+这让一块代码宣称有些有趣的事情发生了<em>而不必关心谁接受通知。</em></p>
+<p>举个例子，我们有物理代码处理重力，追踪哪些物体待在地表，哪些坠入深渊。
+为了实现“桥上掉落”的徽章，我们可以直接把成就代码放在那里，但那就会一团糟。
+相反，我们可以这样做：</p>
 <div class="codehilite"><pre><span class="kt">void</span> <span class="n">Physics</span><span class="o">::</span><span class="n">updateEntity</span><span class="p">(</span><span class="n">Entity</span><span class="o">&amp;</span> <span class="n">entity</span><span class="p">)</span>
 <span class="p">{</span>
   <span class="kt">bool</span> <span class="n">wasOnSurface</span> <span class="o">=</span> <span class="n">entity</span><span class="p">.</span><span class="n">isOnSurface</span><span class="p">();</span>
@@ -100,43 +81,25 @@ achievement code right in there, but that&#8217;s a mess. Instead, we can just d
 </pre></div>
 
 
-<p><span name="subtle">All</span> it does is say, &#8220;Uh, I don&#8217;t know if anyone
+<p>All it does is say, &#8220;Uh, I don&#8217;t know if anyone
 cares, but this thing just fell. Do with that as you will.&#8221;</p>
-<p>所有他说的就是，“额，我不知道谁感兴趣，但是有东西刚刚掉下去了。做你想做的事吧。”</p>
+<p><span name="subtle">他做的就是</span>，“额，我不知道有谁感兴趣，但是这个东西刚刚掉下去了。做你想做的事吧。”</p>
 <aside name="subtle">
-<p>The physics engine does have to decide what notifications to send, so it isn&#8217;t
-entirely decoupled. But in architecture, we&#8217;re most often trying to make systems
-<em>better</em>, not <em>perfect</em>.</p>
+<p>物理引擎确实决定了发送什么通知，所以它没有完全解耦。但在架构中，我们通常只是让系统<em>更好</em>，而不是<em>完美</em>。</p>
 </aside>
-<p>The achievement system registers itself so that whenever the physics code sends
-a notification, the achievement system receives it. It can then check to see if
-the falling body is our less-than-graceful hero, and if his perch prior to this
-new, unpleasant encounter with classical mechanics was a bridge. If so, it
-unlocks the proper achievement with associated fireworks and fanfare, and it
-does all of this with no involvement from the physics code.</p>
-<p>成就系统注册它自己，这样无论何时物理代码发送一个通知，成就系统就收到。它可以然后检查掉落的物体是不是我们不那么伟大的英雄，他之前有没有做过这种新的，不愉快的与桥的经典力学遭遇。如果这样，它解锁了合适的成就，伴着礼花和炫光，它做完所有这些而不必牵扯到物理代码。</p>
-<p><span name="tear">In fact</span>, we can change the set of achievements or tear
-out the entire achievement system without touching a line of the physics engine.
-It will still send out its notifications, oblivious to the fact that nothing is
-receiving them anymore.</p>
-<p>事实上，我们可以改变成就的集合或者删除整个成就系统而不必修改一行物理引擎。它仍然会发送它的通知，哪怕事实上没有东西在接收。</p>
+<p>成就系统注册它自己，这样无论何时物理代码发送通知，成就系统都能收到。
+它可以检查掉落的物体是不是我们不那么伟大的英雄，
+他之前有没有做过这种新的，不愉快的与桥的经典力学遭遇。
+如果满足条件，就解锁合适的成就，伴着礼花和炫光，做完所有这些都不必牵扯到物理代码。</p>
+<p><span name="tear">事实上</span>，我们可以改变成就的集合或者删除整个成就系统，而不必修改一行物理引擎。它仍然会发送它的通知，哪怕事实上没有东西在接收。</p>
 <aside name="tear">
-<p>Of course, if we <em>permanently</em> remove achievements and nothing else ever
-listens to the physics engine&#8217;s notifications, we may as well remove the
-notification code too. But during the game&#8217;s evolution, it&#8217;s nice to have this
-flexibility.</p>
+<p>当然，如果我们<em>暂时</em>移除成就，没有任何东西监听物理引擎的通知，我们也同样可以移除通知代码。但是在游戏的演进中，最好保持这样的灵活性。</p>
 </aside>
-<h2><a href="#how-it-works" name="how-it-works">How it Works</a></h2>
 <h2><a href="#它如何运作" name="它如何运作">它如何运作</a></h2>
-<p>If you don&#8217;t already know how to implement the pattern, you could probably
-guess from the previous description, but to keep things easy on you, I&#8217;ll walk
-through it quickly.</p>
-<p>如果你还不知道如何实现这个模式，你可能可以从之前的描述中猜到，但是减轻你的负担，我会过一遍代码。</p>
-<h3><a href="#the-observer" name="the-observer">The observer</a></h3>
+<p>如果你还不知道如何实现这个模式，你可能可以从之前的描述中猜到，但是为了减轻你的负担，我会过一遍代码。</p>
 <h3><a href="#观察者" name="观察者">观察者</a></h3>
-<p>We&#8217;ll start with the nosy class that wants to know when another object does
-something interesting. These inquisitive objects are defined by this interface:</p>
-<p>我们从那个需要知道别的对象做了什么有趣事情的吵闹类开始。这些好打听的对象用如下接口定义：</p>
+<p>我们从那个需要知道别的对象做了什么有趣事情的吵闹类开始。
+这些好打听的对象用如下接口定义：</p>
 <p><span name="signature"></span></p>
 <div class="codehilite"><pre><span class="k">class</span> <span class="nc">Observer</span>
 <span class="p">{</span>
@@ -148,18 +111,14 @@ something interesting. These inquisitive objects are defined by this interface:<
 
 
 <aside name="signature">
-<p>The parameters to <code>onNotify()</code> are up to you. That&#8217;s why this is the Observer
-<em>pattern</em> and not the Observer &#8220;ready-made code you can paste into your game&#8221;.
-Typical parameters are the object that sent the notification and a generic
-&#8220;data&#8221; parameter you stuff other details into.</p>
-<p>If you&#8217;re coding in a language with generics or templates, you&#8217;ll probably use
-them here, but it&#8217;s also fine to tailor them to your specific use case. Here,
-I&#8217;m just hardcoding it to take a game entity and an enum that describes what
-happened.</p>
+<p><code>onNotify()</code>的参数取决于你。这就是为什么是观察者<em>模式</em>，
+而不是观察者“可以粘贴到游戏中的真实代码”。
+典型的参数是发送通知的对象和一个将其他细节装入的“数据”参数。</p>
+<p>如果你用通用语言或者模板编码，你可能会在这里使用它们，但是将它们根据你的特殊用况裁剪也很好。
+这里我将其硬编码为接受一个游戏实体和一个描述发生了什么的枚举。</p>
 </aside>
-<p>Any concrete class that implements this becomes an observer. In our example,
-that&#8217;s the achievement system, so we&#8217;d have something like so:</p>
-<p>任何实现了这个的具体类成为了一个观察者。在我们的例子中，那是成就系统，所以我们会做些像这样的事。</p>
+<p>任何实现了这个的具体类就成为了观察者。
+在我们的例子中，是成就系统，所以我们会做些像这样的事：</p>
 <div class="codehilite"><pre><span class="k">class</span> <span class="nc">Achievements</span> <span class="o">:</span> <span class="k">public</span> <span class="n">Observer</span>
 <span class="p">{</span>
 <span class="k">public</span><span class="o">:</span>
@@ -189,12 +148,9 @@ that&#8217;s the achievement system, so we&#8217;d have something like so:</p>
 </pre></div>
 
 
-<h3><a href="#the-subject" name="the-subject">The subject</a></h3>
 <h3><a href="#客体" name="客体">客体</a></h3>
-<p>The notification method is invoked by the object being observed. In Gang of Four
-parlance, that object is called the &#8220;subject&#8221;. It has two jobs. First, it holds
-the list of observers that are waiting oh-so-patiently for a missive from it:</p>
-<p>接受观察的对象拥有通知方法，以GoF的说法那些对象被称为“客体”。它有两个工作。首先，它保持默默等待它的观察者列表：</p>
+<p>接受观察的对象拥有通知方法，以GoF的说法那些对象被称为“客体”。
+它有两个任务。首先，它保存默默等待它的观察者列表：</p>
 <p><span name="stl"></span></p>
 <div class="codehilite"><pre><span class="k">class</span> <span class="nc">Subject</span>
 <span class="p">{</span>
@@ -206,12 +162,9 @@ the list of observers that are waiting oh-so-patiently for a missive from it:</p
 
 
 <aside name="stl">
-<p>In real code, you would use a dynamically-sized collection instead of a dumb
-array. I&#8217;m sticking with the basics here for people coming from other languages
-who don&#8217;t know C++&#8217;s standard library.</p>
+<p>在真实代码中，你会使用动态大小的集合而不是一个固定数组。
+我在这里这种基本的形式是为了那些从其他语言过来而不懂C++的标准库的人们。</p>
 </aside>
-<p>The important bit is that the subject exposes a <em>public</em> API for modifying that
-list:</p>
 <p>重点是客体暴露了一个<em>公开</em>API来修改这个列表：</p>
 <div class="codehilite"><pre><span class="k">class</span> <span class="nc">Subject</span>
 <span class="p">{</span>
@@ -231,25 +184,18 @@ list:</p>
 </pre></div>
 
 
-<p>That allows outside code to control who receives notifications. The subject
-communicates with the observers, but it isn&#8217;t <em>coupled</em> to them. In our example,
-no line of physics code will mention achievements. Yet, it can still talk to the
-achievements system. That&#8217;s the clever part about this pattern.</p>
-<p>这就允许了外界代码控制谁接收通知。客体与观察者交流，但是不与他们<em>耦合</em>。在我们的例子中，没有一行物理代码会提及成就。现在，它仍然可以与成就系统交流。这就是这个模式的聪慧之处。</p>
-<p>It&#8217;s also important that the subject has a <em>list</em> of observers instead of a
-single one. It makes sure that observers aren&#8217;t implicitly coupled to <em>each
-other</em>. For example, say the audio engine also observes the fall event so that
-it can play an appropriate sound. If the subject only supported one observer,
-when the audio engine registered itself, that would <em>un</em>-register the
-achievements system.</p>
-<p>客体有一<em>列表</em>观察者而不是一个也是很重要的。这保证了观察者不会相互竞争。举个例子，假设我们的音频引擎也需要观察坠落事件来播放合适的音乐。如果客体只支持一个观察者，当音频引擎注册了它自己，这就会<em>取消</em>成就系统的注册。</p>
-<p>That means those two systems would interfere with each other&#8202;&mdash;&#8202;and in a
-particularly nasty way, since the second would disable the first. Supporting a
-list of observers ensures that each observer is treated independently from the
-others. As far as they know, each is the only thing in the world with eyes on
-the subject.</p>
-<p>这意味着这两个系统需要相互交互——使用一种极其糟糕的方式，由于第二个会使第一个失效。支持一列表的观察者保证了每一个观察者都是与其他独立处理的。他们知道的所有事情是，他是世界上唯一看着客体的东西。</p>
-<p>The other job of the subject is sending notifications:</p>
+<p>这就允许了外界代码控制谁接收通知。
+客体与观察者交流，但是不与它们<em>耦合</em>。
+在我们的例子中，没有一行物理代码会提及成就。
+现在，它仍然可以与成就系统交流。这就是这个模式的聪慧之处。</p>
+<p>客体有一<em>列表</em>观察者而不是一个也是很重要的。
+这保证了观察者不会相互竞争。
+举个例子，假设我们的音频引擎也需要观察坠落事件来播放合适的音乐。
+如果客体只支持一个观察者，当音频引擎注册了它自己，这就会<em>取消</em>成就系统的注册。</p>
+<p>这意味着这两个系统需要相互交互——用一种极其糟糕的方式，
+由于第二个会使第一个失效。
+支持一列表的观察者保证了每个观察者都是与其他独立处理的。
+它们知道的所有事情是，它是世界上唯一看着客体的东西。</p>
 <p>客体的剩余任务就是发送通知：</p>
 <p><span name="concurrent"></span></p>
 <div class="codehilite"><pre><span class="k">class</span> <span class="nc">Subject</span>
@@ -269,17 +215,14 @@ the subject.</p>
 
 
 <aside name="concurrent">
-<p>Note that this code assumes observers don&#8217;t modify the list in their <code>onNotify()</code>
-methods. A more robust implementation would either prevent or gracefully handle
-concurrent modification like that.</p>
+<p>注意代码假设了观察者不在它们的<code>onNotify()</code>方法中修改列表。
+一个更加强健的实现会阻止或优雅地处理像这样的并发修改。</p>
 </aside>
-<h3><a href="#observable-physics" name="observable-physics">Observable physics</a></h3>
-<h3><a href="#可观察物理" name="可观察物理">可观察物理</a></h3>
-<p>Now, we just need to hook all of this into the physics engine so that it can send
-notifications and the achievement system can wire itself up to receive them.
-We&#8217;ll stay close to the original <em>Design Patterns</em> recipe and <span
-name="event">inherit</span> <code>Subject</code>:</p>
-<p>现在，我们只需要给物理引擎绑上钩子，这样他可以发送消息，成就系统可以将它自己接上线来接受他们。我们靠近之前的<em>设计模式</em>秘方，然后继承<code>Subject</code>：</p>
+<h3><a href="#可观察的物理" name="可观察的物理">可观察的物理</a></h3>
+<p>现在，我们只需要给物理引擎绑上钩子，这样它可以发送消息，
+成就系统可以将它自己接上线来接受消息。
+我们靠近之前的<em>设计模式</em>秘方，
+然后<span name="event">继承</span><code>Subject</code>：</p>
 <div class="codehilite"><pre><span class="k">class</span> <span class="nc">Physics</span> <span class="o">:</span> <span class="k">public</span> <span class="n">Subject</span>
 <span class="p">{</span>
 <span class="k">public</span><span class="o">:</span>
@@ -288,143 +231,90 @@ name="event">inherit</span> <code>Subject</code>:</p>
 </pre></div>
 
 
-<p>This lets us make <code>notify()</code> in <code>Subject</code> protected. That way the derived
-physics engine class can call it to send notifications, but code outside of it
-cannot. Meanwhile, <code>addObserver()</code> and <code>removeObserver()</code> are public, so
-anything that can get to the physics system can observe it.</p>
-<p>这让我们在<code>Subject</code>中保护的完成<code>notify()</code>。这样推导的物理引擎类可以调用发送通知，但是外部的代码不行。同时，<code>addObserver()</code>和<code>removeObserver()</code>是公开的，所以任何可以接触物理引擎的东西都可以观察它。</p>
+<p>这让我们在<code>Subject</code>中保护的完成<code>notify()</code>。
+这样推导的物理引擎类可以调用发送通知，但是外部的代码不行。
+同时，<code>addObserver()</code>和<code>removeObserver()</code>是公开的，
+所以任何可以接触物理引擎的东西都可以观察它。</p>
 <aside name="event">
-<p>In real code, I would avoid using inheritance here. Instead, I&#8217;d make <code>Physics</code>
-<em>have</em> an instance of <code>Subject</code>. Instead of observing the physics engine itself,
-the subject would be a separate &#8220;falling event&#8221; object. Observers could register
-themselves using something like:</p>
+<p>在真实代码中，我会避免使用这里的继承。相反，我会让<code>Physics</code><em>有</em>一个<code>Subject</code>的实例。不是观察物理引擎自己，客体会是一个单独的“下落时间”对象。
+观察者可以用像下面这样的东西注册它们自己：</p>
 <div class="codehilite"><pre><span class="n">physics</span><span class="p">.</span><span class="n">entityFell</span><span class="p">()</span>
   <span class="p">.</span><span class="n">addObserver</span><span class="p">(</span><span class="k">this</span><span class="p">);</span>
 </pre></div>
 
 
-<p>To me, this is the difference between &#8220;observer&#8221; systems and &#8220;event&#8221; systems.
-With the former, you observe <em>the thing that did something interesting</em>. With
-the latter, you observe an object that represents <em>the interesting thing that
-happened</em>.</p>
+<p>对于我，这是“观察者”系统与“事件”系统的不同之处。
+使用前者，你观察<em>做了有趣事情的事物</em>。
+使用后者，你观察代表<em>发生的有趣的事物</em>。</p>
 </aside>
-<p>Now, when the physics engine does something noteworthy, it calls <code>notify()</code>
-like in the motivating example before. That walks the observer list and gives
-them all the heads up.</p>
-<p>现在，当物理引擎做了些值得关注的东西，它调用<code>notify()</code>，就像之前的刺激例子。它遍历了观察者列表然后通知所有。</p>
+<p>现在，当物理引擎做了些值得关注的东西，它调用<code>notify()</code>，就像之前的例子。
+它遍历了观察者列表然后通知所有观察者。</p>
 <p><img src="images/observer-list.png" alt="A Subject containing a list of Observer pointers. The first two point to Achievements and Audio." /></p>
-<p>Pretty simple, right? Just one class that maintains a list of pointers to
-instances of some interface. It&#8217;s hard to believe that something so
-straightforward is the communication backbone of countless programs and app
-frameworks.</p>
-<p>很简单，对吧？只要一个类管理一列表指针指向一些接口的实例。很难相信如此直观的东西是无数程序和应用框架交流的主心骨。</p>
-<p>But the Observer pattern isn&#8217;t without its detractors. When I&#8217;ve asked other
-game programmers what
-they think about this pattern, they bring up a few complaints. Let&#8217;s see what we
-can do to address them, if anything.</p>
-<p>观察者模式不是没有诋毁者。但我问其他程序员他们怎么看，他们提出了一些抱怨。让我们看看我们可以做些什么来掌控，如果有事能做的话。</p>
-<h2><a href="#it's-too-slow" name="it's-too-slow">&#8220;It&#8217;s Too Slow&#8221;</a></h2>
+<p>很简单，对吧？只要一个类管理一列表指向一些接口的实例的指针。
+很难相信如此直观的东西是无数程序和应用框架交流的主心骨。</p>
+<p>观察者模式不是没有诋毁者。当我问其他程序员怎么看，他们提出了一些抱怨。
+让我们看看我们可以做些什么来掌控，如果能做的话。</p>
 <h2><a href="#太慢了" name="太慢了">太慢了</a></h2>
-<p>I hear this a lot, often from programmers who don&#8217;t actually know the details of
-the pattern. They have a default assumption that anything that smells like a
-&#8220;design pattern&#8221; must involve piles of classes and indirection and other
-creative ways of squandering CPU cycles.</p>
-<p>我经常听到这一点，通常是从那些不知道模式的细节的程序员那里。他们有一种假设，只要有东西听起来像是“设计模式”一定包含了一堆类，跳转和其他创造性的方式浪费CPU循环。</p>
-<p>The Observer pattern gets a particularly bad rap here because it&#8217;s been known to
-hang around with some shady characters named &#8220;events&#8221;, <span
-name="names">&#8220;messages&#8221;</span>, and even &#8220;data binding&#8221;. Some of those systems
-<em>can</em> be slow (often deliberately, and for good reason). They involve things
-like queuing or doing dynamic allocation for each notification.</p>
-<p>观察者模式有一个特别坏的名声，因为他通常与一些坏名声的事物结伴出行，比如“事件”，“消息”，甚至“数据绑定”。其中的一些系统<em>会</em>慢。（通常是故意的，有一个很好的原因）。他们包含了队列或者为每一个通知做些动态分配。</p>
+<p>我经常听到这一点，通常是从那些不知道模式细节的程序员那里。
+他们有一种假设，只要有东西听起来像是“设计模式”一定包含了一堆类，跳转和其他创造性的方式浪费CPU循环。</p>
+<p>观察者模式有特别坏的名声，因为他通常与一些坏名声的事物结伴出行，
+比如“事件”，<span name="names">“消息”</span>，甚至“数据绑定”。
+其中的一些系统<em>会</em>慢。（通常是故意的，基于很好的原因）。
+他们包含了队列或者为每个通知做些动态分配。</p>
 <aside name="names">
-<p>This is why I think documenting patterns is important. When we get fuzzy about
-terminology, we lose the ability to communicate clearly and succinctly. You say,
-&#8220;Observer&#8221;, and someone hears &#8220;Events&#8221; or &#8220;Messaging&#8221; because either no one
-bothered to write down the difference or they didn&#8217;t happen to read it.</p>
-<p>That&#8217;s what I&#8217;m trying to do with this book. To cover my bases, I&#8217;ve got a
-chapter on events and messages too: <a href="event-queue.html"
-class="pattern">Event Queue</a>.</p>
+<p>这就是为什么我认为文档化模式很重要。
+当我们为术语发狂，我们失去了简洁明确表达的能力。
+你说“观察者”，别人听到了“事件”或“消息”，
+因为没人花时间写下差异，也没人阅读它。</p>
+<p>这就是我在这本书中要做的。为了涵盖我的支点，我也有一章关于事件和消息：<a href="event-queue.html" class="pattern">事件队列</a>.</p>
 </aside>
-<p>But, now that you&#8217;ve seen how the pattern is actually implemented, you know that
-isn&#8217;t the case. Sending a notification is simply walking a list and calling some
-virtual methods. Granted, it&#8217;s a <em>bit</em> slower than a statically dispatched
-call, but that cost is negligible in all but the most performance-critical
-code.</p>
-<p>现在你看到了模式是如何真正被实现的，你知道了这并不是这样。发送一个通知只是简单的遍历列表然后调用一些虚方法。是的，这回避静态调用慢<em>一点</em>，但是这消耗在大多数性能攸关的代码都是微不足道的。</p>
-<p>I find this pattern fits best outside of hot code paths anyway, so you can
-usually afford the dynamic dispatch. Aside from that, there&#8217;s virtually no
-overhead. We aren&#8217;t allocating objects for messages. There&#8217;s no queueing. It&#8217;s
-just an indirection over a synchronous method call.</p>
-<p>我发现这个模式在热点代码路径之外有很好的应用，所以你可以付得起动态分配的消耗。除了那点，这里几乎没有天花板。我们不必为消息分配对象。这里没有队列。这里只有一个同步方法调用的跳转。</p>
-<h3><a href="#it's-too-*fast*" name="it's-too-*fast*">It&#8217;s too <em>fast?</em></a></h3>
+<p>现在你看到了模式是如何真正被实现的，
+你知道了并不是这样。
+发送一个通知只是简单的遍历列表，然后调用一些虚方法。
+是的，这比静态调用慢<em>一点</em>，但是这点消耗在大多数性能攸关的代码都是微不足道的。</p>
+<p>我发现这个模式在热点代码路径之外有很好的应用，
+那些你可以付得起动态分配消耗的地方。
+除了那点，这里几乎没有天花板。
+我们不必为消息分配对象。这里没有队列。这里只有一个跳转用在同步方法调用上。</p>
 <h3><a href="#太*快*？" name="太*快*？">太<em>快</em>？</a></h3>
-<p>In fact, you have to be careful because the Observer pattern <em>is</em> synchronous.
-The subject invokes its observers directly, which means it doesn&#8217;t resume its
-own work until all of the observers have returned from their notification
-methods. A slow observer can block a subject.</p>
-<p>事实上，你得小心观察者模式<em>是</em>同步的。客体直接引入了他的观察者，这就意味着直到所有他的观察者从他们的通知方法返回后才会继续它自己的工作。一个缓慢的观察者会阻塞客体。</p>
-<p>This sounds scary, but in practice, it&#8217;s not the end of the world. It&#8217;s just
-something you have to be aware of. UI programmers&#8202;&mdash;&#8202;who&#8217;ve been doing
-event-based programming like this for ages&#8202;&mdash;&#8202;have a time-worn motto for this:
-&#8220;stay off the UI thread&#8221;.</p>
-<p>这听起来很疯狂，但在实践中，这还不是世界末日。这只是你得注意的事情。UI程序员——那些基于事件的编程已经这么干了好几年了——有句经典名言：“滚出UI线程”。</p>
-<p>If you&#8217;re responding to an event synchronously, you need to finish and return
-control as quickly as possible so that the UI doesn&#8217;t lock up. When you have
-slow work to do, push it onto another thread or a work queue.</p>
-<p>如果年级对事件同步响应，你需要完成然后尽可能的返回控制权，这样UI不会锁死。当你有缓慢工作要做的时候，将其推到另一个线程或工作队列中去。</p>
-<p>You do have to be careful mixing observers with threading and explicit locks,
-though. If an observer tries to grab a lock that the subject has, you can
-deadlock the game. In a highly threaded engine, you may be better off with
-asynchronous communication using an <a href="event-queue.html"
-class="pattern">Event Queue</a>.</p>
-<p>你需要小心观察者混合线程和锁。如果一个观察者试图获得一个客体有的锁，你就死锁了游戏。在更高线程的机器，你最好使用事件队列来做异步通信。</p>
-<h2><a href="#it-does-too-much-dynamic-allocation" name="it-does-too-much-dynamic-allocation">&#8220;It Does Too Much Dynamic Allocation&#8221;</a></h2>
+<p>事实上，你得小心观察者模式<em>是</em>同步的。
+客体直接引入了他的观察者，这就意味着直到所有观察者从通知方法返回后，
+它才会继续自己的工作。一个缓慢的观察者会阻塞客体。</p>
+<p>这听起来很疯狂，但在实践中，这还不是世界末日。
+这只是你得注意的事情。
+UI程序员——那些基于事件的编程已经这么干了好几年了——有句经典名言：“滚出UI线程”。</p>
+<p>如果要对事件同步响应，你需要完成然后尽可能快的返回控制权，这样UI就不会锁死。
+当你有缓慢工作要做的时候，将其推到另一个线程或工作队列中去。</p>
+<p>你需要小心观察者混合线程和锁。
+如果一个观察者试图获得客体拥有的锁，你就死锁了游戏。
+在更多线程的机器，你最好使用<a href="event-queue.html"
+class="pattern">事件队列</a>来做异步通信。</p>
 <h2><a href="#“它做了太多动态分配”" name="“它做了太多动态分配”">“它做了太多动态分配”</a></h2>
-<p>Whole tribes of the programmer clan&#8202;&mdash;&#8202;including many game developers&#8202;&mdash;&#8202;have
-moved onto garbage collected languages, and dynamic allocation isn&#8217;t the boogie
-man that it used to be. But for performance-critical software like games, memory
-allocation still matters, even in managed languages. <span
-name="fragment">Dynamic</span> allocation takes time, as does reclaiming memory,
-even if it happens automatically.</p>
-<p>整个程序员部落——包括很多游戏开发者——移到了垃圾回收语言，动态分配不再是以前的样子了。的那会对于性能攸关的软件比如游戏，内存分配仍然重要，哪怕是在有管理的语言。动态分配需要时间，回收内存也需要时间，哪怕是自动运行的。</p>
+<p>整个程序员部落——包括很多游戏开发者——迁移到了垃圾回收语言，
+动态分配不再是以前的样子了。
+但对于性能攸关的软件比如游戏，内存分配仍然重要，哪怕是在有管理的语言。
+<span name="fragment">动态</span>分配需要时间，回收内存也需要时间，哪怕是自动运行的。</p>
 <aside name="fragment">
-<p>Many game developers are less worried about allocation and more worried about
-<em>fragmentation.</em> When your game needs to run continuously for days without
-crashing in order to get certified, an increasingly fragmented heap can prevent
-you from shipping.</p>
-<p>The <a href="object-pool.html" class="pattern">Object Pool</a> chapter goes into
-more detail about this and a common technique for avoiding it.</p>
+<p>很多游戏开发者很少担忧分配而更多担忧<em>分页</em>。
+当你的游戏需要不崩溃的连续运行多日来获得认证，不断增加的分页堆会阻止你发布。</p>
+<p><a href="object-pool.html" class="pattern">对象池</a>模式一章介绍了更多细节，以及避免它的常用技术。</p>
 </aside>
-<p>In the example code before, I used a fixed array because I&#8217;m trying to keep
-things dead simple. In real implementations, the observer list is almost always
-a dynamically allocated collection that grows and shrinks as observers are
-added and removed. That memory churn spooks some people.</p>
-<p>在上面的示例代码中，我使用了一个固定数组因为我想尽可能保证简单。在真实的实现中，观察者列表总是在动态的随着观察者的添加和删除而增长和消减。这种内存搅拌吓坏了一些人。</p>
-<p>Of course, the first thing to notice is that it only allocates memory when
-observers are being wired up. <em>Sending</em> a notification requires no memory
-allocation whatsoever&#8202;&mdash;&#8202;it&#8217;s just a method call. If you hook up your observers
-at the start of the game and don&#8217;t mess with them much, the amount of allocation
-is minimal.</p>
-<p>当然，第一件需要注意的事情是只在观察者连线的时候分配内存。<em>发送</em>一个通知不需要内存分配——只是一个方法调用。如果你在游戏一开始就挂上了你的观察者而不乱搞它们，分配的总量是很小的。</p>
-<p>If it&#8217;s still a problem, though, I&#8217;ll walk through a way to implement adding and
-removing observers without any dynamic allocation at all.</p>
-<p>但是，如果这还是问题，我会介绍一种方式实现增加和删除观察者无需任何动态分配。</p>
-<h3><a href="#linked-observers" name="linked-observers">Linked observers</a></h3>
+<p>在上面的示例代码中，我使用了一个固长度的数组，因为我想尽可能保证简单。
+在真实的实现中，观察者列表总是在随着观察者的添加和删除而动态地增长和消减。
+这种内存搅拌吓坏了一些人。</p>
+<p>当然，第一件需要注意的事情是只在观察者连线的时候分配内存。
+<em>发送</em>一个通知不需要内存分配——只是一个方法调用。
+如果你在游戏一开始就挂上了你的观察者而不乱动它们，分配的总量是很小的。</p>
+<p>但是，如果这还是问题，我会介绍一种方式增加和删除观察者，而无需任何动态分配。</p>
 <h3><a href="#连接观察者" name="连接观察者">连接观察者</a></h3>
-<p>In the code we&#8217;ve seen so far, <code>Subject</code> owns a list of pointers to each
-<code>Observer</code> watching it. The <code>Observer</code> class itself has no reference to this
-list. It&#8217;s just a pure virtual interface. Interfaces are preferred over
-concrete, stateful classes, so that&#8217;s generally a good thing.</p>
-<p>我们现在看到的所有代码中，<code>Subject</code>拥有一列指针指向观察它的<code>Observer</code>。<code>Observer</code>类本身没有对这个列表的引用。他只是一个纯虚接口。接口比具体有状态的类更加受欢迎，所以这大体上是一件好事。</p>
-<p>But if we <em>are</em> willing to put a bit of state in <code>Observer</code>, we can solve our
-allocation problem by threading the subject&#8217;s list <em>through the observers
-themselves</em>. Instead of the subject having a separate collection of pointers,
-the observer objects become nodes in a linked list:</p>
-<p>但是如果我们<em>确实</em>愿意在<code>Observer</code>中放一些状态，我们可以通过将客体的列表包含<em>观察者自己</em>来解决我们的分配问题。不是客体有一集合分散的指针，观察者对象成为了链表中的一部分：</p>
+<p>我们现在看到的所有代码中，<code>Subject</code>拥有一列指针指向观察它的<code>Observer</code>。
+<code>Observer</code>类本身没有对这个列表的引用。
+它只是一个纯虚接口。接口比具体有状态的类更受欢迎，所以这大体上是一件好事。</p>
+<p>但是如果我们<em>确实</em>愿意在<code>Observer</code>中放一些状态，
+我们可以通过将客体的列表包含<em>观察者自己</em>来解决分配问题。
+不是客体有一集合分散的指针，观察者对象成为了链表中的一部分：</p>
 <p><img src="images/observer-linked.png" alt="A linked list of Observers. Each has a next_ field pointing to the next one. A Subject has a head_ pointing to the first Observer." /></p>
-<p>To implement this, first we&#8217;ll get rid of the array in <code>Subject</code> and replace it
-with a pointer to the head of the list of observers:</p>
-<p>为了实现这一点，我们首先要摆脱<code>Subject</code>中的数组然后用链表头部的指针取而代之。</p>
+<p>为了实现这一点，我们首先要摆脱<code>Subject</code>中的数组，然后用链表头部的指针取而代之：</p>
 <div class="codehilite"><pre><span class="k">class</span> <span class="nc">Subject</span>
 <span class="p">{</span>
   <span class="n">Subject</span><span class="p">()</span>
@@ -438,7 +328,6 @@ with a pointer to the head of the list of observers:</p>
 </pre></div>
 
 
-<p>Then we&#8217;ll extend <code>Observer</code> with a pointer to the next observer in the list:</p>
 <p>然后，我们在<code>Observer</code>中添加指向列表中下一个观察者的指针。</p>
 <div class="codehilite"><pre><span class="k">class</span> <span class="nc">Observer</span>
 <span class="p">{</span>
@@ -456,14 +345,10 @@ with a pointer to the head of the list of observers:</p>
 </pre></div>
 
 
-<p>We&#8217;re also making <code>Subject</code> a friend class here. The subject owns the API for adding
-and removing observers, but the list it will be managing is now inside the
-<code>Observer</code> class itself. The simplest way to give it the ability to poke at that
-list is by making it a friend.</p>
-<p>我们也可以让<code>Subject</code>成为一个友类。客体拥有增加和删除观察者的API，但是列表现在在<code>Observer</code>内部管理。获得接触这个列表最简单的办法就是让他成为友类。</p>
-<p>Registering a new observer is just wiring it into the list. We&#8217;ll take the easy
-option and insert it at the front:</p>
-<p>注册一个新的观察者就是将其连到链表中。我们使用更简单的选项，将其插到前头。</p>
+<p>我们也可以让<code>Subject</code>成为一个友类。
+客体拥有增加和删除观察者的API，但是现在列表在<code>Observer</code>内部管理。
+接触这个列表最简单的办法就是让它成为友类。</p>
+<p>注册一个新观察者就是将其连到链表中。我们使用更简单的选项，将其插到前头：</p>
 <div class="codehilite"><pre><span class="kt">void</span> <span class="n">Subject</span><span class="o">::</span><span class="n">addObserver</span><span class="p">(</span><span class="n">Observer</span><span class="o">*</span> <span class="n">observer</span><span class="p">)</span>
 <span class="p">{</span>
   <span class="n">observer</span><span class="o">-&gt;</span><span class="n">next_</span> <span class="o">=</span> <span class="n">head_</span><span class="p">;</span>
@@ -472,23 +357,15 @@ option and insert it at the front:</p>
 </pre></div>
 
 
-<p>The other option is to add it to the end of the linked list. Doing that adds a
-bit more complexity. <code>Subject</code> has to either walk the list to find the end or
-keep a separate <code>tail_</code> pointer that always points to the last node.</p>
-<p>另一个选项是将其添加到链表的末尾。这么做增加了一定的复杂性。<code>Subject</code>需要遍历整个链表来找到尾部或者保留一个分离的<code>tail_</code>指针指向最后一个节点。</p>
-<p>Adding it to the front of the list is simpler, but does have one side effect.
-When we walk the list to send a notification to every observer, the most
-<em>recently</em> registered observer gets notified <em>first</em>. So if you register
-observers A, B, and C, in that order, they will receive notifications in C, B, A
-order.</p>
-<p>将它增加在列表的头很简单，但也有另一个副作用。但我们遍历列表给每一个观察者发送一个通知，最<em>近</em>注册的观察者最<em>先</em>接到通知。所以如果以A，B，C的顺序来注册观察者，他们会以C，B，A的顺序接到通知。</p>
-<p>In theory, this doesn&#8217;t matter one way or the other. It&#8217;s a tenet of good
-observer discipline that two observers observing the same subject should have no
-ordering dependencies relative to each other. If the ordering <em>does</em> matter, it
-means those two observers have some subtle coupling that could end up biting
-you.</p>
-<p>理论上，这种方式和那种没什么区别。一种好的观察者设计原则是观察统一客体的两个观察者互相不应该有任何顺序相关。如果顺序<em>确实</em>有影响，这意味着这两个观察者有一些微妙的耦合最终会伤到你。</p>
-<p>Let&#8217;s get removal working:</p>
+<p>另一个选项是将其添加到链表的末尾。这么做增加了一定的复杂性。
+<code>Subject</code>要么遍历整个链表来找到尾部，要么保留一个分离的<code>tail_</code>指针指向最后一个节点。</p>
+<p>将它增加在列表的头很简单，但也有另一副作用。
+当我们遍历列表给每个观察者发送一个通知，
+最<em>近</em>注册的观察者最<em>先</em>接到通知。
+所以如果以A，B，C的顺序来注册观察者，他们会以C，B，A的顺序接到通知。</p>
+<p>理论上，这种方式和那种没什么区别。
+一种好的观察者设计原则是观察同一客体的两个观察者互相之间不应该有任何顺序相关。
+如果顺序<em>确实</em>有影响，这意味着这两个观察者有一些微妙的耦合，最终会伤到你。</p>
 <p>让我们把删除完成：</p>
 <p><span name="remove"></span></p>
 <div class="codehilite"><pre><span class="kt">void</span> <span class="n">Subject</span><span class="o">::</span><span class="n">removeObserver</span><span class="p">(</span><span class="n">Observer</span><span class="o">*</span> <span class="n">observer</span><span class="p">)</span>
@@ -517,22 +394,16 @@ you.</p>
 
 
 <aside name="remove">
-<p>Removing a node from a linked list usually requires a bit of ugly special case
-handling for removing the very first node, like you see here. There&#8217;s a more
-elegant solution using a pointer to a pointer.</p>
-<p>I didn&#8217;t do that here because it confuses at least half the people I show it to.
-It&#8217;s a worthwhile exercise for you to do, though: It helps you really think in
-terms of pointers.</p>
+<p>从链表移除一个节点通常需要一点丑陋的特殊情况来应对头节点，就像你在这里看到的。
+这里还有一个更优雅的，用指向指针的指针的解决方案。</p>
+<p>我在这里没有那么做，是因为我展示的半数人都迷糊了。
+但这对你是一个很值得做的练习：它帮助你深入思考指针。</p>
 </aside>
-<p>Because we have a singly linked list, we have to walk it to find the observer
-we&#8217;re removing. We&#8217;d have to do the same thing if we were using a regular array
-for that matter. If we use a <em>doubly</em> linked list, where each observer has a
-pointer to both the observer after it and before it, we can remove an observer
-in constant time. If this were real code, I&#8217;d do that.</p>
-<p>因为我们有一个链表，得遍历它找到我们删除的观察者。如果我们使用一个普通的数组也要做相同的事。如果我们使用<em>双向</em>链表，每一个观察者都有指向前面和后面的各一个指针，我们可以用常量时间移除一个观察者。如果这是真实代码，我会那么做。</p>
-<p>The <span name="chain">only</span> thing left to do is send a notification.
-That&#8217;s as simple as walking the list:</p>
-<p>唯一需要做的事情是发送一个通知，这只需要简单的遍历列表；</p>
+<p>因为我们有一个链表，得遍历它找到我们要删除的观察者。
+如果我们使用一个普通的数组也要做相同的事。
+如果我们使用<em>双向</em>链表，每个观察者都有指向前面和后面的各一个指针，
+我们可以用常量时间移除一个观察者。如果这是真实代码，我会那么做。</p>
+<p><span name="chain">唯一</span>需要做的事情是发送通知，这和遍历列表同样简单；</p>
 <div class="codehilite"><pre><span class="kt">void</span> <span class="n">Subject</span><span class="o">::</span><span class="n">notify</span><span class="p">(</span><span class="k">const</span> <span class="n">Entity</span><span class="o">&amp;</span> <span class="n">entity</span><span class="p">,</span> <span class="n">Event</span> <span class="n">event</span><span class="p">)</span>
 <span class="p">{</span>
   <span class="n">Observer</span><span class="o">*</span> <span class="n">observer</span> <span class="o">=</span> <span class="n">head_</span><span class="p">;</span>
@@ -546,266 +417,170 @@ That&#8217;s as simple as walking the list:</p>
 
 
 <aside name="chain">
-<p>Here, we walk the entire list and notify every single observer in it. This
-ensures that all of the observers get equal priority and are independent of each
-other.</p>
-<p>We could tweak this such that when an observer is notified, it can return a flag
-indicating whether the subject should keep walking the list or stop. If you do
-that, you&#8217;re pretty close to having the <a href="http://en.wikipedia.org/wiki
-/Chain-of-responsibility_pattern" class="gof-pattern">Chain of
-Responsibility</a> pattern.</p>
+<p>这里，我们遍历了整个链表，通知了其中每一个观察者。
+这保证了所有的观察者有同样的优先级并相互独立。</p>
+<p>我们可以这样实现，当观察者被通知时，它返回了一个标识表明客体是否应该继续遍历列表还是停止。如果你那么做，你就接近了<a href="http://en.wikipedia.org/wiki/Chain-of-responsibility_pattern" class="gof-pattern">职责链</a>模式。</p>
 </aside>
-<p>Not too bad, right? A subject can have as many observers as it wants, without a
-single whiff of dynamic memory. Registering and unregistering is as fast as it
-was with a simple array. We have sacrificed one small feature, though.</p>
-<p>不差嘛，对吧？一个客体现在想有多少观察者就有多少观察者，不必使用动态内存。注册和取消注册就像一个简单数组一样快。但是，我们牺牲了一些小小的特性。</p>
-<p>Since we are using the observer object itself as a list node, that implies it
-can only be part of one subject&#8217;s observer list. In other words, an observer can
-only observe a single subject at a time. In a more traditional implementation
-where each subject has its own independent list, an observer can be in more than
-one of them simultaneously.</p>
-<p>由于我们使用观察者对象作为链表节点，这暗示了它只能在一个对象的观察者链表中。换言之，一个观察者一次只能观察一个客体。在传统的实现中，每一个客体有他独立的列表，一个观察者同时可以在多个列表中。</p>
-<p>You may be able to live with that limitation. I find it more common for a
-<em>subject</em> to have multiple <em>observers</em> than vice versa. If it <em>is</em> a problem for
-you, there is another more complex solution you can use that still doesn&#8217;t
-require dynamic allocation. It&#8217;s too long to cram into this chapter, but I&#8217;ll
-sketch it out and let you fill in the blanks&#8230;</p>
-<p>你也许可以接受这一限制。我发现一个<em>客体</em>有多个<em>观察者</em>要比相反更常见。如果这<em>是</em>一个问题，这里还有一种不必使用动态分配的解决方案。要将这个塞到这章就太长了，但我会大致描述，让你填补空白。</p>
-<h3><a href="#a-pool-of-list-nodes" name="a-pool-of-list-nodes">A pool of list nodes</a></h3>
+<p>不差嘛，对吧？一个客体现在想有多少观察者就有多少观察者，不必使用动态内存。注册和取消注册就像使用简单数组一样快。但是，我们牺牲了一些小小的特性。</p>
+<p>由于我们使用观察者对象作为链表节点，
+这暗示了它只能在一个对象的观察者链表中。
+换言之，一个观察者一次只能观察一个客体。
+在传统的实现中，每一个客体有他独立的列表，
+一个观察者同时可以在多个列表中。</p>
+<p>你也许可以接受这一限制。
+我发现<em>客体</em>有多个<em>观察者</em>要比相反更常见。
+如果这<em>真是</em>一个问题，这里还有一种不必使用动态分配的解决方案。
+要将这个塞到这章就太长了，但我会大致描述，让你填补空白……</p>
 <h3><a href="#一池链表节点" name="一池链表节点">一池链表节点</a></h3>
-<p>Like before, each subject will have a linked list of observers. However, those
-list nodes won&#8217;t be the observer objects themselves. Instead, they&#8217;ll be
-separate little &#8220;list <span name="intrusive">node</span>&#8221; objects that contain a
-pointer to the observer and then a pointer to the next node in the list.</p>
-<p>就像以前，每一个客体有一个观察者的链表。但是，这些链表节点不是观察者本身。相反，他们是分散的小“链表节点”对象包含了一个指向观察者的指针和另一个指向链表下一节点的指针。</p>
+<p>就像以前，每个客体有一个观察者的链表。
+但是，这些链表节点不是观察者本身。
+相反，它们是分散的小“链表<span name="intrusive">节点</span>”对象，
+包含了一个指向观察者的指针和另一个指向链表下一节点的指针。</p>
 <p><img src="images/observer-nodes.png" alt="A linked list of nodes. Each node has an observer_ field pointing to an Observer, and a next_ field pointing to the next node in the list. A Subject's head_ field points to the first node." /></p>
-<p>Since multiple nodes can all point to the same observer, that means an observer
-can be in more than one subject&#8217;s list at the same time. We&#8217;re back to being
-able to observe multiple subjects simultaneously.</p>
-<p>由于多个节点可以指向同一个观察者，这就意味着一个观察者可以同时在超过一个客体列中。我们同时可以观察多个对象了。</p>
+<p>由于多个节点可以指向同一观察者，这就意味着观察者可以同时在超过一个客体列中。
+我们可以同时观察多个对象了。</p>
 <aside name="intrusive">
-<p>Linked lists come in two flavors. In the one you learned in school, you have a
-node object that contains the data. In our previous linked observer example,
-that was flipped around: the <em>data</em> (in this case the observer) contained the
-<em>node</em> (i.e. the <code>next_</code> pointer).</p>
-<p>The latter style is called an &#8220;intrusive&#8221; linked list because using an object in
-a list intrudes into the definition of that object itself. That makes intrusive
-lists less flexible but, as we&#8217;ve seen, also more efficient. They&#8217;re popular in
-places like the Linux kernel where that trade-off makes sense.</p>
+<p>链表有两种风味。在你学校学习的那一种，你的节点对象包含数据。
+在我们之前的链接观察者例子中，就反过来了：
+<em>数据</em>（在这种例子中的观察者）包含了<em>节点</em>（<code>next_</code>指针）。</p>
+<p>后者的风格被称为“侵入式”链表，因为在对象内部使用链表侵入了对象本身的定义。
+这让侵入式链表有更少的灵活性，但如我们所见，也更有效率。
+他们在Linux核心这样交易有意义的地方很流行，</p>
 </aside>
-<p>The way you avoid dynamic allocation is simple: since all of those nodes are the
-same size and type, you pre-allocate an <a href="object-pool.html"
-class="pattern">Object Pool</a> of them. That gives you a fixed-size pile of
-list nodes to work with, and you can use and reuse them as you need without
-having to hit an actual memory allocator.</p>
-<p>你避免动态分配的方法很简单：由于这些节点都是同样大小和类型，你可以预先在一个对象池中分配他们。这给了你一个固定大小的列表节点工作，你可以随你所需使用并重用他们，无需使用一个真正的内存分配器。</p>
-<h2><a href="#remaining-problems" name="remaining-problems">Remaining Problems</a></h2>
+<p>避免动态分配的方法很简单：由于这些节点都是同样大小和类型，
+可以预先在<a href="object-pool.html" class="pattern">对象池</a>中分配他们。
+这给了你固定大小的列表节点处理，你可以随你所需使用并重用他们，
+无需使用一个真正的内存分配器。</p>
 <h2><a href="#剩余的问题" name="剩余的问题">剩余的问题</a></h2>
-<p>I think we&#8217;ve banished the three boogie men used to scare people off this
-pattern. As we&#8217;ve seen, it&#8217;s simple, fast, and can be made to play nice with
-memory management. But does that mean you should use observers all the time?</p>
-<p>我认为我们已经搞定了三个主要将人们吓阻这个模式的问题。我们看到，它简单，快速，对内存管理友好。但是这意味着你总是应该使用观察者吗？</p>
-<p>Now, that&#8217;s a different question. Like all design patterns, the Observer pattern
-isn&#8217;t a cure-all. Even when implemented correctly and efficiently, it may not be
-the right solution. The reason design patterns get a bad rap is because people
-apply good patterns to the wrong problem and end up making things worse.</p>
-<p>现在，这是一个不同的问题。就像所有的设计模式，观察者模式不是万能药。哪怕可以实现的正确高效，它也不一定是好的解决方案。设计模式获得一个坏名声的原因就是人们将好的模式运用在错误的问题上，最后结果更糟。</p>
-<p>Two challenges remain, one technical and one at something more like the
-maintainability level. We&#8217;ll do the technical one first because those are always
-easiest.</p>
-<p>还剩两个挑战，一个是技术性的，另一个更像是可维护性层次。我们先处理技术性的，因为这些总是更好处理。</p>
-<h3><a href="#destroying-subjects-and-observers" name="destroying-subjects-and-observers">Destroying subjects and observers</a></h3>
+<p>我认为我们已经搞定了三个这个模式将人们吓阻的主要问题。
+我们看到，它简单，快速，对内存管理友好。
+但是这意味着你总是应该使用观察者吗？</p>
+<p>现在，这是另一个的问题。
+就像所有的设计模式，观察者模式不是万能药。
+哪怕可以实现的正确高效，它也不一定是好的解决方案。
+设计模式获得坏名声的原因之一就是人们将好模式运用在错问题上，最终结果更糟。</p>
+<p>还剩两个挑战，一个是技术性的，另一个更像是可维护性层次。
+我们先处理技术性的，因为它总是更好处理。</p>
 <h3><a href="#销毁客体和观察者" name="销毁客体和观察者">销毁客体和观察者</a></h3>
-<p>The sample code we walked through is solid, but it
-<span name="destruct">side-steps</span> an important issue: what happens when
-you delete a subject or an
-observer? If you carelessly call <code>delete</code> on some observer, a subject may still
-have a pointer to it. That&#8217;s now a dangling pointer into deallocated memory.
-When that subject tries to send a notification, well&#8230; let&#8217;s just say you&#8217;re
-not going to have a good time.</p>
-<p>我们看到的样例代码很坚固，但是它有一个严重的副作用：当你删除一个客体或观察者时发生了什么？如果你不小心的在某些观察者上面调用了<code>delete</code>，一块客体也许仍然持有指向它的指针。这就是指向一片释放了悬挂指针。但可以试图发送一个通知，好吧……就说你不会有好时光吧。</p>
+<p>我们看到的样例代码很牢靠，但有一个严重的<span name="destruct">副作用</span>：
+当删除一个客体或观察者时会发生什么？
+如果你不小心的在某些观察者上面调用了<code>delete</code>，客体也许仍然持有指向它的指针。
+这就是指向一片释放了的区域的悬挂指针。
+当客体试图发送一个通知，好吧……就说你不会有好时光吧。</p>
 <aside name="destruct">
 <p>Not to point fingers, but I&#8217;ll note that <em>Design Patterns</em> doesn&#8217;t mention this
 issue at all.</p>
 </aside>
-<p>Destroying the subject is easier since in most implementations, the observer
-doesn&#8217;t have any references to it. But even then, sending the subject&#8217;s bits to
-the memory manager&#8217;s recycle bin may cause some problems. Those observers may
-still be expecting to receive notifications in the future, and they don&#8217;t know
-that that will never happen now. They aren&#8217;t observers at all, really, they just
-think they are.</p>
-<p>删除客体更加容易，因为在大多数实现中，观察者没有对它的引用。但是即使这样，客体的位到内存管理系统 的回收站也许会造成一些问题。这些观察者也许仍然期待在以后收到通知，而他们不知道这再也不会发生了。他们不再是观察者了，真的，他们只是认为他们是。</p>
-<p>You can deal with this in a couple of different ways. The simplest is to do what
-I did and just punt on it. It&#8217;s an observer&#8217;s job to unregister itself from any
-subjects when it gets deleted. More often than not, the observer <em>does</em> know
-which subjects it&#8217;s observing, so it&#8217;s usually just a matter of <span
-name="destructor">adding</span> a <code>removeObserver()</code> call to its destructor.</p>
-<p>你可以用好几种方式处理这点。最简单的是就像我做的然后一脚踩空。这是观察者的职责在其被删除的时候取消注册。多数情况下，观察者<em>确实</em>知道它在观察哪个实体，所以这通常是添加一个<code>removeObserver()</code>调用给它的析构器的工作量。</p>
+<p>删除客体更加容易，因为在大多数实现中，观察者没有对它的引用。
+但是即使这样，将客体所占的位发送到内存管理系统的回收站也许会造成一些问题。
+这些观察者也许仍然期待在以后收到通知，而他们不知道这再也不会发生了。
+他们不再是观察者了，真的，他们只是认为他们是。</p>
+<p>你可以用好几种方式处理这点。
+最简单的就是像我做的，然后一脚踩空。
+这是观察者的职责在其被删除的时候取消注册。
+多数情况下，观察者<em>确实</em>知道它在观察哪个实体，
+所以这通常是给它的析构器<span name="destructor">添加</span>一个<code>removeObserver()</code>调用的工作量。</p>
 <aside name="destructor">
-<p>As is often the case, the hard part isn&#8217;t doing it, it&#8217;s <em>remembering</em> to do it.</p>
+<p>通常在这种情况下，难点不在于如何做，而是<em>记得</em>做。</p>
 </aside>
-<p>If you don&#8217;t want to leave observers hanging when a subject gives up the ghost,
-that&#8217;s easy to fix. Just have the subject send one final &#8220;dying breath&#8221;
-notification right before it gets destroyed. That way, any observer can receive
-that and take <span name="mourn">whatever action</span> it thinks is
-appropriate.</p>
-<p>如果在客厅放弃存在，不想让观察者挂着，这也很好解决。只需要让客体在它被摧毁前发送一个最终的“死亡叹息”通知。通过这种方式，任何观察者都可以接收到然后做那些他认为合适的行为。</p>
+<p>如果在客体放弃存在，而你不想让观察者挂着，这也很好解决。
+只需要让客体在它被摧毁前发送一个最终的“死亡叹息”通知。
+通过这种方式，任何观察者都可以接收到，然后做那些它认为合适的<span name="mourn">行为</span>。</p>
 <aside name="mourn">
-<p>Mourn, send flowers, compose elegy, etc.</p>
+<p>默哀，献花，挽歌……</p>
 </aside>
-<p>People&#8202;&mdash;&#8202;even those of us who&#8217;ve spent enough time in the company of machines
-to have some of their precise nature rub off on us&#8202;&mdash;&#8202;are reliably terrible at
-being reliable. That&#8217;s why we invented computers: they don&#8217;t make the mistakes
-we so often do.</p>
-<p>人们——哪怕是那些花费在大量时间在机器前，拥有让我们黯然失色才能的人——也是可靠地不可靠。这就是为什么我们发明了电脑：他们不像我们那样经常犯错误。</p>
-<p>A safer answer is to make observers automatically unregister themselves from
-every subject when they get destroyed. If you implement the logic for that once
-in your base observer class, everyone using it doesn&#8217;t have to remember to do it
-themselves. This does add some complexity, though. It means each <em>observer</em> will
-need a list of the <em>subjects</em> it&#8217;s observing. You end up with pointers going in
-both directions.</p>
-<p>更安全的回答是在每一个客体销毁时，让观察者自动取消注册。若干你在一个观察者基类中实现了这个逻辑，每个人不必记住就可以使用它。这确实增加了一定的复杂度。这意味着每个<em>观察者</em>都需要一个它在观察的<em>客体</em>列表。你最终拥有独立双向指针。</p>
-<h3><a href="#don't-worry,-i've-got-a-gc" name="don't-worry,-i've-got-a-gc">Don&#8217;t worry, I&#8217;ve got a GC</a></h3>
+<p>人们——哪怕是那些花费在大量时间在机器前，拥有让我们黯然失色才能的人——也是可靠地不可靠。
+这就是为什么我们发明了电脑：它们不像我们那样经常犯错误。</p>
+<p>更安全的回答是在每个客体销毁时，让观察者自动取消注册。
+如果你在观察者基类中实现了这个逻辑，每个人不必记住就可以使用它。
+这确实增加了一定的复杂度。
+这意味着每个<em>观察者</em>都需要一个它在观察的<em>客体</em>列表。
+你最终拥有了双向指针。</p>
 <h3><a href="#别担心，我有垃圾回收器" name="别担心，我有垃圾回收器">别担心，我有垃圾回收器</a></h3>
-<p>All you cool kids with your hip modern languages with garbage collectors are
-feeling pretty smug right now. Think you don&#8217;t have to worry about this because
-you never explicitly delete anything? Think again!</p>
-<p>你们那些装备有垃圾回收系统的孩子现在一定很洋洋自得。觉得你不必担心这个因为你从来不必显式删除任何东西？再想一想！</p>
-<p>Imagine this: you&#8217;ve got some UI screen that shows a bunch of stats about the
-player&#8217;s character like their health and stuff. When the player brings up the
-screen, you instantiate a new object for it. When they close it, you just forget
-about the object and let the GC clean it up.</p>
-<p>想象一下这个：你有UI显式一些了玩家角色情况的状态比如健康和道具。当玩家到屏幕上时，你为其初始化了一个对象。当他们退出时，你直接忘掉那个对象让GC清理。</p>
-<p>Every time the character takes a punch to the face (or elsewhere, I suppose), it
-sends a notification. The UI screen observes that and updates the little health
-bar. Great. Now what happens when the player dismisses the screen, but you don&#8217;t
-unregister the observer?</p>
-<p>每一个角色脸上（或者其他什么地方）挨了一拳，它发送一个通知。UI屏幕观察到了按个然后更新健康槽。很好。当玩家离开了屏幕，但你没有取消观察者的注册会发生什么？</p>
-<p>The UI isn&#8217;t visible anymore, but it won&#8217;t get garbage collected since the
-character&#8217;s observer list still has a reference to it. Every time the screen is
-loaded, we add a new instance of it to that increasingly long list.</p>
-<p>UI不再可见，但它也不会进入垃圾回收系统，因为角色的观察者列表还保存着对它的引用。每一次屏幕加载后，我们给那个不断增长的长列表添加一个新实例。</p>
-<p>The entire time the player is playing the game, running around, and getting in
-fights, the character is sending notifications that get received by <em>all</em> of
-those screens. They aren&#8217;t on screen, but they receive notifications and waste
-CPU cycles updating invisible UI elements. If they do other things like play
-sounds, you&#8217;ll get noticeably wrong behavior.</p>
-<p>玩家玩游戏的整个时间，来回跑，打架，角色都会发送通知给<em>所有</em>这些屏幕。他们不再屏幕上，但他们接受通知浪费CPU循环在不可见的UI元素上。如果他们做了一些像播放声音的事情，你就得到了可见的错误行为。</p>
-<p>This is such a common issue in notification systems that it has a name: the
-<span name="lapsed"><em>lapsed listener problem</em></span>. Since subjects retain
-references to their listeners, you can end up with zombie UI objects lingering
-in memory. The lesson here is to be disciplined about unregistration.</p>
-<p>这在通知系统中非常常见，甚至有个名字：<em>失效监听者问题</em>。由于客体保留了对监听者的引用，你最终有僵尸UI对象徘徊在内存中。这里上的一棵是有关于取消注册的纪律。</p>
+<p>你们那些装备有垃圾回收系统的孩子现在一定很洋洋自得。
+觉得你不必担心这个，因为你从来不必显式删除任何东西？再想一想！</p>
+<p>想象一下这个：你有UI显示玩家角色情况的状态，比如健康和道具。
+当玩家在屏幕上时，你为其初始化了一个对象。
+当他们退出时，你直接忘掉那个对象让GC清理。</p>
+<p>每一个角色脸上（或者其他什么地方）挨了一拳，它发送一个通知。
+UI屏幕观察到了，然后更新健康槽。很好。
+当玩家离开了屏幕，但你没有取消观察者的注册，会发生什么？</p>
+<p>UI不再可见，但也不会进入垃圾回收系统，因为角色的观察者列表还保存着对它的引用。
+每一次屏幕加载后，我们给那个不断增长的长列表添加一个新实例。</p>
+<p>玩家玩游戏的整个时间，来回跑，打架，角色都会发送通知给<em>所有</em>这些屏幕。
+它们不在屏幕上，但它们接受通知，浪费CPU循环在不可见的UI元素上。
+如果它们做了一些像播放声音的事情，就得到了可见的错误行为。</p>
+<p>这在通知系统中非常常见，甚至有个名字：<span name="lapsed"><em>失效监听者问题</em></span>。
+由于客体保留了对监听者的引用，你最终有僵尸UI对象徘徊在内存中。
+这里上的一课是关于取消注册的纪律。</p>
 <aside name="lapsed">
-<p>An even surer sign of its significance: it has <a href="http://en.wikipedia.org/wiki/Lapsed_listener_problem">a Wikipedia
-article</a>.</p>
+<p>哈有更加突出的标志：它有<a href="http://en.wikipedia.org/wiki/Lapsed_listener_problem">维基条目</a>。</p>
 </aside>
-<h3><a href="#what's-going-on" name="what's-going-on">What&#8217;s going on?</a></h3>
 <h3><a href="#发生了什么？" name="发生了什么？">发生了什么？</a></h3>
-<p>The other, deeper issue with the Observer pattern is a direct consequence of its
-intended purpose. We use it because it helps us loosen the coupling between two
-pieces of code. It lets a subject indirectly communicate with some observer
-without being statically bound to it.</p>
-<p>另一个观察者的深层次问题是一个他打算的直接结果。我们使用它是因为它帮助我们放松了两块代码之间的耦合。他让一个客体不直接的与一些没有静态绑定到它的观察者交流。</p>
-<p>This is a real win when you&#8217;re trying to reason about the subject&#8217;s behavior,
-and any hangers-on would be an annoying distraction. If you&#8217;re poking at the
-physics engine, you really don&#8217;t want your editor&#8202;&mdash;&#8202;or your mind&#8202;&mdash;&#8202;cluttered
-up with a bunch of stuff about achievements.</p>
-<p>当你要让客体行为有意义的时候是很有价值的，任何悬挂件都是讨厌的注意力分散。如果你解接触物理引擎，你根本不想要你的编辑器——或者你的脑子——为一堆成就系统的东西而杂乱。</p>
-<p>On the other hand, if your program isn&#8217;t working and the bug spans some chain of
-observers, reasoning about that communication flow is much more difficult. With
-an explicit coupling, it&#8217;s as easy as looking up the method being called. This
-is child&#8217;s play for your average IDE since the coupling is static.</p>
-<p>另一方面，如果你的程序没有工作，漏洞跨越了多个观察者，理清交流流程更加困难。通过显式耦合，它更容易查看那一个方法被调用了。这是由于耦合是静态的，这对于你的IDE是孩子的把戏。</p>
-<p>But if that coupling happens through an observer list, the only way to tell who
-will get notified is by seeing which observers happen to be in that list <em>at
-runtime</em>. Instead of being able to <em>statically</em> reason about the communication
-structure of the program, you have to reason about its <em>imperative, dynamic</em>
-behavior.</p>
-<p>但是如果耦合发生在一个观察者列表中，唯一告诉你谁被通知的方法是看看哪个观察者在恰巧在列表中而且<em>处于运行</em>。不再是理清程序的<em>静态</em>交流结构，你得理清它的<em>命令式，动态</em>行为。</p>
-<p>My guideline for how to cope with this is pretty simple. If you often need to
-think about <em>both</em> sides of some communication in order to understand a part of
-the program, don&#8217;t use the Observer pattern to express that linkage. Prefer
-something more explicit.</p>
-<p>我对如何处理这个的指导原则很简单。如果为了理解程序的一部分，沟通的两遍<em>都</em>需要被考虑。不要使用观察者模式表达这个连接。使用其他更加显式的东西。</p>
-<p>When you&#8217;re hacking on some big program, you tend to have lumps of it that you
-work on all together. We have lots of terminology for this like &#8220;separation of
-concerns&#8221; and &#8220;coherence and cohesion&#8221; and &#8220;modularity&#8221;, but it boils down to
-&#8220;this stuff goes together and doesn&#8217;t go with this other stuff&#8221;.</p>
-<p>当你在某些大型程序上用黑魔法时，你会感觉工作起来很笨拙。我们有很多术语给他，比如“角落分离”，“一致性和内聚性”和“模块化”，但是总归就是“这些东西待在一起而不与其他东西待在一起。”</p>
-<p>The observer pattern is a great way to let those mostly unrelated lumps talk to
-each other without them merging into one big lump. It&#8217;s less useful <em>within</em> a
-single lump of code dedicated to one feature or aspect.</p>
-<p>观察者模式是一个让这些大量不相关的代码块互相角落而不必将他们打包成一个更大的块的好方法。这在专注于一个特性或层面的单一代码块<em>内</em>不会太有用。</p>
-<p>That&#8217;s why it fits our example well: achievements and physics are almost entirely
-unrelated domains, likely implemented by different people. We want the bare
-minimum of communication between them so that working on either one doesn&#8217;t
-require much knowledge of the other.</p>
-<p>这就是为什么它适应我们的例子：成就和物理是几乎完全不相干的领域，通常被不同人实现。我们想要他们之间最小化交流，这样物理在哪一个上工作都不需要另一个的太多消息。</p>
-<h2><a href="#observers-today" name="observers-today">Observers Today</a></h2>
+<p>另一个观察者的深层次问题是它意图的直接结果。
+我们使用它是因为它帮助我们放松了两块代码之间的耦合。
+它让客体间接与没有静态绑定的观察者交流。</p>
+<p>当你要让客体行为有意义时，这是很有价值的，任何悬挂件都讨厌地分散注意力。
+如果你在接触物理引擎，你根本不想要你的编辑器——或者你的脑子——为一堆成就系统的东西而繁忙。</p>
+<p>另一方面，如果你的程序没有工作，漏洞跨越了多个观察者，理清交流流程更加困难。
+通过显式耦合，更容易查看哪一个方法被调用了。
+这是由于耦合是静态的，分析它对于IDE是小孩子的把戏。</p>
+<p>但是如果耦合发生在观察者列表中，唯一能告诉你谁被通知的方法是看看哪个观察者恰巧在列表中而且<em>处于运行中</em>。
+不再是理清程序的<em>静态</em>交流结构，你得理清它的<em>命令式，动态</em>行为。</p>
+<p>我对如何处理这个的指导原则很简单。
+如果为了理解程序的一部分，沟通的两边<em>都</em>需要考虑，不要使用观察者模式。
+使用其他更加显式的东西。</p>
+<p>当你在某些大型程序上用黑魔法时，你会感觉这些一起处理很笨拙。
+我们有很多术语给他，比如“角落分离”，“一致性和内聚性”和“模块化”，
+但是总归就是“这些东西待在一起而不与其他东西待在一起。”</p>
+<p>观察者模式是一个让这些大量不相关的代码块互相交流，而不必打包成更大块的好方法。
+这在专注于一个特性或层面的单一代码块<em>内</em>不会太有用。</p>
+<p>这就是为什么它能很好地适应我们的例子：
+成就和物理是几乎完全不相干的领域，通常被不同人实现。
+我们想要它们之间的交流最小化，
+这样无论在哪一个上工作都不需要另一个的太多信息。</p>
 <h2><a href="#今日观察者" name="今日观察者">今日观察者</a></h2>
-<p><em>Design Patterns</em> came out in <span name="90s">1994</span>. Back then,
-object-oriented programming was <em>the</em> hot paradigm. Every programmer on Earth
-wanted to &#8220;Learn OOP in 30 Days,&#8221; and middle managers paid them based on the
-number of classes they created. Engineers judged their mettle by the depth of
-their inheritance hierarchies.</p>
-<p><em>设计模式</em>源于1994.那时候，面向对象语言是<em>那个</em>热门范式。每一个程序员都想要“30天学会OOP”，中层管理员根据他们创建的类的数量为他们支付工资。工程师通过继承层次的深度评价质量。</p>
+<p><em>设计模式</em>源于<span name="90s">1994</span>。
+那时候，面向对象语言是<em>那个</em>热门范式。
+每一个程序员都想要“30天学会OOP”，
+中层管理员根据他们创建类的数量为他们支付工资。
+工程师通过继承层次的深度评价质量。</p>
 <aside name="90s">
-<p>That same year, Ace of Base had not one but <em>three</em> hit singles, so that may
-tell you something about our taste and discernment back then.</p>
+<p>同一年，Ace of Base发行了不是一首而是<em>三首</em>畅销单曲，那也许能告诉你一些我们那时的品味和洞察力。</p>
 </aside>
-<p>The Observer pattern got popular during that zeitgeist, so it&#8217;s no surprise that
-it&#8217;s class-heavy. But mainstream coders now are more comfortable with functional
-programming. Having to implement an entire interface just to receive a
-notification doesn&#8217;t fit today&#8217;s aesthetic.</p>
-<p>观察者模式在那个时代中很流行，所以它有很多类就不奇怪了。但是现代的主流程序员更加适应函数式语言。实现一整套接口只是为了接受一个通知不再适合今日的美学了。</p>
-<p>It feels <span name="different">heavyweight</span> and rigid. It <em>is</em>
-heavyweight and rigid. For example, you can&#8217;t have a single class that uses
-different notification methods for different subjects.</p>
-<p>它感觉是又沉重又死板。它<em>确实</em>又沉重又死板。举个例子，你不能有一个类为不同的对象使用不同的通知方法。</p>
+<p>观察者模式在那个时代中很流行，所以它有很多类就不奇怪了。
+但是现代的主流程序员更加适应函数式语言。
+实现一整套接口只是为了接受一个通知不再适合今日的美学了。</p>
+<p>它感觉上去是又<span name="different">沉重</span>又死板。它<em>确实</em>又沉重又死板。
+举个例子，你不能有为不同的对象使用不同通知方法的类。</p>
 <aside name="different">
-<p>This is why the subject usually passes itself to the observer. Since an observer
-only has a single <code>onNotify()</code> method, if it&#8217;s observing multiple subjects, it
-needs to be able to tell which one called it.</p>
+<p>这就是为什么客体经常讲它自己传给观察者。
+哟与一个观察者只有单一的<code>onNotify()</code>方法，如果它观察多个客体，它需要知道哪个在调用它。</p>
 </aside>
-<p>A more modern approach is for an &#8220;observer&#8221; to be only a reference to a method
-or function. In languages with first-class functions, and especially ones with
-<span name="closures">closures</span>, this is a much more common way to do
-observers.</p>
-<p>一个现代的解决办法是让一个“观察者”只是对方法或者函数的引用。在函数作为第一公民的与扬中，特别是那些有闭包的，这是一个更加普遍的方式实现观察者。</p>
+<p>现代的解决办法是让“观察者”只是对方法或者函数的引用。
+在函数作为第一公民的语言中，特别是那些有<span name="closures">闭包</span>的，
+这是一个实现观察者更加普遍的方式。</p>
 <aside name="closures">
-<p>These days, practically <em>every</em> language has closures. C++ overcame the challenge
-of closures in a language without garbage collection, and even Java finally got
-its act together and introduced them in JDK 8.</p>
+<p>今日，几乎<em>每种</em>语言都有闭包。C++克服了在没有垃圾回收的语言中构建闭包的挑战，
+甚至是Java都一起行动起来在JDK8中引入了它们。</p>
 </aside>
-<p>For example, C# has &#8220;events&#8221; baked into the language. With those, the observer
-you register is a &#8220;delegate&#8221;, which is that language&#8217;s term for a reference to a
-method. In JavaScript&#8217;s event system, observers <em>can</em> be objects supporting a
-special <code>EventListener</code> protocol, but they can also just be functions. The
-latter is almost always what people use.</p>
-<p>举个例子，C#有“事件”嵌在语言中。通过这些，你注册的观察者是一个“代表”，这是语言的术语描述一个方法的引用。在JavaScript事件系统中，观察者<em>可以</em>是支持了特定<code>EventListener</code>协议的类，但是他们也只能是函数。后者是人们通常用的。</p>
-<p>If I were designing an observer system today, I&#8217;d make it <span
-name="function">function-based</span> instead of class-based. Even in C++, I
-would tend toward a system that let you register member function pointers as
-observers instead of instances of some <code>Observer</code> interface.</p>
-<p>如果我现在设计一个观察者模式，我会让他成为基于函数的而不是基于类的。哪怕是在C++，我倾向于一个让你注册一个成员函数指针作为一个观察者，而不是<code>Observer</code>接口的实例。</p>
+<p>举个例子，C#有“事件”嵌在语言中。
+通过这些，你注册的观察者是一个“委托”，
+这是那种语言的描述方法的引用的术语。
+在JavaScript事件系统中，观察者<em>可以</em>是支持了特定<code>EventListener</code>协议的类，
+但是他们也可以是函数。
+后者是人们常用的方式。</p>
+<p>如果现在设计观察者模式，我会让它<span name="function">基于函数</span>而不是基于类。
+哪怕是在C++，我倾向于让你注册一个成员函数指针作为观察者，而不是<code>Observer</code>接口的实例。</p>
 <aside name="function">
-<p><a href="http://molecularmusings.wordpress.com/2011/09/19/generic-type-safe-delegates-and-events-in-c/">Here&#8217;s</a> an interesting blog post on one way to implement this in C++.</p>
+<p><a href="http://molecularmusings.wordpress.com/2011/09/19/generic-type-safe-delegates-and-events-in-c/">这里</a>的一篇有趣博文在C++上以某种方式实现了这一点。</p>
 </aside>
-<h2><a href="#observers-tomorrow" name="observers-tomorrow">Observers Tomorrow</a></h2>
 <h2><a href="#明日观察者" name="明日观察者">明日观察者</a></h2>
-<p>Event systems and other observer-like patterns are incredibly common these days.
-They&#8217;re a well-worn path. But if you write a few large apps using them, you
-start to notice something. A lot of the code in your observers ends up looking
-the same. It&#8217;s usually something like:</p>
-<p>事件系统和其他类观察者模式在今日令人惊奇的多。他们都是经典方法。但是如果你用他们写一个稍微大一些的引用，你会发现一件事情。在你观察者中很多代码最后都长得一样。通常是像这样：</p>
+<p>事件系统和其他类观察者模式在今日令人惊奇的多。
+它们都是经典方法。
+但是如果你用它们写一个稍微大一些的应用，你会发现一件事情。
+在观察者中很多代码最后都长得一样。通常是像这样：</p>
 <ol>
-<li>
-<p>Get notified that some state has changed.</p>
-</li>
-<li>
-<p>Imperatively modify some chunk of UI to reflect the new state.</p>
-</li>
 <li>
 <p>获知有状态改变了。</p>
 </li>
@@ -813,33 +588,20 @@ the same. It&#8217;s usually something like:</p>
 <p>命令式的改变一些UI来反映新的状态。</p>
 </li>
 </ol>
-<p>It&#8217;s all, &#8220;Oh, the hero health is 7 now? Let me set the width of the health bar
-to 70 pixels.&#8221; After a while, that gets pretty tedious. Computer science
-academics and software engineers have been trying to eliminate that tedium for a
-<em>long</em> time. Their attempts have gone under a number of different names:
-&#8220;dataflow programming&#8221;, &#8220;functional reactive programming&#8221;, etc.</p>
-<p>这就是全部了，“哦，英雄的健康现在是7了？让我们把血条的宽度设为70像素。”过上一段时间，这会变得很沉闷。计算机科学学术界和软件工程师已经尝试结束这种沉闷<em>很长</em>时间了。他们用不同的方式做了很多次：“数据流编程”，“函数反射编程”等等。</p>
-<p>While there have been some successes, usually in limited domains like audio
-processing or chip design, the Holy Grail still hasn&#8217;t been found. In the
-meantime, a less ambitious approach has started gaining traction. Many recent
-application frameworks now use &#8220;data binding&#8221;.</p>
-<p>如果有突破，一般局限在特定的领域比如音频处理货芯片设计，圣杯还没有被找到。与此同时，一个更少野心的方式开始获得成效。很多最近的应用框架现在使用“数据绑定”。</p>
-<p>Unlike more radical models, data binding doesn&#8217;t try to entirely eliminate
-imperative code and doesn&#8217;t try to architect your entire application around a
-giant declarative dataflow graph. What it does do is automate the busywork where
-you&#8217;re tweaking a UI element or calculated property to reflect a change to some
-value.</p>
-<p>不像激进的模型，数据绑定不再指着完全终结命令式代码，也不尝试架构你的整个应用在一个巨大的宣言式数据图表。他做的就是自动完成你将一个UI元素或者计算结果来反映一些数据的改变。</p>
-<p>Like other declarative systems, data binding is probably a bit too slow and
-complex to fit inside the core of a game engine. But I would be surprised if I
-didn&#8217;t see it start making inroads into less critical areas of the game like
-UI.</p>
-<p>就像其他宣言式系统，数据绑定也许太慢太复杂来适应游戏引擎的核心。但是如果说没看到它开始侵入游戏不那么性能攸关的部分比如UI那我会很惊讶。</p>
-<p>In the meantime, the good old Observer pattern will still be here waiting for
-us. Sure, it&#8217;s not as exciting as some hot technique that manages to cram both
-&#8220;functional&#8221; and &#8220;reactive&#8221; in its name, but it&#8217;s dead simple and it works. To
-me, those are often the two most important criteria for a solution.</p>
-<p>与此同时，好的老观察者模式仍然在那里等着我们。是的，他不想其他的新热门技术一样填满了“函数”“反射”在他的名字中，但是它超简单而且能工作。对于我来说，这通常是一个解决方案最重要的条件。</p>
+<p>这就是全部了，“哦，英雄的健康现在是7了？让我们把血条的宽度设为70像素。
+过上一段时间，这会变得很沉闷。
+计算机科学学术界和软件工程师已经尝试结束这种沉闷<em>很长</em>时间了。
+他们用不同的方式做了很多次：“数据流编程”，“函数反射编程”等等。</p>
+<p>如果有突破，一般局限在特定的领域中，比如音频处理或芯片设计，圣杯还没有被找到。
+与此同时，一个更小野心的方式开始获得成效。很多现在的应用框架使用“数据绑定”。</p>
+<p>不像激进的模型，数据绑定不再指望完全终结命令式代码，
+也不尝试在巨大的宣言式数据图表中架构你的整个应用。
+它做的只是自动改变UI元素或计算数值来反映一些值的改变。</p>
+<p>就像其他宣言式系统，数据绑定也许适应游戏引擎的核心太慢太复杂。
+但是如果说没看到它开始侵入游戏不那么性能攸关的部分，比如UI，那我会很惊讶。</p>
+<p>与此同时，经典观察者模式仍然在那里等着我们。
+是的，它不像其他的新热门技术一样填满了“函数”“反射”在名字中，
+但是它超简单而且能工作。对于我来说，这通常是一个解决方案最重要的条件。</p>
 <nav>
   <span class="prev">&larr; <a href="flyweight.html">Previous Chapter</a></span>
   <span class="next"><a href="prototype.html">Next Chapter</a> &rarr;</span>
