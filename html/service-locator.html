@@ -52,11 +52,6 @@ NPC狙击手开了一枪，射出子弹（AI）。
 </pre></div>
 
 
-<p>Either gets us where we&#8217;re trying to go, but we stumbled into some sticky
-coupling along the way. Every place in the game calling into our audio system
-directly references the concrete <code>AudioSystem</code> class and the mechanism for
-accessing it&#8202;&mdash;&#8202;either as a static class or a <a class="gof-pattern"
-href="singleton.html">singleton</a>.</p>
 <p>每种都能让我们获得我们想要的，但是我们绊倒在一些微妙的耦合上。
 每个调用音频系统的游戏部分直接引用了具体的<code>AudioSystem</code>类，和获取它的机制——是静态类还是一个<a class="gof-pattern" href="singleton.html">单例。</a></p>
 <p>这些调用点，当然，需要耦合到<em>某些东西</em>上来播放声音，但是让他们可以接触到具体的音频实现，就好像给了一百个陌生人你家的方向，只是为了让他们在门口放一封信。

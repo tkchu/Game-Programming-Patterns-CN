@@ -167,11 +167,6 @@ extensibility should be engineered in so future changes are easier to make.
 每当你添加了一层抽象或者支持扩展的部分，你是*赌*你以后需要灵活性。
 添加代码和复杂性到游戏中，这都需要时间来开发，调试和维护。
 
-That effort pays off if you guess right and end up touching that code later. But
-<span name="yagni">predicting</span> the future is *hard*, and when that
-modularity doesn't end up being helpful, it quickly becomes actively harmful.
-After all, it is more code you have to deal with.
-
 如果你猜对了，后来接触了代码，那么功夫不负有心人。
 但<span name="yagni">预测</span>未来*很难*，如果模块化最终没有帮助，那它就有伤害。
 毕竟，你得处理更多的代码。
@@ -189,12 +184,6 @@ After all, it is more code you have to deal with.
 当你需要做出改变，当然，有可能某个接口能帮上忙，但能不能找到就只能祝你好运了。
 理论上，解耦意味着在扩展代码之前需要了解的代码更少，
 但抽象层本身就会填满你的心灵暂存磁盘。
-
-Codebases like this are what turn people *against* software architecture, and
-design patterns in particular. It's easy to get so wrapped up in the code itself
-that you lose sight of the fact that you're trying to ship a *game*. The siren
-song of extensibility sucks in countless developers who spend years working on
-an "engine" without ever figuring out what it's an engine *for*.
 
 像这样的代码库让人*反对*软件架构，特别是设计模式。
 人们很容易沉浸在代码中而忽略你要发布*游戏*的这点。
@@ -261,13 +250,7 @@ an "engine" without ever figuring out what it's an engine *for*.
 良好的设计意味着你在屏幕上看到和获取反馈之前要消耗很长时间。
 如果最后证明这个点子不对，那么当你删除代码的时候，那些花在让代码更优雅的时间就完全浪费了。
 
-Prototyping -- slapping together code that's just barely functional enough to
-answer a design question -- is a perfectly legitimate programming practice.
-There is a very large caveat, though. If you write throwaway code, you *must*
-ensure you're able to throw it away. I've seen bad managers play this game time
-and time again:
-
-原型——一坨勉强拼凑在一起，只能回答设计问题简单代码——是一个完全合理的编程习惯。
+原型——一坨勉强拼凑在一起，只能回答设计问题的简单代码——是一个完全合理的编程习惯。
 虽然当你写一次性代码的时候，*必须*保证你可以扔掉它。
 我见过很多次糟糕的经理人在玩这种把戏：
 
@@ -319,12 +302,6 @@ and time again:
 从我收到的邮件看，这伤了很多人的心，特别是那些只是想做个游戏的人。
 它似乎是在恐吓，“没有正确的答案，只有不同的口味的错误。”
 
-But, to me, this is exciting! Look at any field that people dedicate careers to
-mastering, and in the center you will always find a set of intertwined
-constraints. After all, if there was an easy answer, everyone would just do
-that. A field you can master in a week is ultimately boring. You don't hear of
-someone's distinguished career in <span name="ditch">ditch digging</span>.
-
 但，对我来说，这让人兴奋！看看任何人们从事的领域，
 你总能发现某些相互抵触的限制。无论如何，如果有简单的答案，每个人都会那么做。
 一周就能掌握的领域是很无聊的。你从来没有听说过有人讨论<span name="ditch">挖坑事业</span>。
@@ -346,10 +323,6 @@ someone's distinguished career in <span name="ditch">ditch digging</span>.
 最近，我感觉如果有什么能简化这些限制，那就是*简单*。
 在我现在的代码中，我努力去写最简单，最直接的解决方案。
 你读过这种代码后，完全理解了它在做什么，想不出其他完成的方法。
-
-I aim to get the data structures and algorithms right (in about that order) and
-then go from there. I find if I can keep things simple, there's less code
-overall. That means less code to load into my head in order to change it.
 
 我的目的是正确获得数据结构和算法（大致是这样的先后），然后在从那里开始。
 我发现如果能让事物变得简单，就有更少的代码，

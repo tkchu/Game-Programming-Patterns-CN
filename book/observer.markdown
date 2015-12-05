@@ -60,9 +60,6 @@
 
 ^code physics-update
 
-All it does is say, "Uh, I don't know if anyone
-cares, but this thing just fell. Do with that as you will."
-
 <span name="subtle">他做的就是</span>，“额，我不知道有谁感兴趣，但是这个东西刚刚掉下去了。做你想做的事吧。”
 
 <aside name="subtle">

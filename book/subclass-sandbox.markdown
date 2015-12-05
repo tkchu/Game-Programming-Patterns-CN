@@ -71,10 +71,8 @@
 
 <aside name="wide">
 
-Lately, you find a lot of people criticizing inheritance in object-oriented
-languages. Inheritance *is* problematic -- there's really no deeper coupling in
-a codebase than the one between a base class and its subclass -- but I find
-*wide* inheritance trees to be easier to work with than *deep* ones.
+最近，你发现很多人批评面向对象语言中的继承。
+继承*是*有问题——在代码库中没有比父类子类之间的耦合更深的了——但我发现*宽阔的*继承树比起*深的*更好处理。
 
 </aside>
 
