@@ -5,20 +5,20 @@
 
 英文版在线阅读：[Game Programming Patterns](http://gameprogrammingpatterns.com/)
 
-Bob Nystrom同时在Github上无私地提供原本：[munificent/game-programming-patterns](https://github.com/munificent/game-programming-patterns)
+Bob Nystrom同时在Github上无私地提供原本：[munificent/game-programming-patterns](https://github.com/munificent/game-programming-patterns)。
 
-这是《游戏编程模式》的中文翻译版本。仍处于第一轮作业中。
+这是《游戏编程模式》的中文翻译版本。
 
 如果有任何问题，欢迎提出Issues 和 pull requests，谢谢您的帮助。
 
 ## 进度
 
-1. 第一轮作业：将整书翻译一遍，翻译质量预期略高于谷歌机翻。
-2. 第二轮作业：修复漏洞，翻译所有的旁注并添加链接，同时平滑语言。
+1. 第一轮作业：将整书翻译一遍，翻译质量预期略高于谷歌机翻。（完成）
+2. 第二轮作业：修复漏洞，翻译所有的旁注并添加链接，同时平滑语言。（完成）
 3. 第三轮作业：校订。
 
-|章节|试译|初稿|校正|二审|
-|----|----|----|----|----|
+|章节|试译|初稿|校正|
+|----|----|----|----|
 | 致谢 | + | + |
 | 序 |  | | |
 | 架构，性能和游戏 | + | + |
@@ -45,4 +45,4 @@ Bob Nystrom同时在Github上无私地提供原本：[munificent/game-programmin
 | 数据局部性 | + | + |
 | 脏标识 | + | + |
 | 对象池 | + | + |
-| 空间分区 | + | |
+| 空间分区 | + | + |
