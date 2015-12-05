@@ -44,5 +44,5 @@ Bob Nystrom同时在Github上无私地提供原本：[munificent/game-programmin
 | 优化模式 | + | + |
 | 数据局部性 | + | + |
 | 脏标识 | + | + |
-| 对象池 | + | |
+| 对象池 | + | + |
 | 空间分区 | + | |
