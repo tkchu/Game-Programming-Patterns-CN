@@ -1,5 +1,5 @@
-^title Subclass Sandbox
-^section Behavioral Patterns
+^title 子类沙箱
+^section 行为模式
 
 ## 意图
 

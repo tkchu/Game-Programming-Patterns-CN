@@ -1,5 +1,5 @@
-^title Spatial Partition
-^section Optimization Patterns
+^title 空间分区
+^section 优化模式
 
 ## 意图
 

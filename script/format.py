@@ -27,33 +27,33 @@ PINK = '\033[91m'
 YELLOW = '\033[33m'
 
 CHAPTERS = [
-  "Acknowledgements",
+  "致谢",
   "Introduction",
-  "Architecture, Performance, and Games",
-  "Design Patterns Revisited",
-  "Command",
-  "Flyweight",
-  "Observer",
-  "Prototype",
-  "Singleton",
-  "State",
-  "Sequencing Patterns",
-  "Double Buffer",
-  "Game Loop",
-  "Update Method",
-  "Behavioral Patterns",
-  "Bytecode",
-  "Subclass Sandbox",
-  "Type Object",
-  "Decoupling Patterns",
-  "Component",
-  "Event Queue",
-  "Service Locator",
-  "Optimization Patterns",
-  "Data Locality",
-  "Dirty Flag",
-  "Object Pool",
-  "Spatial Partition"
+  "架构，性能和游戏",
+  "重访设计模式",
+  "命令",
+  "享元",
+  "观察者",
+  "原型",
+  "单例",
+  "状态",
+  "序列模式",
+  "双缓冲",
+  "游戏循环",
+  "更新方法",
+  "行为模式",
+  "字节码",
+  "子类沙箱",
+  "类型对象",
+  "解耦模式",
+  "组件",
+  "事件队列",
+  "服务定位器",
+  "优化模式",
+  "数据局部性",
+  "脏标识",
+  "对象池",
+  "空间分区"
 ]
 
 # URLs for hyperlinks to chapters. Note that the order is significant here.
@@ -492,10 +492,11 @@ else:
     file_filter = sys.argv[1]
 
   format_files(file_filter, False)
-
+"""对中文统计失效。
   average_word_count = total_words / (num_chapters - empty_chapters)
   estimated_word_count = total_words + (empty_chapters * average_word_count)
   percent_finished = total_words * 100 / estimated_word_count
 
   print "{}/~{} words ({}%)".format(
     total_words, estimated_word_count, percent_finished)
+"""

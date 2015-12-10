@@ -1,5 +1,5 @@
-^title Component
-^section Decoupling Patterns
+^title 组件
+^section 解耦模式
 
 ## 意图
 

@@ -1,5 +1,5 @@
-^title Dirty Flag
-^section Optimization Patterns
+^title 脏标识
+^section 优化模式
 
 ## 意图
 

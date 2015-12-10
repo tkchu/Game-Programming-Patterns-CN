@@ -1,5 +1,5 @@
-^title Update Method
-^section Sequencing Patterns
+^title 更新方法
+^section 序列模式
 
 ## 意图
 

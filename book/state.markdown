@@ -1,5 +1,5 @@
-^title State
-^section Design Patterns Revisited
+^title 状态
+^section 重访设计欧模式
 
 忏悔时间：我有些越界，将太多的东西打包到了这章中。
 它表面上关于<a href="http://en.wikipedia.org/wiki/State_pattern" class="gof-pattern">状态模式</a>，但我无法只讨论它和游戏，而不涉及更加基础的*有限状态机*（FSMs）。

@@ -1,5 +1,5 @@
-^title Double Buffer
-^section Sequencing Patterns
+^title 双缓冲
+^section 序列模式
 
 ## 意图
 

@@ -1,4 +1,4 @@
-^title Architecture, Performance, and Games
+^title 架构，性能和游戏
 ^section Introduction
 
 在我们一头扎入模式之前，我想先讲一些对软件架构和其在游戏上的应用的理解，

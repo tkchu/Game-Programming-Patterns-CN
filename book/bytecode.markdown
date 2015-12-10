@@ -1,5 +1,5 @@
-^title Bytecode
-^section Behavioral Patterns
+^title 字节码
+^section 行为模式
 
 ## 意图
 

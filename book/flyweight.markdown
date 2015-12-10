@@ -1,5 +1,5 @@
-^title Flyweight
-^section Design Patterns Revisited
+^title 享元
+^section 重访设计模式
 
 迷雾散尽，露出了古朴庄严的森林。无数古老的铁杉，在你头顶编制成绿色的穹顶。阳光在树叶间破碎成金色的顶棚。从巨大的树干间眺望，远处的森林渐渐隐去。
 

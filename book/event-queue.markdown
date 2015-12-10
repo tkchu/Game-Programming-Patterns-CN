@@ -1,5 +1,5 @@
-^title Event Queue
-^section Decoupling Patterns
+^title 事件队列
+^section 解耦模式
 
 ## 意图
 
