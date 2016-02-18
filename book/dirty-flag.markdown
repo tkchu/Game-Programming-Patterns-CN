@@ -1,5 +1,5 @@
 ^title 脏标识
-^section 优化模式
+^section Optimization Patterns
 
 ## 意图
 

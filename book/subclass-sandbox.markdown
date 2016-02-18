@@ -1,5 +1,5 @@
 ^title 子类沙箱
-^section 行为模式
+^section Behavioral Patterns
 
 ## 意图
 

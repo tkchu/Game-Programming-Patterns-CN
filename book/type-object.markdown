@@ -1,5 +1,5 @@
 ^title 类型对象
-^section 行为模式
+^section Behavioral Patterns
 
 ## 意图
 

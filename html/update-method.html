@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="Content-type" content="text/html;charset=UTF-8" />
 
-<title>更新方法 &middot; 序列模式 &middot; Game Programming Patterns</title>
+<title>更新方法 &middot; Sequencing Patterns &middot; Game Programming Patterns</title>
 
 <!-- Tell mobile browsers we're optimized for them and they don't need to crop
      the viewport. -->
@@ -26,12 +26,12 @@
 <div class="page sidebar">
 <div class="content">
 <nav class="top">
-  <span class="prev">&larr; <a href="游戏循环.html">Previous Chapter</a></span>
-  <span class="next"><a href="行为模式.html">Next Chapter</a> &rarr;</span>
+  <span class="prev">&larr; <a href="game-loop.html">Previous Chapter</a></span>
+  <span class="next"><a href="behavioral-patterns.html">Next Chapter</a> &rarr;</span>
   <span class="toc">&equiv; <a href="/">The Book</a></span>
 </nav>
 <h1>更新方法</h1>
-<h1 class="book"><a href="/">Game Programming Patterns</a><span class="section"><a href="序列模式.html">序列模式</a></span></h1>
+<h1 class="book"><a href="/">Game Programming Patterns</a><span class="section"><a href="sequencing-patterns.html">Sequencing Patterns</a></span></h1>
 <h2><a href="#意图" name="意图">意图</a></h2>
 <p><em>通过每次处理一帧的行为模拟一系列独立对象。</em></p>
 <h2><a href="#动机" name="动机">动机</a></h2>
@@ -47,7 +47,7 @@
 <aside name="brains">
 <p>如果巫王想表现得更加智能，它应创造一些仍有脑子的东西。</p>
 </aside>
-<div class="codehilite"><pre><span class="k">while</span> <span class="p">(</span><span class="nb">true</span><span class="p">)</span>
+<div class="codehilite"><pre><span></span><span class="k">while</span> <span class="p">(</span><span class="nb">true</span><span class="p">)</span>
 <span class="p">{</span>
   <span class="c1">// Patrol right.</span>
   <span class="k">for</span> <span class="p">(</span><span class="kt">double</span> <span class="n">x</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">x</span> <span class="o">&lt;</span> <span class="mi">100</span><span class="p">;</span> <span class="n">x</span><span class="o">++</span><span class="p">)</span>
@@ -71,7 +71,7 @@
 <aside name="game-loop1">
 <p>自然的，<a href="game-loop.html" class="pattern">游戏循环</a>是另一个本书的章节。</p>
 </aside>
-<div class="codehilite"><pre><span class="n">Entity</span> <span class="n">skeleton</span><span class="p">;</span>
+<div class="codehilite"><pre><span></span><span class="n">Entity</span> <span class="n">skeleton</span><span class="p">;</span>
 <span class="kt">bool</span> <span class="n">patrollingLeft</span> <span class="o">=</span> <span class="nb">false</span><span class="p">;</span>
 <span class="kt">double</span> <span class="n">x</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
 
@@ -104,7 +104,7 @@
 一个无脑的骨头袋不会给挪威少女造成太多挑战，
 我们添加的下一个是魔法雕像。它们一直会向她发射闪电，这样可让她经常移动。</p>
 <p>继续我们的“用最简单的方式编码”的风格，我们得到了：</p>
-<div class="codehilite"><pre><span class="c1">// Skeleton variables...</span>
+<div class="codehilite"><pre><span></span><span class="c1">// Skeleton variables...</span>
 <span class="n">Entity</span> <span class="n">leftStatue</span><span class="p">;</span>
 <span class="n">Entity</span> <span class="n">rightStatue</span><span class="p">;</span>
 <span class="kt">int</span> <span class="n">leftStatueFrames</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
@@ -235,7 +235,7 @@
 你会继续遍历这张链表，最终找到新的那个然后也更新了它。</p>
 <p>但这确实表明新对象在它产生的那帧就有机会活动，甚至在玩家看到它之前。
 如果你不想发生那种情况，简单的修复方法就是在游戏循环中缓存列表对象的数目，然后在停止前只更新那么多：</p>
-<div class="codehilite"><pre><span class="kt">int</span> <span class="n">numObjectsThisTurn</span> <span class="o">=</span> <span class="n">numObjects_</span><span class="p">;</span>
+<div class="codehilite"><pre><span></span><span class="kt">int</span> <span class="n">numObjectsThisTurn</span> <span class="o">=</span> <span class="n">numObjects_</span><span class="p">;</span>
 <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">numObjectsThisTurn</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span>
 <span class="p">{</span>
   <span class="n">objects_</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">-&gt;</span><span class="n">update</span><span class="p">();</span>
@@ -250,7 +250,7 @@
 <p>一个更麻烦的问题是对象在遍历时<em>移除</em>。
 你击败了邪恶的野兽，现在它需要移出对象列表。
 如果它正好是你更新状态对象之前的对象，你会意外的跳过一个对象：</p>
-<div class="codehilite"><pre><span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">numObjects_</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span>
+<div class="codehilite"><pre><span></span><span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">numObjects_</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span>
 <span class="p">{</span>
   <span class="n">objects_</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">-&gt;</span><span class="n">update</span><span class="p">();</span>
 <span class="p">}</span>
@@ -281,7 +281,7 @@
 这不意味着模式不<em>有用</em>。它<em>因为</em>简单而有用：这是一个无需装饰的干净解决方案。</p>
 <p>但是为了让事情具体，让我们回顾一些基础的实现。
 我们会从代表骷髅和雕像的<code>Entity</code>类开始：</p>
-<div class="codehilite"><pre><span class="k">class</span> <span class="nc">Entity</span>
+<div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">Entity</span>
 <span class="p">{</span>
 <span class="k">public</span><span class="o">:</span>
   <span class="n">Entity</span><span class="p">()</span>
@@ -291,11 +291,11 @@
   <span class="k">virtual</span> <span class="o">~</span><span class="n">Entity</span><span class="p">()</span> <span class="p">{}</span>
   <span class="k">virtual</span> <span class="kt">void</span> <span class="n">update</span><span class="p">()</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
 
-  <span class="kt">double</span> <span class="n">x</span><span class="p">()</span> <span class="k">const</span> <span class="p">{</span> <span class="k">return</span> <span class="n">x_</span><span class="p">;</span> <span class="p">}</span>
-  <span class="kt">double</span> <span class="n">y</span><span class="p">()</span> <span class="k">const</span> <span class="p">{</span> <span class="k">return</span> <span class="n">y_</span><span class="p">;</span> <span class="p">}</span>
+  <span class="kt">double</span> <span class="nf">x</span><span class="p">()</span> <span class="k">const</span> <span class="p">{</span> <span class="k">return</span> <span class="n">x_</span><span class="p">;</span> <span class="p">}</span>
+  <span class="kt">double</span> <span class="nf">y</span><span class="p">()</span> <span class="k">const</span> <span class="p">{</span> <span class="k">return</span> <span class="n">y_</span><span class="p">;</span> <span class="p">}</span>
 
-  <span class="kt">void</span> <span class="n">setX</span><span class="p">(</span><span class="kt">double</span> <span class="n">x</span><span class="p">)</span> <span class="p">{</span> <span class="n">x_</span> <span class="o">=</span> <span class="n">x</span><span class="p">;</span> <span class="p">}</span>
-  <span class="kt">void</span> <span class="n">setY</span><span class="p">(</span><span class="kt">double</span> <span class="n">y</span><span class="p">)</span> <span class="p">{</span> <span class="n">y_</span> <span class="o">=</span> <span class="n">y</span><span class="p">;</span> <span class="p">}</span>
+  <span class="kt">void</span> <span class="nf">setX</span><span class="p">(</span><span class="kt">double</span> <span class="n">x</span><span class="p">)</span> <span class="p">{</span> <span class="n">x_</span> <span class="o">=</span> <span class="n">x</span><span class="p">;</span> <span class="p">}</span>
+  <span class="kt">void</span> <span class="nf">setY</span><span class="p">(</span><span class="kt">double</span> <span class="n">y</span><span class="p">)</span> <span class="p">{</span> <span class="n">y_</span> <span class="o">=</span> <span class="n">y</span><span class="p">;</span> <span class="p">}</span>
 
 <span class="k">private</span><span class="o">:</span>
   <span class="kt">double</span> <span class="n">x_</span><span class="p">;</span>
@@ -309,7 +309,7 @@
 这个模式重要的部分是它有抽象的<code>update()</code>方法。</p>
 <p>游戏管理一系列实体。在我们的示例中，我会把它放在一个代表游戏世界的类中。</p>
 <p><span name="array"></span></p>
-<div class="codehilite"><pre><span class="k">class</span> <span class="nc">World</span>
+<div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">World</span>
 <span class="p">{</span>
 <span class="k">public</span><span class="o">:</span>
   <span class="n">World</span><span class="p">()</span>
@@ -330,7 +330,7 @@
 </aside>
 <p>现在，所有都设好了，游戏通过每帧更新每个实体来实现模式。</p>
 <p><span name="game-loop"></span></p>
-<div class="codehilite"><pre><span class="kt">void</span> <span class="n">World</span><span class="o">::</span><span class="n">gameLoop</span><span class="p">()</span>
+<div class="codehilite"><pre><span></span><span class="kt">void</span> <span class="n">World</span><span class="o">::</span><span class="n">gameLoop</span><span class="p">()</span>
 <span class="p">{</span>
   <span class="k">while</span> <span class="p">(</span><span class="nb">true</span><span class="p">)</span>
   <span class="p">{</span>
@@ -382,7 +382,7 @@ name="subclass">管理</span>庞杂的对象层次。哪怕在1994年的GoF都�
 我们原先的动机是定义巡逻的骷髅守卫和释放闪电的魔法雕像。
 让我们从我们的骨头朋友开始。
 为了定义它的巡逻行为，我们定义新实体恰当地实现了<code>update()</code>：</p>
-<div class="codehilite"><pre><span class="k">class</span> <span class="nc">Skeleton</span> <span class="o">:</span> <span class="k">public</span> <span class="n">Entity</span>
+<div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">Skeleton</span> <span class="o">:</span> <span class="k">public</span> <span class="n">Entity</span>
 <span class="p">{</span>
 <span class="k">public</span><span class="o">:</span>
   <span class="n">Skeleton</span><span class="p">()</span>
@@ -413,7 +413,7 @@ name="subclass">管理</span>庞杂的对象层次。哪怕在1994年的GoF都�
 唯一的小小不同是<code>patrollingLeft_</code>被定义为字段而不是本地变量。
 通过这种方式是，它的值在<code>update()</code>两次调用间保持不变。</p>
 <p>让我们对雕像重新做一遍：</p>
-<div class="codehilite"><pre><span class="k">class</span> <span class="nc">Statue</span> <span class="o">:</span> <span class="k">public</span> <span class="n">Entity</span>
+<div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">Statue</span> <span class="o">:</span> <span class="k">public</span> <span class="n">Entity</span>
 <span class="p">{</span>
 <span class="k">public</span><span class="o">:</span>
   <span class="n">Statue</span><span class="p">(</span><span class="kt">int</span> <span class="n">delay</span><span class="p">)</span>
@@ -470,7 +470,7 @@ name="subclass">管理</span>庞杂的对象层次。哪怕在1994年的GoF都�
 <p>这意味着每次<code>update()</code>调用都需要知道虚拟的时钟转动了多少，
 所以你经常可以看到传入消逝的时间。
 举个例子，我们可以让巡逻骷髅处理变化的时间步长，就像这样：</p>
-<div class="codehilite"><pre><span class="kt">void</span> <span class="n">Skeleton</span><span class="o">::</span><span class="n">update</span><span class="p">(</span><span class="kt">double</span> <span class="n">elapsed</span><span class="p">)</span>
+<div class="codehilite"><pre><span></span><span class="kt">void</span> <span class="n">Skeleton</span><span class="o">::</span><span class="n">update</span><span class="p">(</span><span class="kt">double</span> <span class="n">elapsed</span><span class="p">)</span>
 <span class="p">{</span>
   <span class="k">if</span> <span class="p">(</span><span class="n">patrollingLeft_</span><span class="p">)</span>
   <span class="p">{</span>
@@ -519,7 +519,7 @@ name="subclass">管理</span>庞杂的对象层次。哪怕在1994年的GoF都�
 <a href="type-object.html" class="pattern">类型对象</a>模式也这样做了，这样你可以在同“种”实体间分享行为。</p>
 <p>如果你使用这些模式中的一个，将<code>update()</code>放在委托类中是很自然的。
 在那种情况下，也许主类中仍有<code>update()</code>方法，但是它不是虚方法，可以简单的委托给委托对象。就像这样：</p>
-<div class="codehilite"><pre><span class="kt">void</span> <span class="n">Entity</span><span class="o">::</span><span class="n">update</span><span class="p">()</span>
+<div class="codehilite"><pre><span></span><span class="kt">void</span> <span class="n">Entity</span><span class="o">::</span><span class="n">update</span><span class="p">()</span>
 <span class="p">{</span>
   <span class="c1">// Forward to state object.</span>
   <span class="n">state_</span><span class="o">-&gt;</span><span class="n">update</span><span class="p">();</span>
@@ -588,8 +588,8 @@ CPU通过从RAM上读取数据到缓存上来优化读取。
 </li>
 </ul>
 <nav>
-  <span class="prev">&larr; <a href="游戏循环.html">Previous Chapter</a></span>
-  <span class="next"><a href="行为模式.html">Next Chapter</a> &rarr;</span>
+  <span class="prev">&larr; <a href="game-loop.html">Previous Chapter</a></span>
+  <span class="next"><a href="behavioral-patterns.html">Next Chapter</a> &rarr;</span>
   <span class="toc">&equiv; <a href="/">The Book</a></span>
 </nav>
 </div>

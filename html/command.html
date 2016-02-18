@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="Content-type" content="text/html;charset=UTF-8" />
 
-<title>命令 &middot; 重访设计模式 &middot; Game Programming Patterns</title>
+<title>命令 &middot; Design Patterns Revisited &middot; Game Programming Patterns</title>
 
 <!-- Tell mobile browsers we're optimized for them and they don't need to crop
      the viewport. -->
@@ -26,27 +26,27 @@
 <div class="page sidebar">
 <div class="content">
 <nav class="top">
-  <span class="prev">&larr; <a href="重访设计模式.html">Previous Chapter</a></span>
-  <span class="next"><a href="享元.html">Next Chapter</a> &rarr;</span>
+  <span class="prev">&larr; <a href="design-patterns-revisited.html">Previous Chapter</a></span>
+  <span class="next"><a href="flyweight.html">Next Chapter</a> &rarr;</span>
   <span class="toc">&equiv; <a href="/">The Book</a></span>
 </nav>
 <h1>命令</h1>
-<h1 class="book"><a href="/">Game Programming Patterns</a><span class="section"><a href="重访设计模式.html">重访设计模式</a></span></h1>
+<h1 class="book"><a href="/">Game Programming Patterns</a><span class="section"><a href="design-patterns-revisited.html">Design Patterns Revisited</a></span></h1>
 <p>命令模式是我最喜欢的模式之一。
 大多数我写的大型程序，游戏或者别的什么，都会在某处用到它。
 当在正确的地方使用时，它可以将复杂的代码清理干净。
 对于这样一个了不起的模式，不出所料，GoF有个深奥的定义：</p>
 <blockquote>
-<p>将请求封装为一个对象，这样允许用户用请求参数化客户，
+<p>将请求封装为一个对象，允许用户用请求参数化客户，
 并请求加入队列或记入日志，并支持撤销操作。</p>
 </blockquote>
-<p>我想我们可以讨论一下这是不是一个糟糕的句子。
+<p>我们可以讨论一下这是不是个糟糕的句子。
 第一，它损坏了想建立的比喻。
-在软件之外的狂野世界，词语可以指代任何事物，一个“客户”是一个<em>人</em>——那些你与之做生意的人。上次我检查的时候，人类还不能被“参数化”。</p>
-<p>然后，句子余下的部分介绍了你可能会使用这个模式的原因。
+在软件之外的狂野世界，词语可以指代任何事物，“客户”是一个<em>人</em>——那些你与之做生意的人。上次我检查时，人类还不能被“参数化”。</p>
+<p>然后，句子余下的部分介绍了可能会使用这个模式的情况。
 如果你的情况不在这个列表中，那么这对你就没有启发。
 <em>我的</em>精简的命令模式定义为：</p>
-<p><strong>命令是一个<em><span name="latin">具现化</span>方法调用</em>。</strong></p>
+<p><strong>命令是<em><span name="latin">具现化</span>方法调用</em>。</strong></p>
 <aside name="latin">
 <p>“Reify（具现化）”来自于拉丁语“res”，意为“事物”，加上英语后缀“&ndash;fy”。所以它基本上意为“thingify”，这可能是一个更有趣的词语。</p>
 </aside>
@@ -54,22 +54,26 @@
 让我扩展一下。“具现化”，如果你没有听说过的话，它的意思是“变得具体”。
 另外一种具现化的表达方式是将某事物作为“第一公民”对待。</p>
 <aside name="reflection">
-<p>在某些语言中的<em>反射系统</em>让你在程序运行时命令式的和类型交互。你可以获得代表某些类的类型的对象，你可以与其交互看看类型能做什么。换言之，反射是一个<em>具现化类型的系统</em>。</p>
+<p>在某些语言中的<em>反射</em>允许你在程序运行时命令式地和类型交互。
+你可以获得代表类的类型的对象，可以与其交互看看类型能做什么。换言之，反射是<em>具现化类型的系统</em>。</p>
 </aside>
-<p>两种术语都意味着将一些<span name="reflection"><em>概念</em></span>变成<em>数据</em>——一个对象——可以存储在一个变量中，传给一个函数之类的。
-所以称命令模式为一种“具现化的方法调用”，我的意思是方法调用被存储在一个对象中。</p>
-<p>这听起来有些像“回调”，“第一公民函数”，“函数指针”，“闭包”，“偏函数”，取决于你在学哪种语言，事实上它们大致上是同一个东西。GoF随后说：</p>
+<p>两种术语都意味着将<span name="reflection"><em>概念</em></span>变成<em>数据</em>——一个对象——可以存储在变量中，传给函数之类的。
+所以称命令模式为“具现化的方法调用”，意思是方法调用被存储在一个对象中。</p>
+<p>这听起来有些像“回调”，“第一公民函数”，“函数指针”，“闭包”，“偏函数”，
+取决于你在学哪种语言，事实上大致上是同一个东西。GoF随后说：</p>
 <blockquote>
 <p>命令模式是一种回调的面向对象实现。</p>
 </blockquote>
 <p>这是一种对命令模式更好的解释。</p>
-<p>但这些都既抽象又模糊。我喜欢用实际的东西作为章节的开始，我搞砸了。作为弥补，从这里开始都是命令模式能出色应用的例子。</p>
+<p>但这些都既抽象又模糊。我喜欢用实际的东西作为章节的开始，搞砸了。
+作为弥补，从这里开始都是命令模式能出色应用的例子。</p>
 <h2><a href="#设定输入" name="设定输入">设定输入</a></h2>
-<p>在每个游戏中都有一块代码读取用户的输入——按钮按下，键盘敲击，鼠标点击，诸如此类。这块代码会获取用户的输入，然后将其变为游戏中有意义的行为。</p>
+<p>在每个游戏中都有一块代码读取用户的输入——按钮按下，键盘敲击，鼠标点击，诸如此类。
+这块代码会获取用户的输入，然后将其变为游戏中有意义的行为。</p>
 <p><img src="images/command-buttons-one.png" alt="A controller, with A mapped to swapWeapon(), B mapped to lurch(), X mapped to jump(), and Y mapped to fireGun()." /></p>
 <p>一种简单死了的实现会是这样：</p>
 <p><span name="lurch"></span></p>
-<div class="codehilite"><pre><span class="kt">void</span> <span class="n">InputHandler</span><span class="o">::</span><span class="n">handleInput</span><span class="p">()</span>
+<div class="codehilite"><pre><span></span><span class="kt">void</span> <span class="n">InputHandler</span><span class="o">::</span><span class="n">handleInput</span><span class="p">()</span>
 <span class="p">{</span>
   <span class="k">if</span> <span class="p">(</span><span class="n">isPressed</span><span class="p">(</span><span class="n">BUTTON_X</span><span class="p">))</span> <span class="n">jump</span><span class="p">();</span>
   <span class="k">else</span> <span class="nf">if</span> <span class="p">(</span><span class="n">isPressed</span><span class="p">(</span><span class="n">BUTTON_Y</span><span class="p">))</span> <span class="n">fireGun</span><span class="p">();</span>
@@ -82,12 +86,13 @@
 <aside name="lurch">
 <p>专家建议：不要太经常地按B。</p>
 </aside>
-<p>这个函数通常在<a class="pattern" href="game-loop.html">游戏循环</a>的每帧被调用一次，我确信你可以理解它做了什么。
-这代码在我们想将用户的输入和程序行为硬编码在一起时可以正常工作，但是许多游戏允许玩家<em>设定</em>他们按键的功能。</p>
-<p>为了支持这一点，我们需要将这些对jump()和fireGun()的直接调用转化为可以更换的东西。“更换”听起来有点像声明变量，因此我们需要表示游戏行为的<em>对象</em>。进入：命令模式。</p>
+<p>这个函数通常在<a class="pattern" href="game-loop.html">游戏循环</a>中每帧调用一次，我确信你可以理解它做了什么。
+这代码在我们想将用户的输入和程序行为硬编码在一起时可以正常工作，但是许多游戏允许玩家<em>设定</em>按键的功能。</p>
+<p>为了支持这点，需要将这些对jump()和fireGun()的直接调用转化为可以更换的东西。
+“更换”听起来有点像声明变量，因此我们需要表示游戏行为的<em>对象</em>。进入：命令模式。</p>
 <p>我们定义了一个基类代表可触发的游戏命令：</p>
 <p><span name="one-method"></span></p>
-<div class="codehilite"><pre><span class="k">class</span> <span class="nc">Command</span>
+<div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">Command</span>
 <span class="p">{</span>
 <span class="k">public</span><span class="o">:</span>
   <span class="k">virtual</span> <span class="o">~</span><span class="n">Command</span><span class="p">()</span> <span class="p">{}</span>
@@ -97,10 +102,10 @@
 
 
 <aside name="one-method">
-<p>当你有接口实现了单一未返回值的方法时，很有机会是命令模式。</p>
+<p>当你有接口实现了没有返回值的方法时，很有可能使用命令模式。</p>
 </aside>
 <p>然后我们为不同的游戏行为定义相应的子类：</p>
-<div class="codehilite"><pre><span class="k">class</span> <span class="nc">JumpCommand</span> <span class="o">:</span> <span class="k">public</span> <span class="n">Command</span>
+<div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">JumpCommand</span> <span class="o">:</span> <span class="k">public</span> <span class="n">Command</span>
 <span class="p">{</span>
 <span class="k">public</span><span class="o">:</span>
   <span class="k">virtual</span> <span class="kt">void</span> <span class="n">execute</span><span class="p">()</span> <span class="p">{</span> <span class="n">jump</span><span class="p">();</span> <span class="p">}</span>
@@ -116,8 +121,8 @@
 </pre></div>
 
 
-<p>在我们的输入控制器，我们为每个键存储一个指向命令的指针。</p>
-<div class="codehilite"><pre><span class="k">class</span> <span class="nc">InputHandler</span>
+<p>在输入控制器，为每个键存储一个指向命令的指针。</p>
+<div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">InputHandler</span>
 <span class="p">{</span>
 <span class="k">public</span><span class="o">:</span>
   <span class="kt">void</span> <span class="n">handleInput</span><span class="p">();</span>
@@ -133,9 +138,9 @@
 </pre></div>
 
 
-<p>现在输入处理委托了这些：</p>
+<p>现在输入处理处理了这些：</p>
 <p><span name="null"></span></p>
-<div class="codehilite"><pre><span class="kt">void</span> <span class="n">InputHandler</span><span class="o">::</span><span class="n">handleInput</span><span class="p">()</span>
+<div class="codehilite"><pre><span></span><span class="kt">void</span> <span class="n">InputHandler</span><span class="o">::</span><span class="n">handleInput</span><span class="p">()</span>
 <span class="p">{</span>
   <span class="k">if</span> <span class="p">(</span><span class="n">isPressed</span><span class="p">(</span><span class="n">BUTTON_X</span><span class="p">))</span> <span class="n">buttonX_</span><span class="o">-&gt;</span><span class="n">execute</span><span class="p">();</span>
   <span class="k">else</span> <span class="nf">if</span> <span class="p">(</span><span class="n">isPressed</span><span class="p">(</span><span class="n">BUTTON_Y</span><span class="p">))</span> <span class="n">buttonY_</span><span class="o">-&gt;</span><span class="n">execute</span><span class="p">();</span>
@@ -146,17 +151,19 @@
 
 
 <aside name="null">
-<p>注意在这里我们没有检测<code>NULL</code>了吗？这假设每个按键都与<em>某些</em>命令相连。</p>
-<p>如果我们想支持不做任何事情的按键又不想显式检测<code>NULL</code>，我们可以定义一个命令类，它的<code>execute()</code>什么也不做。这样，不将某些按键处理器设为<code>NULL</code>，我们将其设为指向那个类。这种模式被称为<a href="http://en.wikipedia.org/wiki/Null_Object_pattern">空对象</a>。</p>
+<p>注意在这里没有检测<code>NULL</code>了吗？这假设每个按键都与<em>某些</em>命令相连。</p>
+<p>如果想支持不做任何事情的按键又不想显式检测<code>NULL</code>，我们可以定义一个命令类，它的<code>execute()</code>什么也不做。
+这样，不将某些按键处理器设为<code>NULL</code>，我们将其设为指向那个类。这种模式被称为<a href="http://en.wikipedia.org/wiki/Null_Object_pattern">空对象</a>。</p>
 </aside>
-<p>当每个输入直接调用函数，这里会有一层间接寻址：</p>
+<p>当每个输入直接调用函数，会有一层间接寻址：</p>
 <p><img src="images/command-buttons-two.png" alt="A controller, with each button mapped to a corresponding 'button_' variable which in turn is mapped to a function." /></p>
 <p>这是命令模式的简短介绍。如果你能够看出它的好处，就把这章剩下的部分作为奖励吧。</p>
 <h2><a href="#角色指导" name="角色指导">角色指导</a></h2>
 <p>我们刚才定义的类可以在之前的例子上正常工作，但局限很大。
-问题在于假设顶层的<code>jump()</code>, <code>fireGun()</code>之类的函数可以找到玩家的角色，然后让它像木偶一样跳舞。</p>
-<p>这些假定的耦合限制了这些命令的用处。<code>JumpCommand</code><em>只能</em>让玩家的角色跳跃。让我们放松这个限制。不让函数去找它们控制的角色，我们将控制的角色对象<em>传进去</em>：</p>
-<div class="codehilite"><pre><span class="k">class</span> <span class="nc">Command</span>
+问题在于假设顶层的<code>jump()</code>, <code>fireGun()</code>之类的函数可以找到玩家的角色，然后像木偶一样让它跳舞。</p>
+<p>这些假定的耦合限制了这些命令的用处。<code>JumpCommand</code><em>只能</em>让玩家的角色跳跃。让我们放松这个限制。
+不让函数去找它们控制的角色，将控制的角色对象<em>传进去</em>：</p>
+<div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">Command</span>
 <span class="p">{</span>
 <span class="k">public</span><span class="o">:</span>
   <span class="k">virtual</span> <span class="o">~</span><span class="n">Command</span><span class="p">()</span> <span class="p">{}</span>
@@ -165,8 +172,9 @@
 </pre></div>
 
 
-<p>这里<code>GameActor</code>是代表游戏世界中一个角色的“游戏对象”类。我们将其传给<code>execute()</code>，这样可以在它的子类中添加函数，来与我们选择的角色关联，就像这样：</p>
-<div class="codehilite"><pre><span class="k">class</span> <span class="nc">JumpCommand</span> <span class="o">:</span> <span class="k">public</span> <span class="n">Command</span>
+<p>这里<code>GameActor</code>是代表游戏世界中角色的“游戏对象”类。
+我们将其传给<code>execute()</code>，这样可以在它的子类中添加函数，来与我们选择的角色关联，就像这样：</p>
+<div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">JumpCommand</span> <span class="o">:</span> <span class="k">public</span> <span class="n">Command</span>
 <span class="p">{</span>
 <span class="k">public</span><span class="o">:</span>
   <span class="k">virtual</span> <span class="kt">void</span> <span class="n">execute</span><span class="p">(</span><span class="n">GameActor</span><span class="o">&amp;</span> <span class="n">actor</span><span class="p">)</span>
@@ -178,9 +186,9 @@
 
 
 <p>现在，我们可以使用这个类让游戏中的任何角色跳来跳去了。
-我们还少了一块在输入控制和在正确的对象上起作用的命令之间。
+还少了一块在输入控制和在正确的对象上起作用之间的代码。
 第一，我们修改<code>handleInput()</code>这样它可以<em>返回</em>命令：</p>
-<div class="codehilite"><pre><span class="n">Command</span><span class="o">*</span> <span class="n">InputHandler</span><span class="o">::</span><span class="n">handleInput</span><span class="p">()</span>
+<div class="codehilite"><pre><span></span><span class="n">Command</span><span class="o">*</span> <span class="n">InputHandler</span><span class="o">::</span><span class="n">handleInput</span><span class="p">()</span>
 <span class="p">{</span>
   <span class="k">if</span> <span class="p">(</span><span class="n">isPressed</span><span class="p">(</span><span class="n">BUTTON_X</span><span class="p">))</span> <span class="k">return</span> <span class="n">buttonX_</span><span class="p">;</span>
   <span class="k">if</span> <span class="p">(</span><span class="n">isPressed</span><span class="p">(</span><span class="n">BUTTON_Y</span><span class="p">))</span> <span class="k">return</span> <span class="n">buttonY_</span><span class="p">;</span>
@@ -193,9 +201,10 @@
 </pre></div>
 
 
-<p>这里不能立即执行，因为我们还不知道哪个角色会传进来。这里我们享受了命令是一种具体调用的好处——我们可以<code>延迟</code>到调用被执行的时候。</p>
-<p>然后，我们需要一些代码接受命令然后在玩家角色上起作用。像这样：</p>
-<div class="codehilite"><pre><span class="n">Command</span><span class="o">*</span> <span class="n">command</span> <span class="o">=</span> <span class="n">inputHandler</span><span class="p">.</span><span class="n">handleInput</span><span class="p">();</span>
+<p>这里不能立即执行，因为还不知道哪个角色会传进来。
+这里我们享受了命令是具体调用的好处——可以<code>延迟</code>到调用执行时。</p>
+<p>然后，需要代码接受命令，在玩家角色上起作用。像这样：</p>
+<div class="codehilite"><pre><span></span><span class="n">Command</span><span class="o">*</span> <span class="n">command</span> <span class="o">=</span> <span class="n">inputHandler</span><span class="p">.</span><span class="n">handleInput</span><span class="p">();</span>
 <span class="k">if</span> <span class="p">(</span><span class="n">command</span><span class="p">)</span>
 <span class="p">{</span>
   <span class="n">command</span><span class="o">-&gt;</span><span class="n">execute</span><span class="p">(</span><span class="n">actor</span><span class="p">);</span>
@@ -207,15 +216,16 @@
 所以我们获得了在第一个例子中相同的行为。
 但是在命令和角色间增加了一层重定向，
 我们获得了一个灵巧的功能：<em>我们可以让玩家控制游戏中的任何角色，只需改变在哪个角色上执行代码。</em></p>
-<p>在实践中，这并不是一个常用的功能，但是这<em>经常</em>会有类似的用例跳出来。
+<p>在实践中，这并不是常用的功能，但是这<em>经常</em>会有类似的用例跳出来。
 到目前为止，我们只考虑了玩家控制的角色，但是游戏中的其他角色呢？
 它们被游戏AI控制。我们可以在AI和角色之间使用相同的命令模式；AI代码只是简单的放出<code>Command</code>对象。</p>
 <p>在选择命令的AI和展现命令的游戏角色间解耦给了我们很大的灵活度。
-我们可以对不同的角色使用不同的AI。或者我们可以为了不同的行为而混合AI。
+我们可以对不同的角色使用不同的AI，或者为了不同的行为而混合AI。
 想要一个更加有攻击性的同伴？插入一个更加有攻击性的AI为其生成命令。
-事实上，我们甚至可以为<em>玩家角色</em>加上一个AI，
-这在原型阶段游戏需要一个自动驾驶员是很有用的。</p>
-<p><span name="queue">把</span>控制角色的命令变为第一公民对象，我们去除直接方法调用中严厉的束缚。取而代之的是，将其视为命令队列，或者是命令流：</p>
+事实上，我们甚至可以为<em>玩家角色</em>加上AI，
+这在原型阶段，游戏需要自动驾驶员是很有用的。</p>
+<p><span name="queue">把</span>控制角色的命令变为第一公民对象，去除直接方法调用中严厉的束缚。
+取而代之的是，将其视为命令队列，或者是命令流：</p>
 <aside name="queue">
 <p>对于队列能为你做的更多事情，请看<a href="event-queue.html" class="pattern">事件队列</a>。</p>
 </aside>
@@ -228,21 +238,23 @@
 另一些指令（调度器或者角色自身）消耗指令并调用他们。
 通过在中间加入了一个队列，我们解耦了消费者和生产者。</p>
 <aside name="network">
-<p>如果我们将这些指令<em>序列化</em>，我们可以通过网络流传输它们。我们可以接受玩家的输入，将其通过网络发送到另外一台机器上，然后重现之。这是做网络多人游戏的基础。</p>
+<p>如果将这些指令<em>序列化</em>，我们可以通过网络流传输它们。
+我们可以接受玩家的输入，将其通过网络发送到另外一台机器上，然后重现之。这是网络多人游戏的基础。</p>
 </aside>
 <h2><a href="#撤销和重做" name="撤销和重做">撤销和重做</a></h2>
 <p>最后的这个例子是这种模式最广为人知的使用情况。
 如果一个命令对象可以<em>做</em>一件事，那么它亦可以<em>撤销</em>这件事。
 在一些策略游戏中使用撤销，这样你就可以回滚那些你不喜欢的操作。
 在人们<em>创造</em>游戏时，这是<em>必不可少的</em>工具。
-一个不能撤销肥手指导致的错误的编辑器，<span name="hate">肯定</span>会让游戏设计者恨你。</p>
+不能撤销肥手指导致的错误的编辑器，<span name="hate">肯定</span>会让游戏设计者恨你。</p>
 <aside name="hate">
 <p>这是经验之谈。</p>
 </aside>
-<p>没有了命令模式，实现撤销非常困难，有了它，就是小菜一碟。假设我们在制作单人回合制游戏，我们想让玩家能撤销移动，这样他们就可以集中注意力在策略上而不是猜测上。</p>
+<p>没有了命令模式，实现撤销非常困难，有了它，就是小菜一碟。
+假设我们在制作单人回合制游戏，想让玩家能撤销移动，这样他们就可以集中注意力在策略上而不是猜测上。</p>
 <p>我们已经使用了命令来抽象输入控制，所以每个玩家的举动都已经被封装其中。
 举个例子，移动一个单位的代码可能如下：</p>
-<div class="codehilite"><pre><span class="k">class</span> <span class="nc">MoveUnitCommand</span> <span class="o">:</span> <span class="k">public</span> <span class="n">Command</span>
+<div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">MoveUnitCommand</span> <span class="o">:</span> <span class="k">public</span> <span class="n">Command</span>
 <span class="p">{</span>
 <span class="k">public</span><span class="o">:</span>
   <span class="n">MoveUnitCommand</span><span class="p">(</span><span class="n">Unit</span><span class="o">*</span> <span class="n">unit</span><span class="p">,</span> <span class="kt">int</span> <span class="n">x</span><span class="p">,</span> <span class="kt">int</span> <span class="n">y</span><span class="p">)</span>
@@ -267,12 +279,12 @@
 在前面的例子中，我们需要从修改的角色那里<em>抽象</em>命令。
 在这个例子中，我们将命令<em>绑定</em>到要移动的单位上。
 这条命令的实例不是通用的“移动某物”指令；而是游戏回合中特殊的一次移动。</p>
-<p>这集中展示了命令模式可以被实现的几种情况。
+<p>这集中展示了命令模式可以被使用的几种情况。
 在某些情况中，就像第一个例子，指令是可重用的对象，代表了<em>可执行的事件</em>。
-我们早期的输入控制将其实现一个命令对象，然后在按键按下时调用其<code>execute()</code>方法。</p>
-<p>这里的命令更加特定。它们代表了特定时间点能做的特定事件。
+我们早期的输入控制将其实现为一个命令对象，然后在按键按下时调用其<code>execute()</code>方法。</p>
+<p>这里的命令更加特殊。它们代表了特定时间点能做的特定事件。
 这意味着输入控制代码可以在玩家下决定时<span name="free"><em>创造</em></span>一个实例。就像这样：</p>
-<div class="codehilite"><pre><span class="n">Command</span><span class="o">*</span> <span class="nf">handleInput</span><span class="p">()</span>
+<div class="codehilite"><pre><span></span><span class="n">Command</span><span class="o">*</span> <span class="nf">handleInput</span><span class="p">()</span>
 <span class="p">{</span>
   <span class="n">Unit</span><span class="o">*</span> <span class="n">unit</span> <span class="o">=</span> <span class="n">getSelectedUnit</span><span class="p">();</span>
 
@@ -298,21 +310,21 @@
 <aside name="free">
 <p>当然，在像C++这样没有垃圾回收的语言，这意味着执行命令的代码也要负责释放内存。</p>
 </aside>
-<p>指令是一次性意味我们很快的得到了一个优点。
-为了让指令可被取消，我们为每一个类定义另一个需要实现的方法：</p>
-<div class="codehilite"><pre><span class="k">class</span> <span class="nc">Command</span>
+<p>指令是一次性意味我们很快的获得了一个优点。
+为了让指令可被取消，我们为每个类定义另一个需要实现的方法：</p>
+<div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">Command</span>
 <span class="p">{</span>
 <span class="k">public</span><span class="o">:</span>
   <span class="k">virtual</span> <span class="o">~</span><span class="n">Command</span><span class="p">()</span> <span class="p">{}</span>
   <span class="k">virtual</span> <span class="kt">void</span> <span class="n">execute</span><span class="p">()</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
-  <span class="k">virtual</span> <span class="kt">void</span> <span class="n">undo</span><span class="p">()</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+  <span class="k">virtual</span> <span class="kt">void</span> <span class="nf">undo</span><span class="p">()</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
 <span class="p">};</span>
 </pre></div>
 
 
 <p><code>undo()</code>方法回滚了<code>execute()</code>方法造成的游戏状态改变。
 这里是添加了撤销后的移动指令：</p>
-<div class="codehilite"><pre><span class="k">class</span> <span class="nc">MoveUnitCommand</span> <span class="o">:</span> <span class="k">public</span> <span class="n">Command</span>
+<div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">MoveUnitCommand</span> <span class="o">:</span> <span class="k">public</span> <span class="n">Command</span>
 <span class="p">{</span>
 <span class="k">public</span><span class="o">:</span>
   <span class="n">MoveUnitCommand</span><span class="p">(</span><span class="n">Unit</span><span class="o">*</span> <span class="n">unit</span><span class="p">,</span> <span class="kt">int</span> <span class="n">x</span><span class="p">,</span> <span class="kt">int</span> <span class="n">y</span><span class="p">)</span>
@@ -351,11 +363,12 @@
 如果我们想要撤销这个移动，我们需要记得单位之前的状态，也就是<code>xBefore_</code>和<code>yBefore_</code>做的事。 </p>
 <aside name="memento">
 <p>这看上去是<a href="http://en.wikipedia.org/wiki/Memento_pattern"
-class="gof-pattern">备忘录</a>模式使用的地方，但我从没发现它有用。由于命令趋向于修改对象状态的一小部分，对它数据的其他部分的快照就是浪费内存。手动存储你改动的位消耗更小。</p>
+class="gof-pattern">备忘录</a>模式使用的地方，但我从没发现它有用。
+由于命令趋向于修改对象状态的一小部分，对它数据的其他部分的快照就是浪费内存。手动存储你、改动的位消耗更小。</p>
 <p><a href="http://en.wikipedia.org/wiki/Persistent_data_structure">*持久化数据结构*</a>是另一个选项。使用它，每次修改对象都返回一个新对象，保持原来的对象不变。通过灵巧的实现，这些新对象与之前的对象共享数据，所以比克隆整个对象开销更小。</p>
 <p>使用持久化数据结构，每条命令都存储了命令执行之前对象的引用，而撤销只是切换回之前的对象。</p>
 </aside>
-<p>为了让玩家撤销移动，我们记录了他们执行的最后操作。当他们按下<code>control+z</code>时，我们调用命令的<code>undo()</code>方法。
+<p>为了让玩家撤销移动，我们记录了执行的最后操作。当他们按下<code>control+z</code>时，我们调用命令的<code>undo()</code>方法。
 （如果他们已经撤销了，那么就变成了“重做”，我们会再一次执行命令。）</p>
 <p>支持多层的撤销也不太难。
 我们不单单记录最后一条指令，还要记录指令列表，然后用一个引用指向“当前”的那个。
@@ -363,13 +376,13 @@ class="gof-pattern">备忘录</a>模式使用的地方，但我从没发现它�
 <p><img src="images/command-undo.png" alt="A stack of commands from older to newer. A 'current' arrow points to one command, an 'undo' arrow points to the previous one, and 'redo' points to the next." /></p>
 <p>当玩家选择“撤销”，我们撤销现在的指令，将代表当前的指针往后退。
 当他们选择<span name="replay">“重做”</span>，我们将代表当前的指针往前进，执行该指令。
-如果在撤销后选择了一条新指令，那么指令列表中代表当前的指针所指之后的部分就全部清除了。</p>
-<p>第一次在关卡编辑器中实现这一点时，我觉得自己简直就是一个天才。
+如果在撤销后选择了新指令，那么指令列表中代表当前的指针所指之后的部分就全部清除了。</p>
+<p>第一次在关卡编辑器中实现这点时，我觉得自己简直就是个天才。
 我惊讶于它如此的简明有效。
 你需要约束保证每个数据修改都通过指令完成，但是一旦你做到了，余下的都很简单。</p>
 <aside name="replay">
 <p>重做在游戏中并不常见，但重<em>放</em>常见。
-一个简单的实现会记录游戏每帧的状态，这样它可以回放，但那会消耗太多的内存。</p>
+简单的实现记录游戏每帧的状态，这样它可以回放，但那会消耗太多的内存。</p>
 <p>相反，很多游戏记录每个实体每帧运行的命令。
 为了重放游戏，引擎只需要运行正常游戏的模拟，执行之前存储的命令。</p>
 </aside>
@@ -381,18 +394,18 @@ class="gof-pattern">备忘录</a>模式使用的地方，但我从没发现它�
 函数指针没有状态，函子很奇怪而且仍然需要定义类，
 在C++11中的lambda演算需要大量的人工记忆辅助才能使用。</p>
 <p>这并<em>不是</em>说你在其他语言中不可以用函数来完成命令模式。
-如果你使用的语言非常奢侈的支持闭包，不管怎样，快去用它！
+如果你使用的语言奢侈地支持闭包，不管怎样，快去用它！
 在<span name="some">某种程度</span>上，命令模式是为一些没有闭包的语言模拟闭包。</p>
 <aside name="some">
 <p>(我说<em>某种程度上</em>是因为，即使是那些支持闭包的语言，
 为命令建立真正的类或者结构也是很有用的。
 如果你的命令拥有多重操作（比如可撤销的命令），
-将其全部映射到同一个函数中并不优雅。)</p>
-<p>定义一个有字段的真实类帮助读者轻易的理解命令包含了什么数据。
-闭包是自动包装状态的完美解决方案，但它们过于自动化而很难看清它们真正保持的状态有哪些。</p>
+将其全部映射到同一函数中并不优雅。)</p>
+<p>定义一个有字段的真实类帮助读者轻易地理解命令包含了什么数据。
+闭包是自动包装状态的完美解决方案，但它们过于自动化而很难看清真正保持的状态有哪些。</p>
 </aside>
 <p>举个例子，如果我们使用javascript来写游戏，那么我们可以用这种方式来写让单位移动的命令：</p>
-<div class="codehilite"><pre><span class="kd">function</span> <span class="nx">makeMoveUnitCommand</span><span class="p">(</span><span class="nx">unit</span><span class="p">,</span> <span class="nx">x</span><span class="p">,</span> <span class="nx">y</span><span class="p">)</span> <span class="p">{</span>
+<div class="codehilite"><pre><span></span><span class="kd">function</span> <span class="nx">makeMoveUnitCommand</span><span class="p">(</span><span class="nx">unit</span><span class="p">,</span> <span class="nx">x</span><span class="p">,</span> <span class="nx">y</span><span class="p">)</span> <span class="p">{</span>
   <span class="c1">// This function here is the command object:</span>
   <span class="k">return</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
     <span class="nx">unit</span><span class="p">.</span><span class="nx">moveTo</span><span class="p">(</span><span class="nx">x</span><span class="p">,</span> <span class="nx">y</span><span class="p">);</span>
@@ -402,7 +415,7 @@ class="gof-pattern">备忘录</a>模式使用的地方，但我从没发现它�
 
 
 <p>我们可以通过一对闭包来为撤销提供支持：</p>
-<div class="codehilite"><pre><span class="kd">function</span> <span class="nx">makeMoveUnitCommand</span><span class="p">(</span><span class="nx">unit</span><span class="p">,</span> <span class="nx">x</span><span class="p">,</span> <span class="nx">y</span><span class="p">)</span> <span class="p">{</span>
+<div class="codehilite"><pre><span></span><span class="kd">function</span> <span class="nx">makeMoveUnitCommand</span><span class="p">(</span><span class="nx">unit</span><span class="p">,</span> <span class="nx">x</span><span class="p">,</span> <span class="nx">y</span><span class="p">)</span> <span class="p">{</span>
   <span class="kd">var</span> <span class="nx">xBefore</span><span class="p">,</span> <span class="nx">yBefore</span><span class="p">;</span>
   <span class="k">return</span> <span class="p">{</span>
     <span class="nx">execute</span><span class="o">:</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
@@ -420,28 +433,28 @@ class="gof-pattern">备忘录</a>模式使用的地方，但我从没发现它�
 
 <p>如果你习惯了函数式编程风格，这种做事的方法是很自然的。
 如果你没有，我希望这一章可以帮到你一些。
-对于我来说，命令模式的作用展现了功能范式子啊很多问题上的高效。</p>
+对于我来说，命令模式的作用展现了功能范式在很多问题上的高效。</p>
 <h2><a href="#参见" name="参见">参见</a></h2>
 <ul>
 <li>
-<p>你最终可能会得到很多不同的命令类。为了使之更容易实现，定义一个具体基类，包括一些能定义自己行为的高层方法，往往有帮助。这将命令的主体<code>execute()</code>转到<a href="subclass-sandbox.html" class="pattern">子类沙箱</a>中。</p>
+<p>你最终可能会得到很多不同的命令类。为了使之更容易实现，定义一个具体基类，包括一些能定义自己行为的高层方法，往往会有帮助。这将命令的主体<code>execute()</code>转到<a href="subclass-sandbox.html" class="pattern">子类沙箱</a>中。</p>
 </li>
 <li>
-<p>在我们的例子中，我们明确地选择了哪个角色会处理命令。在某些情况下，特别是当你的对象模型分层时，也可以不这么简单粗暴。对象可以响应命令，或它可以决定将其交给一些它的从属对象。如果你这样做，你就完成了一个<a class="gof-pattern" href="http://en.wikipedia.org/wiki/Chain-of-responsibility_pattern">职责链模式</a>。</p>
+<p>在例子中，我们明确地选择了哪个角色会处理命令。在某些情况下，特别是当你的对象模型分层时，也可以不这么简单粗暴。对象可以响应命令，或它可以决定将其交给一些它的从属对象。如果你这样做，你就完成了一个<a class="gof-pattern" href="http://en.wikipedia.org/wiki/Chain-of-responsibility_pattern">职责链模式</a>。</p>
 </li>
 <li>
 <p>有些命令是纯粹的行为，类似第一个例子中的<code>JumpCommand</code>。在这种情况下，有<span name="singleton">多个</span>实例是在浪费内存，因为所有的实例是等价的。可以用<a class="gof-pattern"
     href="flyweight.html">享元模式</a>解决。</p>
 <aside name="singleton">
 
-<p>你也可以将其作为<a href="singleton.html" class="gof-pattern">单例</a>，但一位朋友不会让你创建单例。</p>
+<p>你也可以将其作为<a href="singleton.html" class="gof-pattern">单例</a>，但朋友不会让你创建单例。</p>
 </aside>
 
 </li>
 </ul>
 <nav>
-  <span class="prev">&larr; <a href="重访设计模式.html">Previous Chapter</a></span>
-  <span class="next"><a href="享元.html">Next Chapter</a> &rarr;</span>
+  <span class="prev">&larr; <a href="design-patterns-revisited.html">Previous Chapter</a></span>
+  <span class="next"><a href="flyweight.html">Next Chapter</a> &rarr;</span>
   <span class="toc">&equiv; <a href="/">The Book</a></span>
 </nav>
 </div>

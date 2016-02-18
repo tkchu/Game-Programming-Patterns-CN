@@ -1,5 +1,5 @@
-﻿^title 命令
-^section 重访设计模式
+^title 命令
+^section Design Patterns Revisited
 
 命令模式是我最喜欢的模式之一。
 大多数我写的大型程序，游戏或者别的什么，都会在某处用到它。

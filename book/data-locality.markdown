@@ -1,5 +1,5 @@
 ^title 数据局部性
-^section 优化模式
+^section Optimization Patterns
 
 ## 意图
 

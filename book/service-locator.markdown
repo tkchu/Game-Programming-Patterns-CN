@@ -1,5 +1,5 @@
 ^title 服务定位器
-^section 解耦模式
+^section Decoupling Patterns
 
 ## 意图
 
