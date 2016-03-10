@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="Content-type" content="text/html;charset=UTF-8" />
 
-<title>观察者 &middot; 重访设计模式 &middot; Game Programming Patterns</title>
+<title>观察者 &middot; Design Patterns Revisited &middot; Game Programming Patterns</title>
 
 <!-- Tell mobile browsers we're optimized for them and they don't need to crop
      the viewport. -->
@@ -26,24 +26,24 @@
 <div class="page sidebar">
 <div class="content">
 <nav class="top">
-  <span class="prev">&larr; <a href="享元.html">Previous Chapter</a></span>
-  <span class="next"><a href="原型.html">Next Chapter</a> &rarr;</span>
+  <span class="prev">&larr; <a href="flyweight.html">Previous Chapter</a></span>
+  <span class="next"><a href="prototype.html">Next Chapter</a> &rarr;</span>
   <span class="toc">&equiv; <a href="/">The Book</a></span>
 </nav>
 <h1>观察者</h1>
-<h1 class="book"><a href="/">Game Programming Patterns</a><span class="section"><a href="重访设计模式.html">重访设计模式</a></span></h1>
+<h1 class="book"><a href="/">Game Programming Patterns</a><span class="section"><a href="design-patterns-revisited.html">Design Patterns Revisited</a></span></h1>
 <p>扔块石头到电脑世界中，
 不可能砸不中一个不使用<span name="devised"><a href="http://en.wikipedia.org/wiki/Model%E2%80%93view%E2%80%93controller">MVC架构</a></span>的应用，
 根本在于观察者模式。
 观察者模式非常普遍，Java将其放到了核心库之中（<a href="http://docs.oracle.com/javase/7/docs/api/java/util/Observer.html"><code>java.util.Observer</code></a>），而C#直接将其嵌入了<em>语言</em>（<a href="http://msdn.microsoft.com/en-us/library/8627sbea.aspx"><code>event</code></a>关键字）。</p>
 <aside name="devised">
-<p>就像软件中的很多东西，MVC是Smalltalkers在七十年代创造的。Lisp程序员也许声明他们在六十年代就发明了但懒得记下来。</p>
+<p>就像软件中的很多东西，MVC是Smalltalkers在七十年代创造的。Lisp程序员也许会说他们在六十年代就发明了但他们懒得记下来。</p>
 </aside>
 <p>观察者模式是最广泛使用和最广为人知的GoF模式，
 但是游戏开发世界与世隔绝，
 所以这对你也许是全新的领域。
-防止你还没有从修道院中走出来，
-让我带你看看一个更加形象的例子。</p>
+为了防止你还没有从修道院中走出来，
+让我带你看看更加形象的例子。</p>
 <h2><a href="#成就解锁" name="成就解锁">成就解锁</a></h2>
 <p>假设我们向游戏中添加了<span name="weasel">成就系统</span>。
 它存储了玩家可以完成的各种各样的成就，比如“杀死1000只猴子恶魔”，“从桥上掉下去”，或者“一命通关”。</p>
@@ -59,16 +59,16 @@
 有个对<code>unlockFallOffBridge()</code>的调用是不？</p>
 <aside name="physics">
 <p>这是个尊严问题。
-任何有自尊的物理程序员都不会允许我们用像<em>游戏玩法</em>这样平常的东西玷污优美的算式。</p>
+任何有自尊的物理程序员都不会允许像<em>游戏玩法</em>这样的平凡之物玷污优美的算式。</p>
 </aside>
 <p>我们喜欢的是，照旧，让所有的关注游戏一部分的代码集成一块。
-挑战在于成就在游戏的不同层面被触发。我们怎么解耦成就系统和其他部分呢？</p>
+挑战在于成就在游戏的不同层面被触发。怎么解耦成就系统和其他部分呢？</p>
 <p>这就是观察者模式出现的原因。
 这让一块代码宣称有些有趣的事情发生了<em>而不必关心谁接受通知。</em></p>
-<p>举个例子，我们有物理代码处理重力，追踪哪些物体待在地表，哪些坠入深渊。
+<p>举个例子，有物理代码处理重力，追踪哪些物体待在地表，哪些坠入深渊。
 为了实现“桥上掉落”的徽章，我们可以直接把成就代码放在那里，但那就会一团糟。
-相反，我们可以这样做：</p>
-<div class="codehilite"><pre><span class="kt">void</span> <span class="n">Physics</span><span class="o">::</span><span class="n">updateEntity</span><span class="p">(</span><span class="n">Entity</span><span class="o">&amp;</span> <span class="n">entity</span><span class="p">)</span>
+相反，可以这样做：</p>
+<div class="codehilite"><pre><span></span><span class="kt">void</span> <span class="n">Physics</span><span class="o">::</span><span class="n">updateEntity</span><span class="p">(</span><span class="n">Entity</span><span class="o">&amp;</span> <span class="n">entity</span><span class="p">)</span>
 <span class="p">{</span>
   <span class="kt">bool</span> <span class="n">wasOnSurface</span> <span class="o">=</span> <span class="n">entity</span><span class="p">.</span><span class="n">isOnSurface</span><span class="p">();</span>
   <span class="n">entity</span><span class="p">.</span><span class="n">accelerate</span><span class="p">(</span><span class="n">GRAVITY</span><span class="p">);</span>
@@ -81,14 +81,14 @@
 </pre></div>
 
 
-<p><span name="subtle">他做的就是</span>，“额，我不知道有谁感兴趣，但是这个东西刚刚掉下去了。做你想做的事吧。”</p>
+<p><span name="subtle">它做的就是</span>，“额，我不知道有谁感兴趣，但是这个东西刚刚掉下去了。做你想做的事吧。”</p>
 <aside name="subtle">
-<p>物理引擎确实决定了发送什么通知，所以它没有完全解耦。但在架构中，我们通常只是让系统<em>更好</em>，而不是<em>完美</em>。</p>
+<p>物理引擎确实决定了发送什么通知，所以它没有完全解耦。但在架构中，通常只是让系统<em>更好</em>，而不是<em>完美</em>。</p>
 </aside>
 <p>成就系统注册它自己，这样无论何时物理代码发送通知，成就系统都能收到。
 它可以检查掉落的物体是不是我们不那么伟大的英雄，
-他之前有没有做过这种新的，不愉快的与桥的经典力学遭遇。
-如果满足条件，就解锁合适的成就，伴着礼花和炫光，做完所有这些都不必牵扯到物理代码。</p>
+他之前有没有做过这种全新的，不愉快的与桥的经典力学遭遇。
+如果满足条件，，就能伴着礼花和炫光解锁合适的成就，做完所有这些都不必牵扯到物理代码。</p>
 <p><span name="tear">事实上</span>，我们可以改变成就的集合或者删除整个成就系统，而不必修改一行物理引擎。它仍然会发送它的通知，哪怕事实上没有东西在接收。</p>
 <aside name="tear">
 <p>当然，如果我们<em>暂时</em>移除成就，没有任何东西监听物理引擎的通知，我们也同样可以移除通知代码。但是在游戏的演进中，最好保持这样的灵活性。</p>
@@ -99,7 +99,7 @@
 <p>我们从那个需要知道别的对象做了什么有趣事情的吵闹类开始。
 这些好打听的对象用如下接口定义：</p>
 <p><span name="signature"></span></p>
-<div class="codehilite"><pre><span class="k">class</span> <span class="nc">Observer</span>
+<div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">Observer</span>
 <span class="p">{</span>
 <span class="k">public</span><span class="o">:</span>
   <span class="k">virtual</span> <span class="o">~</span><span class="n">Observer</span><span class="p">()</span> <span class="p">{}</span>
@@ -110,14 +110,14 @@
 
 <aside name="signature">
 <p><code>onNotify()</code>的参数取决于你。这就是为什么是观察者<em>模式</em>，
-而不是观察者“可以粘贴到游戏中的真实代码”。
+而不是“可以粘贴到游戏中的真实代码”的观察者。
 典型的参数是发送通知的对象和一个将其他细节装入的“数据”参数。</p>
 <p>如果你用通用语言或者模板编码，你可能会在这里使用它们，但是将它们根据你的特殊用况裁剪也很好。
 这里我将其硬编码为接受一个游戏实体和一个描述发生了什么的枚举。</p>
 </aside>
 <p>任何实现了这个的具体类就成为了观察者。
 在我们的例子中，是成就系统，所以我们会做些像这样的事：</p>
-<div class="codehilite"><pre><span class="k">class</span> <span class="nc">Achievements</span> <span class="o">:</span> <span class="k">public</span> <span class="n">Observer</span>
+<div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">Achievements</span> <span class="o">:</span> <span class="k">public</span> <span class="n">Observer</span>
 <span class="p">{</span>
 <span class="k">public</span><span class="o">:</span>
   <span class="k">virtual</span> <span class="kt">void</span> <span class="n">onNotify</span><span class="p">(</span><span class="k">const</span> <span class="n">Entity</span><span class="o">&amp;</span> <span class="n">entity</span><span class="p">,</span> <span class="n">Event</span> <span class="n">event</span><span class="p">)</span>
@@ -150,7 +150,7 @@
 <p>接受观察的对象拥有通知方法，以GoF的说法那些对象被称为“客体”。
 它有两个任务。首先，它保存默默等待它的观察者列表：</p>
 <p><span name="stl"></span></p>
-<div class="codehilite"><pre><span class="k">class</span> <span class="nc">Subject</span>
+<div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">Subject</span>
 <span class="p">{</span>
 <span class="k">private</span><span class="o">:</span>
   <span class="n">Observer</span><span class="o">*</span> <span class="n">observers_</span><span class="p">[</span><span class="n">MAX_OBSERVERS</span><span class="p">];</span>
@@ -164,7 +164,7 @@
 我在这里这种基本的形式是为了那些从其他语言过来而不懂C++的标准库的人们。</p>
 </aside>
 <p>重点是客体暴露了一个<em>公开</em>API来修改这个列表：</p>
-<div class="codehilite"><pre><span class="k">class</span> <span class="nc">Subject</span>
+<div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">Subject</span>
 <span class="p">{</span>
 <span class="k">public</span><span class="o">:</span>
   <span class="kt">void</span> <span class="n">addObserver</span><span class="p">(</span><span class="n">Observer</span><span class="o">*</span> <span class="n">observer</span><span class="p">)</span>
@@ -196,7 +196,7 @@
 它们知道的所有事情是，它是世界上唯一看着客体的东西。</p>
 <p>客体的剩余任务就是发送通知：</p>
 <p><span name="concurrent"></span></p>
-<div class="codehilite"><pre><span class="k">class</span> <span class="nc">Subject</span>
+<div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">Subject</span>
 <span class="p">{</span>
 <span class="k">protected</span><span class="o">:</span>
   <span class="kt">void</span> <span class="n">notify</span><span class="p">(</span><span class="k">const</span> <span class="n">Entity</span><span class="o">&amp;</span> <span class="n">entity</span><span class="p">,</span> <span class="n">Event</span> <span class="n">event</span><span class="p">)</span>
@@ -221,7 +221,7 @@
 成就系统可以将它自己接上线来接受消息。
 我们靠近之前的<em>设计模式</em>秘方，
 然后<span name="event">继承</span><code>Subject</code>：</p>
-<div class="codehilite"><pre><span class="k">class</span> <span class="nc">Physics</span> <span class="o">:</span> <span class="k">public</span> <span class="n">Subject</span>
+<div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">Physics</span> <span class="o">:</span> <span class="k">public</span> <span class="n">Subject</span>
 <span class="p">{</span>
 <span class="k">public</span><span class="o">:</span>
   <span class="kt">void</span> <span class="n">updateEntity</span><span class="p">(</span><span class="n">Entity</span><span class="o">&amp;</span> <span class="n">entity</span><span class="p">);</span>
@@ -229,14 +229,16 @@
 </pre></div>
 
 
-<p>这让我们在<code>Subject</code>中保护的完成<code>notify()</code>。
+<p>这让我们在<code>Subject</code>中保护地完成<code>notify()</code>。
 这样推导的物理引擎类可以调用发送通知，但是外部的代码不行。
 同时，<code>addObserver()</code>和<code>removeObserver()</code>是公开的，
 所以任何可以接触物理引擎的东西都可以观察它。</p>
 <aside name="event">
-<p>在真实代码中，我会避免使用这里的继承。相反，我会让<code>Physics</code><em>有</em>一个<code>Subject</code>的实例。不是观察物理引擎自己，客体会是一个单独的“下落时间”对象。
+<p>在真实代码中，我会避免使用这里的继承。
+相反，我会让<code>Physics</code><em>有</em>一个<code>Subject</code>的实例。
+不是观察物理引擎本身，客体会是一个单独的“下落事件”对象。
 观察者可以用像下面这样的东西注册它们自己：</p>
-<div class="codehilite"><pre><span class="n">physics</span><span class="p">.</span><span class="n">entityFell</span><span class="p">()</span>
+<div class="codehilite"><pre><span></span><span class="n">physics</span><span class="p">.</span><span class="n">entityFell</span><span class="p">()</span>
   <span class="p">.</span><span class="n">addObserver</span><span class="p">(</span><span class="k">this</span><span class="p">);</span>
 </pre></div>
 
@@ -248,14 +250,14 @@
 <p>现在，当物理引擎做了些值得关注的东西，它调用<code>notify()</code>，就像之前的例子。
 它遍历了观察者列表然后通知所有观察者。</p>
 <p><img src="images/observer-list.png" alt="A Subject containing a list of Observer pointers. The first two point to Achievements and Audio." /></p>
-<p>很简单，对吧？只要一个类管理一列表指向一些接口的实例的指针。
+<p>很简单，对吧？只要一个类管理一列表指向接口的实例的指针。
 很难相信如此直观的东西是无数程序和应用框架交流的主心骨。</p>
 <p>观察者模式不是没有诋毁者。当我问其他程序员怎么看，他们提出了一些抱怨。
 让我们看看我们可以做些什么来掌控，如果能做的话。</p>
 <h2><a href="#太慢了" name="太慢了">太慢了</a></h2>
 <p>我经常听到这一点，通常是从那些不知道模式细节的程序员那里。
 他们有一种假设，只要有东西听起来像是“设计模式”一定包含了一堆类，跳转和其他创造性的方式浪费CPU循环。</p>
-<p>观察者模式有特别坏的名声，因为他通常与一些坏名声的事物结伴出行，
+<p>观察者模式有特别坏的名声，因为它通常与一些坏名声的事物结伴出行，
 比如“事件”，<span name="names">“消息”</span>，甚至“数据绑定”。
 其中的一些系统<em>会</em>慢。（通常是故意的，基于很好的原因）。
 他们包含了队列或者为每个通知做些动态分配。</p>
@@ -264,7 +266,8 @@
 当我们为术语发狂，我们失去了简洁明确表达的能力。
 你说“观察者”，别人听到了“事件”或“消息”，
 因为没人花时间写下差异，也没人阅读它。</p>
-<p>这就是我在这本书中要做的。为了涵盖我的支点，我也有一章关于事件和消息：<a href="event-queue.html" class="pattern">事件队列</a>.</p>
+<p>这就是我在这本书中要做的。
+为了支撑我的说法，也有一章关于事件和消息：<a href="event-queue.html" class="pattern">事件队列</a>.</p>
 </aside>
 <p>现在你看到了模式是如何真正被实现的，
 你知道了并不是这样。
@@ -276,33 +279,33 @@
 我们不必为消息分配对象。这里没有队列。这里只有一个跳转用在同步方法调用上。</p>
 <h3><a href="#太*快*？" name="太*快*？">太<em>快</em>？</a></h3>
 <p>事实上，你得小心观察者模式<em>是</em>同步的。
-客体直接引入了他的观察者，这就意味着直到所有观察者从通知方法返回后，
+客体直接引入了观察者，这就意味着直到所有观察者从通知方法返回后，
 它才会继续自己的工作。一个缓慢的观察者会阻塞客体。</p>
 <p>这听起来很疯狂，但在实践中，这还不是世界末日。
 这只是你得注意的事情。
 UI程序员——那些基于事件的编程已经这么干了好几年了——有句经典名言：“滚出UI线程”。</p>
 <p>如果要对事件同步响应，你需要完成然后尽可能快的返回控制权，这样UI就不会锁死。
-当你有缓慢工作要做的时候，将其推到另一个线程或工作队列中去。</p>
+当你有缓慢工作要做时，将其推到另一个线程或工作队列中去。</p>
 <p>你需要小心观察者混合线程和锁。
-如果一个观察者试图获得客体拥有的锁，你就死锁了游戏。
+如果一个观察者试图获得客体拥有的锁，游戏就死锁了。
 在更多线程的机器，你最好使用<a href="event-queue.html"
 class="pattern">事件队列</a>来做异步通信。</p>
 <h2><a href="#“它做了太多动态分配”" name="“它做了太多动态分配”">“它做了太多动态分配”</a></h2>
 <p>整个程序员部落——包括很多游戏开发者——迁移到了垃圾回收语言，
 动态分配不再是以前的样子了。
-但对于性能攸关的软件比如游戏，内存分配仍然重要，哪怕是在有管理的语言。
+但对于性能攸关的软件比如游戏，内存分配仍然重要，哪怕是在有垃圾回收的语言。
 <span name="fragment">动态</span>分配需要时间，回收内存也需要时间，哪怕是自动运行的。</p>
 <aside name="fragment">
 <p>很多游戏开发者很少担忧分配而更多担忧<em>分页</em>。
-当你的游戏需要不崩溃的连续运行多日来获得认证，不断增加的分页堆会阻止你发布。</p>
+当游戏需要不崩溃的连续运行多日来获得认证，不断增加的分页堆会阻止发布。</p>
 <p><a href="object-pool.html" class="pattern">对象池</a>模式一章介绍了更多细节，以及避免它的常用技术。</p>
 </aside>
 <p>在上面的示例代码中，我使用了一个固长度的数组，因为我想尽可能保证简单。
 在真实的实现中，观察者列表总是在随着观察者的添加和删除而动态地增长和消减。
 这种内存搅拌吓坏了一些人。</p>
-<p>当然，第一件需要注意的事情是只在观察者连线的时候分配内存。
-<em>发送</em>一个通知不需要内存分配——只是一个方法调用。
-如果你在游戏一开始就挂上了你的观察者而不乱动它们，分配的总量是很小的。</p>
+<p>当然，第一件需要注意的事情是只在观察者连线时分配内存。
+<em>发送</em>通知不需要内存分配——只是一个方法调用。
+如果你在游戏一开始就挂上了观察者而不乱动它们，分配的总量是很小的。</p>
 <p>但是，如果这还是问题，我会介绍一种方式增加和删除观察者，而无需任何动态分配。</p>
 <h3><a href="#连接观察者" name="连接观察者">连接观察者</a></h3>
 <p>我们现在看到的所有代码中，<code>Subject</code>拥有一列指针指向观察它的<code>Observer</code>。
@@ -313,7 +316,7 @@ class="pattern">事件队列</a>来做异步通信。</p>
 不是客体有一集合分散的指针，观察者对象成为了链表中的一部分：</p>
 <p><img src="images/observer-linked.png" alt="A linked list of Observers. Each has a next_ field pointing to the next one. A Subject has a head_ pointing to the first Observer." /></p>
 <p>为了实现这一点，我们首先要摆脱<code>Subject</code>中的数组，然后用链表头部的指针取而代之：</p>
-<div class="codehilite"><pre><span class="k">class</span> <span class="nc">Subject</span>
+<div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">Subject</span>
 <span class="p">{</span>
   <span class="n">Subject</span><span class="p">()</span>
   <span class="o">:</span> <span class="n">head_</span><span class="p">(</span><span class="nb">NULL</span><span class="p">)</span>
@@ -326,8 +329,8 @@ class="pattern">事件队列</a>来做异步通信。</p>
 </pre></div>
 
 
-<p>然后，我们在<code>Observer</code>中添加指向列表中下一个观察者的指针。</p>
-<div class="codehilite"><pre><span class="k">class</span> <span class="nc">Observer</span>
+<p>然后，我们在<code>Observer</code>中添加指向列表中下一观察者的指针。</p>
+<div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">Observer</span>
 <span class="p">{</span>
   <span class="k">friend</span> <span class="k">class</span> <span class="nc">Subject</span><span class="p">;</span>
 
@@ -347,7 +350,7 @@ class="pattern">事件队列</a>来做异步通信。</p>
 客体拥有增加和删除观察者的API，但是现在列表在<code>Observer</code>内部管理。
 接触这个列表最简单的办法就是让它成为友类。</p>
 <p>注册一个新观察者就是将其连到链表中。我们使用更简单的选项，将其插到前头：</p>
-<div class="codehilite"><pre><span class="kt">void</span> <span class="n">Subject</span><span class="o">::</span><span class="n">addObserver</span><span class="p">(</span><span class="n">Observer</span><span class="o">*</span> <span class="n">observer</span><span class="p">)</span>
+<div class="codehilite"><pre><span></span><span class="kt">void</span> <span class="n">Subject</span><span class="o">::</span><span class="n">addObserver</span><span class="p">(</span><span class="n">Observer</span><span class="o">*</span> <span class="n">observer</span><span class="p">)</span>
 <span class="p">{</span>
   <span class="n">observer</span><span class="o">-&gt;</span><span class="n">next_</span> <span class="o">=</span> <span class="n">head_</span><span class="p">;</span>
   <span class="n">head_</span> <span class="o">=</span> <span class="n">observer</span><span class="p">;</span>
@@ -366,7 +369,7 @@ class="pattern">事件队列</a>来做异步通信。</p>
 如果顺序<em>确实</em>有影响，这意味着这两个观察者有一些微妙的耦合，最终会伤到你。</p>
 <p>让我们把删除完成：</p>
 <p><span name="remove"></span></p>
-<div class="codehilite"><pre><span class="kt">void</span> <span class="n">Subject</span><span class="o">::</span><span class="n">removeObserver</span><span class="p">(</span><span class="n">Observer</span><span class="o">*</span> <span class="n">observer</span><span class="p">)</span>
+<div class="codehilite"><pre><span></span><span class="kt">void</span> <span class="n">Subject</span><span class="o">::</span><span class="n">removeObserver</span><span class="p">(</span><span class="n">Observer</span><span class="o">*</span> <span class="n">observer</span><span class="p">)</span>
 <span class="p">{</span>
   <span class="k">if</span> <span class="p">(</span><span class="n">head_</span> <span class="o">==</span> <span class="n">observer</span><span class="p">)</span>
   <span class="p">{</span>
@@ -394,7 +397,7 @@ class="pattern">事件队列</a>来做异步通信。</p>
 <aside name="remove">
 <p>从链表移除一个节点通常需要一点丑陋的特殊情况来应对头节点，就像你在这里看到的。
 这里还有一个更优雅的，用指向指针的指针的解决方案。</p>
-<p>我在这里没有那么做，是因为我展示的半数人都迷糊了。
+<p>我在这里没有那么做，是因为看到展示的半数人都迷糊了。
 但这对你是一个很值得做的练习：它帮助你深入思考指针。</p>
 </aside>
 <p>因为我们有一个链表，得遍历它找到我们要删除的观察者。
@@ -402,7 +405,7 @@ class="pattern">事件队列</a>来做异步通信。</p>
 如果我们使用<em>双向</em>链表，每个观察者都有指向前面和后面的各一个指针，
 我们可以用常量时间移除一个观察者。如果这是真实代码，我会那么做。</p>
 <p><span name="chain">唯一</span>需要做的事情是发送通知，这和遍历列表同样简单；</p>
-<div class="codehilite"><pre><span class="kt">void</span> <span class="n">Subject</span><span class="o">::</span><span class="n">notify</span><span class="p">(</span><span class="k">const</span> <span class="n">Entity</span><span class="o">&amp;</span> <span class="n">entity</span><span class="p">,</span> <span class="n">Event</span> <span class="n">event</span><span class="p">)</span>
+<div class="codehilite"><pre><span></span><span class="kt">void</span> <span class="n">Subject</span><span class="o">::</span><span class="n">notify</span><span class="p">(</span><span class="k">const</span> <span class="n">Entity</span><span class="o">&amp;</span> <span class="n">entity</span><span class="p">,</span> <span class="n">Event</span> <span class="n">event</span><span class="p">)</span>
 <span class="p">{</span>
   <span class="n">Observer</span><span class="o">*</span> <span class="n">observer</span> <span class="o">=</span> <span class="n">head_</span><span class="p">;</span>
   <span class="k">while</span> <span class="p">(</span><span class="n">observer</span> <span class="o">!=</span> <span class="nb">NULL</span><span class="p">)</span>
@@ -419,11 +422,13 @@ class="pattern">事件队列</a>来做异步通信。</p>
 这保证了所有的观察者有同样的优先级并相互独立。</p>
 <p>我们可以这样实现，当观察者被通知时，它返回了一个标识表明客体是否应该继续遍历列表还是停止。如果你那么做，你就接近了<a href="http://en.wikipedia.org/wiki/Chain-of-responsibility_pattern" class="gof-pattern">职责链</a>模式。</p>
 </aside>
-<p>不差嘛，对吧？一个客体现在想有多少观察者就有多少观察者，不必使用动态内存。注册和取消注册就像使用简单数组一样快。但是，我们牺牲了一些小小的特性。</p>
+<p>不差嘛，对吧？一个客体现在想有多少观察者就有多少观察者，不必使用动态内存。
+注册和取消注册就像使用简单数组一样快。
+但是，我们牺牲了一些小小的特性。</p>
 <p>由于我们使用观察者对象作为链表节点，
 这暗示了它只能在一个对象的观察者链表中。
 换言之，一个观察者一次只能观察一个客体。
-在传统的实现中，每一个客体有他独立的列表，
+在传统的实现中，每一个客体有它独立的列表，
 一个观察者同时可以在多个列表中。</p>
 <p>你也许可以接受这一限制。
 我发现<em>客体</em>有多个<em>观察者</em>要比相反更常见。
@@ -443,14 +448,14 @@ class="pattern">事件队列</a>来做异步通信。</p>
 <em>数据</em>（在这种例子中的观察者）包含了<em>节点</em>（<code>next_</code>指针）。</p>
 <p>后者的风格被称为“侵入式”链表，因为在对象内部使用链表侵入了对象本身的定义。
 这让侵入式链表有更少的灵活性，但如我们所见，也更有效率。
-他们在Linux核心这样交易有意义的地方很流行，</p>
+它们在Linux核心这样的地方很流行。</p>
 </aside>
 <p>避免动态分配的方法很简单：由于这些节点都是同样大小和类型，
 可以预先在<a href="object-pool.html" class="pattern">对象池</a>中分配他们。
 这给了你固定大小的列表节点处理，你可以随你所需使用并重用他们，
 无需使用一个真正的内存分配器。</p>
 <h2><a href="#剩余的问题" name="剩余的问题">剩余的问题</a></h2>
-<p>我认为我们已经搞定了三个这个模式将人们吓阻的主要问题。
+<p>我认为我们已经搞定了三个该模式将人们吓阻的主要问题。
 我们看到，它简单，快速，对内存管理友好。
 但是这意味着你总是应该使用观察者吗？</p>
 <p>现在，这是另一个的问题。
@@ -458,16 +463,15 @@ class="pattern">事件队列</a>来做异步通信。</p>
 哪怕可以实现的正确高效，它也不一定是好的解决方案。
 设计模式获得坏名声的原因之一就是人们将好模式运用在错问题上，最终结果更糟。</p>
 <p>还剩两个挑战，一个是技术性的，另一个更像是可维护性层次。
-我们先处理技术性的，因为它总是更好处理。</p>
+我们先处理技术性的，因为那总是更好处理。</p>
 <h3><a href="#销毁客体和观察者" name="销毁客体和观察者">销毁客体和观察者</a></h3>
 <p>我们看到的样例代码很牢靠，但有一个严重的<span name="destruct">副作用</span>：
 当删除一个客体或观察者时会发生什么？
 如果你不小心的在某些观察者上面调用了<code>delete</code>，客体也许仍然持有指向它的指针。
 这就是指向一片释放了的区域的悬挂指针。
-当客体试图发送一个通知，好吧……就说你不会有好时光吧。</p>
+当客体试图发送一个通知，好吧……就说不会有好时光吧。</p>
 <aside name="destruct">
-<p>Not to point fingers, but I&#8217;ll note that <em>Design Patterns</em> doesn&#8217;t mention this
-issue at all.</p>
+<p>不是针对谁，但我注意到<em>设计模式</em>完全没有提到这个问题。</p>
 </aside>
 <p>删除客体更加容易，因为在大多数实现中，观察者没有对它的引用。
 但是即使这样，将客体所占的位发送到内存管理系统的回收站也许会造成一些问题。
@@ -475,7 +479,7 @@ issue at all.</p>
 他们不再是观察者了，真的，他们只是认为他们是。</p>
 <p>你可以用好几种方式处理这点。
 最简单的就是像我做的，然后一脚踩空。
-这是观察者的职责在其被删除的时候取消注册。
+在被删除时取消注册是观察者的职责。
 多数情况下，观察者<em>确实</em>知道它在观察哪个实体，
 所以这通常是给它的析构器<span name="destructor">添加</span>一个<code>removeObserver()</code>调用的工作量。</p>
 <aside name="destructor">
@@ -500,7 +504,7 @@ issue at all.</p>
 <p>想象一下这个：你有UI显示玩家角色情况的状态，比如健康和道具。
 当玩家在屏幕上时，你为其初始化了一个对象。
 当他们退出时，你直接忘掉那个对象让GC清理。</p>
-<p>每一个角色脸上（或者其他什么地方）挨了一拳，它发送一个通知。
+<p>每当角色脸上（或者其他什么地方）挨了一拳，它发送一个通知。
 UI屏幕观察到了，然后更新健康槽。很好。
 当玩家离开了屏幕，但你没有取消观察者的注册，会发生什么？</p>
 <p>UI不再可见，但也不会进入垃圾回收系统，因为角色的观察者列表还保存着对它的引用。
@@ -512,7 +516,7 @@ UI屏幕观察到了，然后更新健康槽。很好。
 由于客体保留了对监听者的引用，你最终有僵尸UI对象徘徊在内存中。
 这里上的一课是关于取消注册的纪律。</p>
 <aside name="lapsed">
-<p>哈有更加突出的标志：它有<a href="http://en.wikipedia.org/wiki/Lapsed_listener_problem">维基条目</a>。</p>
+<p>还有更加突出的标志：它有<a href="http://en.wikipedia.org/wiki/Lapsed_listener_problem">维基条目</a>。</p>
 </aside>
 <h3><a href="#发生了什么？" name="发生了什么？">发生了什么？</a></h3>
 <p>另一个观察者的深层次问题是它意图的直接结果。
@@ -526,10 +530,10 @@ UI屏幕观察到了，然后更新健康槽。很好。
 <p>但是如果耦合发生在观察者列表中，唯一能告诉你谁被通知的方法是看看哪个观察者恰巧在列表中而且<em>处于运行中</em>。
 不再是理清程序的<em>静态</em>交流结构，你得理清它的<em>命令式，动态</em>行为。</p>
 <p>我对如何处理这个的指导原则很简单。
-如果为了理解程序的一部分，沟通的两边<em>都</em>需要考虑，不要使用观察者模式。
-使用其他更加显式的东西。</p>
-<p>当你在某些大型程序上用黑魔法时，你会感觉这些一起处理很笨拙。
-我们有很多术语给他，比如“角落分离”，“一致性和内聚性”和“模块化”，
+如果为了理解程序的一部分，沟通的两边<em>都</em>需要考虑，
+那就不要使用观察者模式，使用其他更加显式的东西。</p>
+<p>当你在某些大型程序上用黑魔法时，你会感觉这样处理很笨拙。
+我们有很多术语给它，比如“角落分离”，“一致性和内聚性”和“模块化”，
 但是总归就是“这些东西待在一起而不与其他东西待在一起。”</p>
 <p>观察者模式是一个让这些大量不相关的代码块互相交流，而不必打包成更大块的好方法。
 这在专注于一个特性或层面的单一代码块<em>内</em>不会太有用。</p>
@@ -540,7 +544,7 @@ UI屏幕观察到了，然后更新健康槽。很好。
 <h2><a href="#今日观察者" name="今日观察者">今日观察者</a></h2>
 <p><em>设计模式</em>源于<span name="90s">1994</span>。
 那时候，面向对象语言是<em>那个</em>热门范式。
-每一个程序员都想要“30天学会OOP”，
+每个程序员都想要“30天学会OOP”，
 中层管理员根据他们创建类的数量为他们支付工资。
 工程师通过继承层次的深度评价质量。</p>
 <aside name="90s">
@@ -552,8 +556,8 @@ UI屏幕观察到了，然后更新健康槽。很好。
 <p>它感觉上去是又<span name="different">沉重</span>又死板。它<em>确实</em>又沉重又死板。
 举个例子，你不能有为不同的对象使用不同通知方法的类。</p>
 <aside name="different">
-<p>这就是为什么客体经常讲它自己传给观察者。
-哟与一个观察者只有单一的<code>onNotify()</code>方法，如果它观察多个客体，它需要知道哪个在调用它。</p>
+<p>这就是为什么客体经常将它自己传给观察者。
+一个观察者只有单一的<code>onNotify()</code>方法，如果它观察多个客体，它需要知道哪个在调用它。</p>
 </aside>
 <p>现代的解决办法是让“观察者”只是对方法或者函数的引用。
 在函数作为第一公民的语言中，特别是那些有<span name="closures">闭包</span>的，
@@ -598,11 +602,11 @@ UI屏幕观察到了，然后更新健康槽。很好。
 <p>就像其他宣言式系统，数据绑定也许适应游戏引擎的核心太慢太复杂。
 但是如果说没看到它开始侵入游戏不那么性能攸关的部分，比如UI，那我会很惊讶。</p>
 <p>与此同时，经典观察者模式仍然在那里等着我们。
-是的，它不像其他的新热门技术一样填满了“函数”“反射”在名字中，
+是的，它不像其他的新热门技术一样在名字中填满了“函数”“反射”，
 但是它超简单而且能工作。对于我来说，这通常是一个解决方案最重要的条件。</p>
 <nav>
-  <span class="prev">&larr; <a href="享元.html">Previous Chapter</a></span>
-  <span class="next"><a href="原型.html">Next Chapter</a> &rarr;</span>
+  <span class="prev">&larr; <a href="flyweight.html">Previous Chapter</a></span>
+  <span class="next"><a href="prototype.html">Next Chapter</a> &rarr;</span>
   <span class="toc">&equiv; <a href="/">The Book</a></span>
 </nav>
 </div>

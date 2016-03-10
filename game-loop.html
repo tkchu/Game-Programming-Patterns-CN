@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="Content-type" content="text/html;charset=UTF-8" />
 
-<title>游戏循环 &middot; 序列模式 &middot; Game Programming Patterns</title>
+<title>游戏循环 &middot; Sequencing Patterns &middot; Game Programming Patterns</title>
 
 <!-- Tell mobile browsers we're optimized for them and they don't need to crop
      the viewport. -->
@@ -26,27 +26,33 @@
 <div class="page sidebar">
 <div class="content">
 <nav class="top">
-  <span class="prev">&larr; <a href="双缓冲.html">Previous Chapter</a></span>
-  <span class="next"><a href="更新方法.html">Next Chapter</a> &rarr;</span>
+  <span class="prev">&larr; <a href="double-buffer.html">Previous Chapter</a></span>
+  <span class="next"><a href="update-method.html">Next Chapter</a> &rarr;</span>
   <span class="toc">&equiv; <a href="/">The Book</a></span>
 </nav>
 <h1>游戏循环</h1>
-<h1 class="book"><a href="/">Game Programming Patterns</a><span class="section"><a href="序列模式.html">序列模式</a></span></h1>
+<h1 class="book"><a href="/">Game Programming Patterns</a><span class="section"><a href="sequencing-patterns.html">Sequencing Patterns</a></span></h1>
 <h2><a href="#意图" name="意图">意图</a></h2>
 <p><em>将游戏的处理过程和玩家输入解耦，和处理器速度解耦。</em></p>
 <h2><a href="#动机" name="动机">动机</a></h2>
 <p>如果本书中有一个不可或缺模式，那就是这个了。
 游戏循环是“游戏设计模式”的精华例子。
 几乎每个游戏都有，两两不同，除游戏外几乎没有程序使用。</p>
-<p>为了看看它们多有用，让我们快速缅怀往事。计算机程序的早先日子，每个人都长着<span name="beard">胡子</span>，程序像你的洗碗机一样工作。你输入一堆代码，按个按钮，等待，然后获得结果，完成。这些都是<em>批处理</em>程序——一旦工作完成，程序就停止了。</p>
+<p>为了看看它多有用，让我们快速缅怀往事。
+计算机程序的早先日子，每个人都长着<span name="beard">胡子</span>，程序像洗碗机一样工作。
+你输入一堆代码，按个按钮，等待，然后获得结果，完成。
+这些都是<em>批处理</em>程序——一旦工作完成，程序就停止了。</p>
 <aside name="beard">
 <p>Ada Lovelace和Rear Admiral Grace Hopper都有名义上的胡须。</p>
 </aside>
-<p>你在今日仍然能看到这写，虽然感谢上天我们不必在打孔纸上面编写它们了。终端脚本，命令行程序，甚至将Markdown翻译成这本书的Python脚本都是批处理程序。</p>
+<p>你在今日仍然能看到这些，虽然感谢上天我们不必在打孔纸上面编写它们了。
+终端脚本，命令行程序，甚至将Markdown翻译成这本书的Python脚本都是批处理程序。</p>
 <h3><a href="#采访cpu" name="采访cpu">采访CPU</a></h3>
-<p>最终，程序员意识到将批处理代码留在计算办公室，然后几个小时后获得结果，这样找程序漏洞又慢有糟糕。他们想要立即的反馈。<em>交互式</em>程序诞生了。第一批交互式程序中的就有游戏：</p>
+<p>最终，程序员意识到将批处理代码留在计算办公室，几个小时后获得结果，这样找程序漏洞又慢有糟糕。
+他们想要立即的反馈。<em>交互式</em>程序诞生了。
+第一批交互式程序中的就有游戏：</p>
 <p><span name="cave"></span></p>
-<div class="codehilite"><pre>YOU ARE STANDING AT THE END OF A ROAD BEFORE A SMALL BRICK
+<div class="codehilite"><pre><span></span>YOU ARE STANDING AT THE END OF A ROAD BEFORE A SMALL BRICK
 BUILDING . AROUND YOU IS A FOREST. A SMALL
 STREAM FLOWS OUT OF THE BUILDING AND DOWN A GULLY.
 
@@ -58,9 +64,12 @@ YOU ARE INSIDE A BUILDING, A WELL HOUSE FOR A LARGE SPRING.
 <aside name="cave">
 <p>这是<a href="http://en.wikipedia.org/wiki/Colossal_Cave_Adventure">Colossal Cave Adventure</a>，史上首个冒险游戏。</p>
 </aside>
-<p>你可以和这个程序进行一些交流。它等待你的输入，然后回应你。你再回复，就像你在幼儿园中学到的那样轮流做事。在你的回合，他坐在那里啥也不做。像这样：</p>
+<p>你可以和这个程序进行一些交流。
+它等待你的输入，然后回应你。
+你再回复，就像你在幼儿园中学到的那样轮流做事。
+在你的回合，它坐在那里啥也不做。像这样：</p>
 <p><span name="exit"></span></p>
-<div class="codehilite"><pre><span class="k">while</span> <span class="p">(</span><span class="nb">true</span><span class="p">)</span>
+<div class="codehilite"><pre><span></span><span class="k">while</span> <span class="p">(</span><span class="nb">true</span><span class="p">)</span>
 <span class="p">{</span>
   <span class="kt">char</span><span class="o">*</span> <span class="n">command</span> <span class="o">=</span> <span class="n">readCommand</span><span class="p">();</span>
   <span class="n">handleCommand</span><span class="p">(</span><span class="n">command</span><span class="p">);</span>
@@ -69,11 +78,14 @@ YOU ARE INSIDE A BUILDING, A WELL HOUSE FOR A LARGE SPRING.
 
 
 <aside name="exit">
-<p>这会永久循环，所以没法退出游戏。真实的游戏会做些<code>while (!done)</code>，设置<code>done</code>为真来退出。我省略了那些来让事情保持简单。</p>
+<p>这会永久循环，所以没法退出游戏。
+真实的游戏会做些<code>while (!done)</code>，设置<code>done</code>为真来退出。
+我省略了那些来保持简单。</p>
 </aside>
 <h3><a href="#事件循环" name="事件循环">事件循环</a></h3>
-<p>如果你剥开现代的图形UI的外皮，会惊讶地发现它们与老旧的冒险游戏差不多。你的文本处理器通常呆在那里什么也不做，直到你按了个键或者点了什么东西：</p>
-<div class="codehilite"><pre><span class="k">while</span> <span class="p">(</span><span class="nb">true</span><span class="p">)</span>
+<p>如果你剥开现代的图形UI的外皮，会惊讶地发现它们与老旧的冒险游戏差不多。
+你的文本处理器通常呆在那里什么也不做，直到按了个键或者点了什么东西：</p>
+<div class="codehilite"><pre><span></span><span class="k">while</span> <span class="p">(</span><span class="nb">true</span><span class="p">)</span>
 <span class="p">{</span>
   <span class="n">Event</span><span class="o">*</span> <span class="n">event</span> <span class="o">=</span> <span class="n">waitForEvent</span><span class="p">();</span>
   <span class="n">dispatchEvent</span><span class="p">(</span><span class="n">event</span><span class="p">);</span>
@@ -81,16 +93,17 @@ YOU ARE INSIDE A BUILDING, A WELL HOUSE FOR A LARGE SPRING.
 </pre></div>
 
 
-<p>最大的不同是，不使用<em>文本命令</em>，程序等待<em>用户输入事件</em>——鼠标点击和按键按下。他还是和以前的老式文本冒险游戏一样，程序<span name="idle"><em>阻塞</em></span>等待用户输入，这是一个问题。</p>
+<p>最大的不同是，不使用<em>文本命令</em>，程序等待<em>用户输入事件</em>——鼠标点击和按键按下。
+还是和以前的老式文本冒险游戏一样，程序<span name="idle"><em>阻塞</em></span>等待用户输入，这是一个问题。</p>
 <p>不像大多数其他软件，游戏即使没有玩家输入时也继续运行。
 如果你站在那里看着屏幕，游戏不会冻结。动画继续动着。视觉效果继续闪烁。
-如果你不幸的话，怪物继续吞噬你的英雄。</p>
+如果不幸的话，怪物继续吞噬你的英雄。</p>
 <aside name="idle">
 <p>大多数事件循环有“空转”事件，这样你可以无需用户输入间歇地做事。
 对于闪烁的光标或者进度条已经足够了，但对于游戏就太原始了。</p>
 </aside>
 <p>这是游戏循环的第一个关键部分：<em>它处理用户输入，但是不等待它</em>。循环总是继续旋转：</p>
-<div class="codehilite"><pre><span class="k">while</span> <span class="p">(</span><span class="nb">true</span><span class="p">)</span>
+<div class="codehilite"><pre><span></span><span class="k">while</span> <span class="p">(</span><span class="nb">true</span><span class="p">)</span>
 <span class="p">{</span>
   <span class="n">processInput</span><span class="p">();</span>
   <span class="n">update</span><span class="p">();</span>
@@ -108,7 +121,7 @@ YOU ARE INSIDE A BUILDING, A WELL HOUSE FOR A LARGE SPRING.
 <p>就像你可以从名字中猜到的，<code>update()</code>是使用<a href="update-method.html" class="pattern">更新方法</a>模式的好地方。</p>
 </aside>
 <h3><a href="#时间之外的世界" name="时间之外的世界">时间之外的世界</a></h3>
-<p>如果这个循环不是在输入阻塞，这就带来了一个明显的问题，要转<em>多快</em>？
+<p>如果这个循环不在输入阻塞，这就带来了明显的问题，要转<em>多快</em>？
 每次进行游戏循环都会发展一定的游戏状态。
 从游戏世界的居民看来，他们手上的表就会<span name="tick">滴答</span>一下。</p>
 <aside name="tick">
@@ -117,14 +130,14 @@ YOU ARE INSIDE A BUILDING, A WELL HOUSE FOR A LARGE SPRING.
 <p>同时，<em>玩家的</em>真实手表也在滴答着。
 如果我们用实际时间来测算游戏循环运行的速度，就得到了游戏的“帧每秒”。
 如果游戏循环的更快，FPS就更高，游戏运行的更流畅更快。
-如果他很慢，游戏看上去就像是慢动作电影。</p>
+如果很慢，游戏看上去就像是慢动作电影。</p>
 <p>我们现在写的这个循环是能转多快转多快，两个因素决定了帧率。
-第一个是<em>每帧要做多少工作</em>。复杂的物理，众多游戏对象，图形细节都让你的CPU和GPU繁忙，这决定了需要多久能完成一帧。</p>
+第一个是<em>每帧要做多少工作</em>。复杂的物理，众多游戏对象，图形细节都让CPU和GPU繁忙，这决定了需要多久能完成一帧。</p>
 <p>第二个是<em>潜在平台的速度。</em>更快的芯片可以在同样的时间执行更多的代码。
 多核，GPU组，独立声卡，以及系统的调度都影响了在一次滴答中能够做多少东西。</p>
 <h3><a href="#每秒的秒数" name="每秒的秒数">每秒的秒数</a></h3>
 <p>在早期的视频游戏中，第二个参数是固定的。
-如果你为NES或者Apple IIe写游戏，你<em>明确</em>知道你的游戏运行在什么CPU上。
+如果你为NES或者Apple IIe写游戏，你<em>明确</em>知道游戏运行在什么CPU上。
 你可以（而且事实也如此）为它特制代码。
 你需要担忧的是每次滴答要做多少工作。</p>
 <p>老些的游戏被仔细地编码，一帧只做足够的工作，这样游戏可以开发者想要的速率运行。
@@ -133,27 +146,29 @@ YOU ARE INSIDE A BUILDING, A WELL HOUSE FOR A LARGE SPRING.
 <p>这就是为什么老式计算机通常有“<a href="http://en.wikipedia.org/wiki/Turbo_button">turbo</a>”按钮。
 新的计算机更快而无法玩老游戏，因为游戏会运行的过快。<em>关闭</em>turbo按钮，会减慢计算机的运行速度，就可以运行老游戏了。</p>
 </aside>
-<p>现在，很少有开发者可以奢侈地知道游戏运行的硬件条件。我们的游戏必须自动适应多种设备。</p>
-<p>这就是游戏循环的另一个关键任务：<em>不管潜在的硬件条件，它以固定速度运行。</em></p>
+<p>现在，很少有开发者可以奢侈地知道游戏运行的硬件条件。游戏必须自动适应多种设备。</p>
+<p>这就是游戏循环的另一个关键任务：<em>不管潜在的硬件条件，以固定速度运行。</em></p>
 <h2><a href="#模式" name="模式">模式</a></h2>
 <p>一个<strong>游戏循环</strong>在游玩中不断运行。
 每一循环回合，它无阻塞地<strong>处理玩家输入</strong>，<strong>更新游戏状态</strong>，<strong>渲染游戏</strong>。
-他追踪时间的消耗来<strong>控制游戏的速度。</strong></p>
+它追踪时间的消耗来<strong>控制游戏的速度。</strong></p>
 <h2><a href="#何时使用" name="何时使用">何时使用</a></h2>
 <p>使用错误的模式比不使用模式更糟，所以这节通常是要小心过于热衷。
 设计模式的目标不是往代码库里尽可能的塞东西。</p>
 <p>但是这个模式有所不同。我可以很自信的说你<em>会</em>使用这个模式。
 如果你使用一个游戏<span name="engine">引擎</span>，你不需要自己写，但是它还在那里。</p>
 <aside name="engine">
-<p>对于我，这是“引擎”与“库”的不同之处。通过库，你拥有的游戏循环调用库。引擎拥有循环调用<em>你的</em>代码。</p>
+<p>对于我，这是“引擎”与“库”的不同之处。
+通过库，你拥有游戏循环，调用库。
+引擎拥有游戏循环，调用<em>你的</em>代码。</p>
 </aside>
-<p>你可能认为在做回合制游戏的时候不需要它。
+<p>你可能认为在做回合制游戏时不需要它。
 但是哪怕是那里，就算<em>游戏状态</em>到玩家回合才改变，<em>视觉</em>和<em>听觉</em>状态仍会改变。
 动画和音乐会继续运行，哪怕游戏在“等待”你进行你的回合。</p>
 <h2><a href="#记住" name="记住">记住</a></h2>
-<p>我们这里谈到的循环是你游戏代码中最重要的部分。
-有人说一个程序会花费<span name="percent">90%</span>的事件在10%的代码上。
-你的游戏循环代码肯定在这10%中。
+<p>我们这里谈到的循环是游戏代码中最重要的部分。
+有人说程序会花费<span name="percent">90%</span>的事件在10%的代码上。
+游戏循环代码肯定在这10%中。
 好好对待代码，注意它的效率。</p>
 <aside name="percent">
 <p>像这样使用统计学是“真正的”工程师，比如机械或电子工程师，不认真对待我们的原因。</p>
@@ -162,24 +177,24 @@ YOU ARE INSIDE A BUILDING, A WELL HOUSE FOR A LARGE SPRING.
 <p>如果你将游戏构建在操作系统的顶层或者有图形UI和内建事件循环的平台上，
 那你就有了两个应用循环在运作。
 它们需要很好的配合。</p>
-<p>有时候，你可以控制只循环其中一个。
-举个例子，如果舍弃了Windows的珍贵API，你的<code>main()</code>可以只有一个游戏循环。
+<p>有时候，你可以控制只运行其中一个。
+举个例子，如果舍弃了Windows的珍贵API，<code>main()</code>可以只有一个游戏循环。
 在里面，你可以调用<code>PeekMessage()</code>来处理和分发系统的事件。
 不像<code>GetMessage()</code>，<code>PeekMessage()</code>没有阻塞等待用户输入，
 因此你的游戏循环会保持运作。</p>
 <p>其他的平台不会让你这么轻松的选择事件循环。
-如果你基于一个网页浏览器，事件循环被内建在浏览器的执行模型深处。
+如果你基于网页浏览器，事件循环被内建在浏览器的执行模型深处。
 这样，你会用事件循环作为游戏循环。
-你会调用<code>requestAnimationFrame()</code>之类的，它会返回你的代码让游戏继续运行。</p>
+你会调用<code>requestAnimationFrame()</code>之类的，它会返回代码让游戏继续运行。</p>
 <h2><a href="#示例代码" name="示例代码">示例代码</a></h2>
 <p>如此长的介绍，而游戏循环的代码实际上很直观。
-我们会浏览一堆变种并比较他们的好处和坏处。</p>
+我们会浏览一堆变种并比较它们的好处和坏处。</p>
 <p>游戏循环驱动了AI，渲染和其他游戏系统，但这些不是模式的要点，
 所以我们会调用虚拟的方法。在实现了<code>render()</code>，<code>update()</code>之后，
-剩下的作为一个（挑战！）练习给读者。</p>
+剩下的作为（挑战！）练习给读者。</p>
 <h3><a href="#跑，能跑多快跑多快" name="跑，能跑多快跑多快">跑，能跑多快跑多快</a></h3>
 <p>我们已经看到了可能是最简单的游戏循环：</p>
-<div class="codehilite"><pre><span class="k">while</span> <span class="p">(</span><span class="nb">true</span><span class="p">)</span>
+<div class="codehilite"><pre><span></span><span class="k">while</span> <span class="p">(</span><span class="nb">true</span><span class="p">)</span>
 <span class="p">{</span>
   <span class="n">processInput</span><span class="p">();</span>
   <span class="n">update</span><span class="p">();</span>
@@ -191,7 +206,7 @@ YOU ARE INSIDE A BUILDING, A WELL HOUSE FOR A LARGE SPRING.
 <p>它的问题是你不能控制游戏运行的有多快。
 在快速机器上，循环会运行的太快，玩家看不清发生了什么。
 在慢速机器上，游戏在爬行。
-如果游戏的一部分时有大量内容或者做了很多AI或物理，游戏就会慢一些。</p>
+如果游戏的一部分有大量内容或者做了很多AI或物理，游戏就会慢一些。</p>
 <h3><a href="#休息一下" name="休息一下">休息一下</a></h3>
 <p>我们看到的第一个变化是增加一个简单的修复。
 假设你想要你的游戏以60FPS运行。这样每帧大约16毫秒。
@@ -202,7 +217,7 @@ YOU ARE INSIDE A BUILDING, A WELL HOUSE FOR A LARGE SPRING.
 <aside name="16">
 <p><em>1000 ms / FPS = ms per frame</em>.</p>
 </aside>
-<div class="codehilite"><pre><span class="k">while</span> <span class="p">(</span><span class="nb">true</span><span class="p">)</span>
+<div class="codehilite"><pre><span></span><span class="k">while</span> <span class="p">(</span><span class="nb">true</span><span class="p">)</span>
 <span class="p">{</span>
   <span class="kt">double</span> <span class="n">start</span> <span class="o">=</span> <span class="n">getCurrentTime</span><span class="p">();</span>
   <span class="n">processInput</span><span class="p">();</span>
@@ -216,16 +231,16 @@ YOU ARE INSIDE A BUILDING, A WELL HOUSE FOR A LARGE SPRING.
 
 <p>如果它很快的处理完一帧，这里的<code>sleep()</code>保证了游戏不会运行太<em>快</em>。
 如果你的游戏运行太<em>慢</em>这无法帮忙。
-如果需要超过16ms来更新并渲染一帧，你休眠的时间就变成了<em>负的</em>。
-如果我们的计算机能回退时间，很多事情就很容易了，但是我们不能。</p>
+如果需要超过16ms来更新并渲染一帧，休眠的时间就变成了<em>负的</em>。
+如果计算机能回退时间，很多事情就很容易了，但是它不能。</p>
 <p>相反，游戏变慢了。
-你可以通过每帧少做些工作来解决这个问题——减少物理效果和绚丽光影，或者把AI变笨。
-但是这影响了玩家的游戏体验，甚至是那些有快速机器的。</p>
+可以通过每帧少做些工作来解决这个问题——减少物理效果和绚丽光影，或者把AI变笨。
+但是这影响了玩家的游戏体验，哪怕是那些有快速机器的。</p>
 <h3><a href="#一小步，一大步" name="一小步，一大步">一小步，一大步</a></h3>
 <p>让我们尝试一些更加复杂的东西。我们拥有的问题基本上是：</p>
 <ol>
 <li>
-<p>每一次更新将游戏时间推动一个固定量。</p>
+<p>每次更新将游戏时间推动一个固定量。</p>
 </li>
 <li>
 <p>这消耗一定量的<em>真实</em>时间来处理它。</p>
@@ -238,7 +253,7 @@ YOU ARE INSIDE A BUILDING, A WELL HOUSE FOR A LARGE SPRING.
 这一帧花费的时间越长，游戏的间隔越大。
 它总能跟上真实时间，因为它走的步子越来越大。
 有人称之为<em>变化的</em>或者<em>流动的</em>时间间隔。它看上去像是：</p>
-<div class="codehilite"><pre><span class="kt">double</span> <span class="n">lastTime</span> <span class="o">=</span> <span class="n">getCurrentTime</span><span class="p">();</span>
+<div class="codehilite"><pre><span></span><span class="kt">double</span> <span class="n">lastTime</span> <span class="o">=</span> <span class="n">getCurrentTime</span><span class="p">();</span>
 <span class="k">while</span> <span class="p">(</span><span class="nb">true</span><span class="p">)</span>
 <span class="p">{</span>
   <span class="kt">double</span> <span class="n">current</span> <span class="o">=</span> <span class="n">getCurrentTime</span><span class="p">();</span>
@@ -269,15 +284,15 @@ YOU ARE INSIDE A BUILDING, A WELL HOUSE FOR A LARGE SPRING.
 </li>
 </ul>
 <p>但是，悲哀，这里有一个严重的问题：
-游戏不再是<span name="deterministic">确定的</span>了也不再稳定。
+游戏不再是<span name="deterministic">确定的</span>了，也不再稳定。
 这是我们给自己挖的一个坑：</p>
 <aside name="deterministic">
 <p>“确定的”代表每次你运行程序，如果你给了它同样的输入，你就获得同样的输出。你可以想得到，在确定的程序中追踪漏洞更容易——一次找到造成漏洞的输入，每次你都能重现之。</p>
 <p>计算机本身是确定的；它们机械地遵循程序。非确定性出现在在纷乱的真实世界加入时。举个例子，网络，系统时钟，和线程调度都依赖于超出程序控制的外部世界。</p>
 </aside>
-<p>假设我们有个双人联网游戏，Fred有一台性能猛兽游戏机，而George正在使用他祖母的老爷机。
+<p>假设我们有个双人联网游戏，Fred的游戏机是性能猛兽，而George正在使用他祖母的老爷机。
 前面提到的子弹在他们的屏幕上飞行。
-在Fred的机器上，游戏跑的超级快，每一个时间间隔都很小。
+在Fred的机器上，游戏跑的超级快，每个时间间隔都很小。
 比如，我们塞了50帧在子弹穿过屏幕的那一秒。
 可怜的George的机器只能跑到大约5帧。</p>
 <p>这就意味着在Fred的机器上，物理引擎每秒更新50次位置，但是George的只能做5次。
@@ -295,20 +310,20 @@ Fred的机器做了10倍多的操作，所以它的误差要比George的更大�
 </aside>
 <p>这种不稳定性太糟了，这个例子在这里的唯一原因是作为警示寓言，引领我们到更好的东西……</p>
 <h3><a href="#追逐游戏" name="追逐游戏">追逐游戏</a></h3>
-<p>我们游戏中<span name="render">渲染</span>通常<em>不会</em>被动态时间间隔影响到。
-由于渲染引擎使用时间上的瞬间，它不会计算上次到现在过了多久。
+<p>游戏中<span name="render">渲染</span>通常<em>不会</em>被动态时间间隔影响到。
+由于渲染引擎使用时间上的一瞬，它不会计算上次到现在过了多久。
 它在事物该在的地方渲染。</p>
 <aside name="render">
 <p>这或多或少是真的。像动态模糊的东西会被时间间隔影响，但如果它们有一点延迟，玩家通常不会注意到。</p>
 </aside>
 <p>我们可以利用这点作为优势。
-我们用固定的时间间隔<em>更新</em>游戏，因为这让所有事情变得简单，物理和AI也更加稳定。
+用固定的时间间隔<em>更新</em>游戏，因为这让所有事情变得简单，物理和AI也更加稳定。
 但是我们允许灵活<em>渲染</em>来释放一些处理器时间。</p>
 <p>它像这样运作：自上一次游戏循环前进定量的时间。
 这就是需要为游戏的“现在”模拟前进，追上玩家的时间。
 我们使用一<em>系列</em>的<em>固定</em>时间间隔。
 代码看上去像是这样的：</p>
-<div class="codehilite"><pre><span class="kt">double</span> <span class="n">previous</span> <span class="o">=</span> <span class="n">getCurrentTime</span><span class="p">();</span>
+<div class="codehilite"><pre><span></span><span class="kt">double</span> <span class="n">previous</span> <span class="o">=</span> <span class="n">getCurrentTime</span><span class="p">();</span>
 <span class="kt">double</span> <span class="n">lag</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">;</span>
 <span class="k">while</span> <span class="p">(</span><span class="nb">true</span><span class="p">)</span>
 <span class="p">{</span>
@@ -331,8 +346,8 @@ Fred的机器做了10倍多的操作，所以它的误差要比George的更大�
 
 
 <p>这里还有几个小块。
-在每一帧的开头，我们基于有多少真实时间过去更新<code>lag</code>。
-这测量了游戏世界是时钟比真实世界落后了多少，直到追上。
+在每一帧的开头，基于有多少真实时间过去更新<code>lag</code>。
+这测量了游戏世界时钟比真实世界落后了多少，直到追上。
 一旦我们追上，我们就渲染然后重新开始。
 你可以将其视觉化如下：</p>
 <p><img src="images/game-loop-fixed.png" alt="A modified flowchart. Process Input &rarr; Update Game &rarr; Wait, then loop back to this step then &rarr; Render &rarr; Loop back to the beginning." /></p>
@@ -355,7 +370,7 @@ Fred的机器做了10倍多的操作，所以它的误差要比George的更大�
 只是玩家的<em>视觉窗口</em>在慢速机器上会有抖动。</p>
 <h3><a href="#卡在中间" name="卡在中间">卡在中间</a></h3>
 <p>我们还剩一个问题，就是剩下的延迟。
-我们以固定的时间间隔更新游戏，但是在任意时间渲染。
+以固定的时间间隔更新游戏，但是在任意时间渲染。
 这就意味着从玩家的角度看，游戏经常在两次更新之间的时候显示。</p>
 <p>这是时间线：</p>
 <p><img src="images/game-loop-timeline.png" alt="A timeline containing evenly spaced Updates and intermittent Renders." /></p>
@@ -374,7 +389,7 @@ Fred的机器做了10倍多的操作，所以它的误差要比George的更大�
 剩余量？那就是到下一帧的时间。</p>
 <p>当我们要渲染时，我们会将其传入：</p>
 <p><span name="normal"></span></p>
-<div class="codehilite"><pre><span class="n">render</span><span class="p">(</span><span class="n">lag</span> <span class="o">/</span> <span class="n">MS_PER_UPDATE</span><span class="p">);</span>
+<div class="codehilite"><pre><span></span><span class="n">render</span><span class="p">(</span><span class="n">lag</span> <span class="o">/</span> <span class="n">MS_PER_UPDATE</span><span class="p">);</span>
 </pre></div>
 
 
@@ -383,7 +398,7 @@ Fred的机器做了10倍多的操作，所以它的误差要比George的更大�
 传给<code>render()</code>在0（恰巧在前一帧）到1.0（恰巧在下一帧），不管时间更新间隔是多大。
 这样，渲染引擎不必担心帧率。它只需处理0到1的值。</p>
 </aside>
-<p>渲染器知道每个游戏对象<em>以及他当前的速度</em>。
+<p>渲染器知道每个游戏对象<em>以及它当前的速度</em>。
 假设子弹在屏幕左边20像素的地方，正在以400像素每帧的速度向右移动。
 如果在两帧中间，我们会传0.5给<code>render()</code>。
 它绘制了半帧之前的图形，在220像素，好啦，平滑移动。</p>
@@ -395,14 +410,14 @@ Fred的机器做了10倍多的操作，所以它的误差要比George的更大�
 但是，幸运的，这种修正通常不可感知。
 最起码，它们比你不使用推断导致的结巴更不明显。</p>
 <h2><a href="#设计决策" name="设计决策">设计决策</a></h2>
-<p>不管这一章的长度，我剩下的超过我包含的。
+<p>不管这一章的长度，我没提的超过我包含的。
 一旦你将显示的刷新频率，多线程，多GPU，加到里面，真正的游戏循环就会变得毛绒绒。
 在高层中，这里还有一些问题你需要回答：</p>
 <h3><a href="#你拥有游戏循环，还是平台？" name="你拥有游戏循环，还是平台？">你拥有游戏循环，还是平台？</a></h3>
 <p>与其说这是你的选择，不如说有人为你选了。
 如果你在做浏览器中的游戏，你很可能<em>不能</em>写自己的经典游戏循环。
 浏览器本身的事件驱动阻碍了这一点。
-同样，如果你是用来现存的游戏引擎，你很可能依赖于它的游戏循环而不是自己写一个。</p>
+同样，如果你使用现存的游戏引擎，你很可能依赖于它的游戏循环而不是自己写一个。</p>
 <ul>
 <li>
 <p><strong>使用平台的事件循环：</strong></p>
@@ -433,7 +448,7 @@ Fred的机器做了10倍多的操作，所以它的误差要比George的更大�
 <p><strong>自己写：</strong></p>
 <ul>
 <li>
-<p><em>完全的控制。</em>你可以做任何你想做的事情。你可以为你游戏的需求订制。</p>
+<p><em>完全的控制。</em>你可以做任何想做的事情。你可以为游戏的需求订制。</p>
 </li>
 <li>
 <p><em>你需要与平台交互。</em>应用框架和操作系统通常有时间片去处理事件和做其他工作。如果你拥有应用的核心循环，它就没有。你得显式定期检查，保证框架没有挂起或者糊涂。</p>
@@ -441,27 +456,27 @@ Fred的机器做了10倍多的操作，所以它的误差要比George的更大�
 </ul>
 </li>
 </ul>
-<h3><a href="#你如何管理性能消耗？" name="你如何管理性能消耗？">你如何管理性能消耗？</a></h3>
+<h3><a href="#如何管理能量消耗？" name="如何管理能量消耗？">如何管理能量消耗？</a></h3>
 <p>这在五年前还不是问题。
 游戏运行在插到插座上的或者专用的设备上。
 但是随着智能手机，笔记本以及移动游戏的发展，这些东西现在需要关注了。
-完美运行但会耗干手机三十分钟前充的电，并将其变成空间加热器，可不是一个能让人开心的游戏。</p>
-<p>现在，你需要考虑的不仅仅是让你的游戏看上去很好，同时也要尽可能少的使用CPU。
-如果让需要的工作在一帧之内完成后，让CPU睡眠，那UI对性能造成<em>上限</em>。</p>
+能完美运行但会耗干三十分钟前充的电，并将手机变成空间加热器，可不是一个能让人开心的游戏。</p>
+<p>现在，你需要考虑的不仅仅是让游戏看上去很好，同时也要尽可能少的使用CPU。
+如果让需要的工作在一帧之内完成后，让CPU睡眠，那会对性能造成<em>上限</em>。</p>
 <ul>
 <li>
 <p><strong>尽可能快的运行：</strong></p>
 <p>这就是你通常想让PC游戏做的事情（即使在笔记本上运行的数目不断增加）。游戏循环永远不会显式告诉系统休眠。相反，空闲的循环被划在提升FPS或者图像显示上了。</p>
-<p>这会给你最好的游戏体验。但是，也会尽可能多的使用电量。如果玩家在笔记本上玩，他们会得到了一个很好的笔记本加热器。</p>
+<p>这会给你最好的游戏体验。但是，也会尽可能多的使用电量。如果玩家在笔记本上玩，他们得到了一个很好的笔记本加热器。</p>
 </li>
 <li>
 <p><strong>固定帧率</strong></p>
-<p>移动游戏更加注意游戏体验质量，而不是图形细节的最大化。很多这种游戏都会设置一个最大帧率（通常是30或60FPS）。如果游戏循环在分配的时间片消耗完之前完成，在剩余的时间它会休眠。</p>
+<p>移动游戏更加注意游戏体验质量，而不是图形细节的最大化。很多这种游戏都会设置最大帧率（通常是30或60FPS）。如果游戏循环在分配的时间片消耗完之前完成，在剩余的时间它会休眠。</p>
 <p>这给了玩家“足够好的”游戏体验，也让背后的电池轻松了一点。</p>
 </li>
 </ul>
 <h3><a href="#你如何控制游戏速度？" name="你如何控制游戏速度？">你如何控制游戏速度？</a></h3>
-<p>游戏循环有两个关键部分：不阻塞用户输入和对通过时间的适应。
+<p>游戏循环有两个关键部分：不阻塞用户输入和对通过事件的适应。
 输入很直观。魔力之处在于你如何处理事件。
 这里有<span name="platform">数不尽的</span>游戏可运行的平台，
 每个游戏都能在其中一些上运行。
@@ -518,7 +533,7 @@ PDP-1是一个仅有4096字内存的2kHz机器，但是Steve Russell和他的朋
 </li>
 <li>
 <p><strong>固定更新间隔，动态渲染：</strong></p>
-<p>我们在示例代码中覆盖的最后一个选项是最复杂的，但是也是最有适应性的。它以固定时间间隔更新，但是如果它需要赶上玩家的时钟，可以扔掉一些<em>渲染</em>帧。</p>
+<p>在示例代码中覆盖的最后一个选项是最复杂的，但是也是最有适应性的。它以固定时间间隔更新，但是如果需要赶上玩家的时钟，可以扔掉一些<em>渲染</em>帧。</p>
 <ul>
 <li>
 <p><em>适应运行太快或者太慢。</em>只要可以在真实时间上<em>更新</em>，游戏就不会落后。如果玩家的机器是顶配，它会回以更平滑的游戏体验。</p>
@@ -542,8 +557,8 @@ PDP-1是一个仅有4096字内存的2kHz机器，但是Steve Russell和他的朋
 </li>
 </ul>
 <nav>
-  <span class="prev">&larr; <a href="双缓冲.html">Previous Chapter</a></span>
-  <span class="next"><a href="更新方法.html">Next Chapter</a> &rarr;</span>
+  <span class="prev">&larr; <a href="double-buffer.html">Previous Chapter</a></span>
+  <span class="next"><a href="update-method.html">Next Chapter</a> &rarr;</span>
   <span class="toc">&equiv; <a href="/">The Book</a></span>
 </nav>
 </div>

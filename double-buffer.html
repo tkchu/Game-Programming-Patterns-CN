@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="Content-type" content="text/html;charset=UTF-8" />
 
-<title>双缓冲 &middot; 序列模式 &middot; Game Programming Patterns</title>
+<title>双缓冲 &middot; Sequencing Patterns &middot; Game Programming Patterns</title>
 
 <!-- Tell mobile browsers we're optimized for them and they don't need to crop
      the viewport. -->
@@ -26,27 +26,27 @@
 <div class="page sidebar">
 <div class="content">
 <nav class="top">
-  <span class="prev">&larr; <a href="序列模式.html">Previous Chapter</a></span>
-  <span class="next"><a href="游戏循环.html">Next Chapter</a> &rarr;</span>
+  <span class="prev">&larr; <a href="sequencing-patterns.html">Previous Chapter</a></span>
+  <span class="next"><a href="game-loop.html">Next Chapter</a> &rarr;</span>
   <span class="toc">&equiv; <a href="/">The Book</a></span>
 </nav>
 <h1>双缓冲</h1>
-<h1 class="book"><a href="/">Game Programming Patterns</a><span class="section"><a href="序列模式.html">序列模式</a></span></h1>
+<h1 class="book"><a href="/">Game Programming Patterns</a><span class="section"><a href="sequencing-patterns.html">Sequencing Patterns</a></span></h1>
 <h2><a href="#意图" name="意图">意图</a></h2>
-<p><em>用序列的操作表示瞬间或者同时。</em></p>
+<p><em>用序列的操作展示瞬间或者同时。</em></p>
 <h2><a href="#动机" name="动机">动机</a></h2>
-<p>在他们心中，电脑是<span name="sequential">连续</span>运行的野兽。
-它们的力量来自于将大的任务分解为小的步骤，这样可以一个接一个完成。
-但是，通常用户需要看到事情在瞬间发生的事情或者让多个任务同时进行。</p>
+<p>在我们心中，电脑是<span name="sequential">连续</span>运行的野兽。
+它的力量来自于将大的任务分解为小的步骤，这样可以一个接一个完成。
+但是，通常用户需要看到事情在瞬间发生或者让多个任务同时进行。</p>
 <aside name="sequential">
 <p>使用线程和多核结构让这点不那么正确了，但哪怕有多核，只有一些操作可以同步运行。</p>
 </aside>
 <p>一个典型的例子，也是每个游戏引擎都得掌控的问题，渲染。
-当游戏渲染玩家见到的世界时，它同时处理了一大块——远处的山，起伏的丘陵，树木，每一种都在各自的循环中。
-如果在用户的<em>观察</em>时增量做这些，连续世界的幻觉就会被打破。
-场景必须快速流畅的更新，显示一系列完整的帧，每一个都是立即出现。</p>
+当游戏渲染玩家见到的世界时，它同时处理了一大块——远处的山，起伏的丘陵，树木，每种都在各自的循环中。
+如果在用户<em>观察</em>时增量做这些，连续世界的幻觉就会被打破。
+场景必须快速流畅地更新，显示一系列完整的帧，每个都是立即出现。</p>
 <p>双缓冲解决了这个问题，但是为了理解怎么去做，我们首先的复习计算机是如何显示图形的。</p>
-<h3><a href="#电脑图形是如何工作的（简短介绍）" name="电脑图形是如何工作的（简短介绍）">电脑图形是如何工作的（简短介绍）</a></h3>
+<h3><a href="#计算机图形是如何工作的（简短介绍）" name="计算机图形是如何工作的（简短介绍）">计算机图形是如何工作的（简短介绍）</a></h3>
 <p>在电脑屏幕上显示<span name="scan">视频</span>是一次绘制一个像素点。
 它从左到右扫描每行像素点，然后移动至下一行。
 当抵达了右下角，它退回左上角重新开始。
@@ -56,11 +56,11 @@
 <p>这个解释是，额，“简化过的”。
 如果你是底层软件开发人员，跳过下一节吧。
 你对这章的其余部分已经了解的够多了。
-如果你不是，我这里的目标是给你足够的背景知识理解我们等会讨论的模式。</p>
+如果你不是，这里的目标是给你足够的背景知识理解等会讨论的模式。</p>
 </aside>
 <p>你可以将整个过程想象为软管向屏幕喷洒像素。
 独特的像素从软管的后面流入，然后在屏幕上喷洒，每次对一个像素涂一位的颜色。
-所以软管怎么知道那种颜色要喷到哪里去？</p>
+所以软管怎么知道哪种颜色要喷到哪里去？</p>
 <p>在大多数电脑上，答案是从<em>帧缓冲</em>中取出它们。
 帧缓冲是内存中的色素数组，RAM中有块<span name="color">字节</span>表示像素的颜色。
 当软管喷洒屏幕时，它从这个数组中读取颜色值，一次一个字节。</p>
@@ -68,51 +68,51 @@
 <p>在字节值和颜色之间的映射通常由系统的<em>像素格式</em>和<em>色深</em>来指定。
 在今日多数游戏主机上，每个像素都有32位，红绿蓝三个频道各八位，剩下的八位有不同的用途。</p>
 </aside>
-<p>最终，为了让我们的游戏显示在屏幕中，我们需要做的就是写入这个数组。
+<p>最终，为了让游戏显示在屏幕中，我们需要做的就是写入这个数组。
 我们使用的疯狂图形算法最终都到了这里：设置帧缓冲中的字节值。但这里有个小问题。</p>
 <p>早先，我说过计算机是顺序的。
-如果机器在运行一块渲染代码，我们不期望它同时还能做些别的什么事情。
-这通常是准确的，但是有些事情<em>确实</em>在我们程序运行中发生。
+如果机器在运行一块渲染代码，我们不期望它同时还能做些别的什么事。
+这通常是准确的，但是有些事<em>确实</em>在程序运行中发生。
 其中一件事是，当游戏运行时，视频输出正在<em>不断</em>从帧缓冲中读取数据。
 这可能会对我们造成问题。</p>
 <p>假设我们要在屏幕上显示一张笑脸。
 程序在帧缓冲上开始循环为像素点涂色。
-我们没有意识到的是视频驱动在我们写入的同时正在读取它。
-当他扫描过整个我们写的像素时，我们的笑脸正在开始出现，但是之后他进入了我们没有写的部分，将没有写的像素绘制到了屏幕上。结果就是<em>哭泣</em>，让你在屏幕上看到绘制了一半的图像，这是一个可见的可怕漏洞。</p>
+我们没有意识到的是视频驱动在写入的同时正在读取它。
+当它扫描过整个我们已写的像素时，笑脸正在开始出现，但是之后它进入了我们没有写的部分，将没有写的像素绘制到了屏幕上。结果就是<em>哭脸</em>，让你在屏幕上看到绘制了一半的图像，这是可见的可怕漏洞。</p>
 <p><span name="tearing"></span></p>
 <p><img src="images/double-buffer-tearing.png" alt="A series of images of an in-progress frame being rendered. A pointer writes pixels while another reads them. The reader outpaces the writer until it starts reading pixels that haven't been rendered yet." /></p>
 <aside name="tearing">
-<p>我们在视频驱动从缓冲帧上读取的时候开始绘制像素(Fig. 1)。
-视频驱动最终追上了渲染器，然后超过它读取了我们还没有写入的像素(Fig. 2)。
+<p>我们在视频驱动从缓冲帧上读取时开始绘制像素(Fig. 1)。
+视频驱动最终追上了渲染器，然后超过它，读取了还没有写入的像素(Fig. 2)。
 我们完成了绘制，但驱动没有收到那些新像素。</p>
 <p>结果(Fig. 4)是用户只看到了一半的绘制结果。
-“哭泣”名字来自看上去下半部是撕裂的。</p>
+“哭脸”这个名字来自看上去下半部是撕裂的。</p>
 </aside>
 <p>这就是为什么我们需要这个模式。
-程序一次渲染一个像素，但是我们需要显示驱动一次全部看到——在一帧中没有出现脸，下一帧全部出现。
+程序一次渲染一个像素，但是显示驱动需要一次全部看到——在一帧中没有出现脸，下一帧全部出现。
 双缓冲解决了这个。我会用类比来解释。</p>
 <h3><a href="#表演1，场景1" name="表演1，场景1">表演1，场景1</a></h3>
-<p>想象我的玩家正在看我们直接演出的表演。
+<p>想象玩家正在看直接演出的表演。
 在场景一结束而场景二开始时，我们需要改变舞台设置。
-如果我们让场务在场景结束后进去拖动东西，在连贯地点演出的幻觉就被打破了。
+如果让场务在场景结束后进去拖动东西，在连贯地点演出的幻觉就被打破了。
 我们可以减弱灯光（这当然是剧院真正做的），但是观众还是知道<em>有什么</em>在进行，我们想在场景间毫无跳跃的转换。</p>
-<p>消耗一些地皮，我们想到了一个聪明的解决方案：我们建<span name="stage"><em>两个</em></span>舞台，观众两个都能看到。
+<p>消耗一些地皮，我们想到了一个聪明的解决方案：建<span name="stage"><em>两个</em></span>舞台，观众两个都能看到。
 每个有它自己的一组灯光。我们称这些舞台为舞台A和舞台B。
-场景一在舞台A上。同时在场务设置场景二的时候，舞台B是黑的。
-当场景一完成后，切断场景A的灯光，将灯光带到场景B。观众看向新舞台，场景二立即开始。</p>
-<p>同时，我们的场务到了黑咕隆咚的舞台<em>A</em>，收拾了场景一然后设置场景<em>三</em>。
-一旦场景二结束，我们将灯光转回舞台A。
+场景一在舞台A上。同时在场务设置场景二时，舞台B是黑的。
+当场景一完成后，切断场景A的灯光，将灯光指向场景B。观众看向新舞台，场景二立即开始。</p>
+<p>同时，场务到了黑咕隆咚的舞台<em>A</em>，收拾了场景一然后设置场景<em>三</em>。
+一旦场景二结束，将灯光转回舞台A。
 我们在整场表演中进行这样的活动，使用黑暗的舞台作为设置下一场景的工作区域。
 每一次场景转换，只是在两个舞台间切换灯光。
-我们的观众获得了连续的体验，没有在场景转换间感到延迟。他们从来没有见到场务。</p>
+观众获得了连续的体验，没有在场景转换间感到延迟。他们从来没有见到场务。</p>
 <aside name="stage">
 <p>使用半边镀银镜还有其他的巧妙布置，你可以真正的在同一<em>位置</em>布置两个舞台。
-随着等过转换，他们会看到了不同的舞台，但他们不会看向不同的地方。
+随着灯光转换，观众看到了不同的舞台，但他们不会看向不同的地方。
 这样布置舞台是一个给读者的练习。</p>
 </aside>
 <h3><a href="#重新回到图形" name="重新回到图形">重新回到图形</a></h3>
 <p>这<span name="sync">就是双缓冲</span>是如何工作的，
-这就是你看到的几乎每个游戏背后的渲染系统。
+这就是几乎每个你看到的游戏背后的渲染系统。
 不是使用一个帧缓冲，我们使用<em>两个</em>。其中一个代表现在的帧，我们类比中的舞台A。
 是图形硬件渲染的那一个。GPU可以想什么时候扫就什么时候扫。</p>
 <aside name="sync">
@@ -167,7 +167,7 @@
 <p>现在我们知道了理论，让我们看看它在实践中如何使用。
 我们写一个非常基础的图形系统，允许我们在缓冲帧上描绘像素。
 在大多数主机和电脑上，图形驱动提供了这种底层的图形系统，但是在这里手动实现有助于理解发生了什么。首先是缓存本身：</p>
-<div class="codehilite"><pre><span class="k">class</span> <span class="nc">Framebuffer</span>
+<div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">Framebuffer</span>
 <span class="p">{</span>
 <span class="k">public</span><span class="o">:</span>
   <span class="n">Framebuffer</span><span class="p">()</span> <span class="p">{</span> <span class="n">clear</span><span class="p">();</span> <span class="p">}</span>
@@ -204,7 +204,7 @@
 虽然从例子中看不出，但实时视频驱动会频繁调用这个函数，将缓存中的数据输送到屏幕上。</p>
 <p>我们将整个缓存包在<code>Scene</code>类中。渲染某物需要做的是在这块缓存上调用一系列<code>draw()</code>。</p>
 <p><span name="draw"></span></p>
-<div class="codehilite"><pre><span class="k">class</span> <span class="nc">Scene</span>
+<div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">Scene</span>
 <span class="p">{</span>
 <span class="k">public</span><span class="o">:</span>
   <span class="kt">void</span> <span class="n">draw</span><span class="p">()</span>
@@ -233,9 +233,9 @@
 </aside>
 <p>每一帧，游戏告诉场景去描绘。场景清空缓存然后一个接一个绘制像素。
 这也提供了<code>getBuffer()</code>获得缓存，这样视频驱动可以接触到它。</p>
-<p>这看起来很直观，但是如果我们就这样做，我们会遇到麻烦。
+<p>这看起来很直观，但是如果就这样做，我们会遇到麻烦。
 问题在于图形驱动可以在<em>任何</em>时间调用<code>getBuffer()</code>，甚至在这里：</p>
-<div class="codehilite"><pre><span class="n">buffer_</span><span class="p">.</span><span class="n">draw</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">);</span>
+<div class="codehilite"><pre><span></span><span class="n">buffer_</span><span class="p">.</span><span class="n">draw</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">);</span>
 <span class="n">buffer_</span><span class="p">.</span><span class="n">draw</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">1</span><span class="p">);</span>
 <span class="c1">// &lt;- Video driver reads pixels here!</span>
 <span class="n">buffer_</span><span class="p">.</span><span class="n">draw</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">);</span>
@@ -247,7 +247,7 @@
 
 <p>当那发生时，用户就会看到脸的眼睛，但是一帧中嘴就会消失了。
 下一帧，又会在某些地方冲突。最终结果是可怕的闪烁图形。我们会用双缓冲修复这点：</p>
-<div class="codehilite"><pre><span class="k">class</span> <span class="nc">Scene</span>
+<div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">Scene</span>
 <span class="p">{</span>
 <span class="k">public</span><span class="o">:</span>
   <span class="n">Scene</span><span class="p">()</span>
@@ -285,24 +285,24 @@
 
 
 <p>现在<code>Scene</code>有两个缓存了，存储在<code>buffers_</code>数组中。
-我们不会直接从数组引用他们。这里会有两个成员，<code>next_</code>和<code>current_</code>，指向这个数组。
-当我们描绘时，我们绘制在<code>next_</code>引用的缓存上。
+我们不会直接从数组引用它们。这里会有两个成员，<code>next_</code>和<code>current_</code>，指向这个数组。
+当描绘时，我们绘制在<code>next_</code>引用的缓存上。
 当图形驱动需要获得像素时，它总是通过<code>current_</code>获取<em>另一个</em>缓存。</p>
 <p>通过这种方式，视频驱动永远看不到我们正在工作的缓存。
 谜题的最后一片碎片就是在场景完成绘制一帧的时候调用<code>swap()</code>。
 这通过交换<code>next_</code>和<code>current_</code>的引用完成这一点。
 下一次视频驱动调用getBuffer()`，它会获得我们刚刚完成描绘的新缓存，
-然后将刚刚描绘好的缓存放在屏幕上。没有悲伤，也没有可以看到的漏洞。</p>
+然后将刚刚描绘好的缓存放在屏幕上。没有哭脸，也没有可以看到的漏洞。</p>
 <h3><a href="#不仅仅是图形" name="不仅仅是图形">不仅仅是图形</a></h3>
 <p>双缓冲解决的核心问题是状态被修改的同时被请求。
 这通常有两种原因。我们用图形例子覆盖了第一种——状态被另一线程的代码或中断请求。</p>
 <p>但是，还有一个同样常见的原因：当<em>负责修改的</em>代码请求正在修改的同样的状态。
-这可能发生在很多实体中，特别是物理和AI中，你有实体相互交互时。
+这可能发生在很多实体中，特别是物理和AI中，有实体相互交互时。
 双缓冲在那里也十分有用。</p>
 <h3><a href="#人工不智能" name="人工不智能">人工不智能</a></h3>
 <p>假设我们正在为基于趣味喜剧的游戏构建行为系统。
 这个游戏包括一堆跑来跑去寻欢作乐恶作剧的角色。这里是我们的基础角色：</p>
-<div class="codehilite"><pre><span class="k">class</span> <span class="nc">Actor</span>
+<div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">Actor</span>
 <span class="p">{</span>
 <span class="k">public</span><span class="o">:</span>
   <span class="n">Actor</span><span class="p">()</span> <span class="o">:</span> <span class="n">slapped_</span><span class="p">(</span><span class="nb">false</span><span class="p">)</span> <span class="p">{}</span>
@@ -320,14 +320,14 @@
 </pre></div>
 
 
-<p>每一帧，游戏要在角色身上调用<span name="update"><code>update()</code></span>这样它可以做些事情。特别的，从玩家的角度<em>所有的角色都看上去应该同时更新</em>。</p>
+<p>每一帧，游戏要在角色身上调用<span name="update"><code>update()</code></span>这样它可以做些事情。特别的，从玩家的角度，<em>所有的角色都看上去应该同时更新</em>。</p>
 <aside name="update">
 <p>这是<a class="pattern" href="update-method.html">更新方法</a>模式的例子。</p>
 </aside>
-<p>角色也可以相互交互，这里的“交互”，我指“他们可以互相扇对方巴掌”。
-当更新时，角色可以在另一个角色身上调用<code>slap()</code>来扇他一巴掌，然后调用<code>wasSlapped()</code>决定它是不是被扇了。</p>
-<p>角色需要一个可以交互的状态，所以我们来设置它：</p>
-<div class="codehilite"><pre><span class="k">class</span> <span class="nc">Stage</span>
+<p>角色也可以相互交互，这里的“交互”，我指“可以互相扇对方巴掌”。
+当更新时，角色可以在另一个角色身上调用<code>slap()</code>来扇它一巴掌，然后调用<code>wasSlapped()</code>决定它是不是被扇了。</p>
+<p>角色需要一个可以交互的状态，所以让我们来设置它：</p>
+<div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">Stage</span>
 <span class="p">{</span>
 <span class="k">public</span><span class="o">:</span>
   <span class="kt">void</span> <span class="n">add</span><span class="p">(</span><span class="n">Actor</span><span class="o">*</span> <span class="n">actor</span><span class="p">,</span> <span class="kt">int</span> <span class="n">index</span><span class="p">)</span>
@@ -352,14 +352,14 @@
 </pre></div>
 
 
-<p><code>Stage</code>让我们增加角色，然后提供一个简单的<code>update()</code>调用来更新每个角色。
-对于用户，角色看起来是同时移动的，但是实际上，他们是依次更新的。</p>
+<p><code>Stage</code>允许增加角色，然后提供一个简单的<code>update()</code>调用来更新每个角色。
+对于用户，角色看起来是同时移动的，但是实际上，它们是依次更新的。</p>
 <p>这里需要注意的另一点是每个角色的“被扇”状态在更新后就立刻被清除。
 这是为什么一个角色对一巴掌只反应一次。</p>
-<p>为了让事情开始，让我们定义一个具体的角色子类。
+<p>作为一切的开始，让我们定义一个具体的角色子类。
 我们这里的喜剧演员很简单。
 他面向一个角色。当他被扇的时候——无论是谁扇的——他扇面前的人一巴掌作为回应。</p>
-<div class="codehilite"><pre><span class="k">class</span> <span class="nc">Comedian</span> <span class="o">:</span> <span class="k">public</span> <span class="n">Actor</span>
+<div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">Comedian</span> <span class="o">:</span> <span class="k">public</span> <span class="n">Actor</span>
 <span class="p">{</span>
 <span class="k">public</span><span class="o">:</span>
   <span class="kt">void</span> <span class="n">face</span><span class="p">(</span><span class="n">Actor</span><span class="o">*</span> <span class="n">actor</span><span class="p">)</span> <span class="p">{</span> <span class="n">facing_</span> <span class="o">=</span> <span class="n">actor</span><span class="p">;</span> <span class="p">}</span>
@@ -377,7 +377,7 @@
 
 <p>现在我们把一些喜剧演员丢到舞台上看看发生了什么。
 我们设置三个演员，每个面朝另一个，最后一个面朝第一个，形成一个环状：</p>
-<div class="codehilite"><pre><span class="n">Stage</span> <span class="n">stage</span><span class="p">;</span>
+<div class="codehilite"><pre><span></span><span class="n">Stage</span> <span class="n">stage</span><span class="p">;</span>
 
 <span class="n">Comedian</span><span class="o">*</span> <span class="n">harry</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Comedian</span><span class="p">();</span>
 <span class="n">Comedian</span><span class="o">*</span> <span class="n">baldy</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Comedian</span><span class="p">();</span>
@@ -396,7 +396,7 @@
 <p>最终舞台被像下面图像上那样设置。箭头描述了角色朝向谁，然后数字显示他们在舞台数组中的索引。</p>
 <p><img src="images/double-buffer-slaps-1.png" alt="Boxes for Harry, Baldy, and Chump, in that order. Harry has an arrow pointing to Baldy, who has an arrow pointing to Chump, who has an arrow pointing back to Harry." /></p>
 <p>我们扇哈利一巴掌让事件开始，然后看看我们开始处理后会发生什么：</p>
-<div class="codehilite"><pre><span class="n">harry</span><span class="o">-&gt;</span><span class="n">slap</span><span class="p">();</span>
+<div class="codehilite"><pre><span></span><span class="n">harry</span><span class="o">-&gt;</span><span class="n">slap</span><span class="p">();</span>
 
 <span class="n">stage</span><span class="p">.</span><span class="n">update</span><span class="p">();</span>
 </pre></div>
@@ -404,7 +404,7 @@
 
 <p>记住<code>Stage</code>中的<code>update()</code>函数在每轮中更新每个角色，
 因此如果检视整个代码，我们会发现以下事件发生： </p>
-<div class="codehilite"><pre>Stage updates actor 0 (Harry)
+<div class="codehilite"><pre><span></span>Stage updates actor 0 (Harry)
   Harry was slapped, so he slaps Baldy
 Stage updates actor 1 (Baldy)
   Baldy was slapped, so he slaps Chump
@@ -414,19 +414,19 @@ Stage update ends
 </pre></div>
 
 
-<p>在单独的一帧中，我们的初始给哈利的一巴掌传给了所有的喜剧演员。
-现在，将事物混合起来，让我们重新排列舞台数组中角色的排序，
+<p>在单独的一帧中，初始给哈利的一巴掌传给了所有的喜剧演员。
+现在，将事物混乱起来，让我们重新排列舞台数组中角色的排序，
 但是让他们继续保持面向对方的方式。</p>
 <p><img src="images/double-buffer-slaps-2.png" alt="The same boxes as before with the same arrows, but now they are ordered Chump, Baldy, Harry." /></p>
 <p>我们不管舞台的其余部分，将添加角色到舞台的代码块改为如下：</p>
-<div class="codehilite"><pre><span class="n">stage</span><span class="p">.</span><span class="n">add</span><span class="p">(</span><span class="n">harry</span><span class="p">,</span> <span class="mi">2</span><span class="p">);</span>
+<div class="codehilite"><pre><span></span><span class="n">stage</span><span class="p">.</span><span class="n">add</span><span class="p">(</span><span class="n">harry</span><span class="p">,</span> <span class="mi">2</span><span class="p">);</span>
 <span class="n">stage</span><span class="p">.</span><span class="n">add</span><span class="p">(</span><span class="n">baldy</span><span class="p">,</span> <span class="mi">1</span><span class="p">);</span>
 <span class="n">stage</span><span class="p">.</span><span class="n">add</span><span class="p">(</span><span class="n">chump</span><span class="p">,</span> <span class="mi">0</span><span class="p">);</span>
 </pre></div>
 
 
-<p>让我们看看当再次运行时会发生什么：</p>
-<div class="codehilite"><pre>Stage updates actor 0 (Chump)
+<p>让我们看看再次运行时会发生什么：</p>
+<div class="codehilite"><pre><span></span>Stage updates actor 0 (Chump)
   Chump was not slapped, so he does nothing
 Stage updates actor 1 (Baldy)
   Baldy was not slapped, so he does nothing
@@ -449,7 +449,7 @@ Stage update ends
 <h3><a href="#缓存巴掌" name="缓存巴掌">缓存巴掌</a></h3>
 <p>幸运的是，双缓冲模式可以帮忙。
 这次，不是保存两大块“缓冲”，我们会用更好的粒度缓存：每个角色的“被扇”状态。</p>
-<div class="codehilite"><pre><span class="k">class</span> <span class="nc">Actor</span>
+<div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">Actor</span>
 <span class="p">{</span>
 <span class="k">public</span><span class="o">:</span>
   <span class="n">Actor</span><span class="p">()</span> <span class="o">:</span> <span class="n">currentSlapped_</span><span class="p">(</span><span class="nb">false</span><span class="p">)</span> <span class="p">{}</span>
@@ -480,7 +480,7 @@ Stage update ends
 就像我们之前图像的例子一样，当前状态为读准备，下一状态为写准备。</p>
 <p><code>reset()</code>函数被替换为<code>swap()</code>。
 现在，就在清除交换状态前，它将下一状态拷贝到当前状态上，让它成为新的当前状态，这也需要在<code>Stage</code>中做出小小改变：</p>
-<div class="codehilite"><pre><span class="kt">void</span> <span class="n">Stage</span><span class="o">::</span><span class="n">update</span><span class="p">()</span>
+<div class="codehilite"><pre><span></span><span class="kt">void</span> <span class="n">Stage</span><span class="o">::</span><span class="n">update</span><span class="p">()</span>
 <span class="p">{</span>
   <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">NUM_ACTORS</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span>
   <span class="p">{</span>
@@ -500,8 +500,8 @@ Stage update ends
 通过这种方式，角色无论在舞台数组中如何排列，都会保持相同的行为。
 无论外部的代码如何调用，所有的角色在一帧内同时更新。</p>
 <h2><a href="#设计决策" name="设计决策">设计决策</a></h2>
-<p>双缓冲很直观，我们现在看到了例子也覆盖了大多数你需要的场景。
-使用这个模式之前，还有两个主要设计决策需要去做。</p>
+<p>双缓冲很直观，我们现在看到的例子也覆盖了大多数你需要的场景。
+使用这个模式之前，还有两个主要的设计决策需要去做。</p>
 <h3><a href="#缓存是如何被交换的？" name="缓存是如何被交换的？">缓存是如何被交换的？</a></h3>
 <p>交换操作是整个过程的最重要的一步，
 因为我们必须在其发生时，锁住两个缓存上的读取和修改。
@@ -512,7 +512,7 @@ Stage update ends
 <p>这是我们图形例子工作的方式，这也是大多数双缓冲图形通用的解决方法。</p>
 <ul>
 <li>
-<p><em>速度快。</em>不管缓存有多大，交换都只是一对指针作业。很难在速度和简易性上击败他。</p>
+<p><em>速度快。</em>不管缓存有多大，交换都只是一对指针作业。很难在速度和简易性上击败它。</p>
 </li>
 <li>
 <p><em>外部代码不能存储对缓存的永久指针。</em>这是主要限制。由于我们实际上不能移动<em>数据</em>，本质上做的是周期性的通知代码库的其他部分去别处去寻找缓存，就像前面的舞台类比一样。这就意味着代码库的其他部分不能存储指向缓存中数据的指针——它们也许错误的指向了一段时间后的那个。</p>
@@ -520,7 +520,7 @@ Stage update ends
 </li>
 <li>
 <p><em>在缓存中的数据是两帧之前的，而不是上一帧的。</em>连续的帧绘制在候选的帧缓存上，无需再在它们之间传递任何数据拷贝，就像这样：</p>
-<div class="codehilite"><pre>Frame 1 drawn on buffer A
+<div class="codehilite"><pre><span></span>Frame 1 drawn on buffer A
 Frame 2 drawn on buffer B
 Frame 3 drawn on buffer A
 ...
@@ -542,34 +542,34 @@ Frame 3 drawn on buffer A
 <p>如果我们不能将用户指向其他缓存，唯一的选项就是将下帧的数据实实在在的拷贝到现在这帧上。这是我们的扇巴掌喜剧的工作方法。那种情况下，这种方式因为状态——一个简单的布尔标识——不比修改指向缓存的指针开销更大。</p>
 <ul>
 <li>
-<p><em>下一帧的数据只比之前老一帧。</em>拷贝数据这点与乒乒乓乓地跳转缓存正相反。如果我们需要前一帧的数据，这会给我们更新的数据来工作。</p>
+<p><em>下一帧的数据只比之前老一帧。</em>拷贝数据这点与乒乒乓乓地跳转缓存正相反。如果我们需要前一帧的数据，这会给出更新的数据来工作。</p>
 </li>
 <li>
-<p><em>交换也许很花时间。</em>这个，当然，是最大的负面。我们的交换操作现在意味着在内存中拷贝整个缓存。如果缓存很大比如一整个缓冲帧，这需要花费可观的时间。由于此事发生时没有东西可以读取或者写入<em>每个</em>缓存，这是一个巨大的限制。</p>
+<p><em>交换也许很花时间。</em>这个，当然，是最大的负面。交换操作现在意味着在内存中拷贝整个缓存。如果缓存很大比如一整个缓冲帧，这需要花费可观的时间。由于此事发生时没有东西可以读取或者写入<em>每个</em>缓存，这是一个巨大的限制。</p>
 </li>
 </ul>
 </li>
 </ul>
 <h3><a href="#缓存的粒度如何？" name="缓存的粒度如何？">缓存的粒度如何？</a></h3>
 <p>这里另一问题是缓存本身是如何组织的——是整体的数据块还是散布在对象集合中？
-我们的图形例子是前一个，而角色是后一个。</p>
+图形例子是前一个，而角色是后一个。</p>
 <p>大多数情况下，你缓存的方式自然而然会引导你找到答案，但是这里有些灵活度。
-比如，我们的角色总能将消息存在独立的消息块中，他们都使用索引来引用。</p>
+比如，角色总能将消息存在独立的消息块中，他们都使用索引来引用。</p>
 <ul>
 <li>
 <p><strong>如果缓存是一整块：</strong></p>
 <ul>
-<li><p><em>交换更简单。</em>由于只有一对缓存，一个简单的交换就完成了。如果你可以改变指针来交换，那么你就可以交换整个缓存，不必在意大小，只需几步操作。</p></li>
+<li><p><em>交换更简单。</em>由于只有一对缓存，一个简单的交换就完成了。如果可以改变指针来交换，那么就可以交换整个缓存，不必在意大小，只需几步操作。</p></li>
 </ul>
 </li>
 <li>
 <p><strong>如果很多对象都有一块数据：</strong></p>
 <ul>
 <li>
-<p><em>交换更慢。</em>为了交换，我们需要遍历整个对象集合，通知每个都得交换。</p>
-<p>在我们喜剧例子中，这没问题，因为反正我们需要清除扇巴掌状态——每块缓存的数据每帧都需要接触。如果我们不需要接触老的那帧，我们可以用一个简单操作在多个对象间分散状态，获得使用整块缓存一样的性能。</p>
-<p>思路是将“现在”和“下个”指针概念改为对象相关的<em>偏移量</em>。就像这样：</p>
-<div class="codehilite"><pre><span class="k">class</span> <span class="nc">Actor</span>
+<p><em>交换更慢。</em>为了交换，需要遍历整个对象集合，通知每个都得交换。</p>
+<p>在喜剧例子中，这没问题，因为反正需要清除扇巴掌状态——每块缓存的数据每帧都需要接触。如果不需要接触老的那帧，可以用一个简单操作在多个对象间分散状态，获得使用整块缓存一样的性能。</p>
+<p>思路是将“当前”和“下一”指针概念改为对象相关的<em>偏移量</em>。就像这样：</p>
+<div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">Actor</span>
 <span class="p">{</span>
 <span class="k">public</span><span class="o">:</span>
   <span class="k">static</span> <span class="kt">void</span> <span class="n">init</span><span class="p">()</span> <span class="p">{</span> <span class="n">current_</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="p">}</span>
@@ -587,7 +587,7 @@ Frame 3 drawn on buffer A
 </pre></div>
 
 
-<p>角色使用<code>current_</code>在状态数组中查询，获得当前的被扇状态，下个状态总是数组中的另一索引，这样可以用<code>next()</code>来计算。交换状态只需交替<code>current_</code>索引。聪明之处在于<code>swap()</code>现在是<em>静态</em>函数，只需被调用一次，<em>每个</em>角色的状态都会被交换。</p>
+<p>角色使用<code>current_</code>在状态数组中查询，获得当前的被扇状态，下一状态总是数组中的另一索引，这样可以用<code>next()</code>来计算。交换状态只需交替<code>current_</code>索引。聪明之处在于<code>swap()</code>现在是<em>静态</em>函数，只需被调用一次，<em>每个</em>角色的状态都会被交换。</p>
 </li>
 </ul>
 </li>
@@ -597,8 +597,8 @@ Frame 3 drawn on buffer A
 <li><p>你可以在几乎每个图形API中找到双缓冲。举个例子，OpenGL有<code>swapBuffers()</code>，Direct3D有&#8221;swap chains&#8221;, Microsoft的XNA框架有<code>endDraw()</code>方法。</p> </li>
 </ul>
 <nav>
-  <span class="prev">&larr; <a href="序列模式.html">Previous Chapter</a></span>
-  <span class="next"><a href="游戏循环.html">Next Chapter</a> &rarr;</span>
+  <span class="prev">&larr; <a href="sequencing-patterns.html">Previous Chapter</a></span>
+  <span class="next"><a href="game-loop.html">Next Chapter</a> &rarr;</span>
   <span class="toc">&equiv; <a href="/">The Book</a></span>
 </nav>
 </div>
