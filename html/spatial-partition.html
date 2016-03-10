@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="Content-type" content="text/html;charset=UTF-8" />
 
-<title>空间分区 &middot; Optimization Patterns &middot; Game Programming Patterns</title>
+<title>空间分区 &middot; 优化模式 &middot; Game Programming Patterns</title>
 
 <!-- Tell mobile browsers we're optimized for them and they don't need to crop
      the viewport. -->
@@ -26,12 +26,12 @@
 <div class="page sidebar">
 <div class="content">
 <nav class="top">
-  <span class="prev">&larr; <a href="object-pool.html">Previous Chapter</a></span>
+  <span class="prev">&larr; <a href="对象池.html">Previous Chapter</a></span>
   
   <span class="toc">&equiv; <a href="/">The Book</a></span>
 </nav>
 <h1>空间分区</h1>
-<h1 class="book"><a href="/">Game Programming Patterns</a><span class="section"><a href="optimization-patterns.html">Optimization Patterns</a></span></h1>
+<h1 class="book"><a href="/">Game Programming Patterns</a><span class="section"><a href="优化模式.html">优化模式</a></span></h1>
 <h2><a href="#意图" name="意图">意图</a></h2>
 <p><em>将对象根据它们的位置存储在数据结构中，来有效的定位对象。</em></p>
 <h2><a href="#动机" name="动机">动机</a></h2>
@@ -48,7 +48,7 @@
 <p>假设我们在做实时战略游戏。双方成百上千的单位在战场上撞在一起。
 战士需要挥舞刀锋向最近的那个敌人砍去。
 最简单的处理方法是检查每对单位，然后看看它们互相之间有多么近：</p>
-<div class="codehilite"><pre><span></span><span class="kt">void</span> <span class="nf">handleMelee</span><span class="p">(</span><span class="n">Unit</span><span class="o">*</span> <span class="n">units</span><span class="p">[],</span> <span class="kt">int</span> <span class="n">numUnits</span><span class="p">)</span>
+<div class="codehilite"><pre><span class="kt">void</span> <span class="nf">handleMelee</span><span class="p">(</span><span class="n">Unit</span><span class="o">*</span> <span class="n">units</span><span class="p">[],</span> <span class="kt">int</span> <span class="n">numUnits</span><span class="p">)</span>
 <span class="p">{</span>
   <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">a</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">a</span> <span class="o">&lt;</span> <span class="n">numUnits</span> <span class="o">-</span> <span class="mi">1</span><span class="p">;</span> <span class="n">a</span><span class="o">++</span><span class="p">)</span>
   <span class="p">{</span>
@@ -124,7 +124,7 @@
 不是将每个游戏中的单位与其他所有单位比较，我们将战场<em>划分</em>为多个小战场，每个都有更少的单位。</p>
 <h3><a href="#一网格链接单位" name="一网格链接单位">一网格链接单位</a></h3>
 <p>好了，让我们编码把。首先，一些准备工作。这是我们的基础<code>Unit</code>类。</p>
-<div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">Unit</span>
+<div class="codehilite"><pre><span class="k">class</span> <span class="nc">Unit</span>
 <span class="p">{</span>
   <span class="k">friend</span> <span class="k">class</span> <span class="nc">Grid</span><span class="p">;</span>
 
@@ -147,7 +147,7 @@
 <p>每个单位都有位置（2D表示），以及一个指针指向它存在的<code>Grid</code>。
 我们让<code>Grid</code>成为一个<code>friend</code>类，因为，就像将要看到的，当单位的位置改变时，它需要和网格做复杂的交互，以确保任何事情都正确的更新了。</p>
 <p>这里是网格的表示：</p>
-<div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">Grid</span>
+<div class="codehilite"><pre><span class="k">class</span> <span class="nc">Grid</span>
 <span class="p">{</span>
 <span class="k">public</span><span class="o">:</span>
   <span class="n">Grid</span><span class="p">()</span>
@@ -172,7 +172,7 @@
 
 <p>注意每个格子是一个指向单位的<span name="stl">指针</span>。
 下面我们扩展<code>Unit</code>，增加<code>next</code>和<code>prev</code>指针：</p>
-<div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">Unit</span>
+<div class="codehilite"><pre><span class="k">class</span> <span class="nc">Unit</span>
 <span class="p">{</span>
   <span class="c1">// Previous code...</span>
 <span class="k">private</span><span class="o">:</span>
@@ -197,7 +197,7 @@
 <h3><a href="#进入战场" name="进入战场">进入战场</a></h3>
 <p>我们需要做的第一件事是保证新单位创建时被放置到了网格中。
 我们让<code>Unit</code>在它的构建器中处理这个：</p>
-<div class="codehilite"><pre><span></span><span class="n">Unit</span><span class="o">::</span><span class="n">Unit</span><span class="p">(</span><span class="n">Grid</span><span class="o">*</span> <span class="n">grid</span><span class="p">,</span> <span class="kt">double</span> <span class="n">x</span><span class="p">,</span> <span class="kt">double</span> <span class="n">y</span><span class="p">)</span>
+<div class="codehilite"><pre><span class="n">Unit</span><span class="o">::</span><span class="n">Unit</span><span class="p">(</span><span class="n">Grid</span><span class="o">*</span> <span class="n">grid</span><span class="p">,</span> <span class="kt">double</span> <span class="n">x</span><span class="p">,</span> <span class="kt">double</span> <span class="n">y</span><span class="p">)</span>
 <span class="o">:</span> <span class="n">grid_</span><span class="p">(</span><span class="n">grid</span><span class="p">),</span>
   <span class="n">x_</span><span class="p">(</span><span class="n">x</span><span class="p">),</span>
   <span class="n">y_</span><span class="p">(</span><span class="n">y</span><span class="p">),</span>
@@ -211,7 +211,7 @@
 
 <p><code>add()</code>方法像这样定义：</p>
 <p><span name="floor"></span></p>
-<div class="codehilite"><pre><span></span><span class="kt">void</span> <span class="n">Grid</span><span class="o">::</span><span class="n">add</span><span class="p">(</span><span class="n">Unit</span><span class="o">*</span> <span class="n">unit</span><span class="p">)</span>
+<div class="codehilite"><pre><span class="kt">void</span> <span class="n">Grid</span><span class="o">::</span><span class="n">add</span><span class="p">(</span><span class="n">Unit</span><span class="o">*</span> <span class="n">unit</span><span class="p">)</span>
 <span class="p">{</span>
   <span class="c1">// Determine which grid cell it&#39;s in.</span>
   <span class="kt">int</span> <span class="n">cellX</span> <span class="o">=</span> <span class="p">(</span><span class="kt">int</span><span class="p">)(</span><span class="n">unit</span><span class="o">-&gt;</span><span class="n">x_</span> <span class="o">/</span> <span class="n">Grid</span><span class="o">::</span><span class="n">CELL_SIZE</span><span class="p">);</span>
@@ -240,7 +240,7 @@
 <h3><a href="#刀剑碰撞" name="刀剑碰撞">刀剑碰撞</a></h3>
 <p>一旦所有的单位都安定在他们的网格中，我们可以让它们开始互相交互。
 使用这个新网格，处理战斗的主要方法看上去是这样的：</p>
-<div class="codehilite"><pre><span></span><span class="kt">void</span> <span class="n">Grid</span><span class="o">::</span><span class="n">handleMelee</span><span class="p">()</span>
+<div class="codehilite"><pre><span class="kt">void</span> <span class="n">Grid</span><span class="o">::</span><span class="n">handleMelee</span><span class="p">()</span>
 <span class="p">{</span>
   <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">x</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">x</span> <span class="o">&lt;</span> <span class="n">NUM_CELLS</span><span class="p">;</span> <span class="n">x</span><span class="o">++</span><span class="p">)</span>
   <span class="p">{</span>
@@ -256,7 +256,7 @@
 <p>它遍历每个网格，然后在它上面调用<code>handleCell()</code>。
 就像你看到的那样，我们真的需要将战场分割为分离的小冲突。
 每个网格之后像这样处理它的战斗：</p>
-<div class="codehilite"><pre><span></span><span class="kt">void</span> <span class="n">Grid</span><span class="o">::</span><span class="n">handleCell</span><span class="p">(</span><span class="n">Unit</span><span class="o">*</span> <span class="n">unit</span><span class="p">)</span>
+<div class="codehilite"><pre><span class="kt">void</span> <span class="n">Grid</span><span class="o">::</span><span class="n">handleCell</span><span class="p">(</span><span class="n">Unit</span><span class="o">*</span> <span class="n">unit</span><span class="p">)</span>
 <span class="p">{</span>
   <span class="k">while</span> <span class="p">(</span><span class="n">unit</span> <span class="o">!=</span> <span class="nb">NULL</span><span class="p">)</span>
   <span class="p">{</span>
@@ -295,7 +295,7 @@
 <p>为了解决那个，我们需要每次单位移动时都做些工作。
 如果它跨越了格子的边界，我们需要将它从原来的格子删除，添加到新的格子中。
 首先，我们给<code>Unit</code>一个方法来改变它的位置：</p>
-<div class="codehilite"><pre><span></span><span class="kt">void</span> <span class="n">Unit</span><span class="o">::</span><span class="n">move</span><span class="p">(</span><span class="kt">double</span> <span class="n">x</span><span class="p">,</span> <span class="kt">double</span> <span class="n">y</span><span class="p">)</span>
+<div class="codehilite"><pre><span class="kt">void</span> <span class="n">Unit</span><span class="o">::</span><span class="n">move</span><span class="p">(</span><span class="kt">double</span> <span class="n">x</span><span class="p">,</span> <span class="kt">double</span> <span class="n">y</span><span class="p">)</span>
 <span class="p">{</span>
   <span class="n">grid_</span><span class="o">-&gt;</span><span class="n">move</span><span class="p">(</span><span class="k">this</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">);</span>
 <span class="p">}</span>
@@ -304,7 +304,7 @@
 
 <p>可推测的是，它会被AI代码调用控制电脑的单位，也会被玩家输入代码调用来控制玩家的单位。
 它做的只是交换格子的控制权，之后：</p>
-<div class="codehilite"><pre><span></span><span class="kt">void</span> <span class="n">Grid</span><span class="o">::</span><span class="n">move</span><span class="p">(</span><span class="n">Unit</span><span class="o">*</span> <span class="n">unit</span><span class="p">,</span> <span class="kt">double</span> <span class="n">x</span><span class="p">,</span> <span class="kt">double</span> <span class="n">y</span><span class="p">)</span>
+<div class="codehilite"><pre><span class="kt">void</span> <span class="n">Grid</span><span class="o">::</span><span class="n">move</span><span class="p">(</span><span class="n">Unit</span><span class="o">*</span> <span class="n">unit</span><span class="p">,</span> <span class="kt">double</span> <span class="n">x</span><span class="p">,</span> <span class="kt">double</span> <span class="n">y</span><span class="p">)</span>
 <span class="p">{</span>
   <span class="c1">// See which cell it was in.</span>
   <span class="kt">int</span> <span class="n">oldCellX</span> <span class="o">=</span> <span class="p">(</span><span class="kt">int</span><span class="p">)(</span><span class="n">unit</span><span class="o">-&gt;</span><span class="n">x_</span> <span class="o">/</span> <span class="n">Grid</span><span class="o">::</span><span class="n">CELL_SIZE</span><span class="p">);</span>
@@ -356,7 +356,7 @@
 这对于西洋棋和国际象棋是真的，但是对于更加实际的游戏就不那么准确了。
 这通常需要将攻击<em>距离</em>引入考虑。</p>
 <p>这个模式仍然可以好好工作，与检查同一位置匹配相反，我们做的事情更接近于：</p>
-<div class="codehilite"><pre><span></span><span class="k">if</span> <span class="p">(</span><span class="n">distance</span><span class="p">(</span><span class="n">unit</span><span class="p">,</span> <span class="n">other</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">ATTACK_DISTANCE</span><span class="p">)</span>
+<div class="codehilite"><pre><span class="k">if</span> <span class="p">(</span><span class="n">distance</span><span class="p">(</span><span class="n">unit</span><span class="p">,</span> <span class="n">other</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">ATTACK_DISTANCE</span><span class="p">)</span>
 <span class="p">{</span>
   <span class="n">handleAttack</span><span class="p">(</span><span class="n">unit</span><span class="p">,</span> <span class="n">other</span><span class="p">);</span>
 <span class="p">}</span>
@@ -369,7 +369,7 @@
 <p>这里，B在A的攻击半径内，哪怕它们的中心点在不同的网格。
 为了处理这个，我们不仅需要比较同一网格的单位，同时需要比较邻近网格。
 为了达到这点，首先我们让内层循环摆脱<code>handleCell()</code>：</p>
-<div class="codehilite"><pre><span></span><span class="kt">void</span> <span class="n">Grid</span><span class="o">::</span><span class="n">handleUnit</span><span class="p">(</span><span class="n">Unit</span><span class="o">*</span> <span class="n">unit</span><span class="p">,</span> <span class="n">Unit</span><span class="o">*</span> <span class="n">other</span><span class="p">)</span>
+<div class="codehilite"><pre><span class="kt">void</span> <span class="n">Grid</span><span class="o">::</span><span class="n">handleUnit</span><span class="p">(</span><span class="n">Unit</span><span class="o">*</span> <span class="n">unit</span><span class="p">,</span> <span class="n">Unit</span><span class="o">*</span> <span class="n">other</span><span class="p">)</span>
 <span class="p">{</span>
   <span class="k">while</span> <span class="p">(</span><span class="n">other</span> <span class="o">!=</span> <span class="nb">NULL</span><span class="p">)</span>
   <span class="p">{</span>
@@ -386,7 +386,7 @@
 
 <p>现在有函数接受一个单位和一列表的其他单位看看有没有碰撞。
 然后我们让<code>handleCell()</code>使用它：</p>
-<div class="codehilite"><pre><span></span><span class="kt">void</span> <span class="n">Grid</span><span class="o">::</span><span class="n">handleCell</span><span class="p">(</span><span class="kt">int</span> <span class="n">x</span><span class="p">,</span> <span class="kt">int</span> <span class="n">y</span><span class="p">)</span>
+<div class="codehilite"><pre><span class="kt">void</span> <span class="n">Grid</span><span class="o">::</span><span class="n">handleCell</span><span class="p">(</span><span class="kt">int</span> <span class="n">x</span><span class="p">,</span> <span class="kt">int</span> <span class="n">y</span><span class="p">)</span>
 <span class="p">{</span>
   <span class="n">Unit</span><span class="o">*</span> <span class="n">unit</span> <span class="o">=</span> <span class="n">cells_</span><span class="p">[</span><span class="n">x</span><span class="p">][</span><span class="n">y</span><span class="p">];</span>
   <span class="k">while</span> <span class="p">(</span><span class="n">unit</span> <span class="o">!=</span> <span class="nb">NULL</span><span class="p">)</span>
@@ -402,7 +402,7 @@
 
 <p>注意我们同样传入了网格的坐标，而不仅仅是对象列表。
 现在，这也许和前面的例子没有什么区别，但是我们会稍微扩展它：</p>
-<div class="codehilite"><pre><span></span><span class="kt">void</span> <span class="n">Grid</span><span class="o">::</span><span class="n">handleCell</span><span class="p">(</span><span class="kt">int</span> <span class="n">x</span><span class="p">,</span> <span class="kt">int</span> <span class="n">y</span><span class="p">)</span>
+<div class="codehilite"><pre><span class="kt">void</span> <span class="n">Grid</span><span class="o">::</span><span class="n">handleCell</span><span class="p">(</span><span class="kt">int</span> <span class="n">x</span><span class="p">,</span> <span class="kt">int</span> <span class="n">y</span><span class="p">)</span>
 <span class="p">{</span>
   <span class="n">Unit</span><span class="o">*</span> <span class="n">unit</span> <span class="o">=</span> <span class="n">cells_</span><span class="p">[</span><span class="n">x</span><span class="p">][</span><span class="n">y</span><span class="p">];</span>
   <span class="k">while</span> <span class="p">(</span><span class="n">unit</span> <span class="o">!=</span> <span class="nb">NULL</span><span class="p">)</span>
@@ -597,7 +597,7 @@
 </li>
 </ul>
 <nav>
-  <span class="prev">&larr; <a href="object-pool.html">Previous Chapter</a></span>
+  <span class="prev">&larr; <a href="对象池.html">Previous Chapter</a></span>
   
   <span class="toc">&equiv; <a href="/">The Book</a></span>
 </nav>

@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="Content-type" content="text/html;charset=UTF-8" />
 
-<title>子类沙箱 &middot; Behavioral Patterns &middot; Game Programming Patterns</title>
+<title>子类沙箱 &middot; 行为模式 &middot; Game Programming Patterns</title>
 
 <!-- Tell mobile browsers we're optimized for them and they don't need to crop
      the viewport. -->
@@ -26,12 +26,12 @@
 <div class="page sidebar">
 <div class="content">
 <nav class="top">
-  <span class="prev">&larr; <a href="bytecode.html">Previous Chapter</a></span>
-  <span class="next"><a href="type-object.html">Next Chapter</a> &rarr;</span>
+  <span class="prev">&larr; <a href="字节码.html">Previous Chapter</a></span>
+  <span class="next"><a href="类型对象.html">Next Chapter</a> &rarr;</span>
   <span class="toc">&equiv; <a href="/">The Book</a></span>
 </nav>
 <h1>子类沙箱</h1>
-<h1 class="book"><a href="/">Game Programming Patterns</a><span class="section"><a href="behavioral-patterns.html">Behavioral Patterns</a></span></h1>
+<h1 class="book"><a href="/">Game Programming Patterns</a><span class="section"><a href="行为模式.html">行为模式</a></span></h1>
 <h2><a href="#意图" name="意图">意图</a></h2>
 <p><em>用一系列由基类提供的操作定义子类中的行为。</em></p>
 <h2><a href="#动机" name="动机">动机</a></h2>
@@ -134,7 +134,7 @@
 <p>因为这个模式太简单了，示例代码中没有太多东西。
 这不是说它没用——这个模式关键在于“意图”，而不是它实现复杂度。</p>
 <p>我们从<code>Superpower</code>基类开始：</p>
-<div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">Superpower</span>
+<div class="codehilite"><pre><span class="k">class</span> <span class="nc">Superpower</span>
 <span class="p">{</span>
 <span class="k">public</span><span class="o">:</span>
   <span class="k">virtual</span> <span class="o">~</span><span class="n">Superpower</span><span class="p">()</span> <span class="p">{}</span>
@@ -169,7 +169,7 @@
 由于这都在基类的<em>实现</em>中，保证了耦合封闭在<code>Superpower</code>中。</p>
 <p>好了，拿出我们的放射蜘蛛侠，创建一个能力。这里是一个：</p>
 <p><span name="jump"></span></p>
-<div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">SkyLaunch</span> <span class="o">:</span> <span class="k">public</span> <span class="n">Superpower</span>
+<div class="codehilite"><pre><span class="k">class</span> <span class="nc">SkyLaunch</span> <span class="o">:</span> <span class="k">public</span> <span class="n">Superpower</span>
 <span class="p">{</span>
 <span class="k">protected</span><span class="o">:</span>
   <span class="k">virtual</span> <span class="kt">void</span> <span class="n">activate</span><span class="p">()</span>
@@ -190,7 +190,7 @@
 如果所有的超能力都这样简单——声音，粒子效果，动作的组合——那么就根本不需要这个模式了。
 相反，<code>Superpower</code>有内置的<code>activate()</code>获得了声音ID，粒子类型和运动的字段。
 但是这只在所有能力都以相同方式运行，只在一些数据上不同时可行。让我们精细一些：</p>
-<div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">Superpower</span>
+<div class="codehilite"><pre><span class="k">class</span> <span class="nc">Superpower</span>
 <span class="p">{</span>
 <span class="k">protected</span><span class="o">:</span>
   <span class="kt">double</span> <span class="n">getHeroX</span><span class="p">()</span>
@@ -214,7 +214,7 @@
 
 
 <p>这里我们增加了些方法获取英雄的位置。我们的<code>SkyLaunch</code>现在可以使用它们了：</p>
-<div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">SkyLaunch</span> <span class="o">:</span> <span class="k">public</span> <span class="n">Superpower</span>
+<div class="codehilite"><pre><span class="k">class</span> <span class="nc">SkyLaunch</span> <span class="o">:</span> <span class="k">public</span> <span class="n">Superpower</span>
 <span class="p">{</span>
 <span class="k">protected</span><span class="o">:</span>
   <span class="k">virtual</span> <span class="kt">void</span> <span class="n">activate</span><span class="p">()</span>
@@ -288,7 +288,7 @@
 <li>
 <p>如果提供操作的实现是增加了向外部系统转发调用，那它就没增加太多价值。那种情况下，也许直接调用外部方法更简单。</p>
 <p>但是，但简单的转发也是有用的——那些方法接触了基类不想直接暴露给子类的状态。举个例子，假设<code>Superpower</code>提供这个：</p>
-<div class="codehilite"><pre><span></span><span class="kt">void</span> <span class="nf">playSound</span><span class="p">(</span><span class="n">SoundId</span> <span class="n">sound</span><span class="p">,</span> <span class="kt">double</span> <span class="n">volume</span><span class="p">)</span>
+<div class="codehilite"><pre><span class="kt">void</span> <span class="nf">playSound</span><span class="p">(</span><span class="n">SoundId</span> <span class="n">sound</span><span class="p">,</span> <span class="kt">double</span> <span class="n">volume</span><span class="p">)</span>
 <span class="p">{</span>
   <span class="n">soundEngine_</span><span class="p">.</span><span class="n">play</span><span class="p">(</span><span class="n">sound</span><span class="p">,</span> <span class="n">volume</span><span class="p">);</span>
 <span class="p">}</span>
@@ -302,7 +302,7 @@
 <p>这个模式的挑战是基类中最终加入了很多方法。
 你可以将一些方法移到其他类中来缓和。基类通过返回对象提供方法。</p>
 <p>举个例子，为了让超能力播放声音，我们可以直接将它们加到<code>Superpower</code>中：</p>
-<div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">Superpower</span>
+<div class="codehilite"><pre><span class="k">class</span> <span class="nc">Superpower</span>
 <span class="p">{</span>
 <span class="k">protected</span><span class="o">:</span>
   <span class="kt">void</span> <span class="n">playSound</span><span class="p">(</span><span class="n">SoundId</span> <span class="n">sound</span><span class="p">,</span> <span class="kt">double</span> <span class="n">volume</span><span class="p">)</span>
@@ -327,7 +327,7 @@
 
 <p>但是如果<code>Superpower</code>已经很大很宽泛，我们也许想要避免那样。
 取而代之的是创建<code>SoundPlayer</code>类暴露那个函数：</p>
-<div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">SoundPlayer</span>
+<div class="codehilite"><pre><span class="k">class</span> <span class="nc">SoundPlayer</span>
 <span class="p">{</span>
   <span class="kt">void</span> <span class="n">playSound</span><span class="p">(</span><span class="n">SoundId</span> <span class="n">sound</span><span class="p">,</span> <span class="kt">double</span> <span class="n">volume</span><span class="p">)</span>
   <span class="p">{</span>
@@ -348,7 +348,7 @@
 
 
 <p><code>Superpower</code>提供了对其的接触：</p>
-<div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">Superpower</span>
+<div class="codehilite"><pre><span class="k">class</span> <span class="nc">Superpower</span>
 <span class="p">{</span>
 <span class="k">protected</span><span class="o">:</span>
   <span class="n">SoundPlayer</span><span class="o">&amp;</span> <span class="n">getSoundPlayer</span><span class="p">()</span>
@@ -384,7 +384,7 @@
 <li>
 <p><strong>将它传给基类构造器：</strong></p>
 <p>最简单的解决方案是让基类将其作为构造器变量：</p>
-<div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">Superpower</span>
+<div class="codehilite"><pre><span class="k">class</span> <span class="nc">Superpower</span>
 <span class="p">{</span>
 <span class="k">public</span><span class="o">:</span>
   <span class="n">Superpower</span><span class="p">(</span><span class="n">ParticleSystem</span><span class="o">*</span> <span class="n">particles</span><span class="p">)</span>
@@ -400,7 +400,7 @@
 
 
 <p>这安全地保证了每个超能力在构造时有粒子系统。但让我们看看子类：</p>
-<div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">SkyLaunch</span> <span class="o">:</span> <span class="k">public</span> <span class="n">Superpower</span>
+<div class="codehilite"><pre><span class="k">class</span> <span class="nc">SkyLaunch</span> <span class="o">:</span> <span class="k">public</span> <span class="n">Superpower</span>
 <span class="p">{</span>
 <span class="k">public</span><span class="o">:</span>
   <span class="n">SkyLaunch</span><span class="p">(</span><span class="n">ParticleSystem</span><span class="o">*</span> <span class="n">particles</span><span class="p">)</span>
@@ -416,7 +416,7 @@
 <li>
 <p><strong>使用两阶初始化：</strong></p>
 <p>为了避免通过构造器传递所有东西，我们可以将初始化划分为两个部分。构造器不接受任何参数，只是创建对象。然后，我们调用一个定义在基类的分离方法传入所有它需要的数据：</p>
-<div class="codehilite"><pre><span></span><span class="n">Superpower</span><span class="o">*</span> <span class="n">power</span> <span class="o">=</span> <span class="k">new</span> <span class="n">SkyLaunch</span><span class="p">();</span>
+<div class="codehilite"><pre><span class="n">Superpower</span><span class="o">*</span> <span class="n">power</span> <span class="o">=</span> <span class="k">new</span> <span class="n">SkyLaunch</span><span class="p">();</span>
 <span class="n">power</span><span class="o">-&gt;</span><span class="n">init</span><span class="p">(</span><span class="n">particles</span><span class="p">);</span>
 </pre></div>
 
@@ -424,7 +424,7 @@
 <p>注意我们没有为<code>SkyLaunch</code>的构造器传入任何东西，它与<code>Superpower</code>中想要保持 私有的任何东西都不耦合。这种实现的问题，是你需要保证永远记得调用<code>init()</code>，如果忘了，你会获得处于半完成的，无法运行的超能力。</p>
 <p>你可以将整个过程封装到一个函数中来修复这一点，就像这样：</p>
 <p><span name="friend"></span></p>
-<div class="codehilite"><pre><span></span><span class="n">Superpower</span><span class="o">*</span> <span class="nf">createSkyLaunch</span><span class="p">(</span><span class="n">ParticleSystem</span><span class="o">*</span> <span class="n">particles</span><span class="p">)</span>
+<div class="codehilite"><pre><span class="n">Superpower</span><span class="o">*</span> <span class="nf">createSkyLaunch</span><span class="p">(</span><span class="n">ParticleSystem</span><span class="o">*</span> <span class="n">particles</span><span class="p">)</span>
 <span class="p">{</span>
   <span class="n">Superpower</span><span class="o">*</span> <span class="n">power</span> <span class="o">=</span> <span class="k">new</span> <span class="n">SkyLaunch</span><span class="p">();</span>
   <span class="n">power</span><span class="o">-&gt;</span><span class="n">init</span><span class="p">(</span><span class="n">particles</span><span class="p">);</span>
@@ -448,7 +448,7 @@
 <p>记住单例仍然有很多问题。你在很多对象中分享了状态（所有的<code>Superpower</code>实例）。粒子系统被封装了，因此它不是全局<em>可见的</em>，这很好，但它们都接触了同一对象让理解能力更难了。</p>
 </aside>
 
-<div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">Superpower</span>
+<div class="codehilite"><pre><span class="k">class</span> <span class="nc">Superpower</span>
 <span class="p">{</span>
 <span class="k">public</span><span class="o">:</span>
   <span class="k">static</span> <span class="kt">void</span> <span class="n">init</span><span class="p">(</span><span class="n">ParticleSystem</span><span class="o">*</span> <span class="n">particles</span><span class="p">)</span>
@@ -470,7 +470,7 @@
 <li>
 <p><strong>使用服务定位器：</strong></p>
 <p>前一选项中，外部代码要在基类请求前压入基类需要的状态。初始化的责任落在了周围的代码。另一选项是让基类调出它需要的状态。一种实现的方法是使用<a class="pattern" href="service-locator.html">服务定位器</a>模式：</p>
-<div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">Superpower</span>
+<div class="codehilite"><pre><span class="k">class</span> <span class="nc">Superpower</span>
 <span class="p">{</span>
 <span class="k">protected</span><span class="o">:</span>
   <span class="kt">void</span> <span class="n">spawnParticles</span><span class="p">(</span><span class="n">ParticleType</span> <span class="n">type</span><span class="p">,</span> <span class="kt">int</span> <span class="n">count</span><span class="p">)</span>
@@ -500,8 +500,8 @@
 </li>
 </ul>
 <nav>
-  <span class="prev">&larr; <a href="bytecode.html">Previous Chapter</a></span>
-  <span class="next"><a href="type-object.html">Next Chapter</a> &rarr;</span>
+  <span class="prev">&larr; <a href="字节码.html">Previous Chapter</a></span>
+  <span class="next"><a href="类型对象.html">Next Chapter</a> &rarr;</span>
   <span class="toc">&equiv; <a href="/">The Book</a></span>
 </nav>
 </div>

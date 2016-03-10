@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="Content-type" content="text/html;charset=UTF-8" />
 
-<title>原型 &middot; Design Patterns Revisited &middot; Game Programming Patterns</title>
+<title>原型 &middot; 重访设计模式 &middot; Game Programming Patterns</title>
 
 <!-- Tell mobile browsers we're optimized for them and they don't need to crop
      the viewport. -->
@@ -26,15 +26,15 @@
 <div class="page sidebar">
 <div class="content">
 <nav class="top">
-  <span class="prev">&larr; <a href="observer.html">Previous Chapter</a></span>
-  <span class="next"><a href="singleton.html">Next Chapter</a> &rarr;</span>
+  <span class="prev">&larr; <a href="观察者.html">Previous Chapter</a></span>
+  <span class="next"><a href="单例.html">Next Chapter</a> &rarr;</span>
   <span class="toc">&equiv; <a href="/">The Book</a></span>
 </nav>
 <h1>原型</h1>
-<h1 class="book"><a href="/">Game Programming Patterns</a><span class="section"><a href="design-patterns-revisited.html">Design Patterns Revisited</a></span></h1>
-<p>我第一次听到“原型”这个词是在<em>设计模式</em>中。
-如今，似乎每个人都在用这个词，但他们讨论的不是<a href="http://en.wikipedia.org/wiki/Prototype_pattern" class="gof-pattern">设计模式</a>。
-我们会讲述设计模式，同样也会展示术语“原型”的有趣之处，和其出现的背后理念。
+<h1 class="book"><a href="/">Game Programming Patterns</a><span class="section"><a href="重访设计模式.html">重访设计模式</a></span></h1>
+<p>第一次我听到“原型”这个词是在<em>设计模式</em>中。
+今天，似乎每个人都在用这个词，但是他们讨论的不是<a href="http://en.wikipedia.org/wiki/Prototype_pattern" class="gof-pattern">设计模式</a>。
+我们会讲述设计模式，同样也会展示给你术语“原型”的有趣之处，和其出现的背后理念。
 但首先，让我们重访<span name="original">原先的</span>设计模式。</p>
 <aside name="original">
 <p>我不是随意地在这里说“原先的”。
@@ -47,7 +47,7 @@
 我们有野兽和魔鬼蜂群围绕着英雄，争着要吃他的血肉。
 这些不可口的晚餐同伴通过“生产者”进入这片区域，每种敌人有不同的生产者。</p>
 <p>为了这个例子考虑，假设我们游戏中每种怪物都有不同的类——<code>Ghost</code>，<code>Demon</code>，<code>Sorcerer</code>等等，像这样：</p>
-<div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">Monster</span>
+<div class="codehilite"><pre><span class="k">class</span> <span class="nc">Monster</span>
 <span class="p">{</span>
   <span class="c1">// Stuff...</span>
 <span class="p">};</span>
@@ -59,7 +59,7 @@
 
 
 <p>一个生产者构造特定种类怪物的实例。
-为了在游戏中支持每一种怪物，我们<em>可以</em>残忍地逼迫它，
+为了在游戏中支持每一种怪物，我们<em>可以</em>残忍的逼迫它，
 让每个怪物类都有生产者类，得到平行的类层次。</p>
 <p><span name="inherits-arrow"></span></p>
 <p><img src="images/prototype-hierarchies.png" alt="Parallel class hierarchies. Ghost, Demon, and Sorceror all inherit from Monster. GhostSpawner, DemonSpawner, and SorcerorSpawner inherit from Spawner." /></p>
@@ -67,7 +67,7 @@
 <p>我得翻出落满灰尘的UML书来写这个图表。<img src="images/arrow-inherits.png" class="arrow" alt="A UML arrow." />代表“继承”。</p>
 </aside>
 <p>实现它看起来像是这样：</p>
-<div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">Spawner</span>
+<div class="codehilite"><pre><span class="k">class</span> <span class="nc">Spawner</span>
 <span class="p">{</span>
 <span class="k">public</span><span class="o">:</span>
   <span class="k">virtual</span> <span class="o">~</span><span class="n">Spawner</span><span class="p">()</span> <span class="p">{}</span>
@@ -101,11 +101,11 @@
 众多类，众多引用，众多冗余，众多副本，众多重复自我……</p>
 <p>原型模式提供了一个解决方案。
 关键思路是<em>一个对象可以产出与它自己相近的对象。</em>
-如果你有一个鬼影，你可以制造更多鬼影。
+如果你有一个鬼影，你可以从它制造更多的鬼影。
 如果你有一个恶魔，你可以制造其他恶魔。
 任何怪物都可以被视为<em>原型</em>怪物来产出它自己的其他版本。</p>
-<p>为了实现这一点，我们给出基类<code>Monster</code>一个抽象方法<code>clone()</code>：</p>
-<div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">Monster</span>
+<p>为了实现这一点，我们给出我们的基类<code>Monster</code>一个抽象方法<code>clone()</code>：</p>
+<div class="codehilite"><pre><span class="k">class</span> <span class="nc">Monster</span>
 <span class="p">{</span>
 <span class="k">public</span><span class="o">:</span>
   <span class="k">virtual</span> <span class="o">~</span><span class="n">Monster</span><span class="p">()</span> <span class="p">{}</span>
@@ -117,7 +117,7 @@
 
 
 <p>每个怪兽子类提供一个实现，返回与它自己的类和状态都完全一样的新对象。举个例子：</p>
-<div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">Ghost</span> <span class="o">:</span> <span class="k">public</span> <span class="n">Monster</span> <span class="p">{</span>
+<div class="codehilite"><pre><span class="k">class</span> <span class="nc">Ghost</span> <span class="o">:</span> <span class="k">public</span> <span class="n">Monster</span> <span class="p">{</span>
 <span class="k">public</span><span class="o">:</span>
   <span class="n">Ghost</span><span class="p">(</span><span class="kt">int</span> <span class="n">health</span><span class="p">,</span> <span class="kt">int</span> <span class="n">speed</span><span class="p">)</span>
   <span class="o">:</span> <span class="n">health_</span><span class="p">(</span><span class="n">health</span><span class="p">),</span>
@@ -138,7 +138,7 @@
 
 <p>一旦我们所有的怪物都支持这个，
 我们不需要为每个怪物类创建生产者类。我们只定义一个：</p>
-<div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">Spawner</span>
+<div class="codehilite"><pre><span class="k">class</span> <span class="nc">Spawner</span>
 <span class="p">{</span>
 <span class="k">public</span><span class="o">:</span>
   <span class="n">Spawner</span><span class="p">(</span><span class="n">Monster</span><span class="o">*</span> <span class="n">prototype</span><span class="p">)</span>
@@ -160,8 +160,8 @@
 它唯一的目标就是被生产者当做模板，去产生更多一样的怪物，
 有点像一个从来不离开巢穴的蜂后。</p>
 <p><img src="images/prototype-spawner.png" alt="A Spawner contains a prototype field referencing a Monster. It calls clone() on the prototype to create new monsters." /></p>
-<p>为了创造鬼魂生产者，我们创建一个原型鬼魂实例，然后创建拥有这个实例的产出者：</p>
-<div class="codehilite"><pre><span></span><span class="n">Monster</span><span class="o">*</span> <span class="n">ghostPrototype</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Ghost</span><span class="p">(</span><span class="mi">15</span><span class="p">,</span> <span class="mi">3</span><span class="p">);</span>
+<p>为了创造鬼魂生产者，我们创建一个原型鬼魂实例然后创建拥有这个实例的产出者：</p>
+<div class="codehilite"><pre><span class="n">Monster</span><span class="o">*</span> <span class="n">ghostPrototype</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Ghost</span><span class="p">(</span><span class="mi">15</span><span class="p">,</span> <span class="mi">3</span><span class="p">);</span>
 <span class="n">Spawner</span><span class="o">*</span> <span class="n">ghostSpawner</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Spawner</span><span class="p">(</span><span class="n">ghostPrototype</span><span class="p">);</span>
 </pre></div>
 
@@ -175,24 +175,24 @@
 但我们<em>确实</em>需要在每个怪物类中实现<code>clone()</code>。
 这和生产者中的代码一样多。</p>
 <p>当你坐下来试着写一个正确的<code>clone()</code>，这里有些令人不快的语义漏洞。
-做深层拷贝还是浅层拷贝呢？换言之，如果恶魔拿着草叉，克隆恶魔也要克隆草叉吗？</p>
-<p>同时，这看上去没减少已存问题上的代码，
+做深层拷贝还是浅层的呢？换言之，如果恶魔拿着草叉，克隆恶魔也要克隆草叉吗？</p>
+<p>同时，这看上去既不减少我们在已存问题上的代码，
 事实上这里还有些<em>人为的问题</em>。
 我们需要将每个怪物有独立的类作为前提条件。
 这绝对<em>不是</em>当今大多数游戏引擎运转的方法。</p>
-<p>我们中大部分以痛苦地方式学到，这样庞杂的类层次管理起来是很痛苦的，那就是我们为什么用<a href="component.html" class="pattern">组件模式</a>和<a href="type-object.html" class="pattern">类型对象</a>为不同的实体建模，这样无需一一建构自己的类。</p>
+<p>我们大部分以痛苦的方式学到，这样庞杂的类层次管理起来是很痛苦的，那就是我们为什么用<a href="component.html" class="pattern">组件模式</a>和<a href="type-object.html" class="pattern">类型对象</a>为不同的实体建模，无需一一建构自己的类。</p>
 <h3><a href="#生产函数" name="生产函数">生产函数</a></h3>
-<p>哪怕每个怪物都有不同的类，这里还有其他方式来为<em>家猫</em>剥皮。（译著：无法将这句翻译出来）
+<p>哪怕每个怪物都有不同的类，这里还有其他方式来为剥<em>家猫</em>的皮。
 不是使用为每个怪物建立分离的生产者<em>类</em>，我们可以创建生产<em>函数</em>，就像这样：</p>
-<div class="codehilite"><pre><span></span><span class="n">Monster</span><span class="o">*</span> <span class="nf">spawnGhost</span><span class="p">()</span>
+<div class="codehilite"><pre><span class="n">Monster</span><span class="o">*</span> <span class="nf">spawnGhost</span><span class="p">()</span>
 <span class="p">{</span>
   <span class="k">return</span> <span class="k">new</span> <span class="n">Ghost</span><span class="p">();</span>
 <span class="p">}</span>
 </pre></div>
 
 
-<p>这比将不同类型怪兽的构建包到一起使用了更少的样板。生产者类可以简单地存储一个函数指针：</p>
-<div class="codehilite"><pre><span></span><span class="k">typedef</span> <span class="n">Monster</span><span class="o">*</span> <span class="p">(</span><span class="o">*</span><span class="n">SpawnCallback</span><span class="p">)();</span>
+<p>这比将不同类型怪兽的构建包到一起使用了更少的样板。一个生产者类可以简单地存储一个函数指针：</p>
+<div class="codehilite"><pre><span class="k">typedef</span> <span class="n">Monster</span><span class="o">*</span> <span class="p">(</span><span class="o">*</span><span class="n">SpawnCallback</span><span class="p">)();</span>
 
 <span class="k">class</span> <span class="nc">Spawner</span>
 <span class="p">{</span>
@@ -213,20 +213,20 @@
 
 
 <p>为了给鬼魂创建生产者，你需要做：</p>
-<div class="codehilite"><pre><span></span><span class="n">Spawner</span><span class="o">*</span> <span class="n">ghostSpawner</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Spawner</span><span class="p">(</span><span class="n">spawnGhost</span><span class="p">);</span>
+<div class="codehilite"><pre><span class="n">Spawner</span><span class="o">*</span> <span class="n">ghostSpawner</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Spawner</span><span class="p">(</span><span class="n">spawnGhost</span><span class="p">);</span>
 </pre></div>
 
 
 <h3><a href="#模板" name="模板">模板</a></h3>
 <p>到了<span name="templates">现在</span>，大多数C++开发者很熟悉模板了。
-生产者类需要构建各种类型的实例，但是我们不想为特定的怪物类硬编码。
+我们的生产者类需要构建各种类型的实例，但是我们不想为特定的怪物类硬编码。
 自然的解决方案是将它作为<em>类型参数</em>，就是模板允许我们做的：</p>
 <aside name="templates">
 <p>我不太确定C++程序员是学着喜欢它还是模板完全吓阻了人们学习C++。
 不管怎样，我今日见到使用C++的也都使用模板。</p>
 </aside>
 <p><span name="base"></span></p>
-<div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">Spawner</span>
+<div class="codehilite"><pre><span class="k">class</span> <span class="nc">Spawner</span>
 <span class="p">{</span>
 <span class="k">public</span><span class="o">:</span>
   <span class="k">virtual</span> <span class="o">~</span><span class="n">Spawner</span><span class="p">()</span> <span class="p">{}</span>
@@ -243,14 +243,14 @@
 
 
 <p>像这样使用它：</p>
-<div class="codehilite"><pre><span></span><span class="n">Spawner</span><span class="o">*</span> <span class="n">ghostSpawner</span> <span class="o">=</span> <span class="k">new</span> <span class="n">SpawnerFor</span><span class="o">&lt;</span><span class="n">Ghost</span><span class="o">&gt;</span><span class="p">();</span>
+<div class="codehilite"><pre><span class="n">Spawner</span><span class="o">*</span> <span class="n">ghostSpawner</span> <span class="o">=</span> <span class="k">new</span> <span class="n">SpawnerFor</span><span class="o">&lt;</span><span class="n">Ghost</span><span class="o">&gt;</span><span class="p">();</span>
 </pre></div>
 
 
 <aside name="base">
 <p>这里的<code>Spawner</code>类是这样，代码不必担心生产者生产了什么样的怪物，
 它可以使用它然后与指向<code>Monster</code>的指针打交道。</p>
-<p>如果我们只有<code>SpawnerFor&lt;T&gt;</code>类，那就没有类型实例化共享模板，这样任何与产生多种怪物类型的生产者打交道的代码都需要接受模板参数。</p>
+<p>如果我们只有<code>SpawnerFor&lt;T&gt;</code>类，那就没有一个超类型实例化我们分享的模板，这样任何与产生多种怪物类型的生产者打交道的代码都需要接受模板参数。</p>
 </aside>
 <h3><a href="#第一公民类型" name="第一公民类型">第一公民类型</a></h3>
 <p>前面的两个解决方案完成了需要类的需求，<code>Spawner</code>，它用类型参数化。
@@ -276,10 +276,10 @@ OOP定义的特性是它将状态和行为紧紧地绑在一起。</p>
 但是一大堆家伙包括Dave Ungar和Randall Smith一直在拼命区分。
 他们在80年代创建了一种叫做Self的语言。它可以是OOP的，同时没有类</p>
 <h3><a href="#self语言" name="self语言">Self语言</a></h3>
-<p>纯粹的感觉上，Self比一个基于类的语言<em>更加</em>面向对象。
-我们认为OOP将状态和行为绑在一起，但是有类的语言实际在他们之间画了一条线。</p>
+<p>纯粹的感觉上，Self比一个基于类的语言<em>更加</em>面向对象
+。我们认为OOP是将状态和行为绑在一起，但是有类的语言实际在他们之间画了一条线。</p>
 <p>考虑你最喜欢的基于类的语言的语义。
-为了接触对象中的一些状态，在实例的内存中查询。状态是<em>包含</em>在实例之中的。</p>
+为了接触对象中的一些状态，你实例的内存中查询。状态是<em>包含</em>在实例之中的。</p>
 <p>但是，为了调用<span name="vtable">方法</span>，你查询实例的类，
 然后你在<em>那里</em>查询方法。行为被包含在<em>类</em>中。
 获得方法总需要通过中间层，这意味着字段和方法是不同的。</p>
@@ -287,7 +287,7 @@ OOP定义的特性是它将状态和行为紧紧地绑在一起。</p>
 <aside name="vtable">
 <p>举个例子，为了调用C++中的虚方法，你需要在实例中找指向虚方法表的指针，然后再在那里找方法。</p>
 </aside>
-<p>Self结束了这种分歧。找<em>任何东西</em>，都只需在对象中找。
+<p>Self结束了这种分歧。找<em>任何东西</em>，你只需在对象中找。
 实例同时包含状态和行为。你可以有一个对象，它有一个完全独特的方法。</p>
 <p><span name="island"></span></p>
 <p><img src="images/prototype-object.png" alt="An Object contains a mixed list of Fields and Methods." /></p>
@@ -299,9 +299,7 @@ OOP定义的特性是它将状态和行为紧紧地绑在一起。</p>
 为了不用类而实现一些相同的东西，Self拥有<em>委托</em>。</p>
 <p>为了在对象中寻找字段或者调用方法，首先在对象内部查找。
 如果有，就完成了。如果没有，在对象的<span name="parent"><em>父类</em></span>中寻找。
-这是一个对其他对象的引用。
-当我们没能在第一个对象中找到属性，我们尝试它的父母，然后父母的父母，继续下去。
-换言之，失败的查找被<em>委托</em>给对象的父母。</p>
+这是一个对其他对象的引用。当我们没能在第一个对象中找到属性，我们尝试它的父母，然后父母的父母，继续下去。换言之，失败的查找被<em>委托</em>给对象的父母。</p>
 <aside name="parent">
 <p>我在这里简化了。Self实际上支持多个父对象。
 父父母只是特别标明的字段，意味着你可以继承它们或者在运行时改变他们，
@@ -309,13 +307,13 @@ OOP定义的特性是它将状态和行为紧紧地绑在一起。</p>
 </aside>
 <p><img src="images/prototype-delegate.png" alt="An Object contains Fields and Methods and a reference to another object that it delegates to." /></p>
 <p>父对象让我们在不同对象间重用行为（还有状态！），所以我们覆盖了类的公共部分。
-另外一个类做的关键事情就是给了创建实例的方法。
-当你需要新的某物，你可以直接<code>new Thingamabob()</code>，或者随便什么你喜欢的语言表达法。
+另外一个类做的关键事情就是给了我们创建实例的方法。
+当你需要一个新的某物，你可以直接<code>new Thingamabob()</code>，或者随便什么你喜欢的语言表达法。
 类是它实例的工厂。</p>
 <p>不用类，我们怎样创建新东西？
 特别的，我们如何创建一堆有共同点的新东西？
 就像这个设计模式，你在Self中的方式是使用<em>克隆</em>。</p>
-<p>在Self中，就好像<em>每个</em>对象都自动支持原型设计模式。
+<p>在Self中，就好像<em>每一个</em>对象都自动支持原型设计模式。
 任何对象都能被克隆。为了获得一堆相似的对象，你：</p>
 <ol>
 <li>
@@ -339,18 +337,18 @@ OOP定义的特性是它将状态和行为紧紧地绑在一起。</p>
 <p>我从小道消息听说很多Self程序员得出了相同的结论。
 但项目并不是一个失败。
 Self非常的灵活，它需要虚拟机各种创新来跑得快一些。</p>
-<p>在这种思路下他们发明了just-in-time编译，垃圾回收，以及优化方法分配——由同样的人实现的——让很多动态类型语言快到可以构建超流行的应用。</p>
+<p>在这种思路下他们发明了just-in-time编译，垃圾回收，以及优化方法分配——通常由同样的人实现的——那让很多动态类型语言快到可以构建超流行的应用。</p>
 </aside>
 <p>是的，语言很容易实现，那是因为它把复杂度推给了用户。
 一旦我们开始试着使用，我发现我想念类给的结构。
-我最终停在构建语言没有的库概念。</p>
+我最终停在构建语言所没有的库概念。</p>
 <p>鉴于我之前的经验都来自基于类的语言，因此我的头脑可能被那个范式污染了。
 但是我的直觉是大部分人还是喜欢认真定义的“那些事物”。</p>
 <p>除去基于类语言的成功，看看有多少游戏明确指定了角色类以及不同敌人物品技能的清单，
 每个都有整齐的标签。你不会在游戏中看到每个怪物都是独特的雪团，
-比如“洞穴人和哥布林还有雪混合在一起”的东西。</p>
+像“洞穴人和哥布林还有雪混合在一起”的东西。</p>
 <p>原型是非常酷的范式，也是我希望有更多人了解的东西，
-但我很庆幸我们不是每天都用它编程。
+但我很庆幸我们不是每天都用他们编程。
 我看到的完全皈依原型的<span name="telling">代码是一团浆糊</span>，
 我很难用它完成点什么。</p>
 <aside name="telling">
@@ -375,7 +373,7 @@ Eich充分利用了这一点，JavaScript的第一个版本是在十天内创建
 甚至在ECMAScript5之前都没有添加，那已是JavaScript出现后的十四年了。
 不用克隆，让我带你浏览一下JavaScript中定义类和创建对象的经典方法。
 从一个<em>构造器函数</em>开始：</p>
-<div class="codehilite"><pre><span></span><span class="kd">function</span> <span class="nx">Weapon</span><span class="p">(</span><span class="nx">range</span><span class="p">,</span> <span class="nx">damage</span><span class="p">)</span> <span class="p">{</span>
+<div class="codehilite"><pre><span class="kd">function</span> <span class="nx">Weapon</span><span class="p">(</span><span class="nx">range</span><span class="p">,</span> <span class="nx">damage</span><span class="p">)</span> <span class="p">{</span>
   <span class="k">this</span><span class="p">.</span><span class="nx">range</span> <span class="o">=</span> <span class="nx">range</span><span class="p">;</span>
   <span class="k">this</span><span class="p">.</span><span class="nx">damage</span> <span class="o">=</span> <span class="nx">damage</span><span class="p">;</span>
 <span class="p">}</span>
@@ -383,7 +381,7 @@ Eich充分利用了这一点，JavaScript的第一个版本是在十天内创建
 
 
 <p>这创建了一个新对象并初始化了它的字段。你像这样引入它：</p>
-<div class="codehilite"><pre><span></span><span class="kd">var</span> <span class="nx">sword</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Weapon</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">16</span><span class="p">);</span>
+<div class="codehilite"><pre><span class="kd">var</span> <span class="nx">sword</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Weapon</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">16</span><span class="p">);</span>
 </pre></div>
 
 
@@ -394,7 +392,7 @@ Eich充分利用了这一点，JavaScript的第一个版本是在十天内创建
 当它创建那个空对象，它将它和一个原型对象连接起来。
 你可以用<code>Weapon.prototype</code>来直接使用它。</p>
 <p>当状态添加到构建器中时，为了定义<em>行为</em>，你通常向原型对象添加方法。就像这样：</p>
-<div class="codehilite"><pre><span></span><span class="nx">Weapon</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">attack</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">target</span><span class="p">)</span> <span class="p">{</span>
+<div class="codehilite"><pre><span class="nx">Weapon</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">attack</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">target</span><span class="p">)</span> <span class="p">{</span>
   <span class="k">if</span> <span class="p">(</span><span class="nx">distanceTo</span><span class="p">(</span><span class="nx">target</span><span class="p">)</span> <span class="o">&gt;</span> <span class="k">this</span><span class="p">.</span><span class="nx">range</span><span class="p">)</span> <span class="p">{</span>
     <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">&quot;Out of range!&quot;</span><span class="p">);</span>
   <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
@@ -412,7 +410,7 @@ Eich充分利用了这一点，JavaScript的第一个版本是在十天内创建
 <p>让我们回顾一下：</p>
 <ul>
 <li>
-<p>创建对象的方法是通过“new”操作，引入代表类型的对象——构造器函数。</p>
+<p>你创建对象的方法是通过“new”操作，引入代表类型的对象——构造器函数。</p>
 </li>
 <li>
 <p>状态被存储在实例中。</p>
@@ -431,7 +429,7 @@ Eich充分利用了这一点，JavaScript的第一个版本是在十天内创建
 <p>好吧，我不断的讨论<em>不喜欢</em>原型的原因，这让这一章稍有褪色。
 我认为这本书该比惨案更加欢乐些，所以让我们在原型<em>确实</em>有用，或者更加精确，<em>委托</em>有用的地方结束这个话题。</p>
 <p>如果你比较了程序与数据的字节数，
-你可以看到数据的占比随着编程的进行稳定地增长。
+你可以看到数据的占比随着编程的发展稳定地增长。
 早期的游戏在程序中生成几乎任何东西，这样可以适应磁盘和老式游戏盒。
 在今日的游戏中，代码只是驱动游戏的“引擎”，游戏是完全由数据定义的。</p>
 <p>这很好，但是将内容推到数据文件中不会魔术般解决组织大工程的挑战。
@@ -439,12 +437,12 @@ Eich充分利用了这一点，JavaScript的第一个版本是在十天内创建
 我们使用编程语言的原因就是它们有办法处理复杂性。</p>
 <p>不再将一堆代码拷来拷去，我们将其移入函数中，这样可以通过名字调用。
 不再一堆类之间复制方法，我们将其放入分离的类中，其他类可以继承或者组合它。</p>
-<p>当游戏数据达到一定规模时，你真的需要考虑更加简单的特性。
+<p>当你的游戏数据达到一定规模时，你真的需要考虑更加简单的特性。
 数据模式是个我不指望在这里能说清的问题，
 但我确实希望将一个思路扔给你，让你在游戏中考虑：使用原型和委托来重用数据。</p>
 <p>假设我们为我早先提到的<span name="shameless">无耻Gauntlet rip-off</span>定义数据模型。游戏设计者需要在很多文件中设定怪物和物品的属性。</p>
 <aside name="shameless">
-<p>这是完全原创的主题，没有受到已存的多人地下城游戏的影响。
+<p>我这是完全原创的主题，没有受到已存的多人地下城游戏的影响。
 请不要告我。</p>
 </aside>
 <p>一个常用的方法是使用JSON。
@@ -454,7 +452,7 @@ Eich充分利用了这一点，JavaScript的第一个版本是在十天内创建
 <p>我们重新发明了它们太多次，Steve Yegge称之为<a href="http://steve-yegge.blogspot.com/2008/10/universal-design-pattern.html">&#8220;通用设计模式&#8221;</a>.</p>
 </aside>
 <p>所以游戏中的哥布林也许被定义为像这样的东西：</p>
-<div class="codehilite"><pre><span></span><span class="p">{</span>
+<div class="codehilite"><pre><span class="p">{</span>
   <span class="nt">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;goblin grunt&quot;</span><span class="p">,</span>
   <span class="nt">&quot;minHealth&quot;</span><span class="p">:</span> <span class="mi">20</span><span class="p">,</span>
   <span class="nt">&quot;maxHealth&quot;</span><span class="p">:</span> <span class="mi">30</span><span class="p">,</span>
@@ -466,7 +464,7 @@ Eich充分利用了这一点，JavaScript的第一个版本是在十天内创建
 
 <p>这看上去很易懂，哪怕是最讨厌文字的设计者也能完成。
 所以你给哥布林大家族添加几个兄弟分支：</p>
-<div class="codehilite"><pre><span></span><span class="p">{</span>
+<div class="codehilite"><pre><span class="p">{</span>
   <span class="nt">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;goblin wizard&quot;</span><span class="p">,</span>
   <span class="nt">&quot;minHealth&quot;</span><span class="p">:</span> <span class="mi">20</span><span class="p">,</span>
   <span class="nt">&quot;maxHealth&quot;</span><span class="p">:</span> <span class="mi">30</span><span class="p">,</span>
@@ -491,7 +489,7 @@ Eich充分利用了这一点，JavaScript的第一个版本是在十天内创建
 它浪费了空间，消耗了作者更多时间。
 你需要仔细阅读代码才知道这些数据<em>是不是</em>相同的。
 这让维护头疼。
-如果我们决定让所有哥布林变强，需要记得将三个都更新一遍。糟糕糟糕糟糕。</p>
+如果我们决定让所有哥布林变强，需要记得将他们三个都更新一遍。糟糕糟糕糟糕。</p>
 <p>如果这是代码，我们会为“哥布林”创造一个抽象，然后在三个哥布林类型中重用它。
 但是愚蠢的JSON不知道这么做。所以让我们把它做得更加巧妙。</p>
 <p>我们像对象有<span name="meta"><code>"prototype"</code></span>字段那样声明它，
@@ -504,7 +502,7 @@ Eich充分利用了这一点，JavaScript的第一个版本是在十天内创建
 原型是<em>表示哥布林的数据模型</em>的属性，而不是哥布林本身。</p>
 </aside>
 <p>通过这样做，我们可以简单地定义大群哥布林：</p>
-<div class="codehilite"><pre><span></span><span class="p">{</span>
+<div class="codehilite"><pre><span class="p">{</span>
   <span class="nt">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;goblin grunt&quot;</span><span class="p">,</span>
   <span class="nt">&quot;minHealth&quot;</span><span class="p">:</span> <span class="mi">20</span><span class="p">,</span>
   <span class="nt">&quot;maxHealth&quot;</span><span class="p">:</span> <span class="mi">30</span><span class="p">,</span>
@@ -527,15 +525,15 @@ Eich充分利用了这一点，JavaScript的第一个版本是在十天内创建
 
 
 <p>由于弓箭手有grunt作原型，我们不需要在他们中重复血量，防御和弱点。
-我们给数据模型增加的新逻辑超简单——基本的单一委托——但已经摆脱了一堆冗余。</p>
-<p>有趣的事情是，我们没有为具体的哥布林委托的<em>抽象</em>原型设置更进一步“基本哥布林”。
-相反，我们选择了最简单的哥布林，然后委托给它。</p>
+我们给数据模型增加的新逻辑超简单——基本的单一委托——但我们已经摆脱了一堆冗余。</p>
+<p>一个有趣的事情是，我们没有为具体的哥布林委托的<em>抽象</em>原型设置更进一步“基本哥布林”。
+相反，我们选择了一个最简单的哥布林，然后委托给它。</p>
 <p>在基于原型的系统中，一个对象可以克隆产生新对象是很自然的，
 我认为在这里也一样自然。这特别适合记录那些只有一项特别之处实体的游戏数据。</p>
 <p>想想Boss和其他独特事物，它们通常是更加平凡事物的重新定义，
-而原型委托是定义它们的好方法。
+而原型委托是一个定义它们的好方法。
 断头魔剑，就是一把拥有加成的长剑，可以像下面这样表示：</p>
-<div class="codehilite"><pre><span></span><span class="p">{</span>
+<div class="codehilite"><pre><span class="p">{</span>
   <span class="nt">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Sword of Head-Detaching&quot;</span><span class="p">,</span>
   <span class="nt">&quot;prototype&quot;</span><span class="p">:</span> <span class="s2">&quot;longsword&quot;</span><span class="p">,</span>
   <span class="nt">&quot;damageBonus&quot;</span><span class="p">:</span> <span class="s2">&quot;20&quot;</span>
@@ -545,8 +543,8 @@ Eich充分利用了这一点，JavaScript的第一个版本是在十天内创建
 
 <p>在游戏引擎上耗费一点额外的力量，就能让设计者更方便地添加多种不同的武器和野兽，这种丰富度会取悦玩家。</p>
 <nav>
-  <span class="prev">&larr; <a href="observer.html">Previous Chapter</a></span>
-  <span class="next"><a href="singleton.html">Next Chapter</a> &rarr;</span>
+  <span class="prev">&larr; <a href="观察者.html">Previous Chapter</a></span>
+  <span class="next"><a href="单例.html">Next Chapter</a> &rarr;</span>
   <span class="toc">&equiv; <a href="/">The Book</a></span>
 </nav>
 </div>
