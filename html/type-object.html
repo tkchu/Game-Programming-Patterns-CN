@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="Content-type" content="text/html;charset=UTF-8" />
 
-<title>类型对象 &middot; 行为模式 &middot; Game Programming Patterns</title>
+<title>类型对象 &middot; Behavioral Patterns &middot; Game Programming Patterns</title>
 
 <!-- Tell mobile browsers we're optimized for them and they don't need to crop
      the viewport. -->
@@ -26,12 +26,12 @@
 <div class="page sidebar">
 <div class="content">
 <nav class="top">
-  <span class="prev">&larr; <a href="子类沙箱.html">Previous Chapter</a></span>
-  <span class="next"><a href="解耦模式.html">Next Chapter</a> &rarr;</span>
+  <span class="prev">&larr; <a href="subclass-sandbox.html">Previous Chapter</a></span>
+  <span class="next"><a href="decoupling-patterns.html">Next Chapter</a> &rarr;</span>
   <span class="toc">&equiv; <a href="/">The Book</a></span>
 </nav>
 <h1>类型对象</h1>
-<h1 class="book"><a href="/">Game Programming Patterns</a><span class="section"><a href="行为模式.html">行为模式</a></span></h1>
+<h1 class="book"><a href="/">Game Programming Patterns</a><span class="section"><a href="behavioral-patterns.html">Behavioral Patterns</a></span></h1>
 <h2><a href="#意图" name="意图">意图</a></h2>
 <p><em>创造一个类A来允许灵活的创造新“类”，类A的每个实例都代表了不同类型的对象。</em></p>
 <h2><a href="#动机" name="动机">动机</a></h2>
@@ -57,7 +57,7 @@
 在传统OOP思路中，由于龙“是”怪物，我们让<code>Dragon</code>是<code>Monster</code>的子类来描述这点。
 如我们将看到的，子类只是一种将这种关系表示为代码的方法。</p>
 </aside>
-<div class="codehilite"><pre><span class="k">class</span> <span class="nc">Monster</span>
+<div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">Monster</span>
 <span class="p">{</span>
 <span class="k">public</span><span class="o">:</span>
   <span class="k">virtual</span> <span class="o">~</span><span class="n">Monster</span><span class="p">()</span> <span class="p">{}</span>
@@ -80,7 +80,7 @@
 每个品种的子类的公共构造器调用这个，传入对于该品种适合的起始血量。</p>
 <p>现在让我们看看一些品种子类：</p>
 <p><span name="exclaim"></span></p>
-<div class="codehilite"><pre><span class="k">class</span> <span class="nc">Dragon</span> <span class="o">:</span> <span class="k">public</span> <span class="n">Monster</span>
+<div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">Dragon</span> <span class="o">:</span> <span class="k">public</span> <span class="n">Monster</span>
 <span class="p">{</span>
 <span class="k">public</span><span class="o">:</span>
   <span class="n">Dragon</span><span class="p">()</span> <span class="o">:</span> <span class="n">Monster</span><span class="p">(</span><span class="mi">230</span><span class="p">)</span> <span class="p">{}</span>
@@ -222,7 +222,7 @@
 <h2><a href="#示例代码" name="示例代码">示例代码</a></h2>
 <p>在第一遍实现中，让我们从简单的开始，只构建动机那节提到的基础系统。
 我们从<code>Breed</code>类开始：</p>
-<div class="codehilite"><pre><span class="k">class</span> <span class="nc">Breed</span>
+<div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">Breed</span>
 <span class="p">{</span>
 <span class="k">public</span><span class="o">:</span>
   <span class="n">Breed</span><span class="p">(</span><span class="kt">int</span> <span class="n">health</span><span class="p">,</span> <span class="k">const</span> <span class="kt">char</span><span class="o">*</span> <span class="n">attack</span><span class="p">)</span>
@@ -242,7 +242,7 @@
 
 <p>很简单。它基本上只是两个数据字段的容器：起始血量和攻击字符串。
 让我们看看怪物怎么使用它：</p>
-<div class="codehilite"><pre><span class="k">class</span> <span class="nc">Monster</span>
+<div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">Monster</span>
 <span class="p">{</span>
 <span class="k">public</span><span class="o">:</span>
   <span class="n">Monster</span><span class="p">(</span><span class="n">Breed</span><span class="o">&amp;</span> <span class="n">breed</span><span class="p">)</span>
@@ -272,7 +272,7 @@
 这比常用的OOP语言实现的对象有些退步——我们通常不分配一块空白内存，然后<em>赋予</em>内存的类。
 相反，我们根据类调用构造器，它负责给我们一个新实例。</p>
 <p>我们可以在类型对象上应用同样的<span name="pattern">模式</span>。</p>
-<div class="codehilite"><pre><span class="k">class</span> <span class="nc">Breed</span>
+<div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">Breed</span>
 <span class="p">{</span>
 <span class="k">public</span><span class="o">:</span>
   <span class="n">Monster</span><span class="o">*</span> <span class="n">newMonster</span><span class="p">()</span> <span class="p">{</span> <span class="k">return</span> <span class="k">new</span> <span class="n">Monster</span><span class="p">(</span><span class="o">*</span><span class="k">this</span><span class="p">);</span> <span class="p">}</span>
@@ -288,7 +288,7 @@
 在Ruby，Smalltalk，Objective-C以及其他类是对象的语言中，你通过在类对象本身上调用方法来构建实例。</p>
 </aside>
 <p>以及那个使用它们的类：</p>
-<div class="codehilite"><pre><span class="k">class</span> <span class="nc">Monster</span>
+<div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">Monster</span>
 <span class="p">{</span>
   <span class="k">friend</span> <span class="k">class</span> <span class="nc">Breed</span><span class="p">;</span>
 
@@ -316,12 +316,12 @@
 友类放松了这个限制，<code>Breed</code>仍可接触它。
 这意味着构造怪物的<em>唯一</em>方法是通过<code>newMonster()</code>。</p>
 </aside>
-<div class="codehilite"><pre><span class="n">Monster</span><span class="o">*</span> <span class="n">monster</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Monster</span><span class="p">(</span><span class="n">someBreed</span><span class="p">);</span>
+<div class="codehilite"><pre><span></span><span class="n">Monster</span><span class="o">*</span> <span class="n">monster</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Monster</span><span class="p">(</span><span class="n">someBreed</span><span class="p">);</span>
 </pre></div>
 
 
 <p>在我们改动后，它看上去是：</p>
-<div class="codehilite"><pre><span class="n">Monster</span><span class="o">*</span> <span class="n">monster</span> <span class="o">=</span> <span class="n">someBreed</span><span class="p">.</span><span class="n">newMonster</span><span class="p">();</span>
+<div class="codehilite"><pre><span></span><span class="n">Monster</span><span class="o">*</span> <span class="n">monster</span> <span class="o">=</span> <span class="n">someBreed</span><span class="p">.</span><span class="n">newMonster</span><span class="p">();</span>
 </pre></div>
 
 
@@ -345,7 +345,7 @@
 只是，这次，不使用语言的继承机制，我们用类型对象实现它。</p>
 <p>为了保持简单，我们只支持单继承。
 以某种方式，类可以有一个父基类，我们允许品种有一个父品种：</p>
-<div class="codehilite"><pre><span class="k">class</span> <span class="nc">Breed</span>
+<div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">Breed</span>
 <span class="p">{</span>
 <span class="k">public</span><span class="o">:</span>
   <span class="n">Breed</span><span class="p">(</span><span class="n">Breed</span><span class="o">*</span> <span class="n">parent</span><span class="p">,</span> <span class="kt">int</span> <span class="n">health</span><span class="p">,</span> <span class="k">const</span> <span class="kt">char</span><span class="o">*</span> <span class="n">attack</span><span class="p">)</span>
@@ -372,7 +372,7 @@
 否则，这些属性要从它的父母继承。</p>
 <p>有两种方式我们可以实现之。
 一种是每次属性被请求时动态处理委托，就像这样：</p>
-<div class="codehilite"><pre><span class="kt">int</span> <span class="n">Breed</span><span class="o">::</span><span class="n">getHealth</span><span class="p">()</span>
+<div class="codehilite"><pre><span></span><span class="kt">int</span> <span class="n">Breed</span><span class="o">::</span><span class="n">getHealth</span><span class="p">()</span>
 <span class="p">{</span>
   <span class="c1">// Override.</span>
   <span class="k">if</span> <span class="p">(</span><span class="n">health_</span> <span class="o">!=</span> <span class="mi">0</span> <span class="o">||</span> <span class="n">parent_</span> <span class="o">==</span> <span class="nb">NULL</span><span class="p">)</span> <span class="k">return</span> <span class="n">health_</span><span class="p">;</span>
@@ -397,7 +397,7 @@
 每次你查找属性都需要回溯继承链。</p>
 <p>如果我们可以保证品种的属性不变，一个更快的解决方案是在<em>构造时</em>引用继承。
 这被称为“复制到”委托，因为在创建对象时，我们<em>复制</em>继承的属性<em>到</em>推导的类型。它看上去是这样的：</p>
-<div class="codehilite"><pre><span class="n">Breed</span><span class="p">(</span><span class="n">Breed</span><span class="o">*</span> <span class="n">parent</span><span class="p">,</span> <span class="kt">int</span> <span class="n">health</span><span class="p">,</span> <span class="k">const</span> <span class="kt">char</span><span class="o">*</span> <span class="n">attack</span><span class="p">)</span>
+<div class="codehilite"><pre><span></span><span class="n">Breed</span><span class="p">(</span><span class="n">Breed</span><span class="o">*</span> <span class="n">parent</span><span class="p">,</span> <span class="kt">int</span> <span class="n">health</span><span class="p">,</span> <span class="k">const</span> <span class="kt">char</span><span class="o">*</span> <span class="n">attack</span><span class="p">)</span>
 <span class="o">:</span> <span class="n">health_</span><span class="p">(</span><span class="n">health</span><span class="p">),</span>
   <span class="n">attack_</span><span class="p">(</span><span class="n">attack</span><span class="p">)</span>
 <span class="p">{</span>
@@ -414,14 +414,14 @@
 <p>注意现在我们不再需要给父品种的字段了。
 一旦构造器完成，我们可以忘了父品种，因为我们已经拷贝了它的所有属性。
 为了获得品种的属性，我们现在直接返回字段：</p>
-<div class="codehilite"><pre><span class="kt">int</span>         <span class="nf">getHealth</span><span class="p">()</span> <span class="p">{</span> <span class="k">return</span> <span class="n">health_</span><span class="p">;</span> <span class="p">}</span>
+<div class="codehilite"><pre><span></span><span class="kt">int</span>         <span class="nf">getHealth</span><span class="p">()</span> <span class="p">{</span> <span class="k">return</span> <span class="n">health_</span><span class="p">;</span> <span class="p">}</span>
 <span class="k">const</span> <span class="kt">char</span><span class="o">*</span> <span class="nf">getAttack</span><span class="p">()</span> <span class="p">{</span> <span class="k">return</span> <span class="n">attack_</span><span class="p">;</span> <span class="p">}</span>
 </pre></div>
 
 
 <p>又好又快！</p>
 <p>假设我们的游戏引擎设置为加载定义品种的JSON文件后创建类型。它看上去是这样的：</p>
-<div class="codehilite"><pre><span class="p">{</span>
+<div class="codehilite"><pre><span></span><span class="p">{</span>
   <span class="nt">&quot;Troll&quot;</span><span class="p">:</span> <span class="p">{</span>
     <span class="nt">&quot;health&quot;</span><span class="p">:</span> <span class="mi">25</span><span class="p">,</span>
     <span class="nt">&quot;attack&quot;</span><span class="p">:</span> <span class="s2">&quot;The troll hits you!&quot;</span>
@@ -461,7 +461,7 @@
 从代码库的角度看来，怪物基本上没有类型，事实上它们有品种是一个实现的细节。</p>
 <p>我们可以很容易的改变这点，允许<code>Monster</code>返回它的<code>Breed</code>：</p>
 <p><span name="null"></span></p>
-<div class="codehilite"><pre><span class="k">class</span> <span class="nc">Monster</span>
+<div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">Monster</span>
 <span class="p">{</span>
 <span class="k">public</span><span class="o">:</span>
   <span class="n">Breed</span><span class="o">&amp;</span> <span class="n">getBreed</span><span class="p">()</span> <span class="p">{</span> <span class="k">return</span> <span class="n">breed_</span><span class="p">;</span> <span class="p">}</span>
@@ -485,7 +485,7 @@
 </li>
 <li>
 <p><em>有类型的对象可以选择有类型对象的重载行为</em>。假设我们想要怪物在它接近死亡时改变它的攻击字符串。由于攻击字符串总是通过<code>Monster</code>获取的，我们有一个方便的地方放置代码：</p>
-<div class="codehilite"><pre><span class="k">const</span> <span class="kt">char</span><span class="o">*</span> <span class="n">Monster</span><span class="o">::</span><span class="n">getAttack</span><span class="p">()</span>
+<div class="codehilite"><pre><span></span><span class="k">const</span> <span class="kt">char</span><span class="o">*</span> <span class="n">Monster</span><span class="o">::</span><span class="n">getAttack</span><span class="p">()</span>
 <span class="p">{</span>
   <span class="k">if</span> <span class="p">(</span><span class="n">health_</span> <span class="o">&lt;</span> <span class="n">LOW_HEALTH</span><span class="p">)</span>
   <span class="p">{</span>
@@ -617,8 +617,8 @@
 </li>
 </ul>
 <nav>
-  <span class="prev">&larr; <a href="子类沙箱.html">Previous Chapter</a></span>
-  <span class="next"><a href="解耦模式.html">Next Chapter</a> &rarr;</span>
+  <span class="prev">&larr; <a href="subclass-sandbox.html">Previous Chapter</a></span>
+  <span class="next"><a href="decoupling-patterns.html">Next Chapter</a> &rarr;</span>
   <span class="toc">&equiv; <a href="/">The Book</a></span>
 </nav>
 </div>

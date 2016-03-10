@@ -28,7 +28,7 @@ YELLOW = '\033[33m'
 
 CHAPTERS = [
   "致谢",
-  "Introduction",
+  "序",
   "架构，性能和游戏",
   "重访设计模式",
   "命令",
@@ -54,6 +54,36 @@ CHAPTERS = [
   "脏标识",
   "对象池",
   "空间分区"
+]
+
+CHAPTERS_HTML = [
+  "Acknowledgements",
+  "Introduction",
+  "Architecture, Performance, and Games",
+  "Design Patterns Revisited",
+  "Command",
+  "Flyweight",
+  "Observer",
+  "Prototype",
+  "Singleton",
+  "State",
+  "Sequencing Patterns",
+  "Double Buffer",
+  "Game Loop",
+  "Update Method",
+  "Behavioral Patterns",
+  "Bytecode",
+  "Subclass Sandbox",
+  "Type Object",
+  "Decoupling Patterns",
+  "Component",
+  "Event Queue",
+  "Service Locator",
+  "Optimization Patterns",
+  "Data Locality",
+  "Dirty Flag",
+  "Object Pool",
+  "Spatial Partition"
 ]
 
 # URLs for hyperlinks to chapters. Note that the order is significant here.
@@ -340,14 +370,14 @@ def make_prev_next(title):
   prev_link = ""
   next_link = ""
   if chapter_index > 0:
-    prev_href = title_to_file(CHAPTERS[chapter_index - 1])
+    prev_href = title_to_file(CHAPTERS_HTML[chapter_index - 1])
     prev_link = '<span class="prev">&larr; <a href="{}.html">Previous Chapter</a></span>'.format(
-      prev_href, CHAPTERS[chapter_index - 1])
+      prev_href, CHAPTERS_HTML[chapter_index - 1])
 
-  if chapter_index < len(CHAPTERS) - 1:
-    next_href = title_to_file(CHAPTERS[chapter_index + 1])
+  if chapter_index < len(CHAPTERS_HTML) - 1:
+    next_href = title_to_file(CHAPTERS_HTML[chapter_index + 1])
     next_link = '<span class="next"><a href="{}.html">Next Chapter</a> &rarr;</span>'.format(
-      next_href, CHAPTERS[chapter_index + 1])
+      next_href, CHAPTERS_HTML[chapter_index + 1])
 
   return (prev_link, next_link)
 

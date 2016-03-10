@@ -1,5 +1,5 @@
 ^title 原型
-^section 重访设计模式
+^section Design Patterns Revisited
 
 我第一次听到“原型”这个词是在*设计模式*中。
 如今，似乎每个人都在用这个词，但他们讨论的不是<a href="http://en.wikipedia.org/wiki/Prototype_pattern" class="gof-pattern">设计模式</a>。

@@ -1,5 +1,5 @@
 ^title 单例
-^section 重访设计模式
+^section Design Patterns Revisited
 
 这个章节不同寻常。
 这本书其他章节展示如何使用一个设计模式。

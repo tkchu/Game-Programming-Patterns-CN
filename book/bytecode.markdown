@@ -1,5 +1,5 @@
 ^title 字节码
-^section 行为模式
+^section Behavioral Patterns
 
 ## 意图
 

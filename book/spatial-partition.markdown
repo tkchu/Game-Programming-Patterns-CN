@@ -1,5 +1,5 @@
 ^title 空间分区
-^section 优化模式
+^section Optimization Patterns
 
 ## 意图
 

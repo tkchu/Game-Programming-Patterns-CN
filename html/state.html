@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="Content-type" content="text/html;charset=UTF-8" />
 
-<title>状态 &middot; 重访设计欧模式 &middot; Game Programming Patterns</title>
+<title>状态 &middot; Design Patterns Revisited &middot; Game Programming Patterns</title>
 
 <!-- Tell mobile browsers we're optimized for them and they don't need to crop
      the viewport. -->
@@ -26,12 +26,12 @@
 <div class="page sidebar">
 <div class="content">
 <nav class="top">
-  <span class="prev">&larr; <a href="单例.html">Previous Chapter</a></span>
-  <span class="next"><a href="序列模式.html">Next Chapter</a> &rarr;</span>
+  <span class="prev">&larr; <a href="singleton.html">Previous Chapter</a></span>
+  <span class="next"><a href="sequencing-patterns.html">Next Chapter</a> &rarr;</span>
   <span class="toc">&equiv; <a href="/">The Book</a></span>
 </nav>
 <h1>状态</h1>
-<h1 class="book"><a href="/">Game Programming Patterns</a><span class="section"><a href="重访设计欧模式.html">重访设计欧模式</a></span></h1>
+<h1 class="book"><a href="/">Game Programming Patterns</a><span class="section"><a href="design-patterns-revisited.html">Design Patterns Revisited</a></span></h1>
 <p>忏悔时间：我有些越界，将太多的东西打包到了这章中。
 它表面上关于<a href="http://en.wikipedia.org/wiki/State_pattern" class="gof-pattern">状态模式</a>，但我无法只讨论它和游戏，而不涉及更加基础的<em>有限状态机</em>（FSMs）。
 但是一旦讲了那个，我发现也想要介绍<em>层次状态机</em>和<em>下推自动机</em>。</p>
@@ -49,7 +49,7 @@
 <p>我们在完成一个卷轴平台游戏。
 工作是实现玩家在游戏世界中操作的女英雄。
 这就意味着她需要对玩家的输入做出响应。按B键她应该跳跃。简单实现如下：</p>
-<div class="codehilite"><pre><span class="kt">void</span> <span class="n">Heroine</span><span class="o">::</span><span class="n">handleInput</span><span class="p">(</span><span class="n">Input</span> <span class="n">input</span><span class="p">)</span>
+<div class="codehilite"><pre><span></span><span class="kt">void</span> <span class="n">Heroine</span><span class="o">::</span><span class="n">handleInput</span><span class="p">(</span><span class="n">Input</span> <span class="n">input</span><span class="p">)</span>
 <span class="p">{</span>
   <span class="k">if</span> <span class="p">(</span><span class="n">input</span> <span class="o">==</span> <span class="n">PRESS_B</span><span class="p">)</span>
   <span class="p">{</span>
@@ -63,7 +63,7 @@
 <p>看到漏洞了吗？</p>
 <p>没有东西阻止“空气跳”——在她空中时狂按B，她就会浮空。
 简单的<span name="landing">修复方法</span>是给<code>Heroine</code>增加<code>isJumping_</code>布尔字段，追踪它跳跃的状态。然后这样做：</p>
-<div class="codehilite"><pre><span class="kt">void</span> <span class="n">Heroine</span><span class="o">::</span><span class="n">handleInput</span><span class="p">(</span><span class="n">Input</span> <span class="n">input</span><span class="p">)</span>
+<div class="codehilite"><pre><span></span><span class="kt">void</span> <span class="n">Heroine</span><span class="o">::</span><span class="n">handleInput</span><span class="p">(</span><span class="n">Input</span> <span class="n">input</span><span class="p">)</span>
 <span class="p">{</span>
   <span class="k">if</span> <span class="p">(</span><span class="n">input</span> <span class="o">==</span> <span class="n">PRESS_B</span><span class="p">)</span>
   <span class="p">{</span>
@@ -82,7 +82,7 @@
 我在这里为了简明而没有写。</p>
 </aside>
 <p>下面，当玩家按下键时，我们想要她在地上时卧倒，而松开下键的时候站起来：</p>
-<div class="codehilite"><pre><span class="kt">void</span> <span class="n">Heroine</span><span class="o">::</span><span class="n">handleInput</span><span class="p">(</span><span class="n">Input</span> <span class="n">input</span><span class="p">)</span>
+<div class="codehilite"><pre><span></span><span class="kt">void</span> <span class="n">Heroine</span><span class="o">::</span><span class="n">handleInput</span><span class="p">(</span><span class="n">Input</span> <span class="n">input</span><span class="p">)</span>
 <span class="p">{</span>
   <span class="k">if</span> <span class="p">(</span><span class="n">input</span> <span class="o">==</span> <span class="n">PRESS_B</span><span class="p">)</span>
   <span class="p">{</span>
@@ -111,7 +111,7 @@
 <li>在空中放开下键。</li>
 </ol>
 <p>英雄会在跳跃的半路上变成站立图片。是时候增加另一个标识了……</p>
-<div class="codehilite"><pre><span class="kt">void</span> <span class="n">Heroine</span><span class="o">::</span><span class="n">handleInput</span><span class="p">(</span><span class="n">Input</span> <span class="n">input</span><span class="p">)</span>
+<div class="codehilite"><pre><span></span><span class="kt">void</span> <span class="n">Heroine</span><span class="o">::</span><span class="n">handleInput</span><span class="p">(</span><span class="n">Input</span> <span class="n">input</span><span class="p">)</span>
 <span class="p">{</span>
   <span class="k">if</span> <span class="p">(</span><span class="n">input</span> <span class="o">==</span> <span class="n">PRESS_B</span><span class="p">)</span>
   <span class="p">{</span>
@@ -141,7 +141,7 @@
 
 
 <p>下面，如果玩家在跳跃途中按下下键，英雄能够做速降攻击就太酷了：</p>
-<div class="codehilite"><pre><span class="kt">void</span> <span class="n">Heroine</span><span class="o">::</span><span class="n">handleInput</span><span class="p">(</span><span class="n">Input</span> <span class="n">input</span><span class="p">)</span>
+<div class="codehilite"><pre><span></span><span class="kt">void</span> <span class="n">Heroine</span><span class="o">::</span><span class="n">handleInput</span><span class="p">(</span><span class="n">Input</span> <span class="n">input</span><span class="p">)</span>
 <span class="p">{</span>
   <span class="k">if</span> <span class="p">(</span><span class="n">input</span> <span class="o">==</span> <span class="n">PRESS_B</span><span class="p">)</span>
   <span class="p">{</span>
@@ -224,7 +224,7 @@ GoF的状态模式是一个方法——我们会谈到的——但先从简单�
 <code>isJumping_</code>和<code>isDucking_</code>，不会同时为真。
 但有些标识同时只有一个是<code>true</code>，提示是你真正需要的其实是<code>enum</code>。 </p>
 <p>在这个例子中 <code>enum</code>就是FSM的状态的集合，所以让我们定义它：</p>
-<div class="codehilite"><pre><span class="k">enum</span> <span class="n">State</span>
+<div class="codehilite"><pre><span></span><span class="k">enum</span> <span class="n">State</span>
 <span class="p">{</span>
   <span class="n">STATE_STANDING</span><span class="p">,</span>
   <span class="n">STATE_JUMPING</span><span class="p">,</span>
@@ -238,7 +238,7 @@ GoF的状态模式是一个方法——我们会谈到的——但先从简单�
 我们同样改变了分支顺序。在前面的代码中，我们先在输入上做分支，<em>然后</em>是状态。
 这让代码统一处理某个按键，但一个状态分布到了代码各处。
 我们想让它们聚在一起，所以先对状态做分支。这样的话：</p>
-<div class="codehilite"><pre><span class="kt">void</span> <span class="n">Heroine</span><span class="o">::</span><span class="n">handleInput</span><span class="p">(</span><span class="n">Input</span> <span class="n">input</span><span class="p">)</span>
+<div class="codehilite"><pre><span></span><span class="kt">void</span> <span class="n">Heroine</span><span class="o">::</span><span class="n">handleInput</span><span class="p">(</span><span class="n">Input</span> <span class="n">input</span><span class="p">)</span>
 <span class="p">{</span>
   <span class="k">switch</span> <span class="p">(</span><span class="n">state_</span><span class="p">)</span>
   <span class="p">{</span>
@@ -290,7 +290,7 @@ GoF的状态模式是一个方法——我们会谈到的——但先从简单�
 当她速降时，我们需要追踪它的充能时间。</p>
 <p>我们为<code>Heroine</code>添加了<code>chargeTime_</code>字段，保存攻击充能的时间大小。
 假设我们已经有一个每帧都会调用的<code>update()</code>方法。在那里，我们添加：</p>
-<div class="codehilite"><pre><span class="kt">void</span> <span class="n">Heroine</span><span class="o">::</span><span class="n">update</span><span class="p">()</span>
+<div class="codehilite"><pre><span></span><span class="kt">void</span> <span class="n">Heroine</span><span class="o">::</span><span class="n">update</span><span class="p">()</span>
 <span class="p">{</span>
   <span class="k">if</span> <span class="p">(</span><span class="n">state_</span> <span class="o">==</span> <span class="n">STATE_DUCKING</span><span class="p">)</span>
   <span class="p">{</span>
@@ -308,7 +308,7 @@ GoF的状态模式是一个方法——我们会谈到的——但先从简单�
 <p>如果你猜这就是<a href="update-method.html" class="pattern">更新方法</a>模式，你答对了！</p>
 </aside>
 <p>我们需要在她开始速降的时候重置计时器，所以我们修改<code>handleInput()</code>：</p>
-<div class="codehilite"><pre><span class="kt">void</span> <span class="n">Heroine</span><span class="o">::</span><span class="n">handleInput</span><span class="p">(</span><span class="n">Input</span> <span class="n">input</span><span class="p">)</span>
+<div class="codehilite"><pre><span></span><span class="kt">void</span> <span class="n">Heroine</span><span class="o">::</span><span class="n">handleInput</span><span class="p">(</span><span class="n">Input</span> <span class="n">input</span><span class="p">)</span>
 <span class="p">{</span>
   <span class="k">switch</span> <span class="p">(</span><span class="n">state_</span><span class="p">)</span>
   <span class="p">{</span>
@@ -350,7 +350,7 @@ GoF的状态模式是一个方法——我们会谈到的——但先从简单�
 <p>首先，我们为状态定义接口。
 状态相关的行为——我们之前用<code>switch</code>的每一处——成为了接口中的虚方法。
 对于我们来说，那是<code>handleInput()</code>和<code>update()</code>：</p>
-<div class="codehilite"><pre><span class="k">class</span> <span class="nc">HeroineState</span>
+<div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">HeroineState</span>
 <span class="p">{</span>
 <span class="k">public</span><span class="o">:</span>
   <span class="k">virtual</span> <span class="o">~</span><span class="n">HeroineState</span><span class="p">()</span> <span class="p">{}</span>
@@ -363,7 +363,7 @@ GoF的状态模式是一个方法——我们会谈到的——但先从简单�
 <h3><a href="#为每个状态写类" name="为每个状态写类">为每个状态写类</a></h3>
 <p>对于每个状态，我们定义一个类实现接口。它的方法定义了英雄在状态的行为。
 换言之，从之前的<code>switch</code>中取出每个<code>case</code>，将它们移动到状态类中。举个例子：</p>
-<div class="codehilite"><pre><span class="k">class</span> <span class="nc">DuckingState</span> <span class="o">:</span> <span class="k">public</span> <span class="n">HeroineState</span>
+<div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">DuckingState</span> <span class="o">:</span> <span class="k">public</span> <span class="n">HeroineState</span>
 <span class="p">{</span>
 <span class="k">public</span><span class="o">:</span>
   <span class="n">DuckingState</span><span class="p">()</span>
@@ -397,7 +397,7 @@ GoF的状态模式是一个方法——我们会谈到的——但先从简单�
 <h3><a href="#状态委托" name="状态委托">状态委托</a></h3>
 <p>然后，我们给<code>Heroine</code>指向她的当前状态的指针，放弃巨大的<code>switch</code>，转而委托给状态。</p>
 <p><span name="delegate"></span></p>
-<div class="codehilite"><pre><span class="k">class</span> <span class="nc">Heroine</span>
+<div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">Heroine</span>
 <span class="p">{</span>
 <span class="k">public</span><span class="o">:</span>
   <span class="k">virtual</span> <span class="kt">void</span> <span class="n">handleInput</span><span class="p">(</span><span class="n">Input</span> <span class="n">input</span><span class="p">)</span>
@@ -456,7 +456,7 @@ class="pattern">类型</a>对象模式。
 </aside>
 <p>在<em>哪里</em>放置静态实例取决于你。找一个合理的地方。
 没什么特殊的理由，把我们的放在状态基类中。</p>
-<div class="codehilite"><pre><span class="k">class</span> <span class="nc">HeroineState</span>
+<div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">HeroineState</span>
 <span class="p">{</span>
 <span class="k">public</span><span class="o">:</span>
   <span class="k">static</span> <span class="n">StandingState</span> <span class="n">standing</span><span class="p">;</span>
@@ -470,7 +470,7 @@ class="pattern">类型</a>对象模式。
 
 
 <p>每个静态字段都是游戏状态的一个实例。为了让英雄跳跃，站立状态会做些这样的事情：</p>
-<div class="codehilite"><pre><span class="k">if</span> <span class="p">(</span><span class="n">input</span> <span class="o">==</span> <span class="n">PRESS_B</span><span class="p">)</span>
+<div class="codehilite"><pre><span></span><span class="k">if</span> <span class="p">(</span><span class="n">input</span> <span class="o">==</span> <span class="n">PRESS_B</span><span class="p">)</span>
 <span class="p">{</span>
   <span class="n">heroine</span><span class="p">.</span><span class="n">state_</span> <span class="o">=</span> <span class="o">&amp;</span><span class="n">HeroineState</span><span class="o">::</span><span class="n">jumping</span><span class="p">;</span>
   <span class="n">heroine</span><span class="p">.</span><span class="n">setGraphics</span><span class="p">(</span><span class="n">IMAGE_JUMP</span><span class="p">);</span>
@@ -488,7 +488,7 @@ class="pattern">类型</a>对象模式。
 在这里要小心，由于触发变化的代码是当前状态中的方法。我们不想自己删除<code>this</code>。</p>
 <p>相反，我们允许<code>HeroineState</code>中的<code>handleInput()</code>随机的返回一个新状态。
 如果它那么做了，<code>Heroine</code>会删除旧的，然后换成新的，就像这样：</p>
-<div class="codehilite"><pre><span class="kt">void</span> <span class="n">Heroine</span><span class="o">::</span><span class="n">handleInput</span><span class="p">(</span><span class="n">Input</span> <span class="n">input</span><span class="p">)</span>
+<div class="codehilite"><pre><span></span><span class="kt">void</span> <span class="n">Heroine</span><span class="o">::</span><span class="n">handleInput</span><span class="p">(</span><span class="n">Input</span> <span class="n">input</span><span class="p">)</span>
 <span class="p">{</span>
   <span class="n">HeroineState</span><span class="o">*</span> <span class="n">state</span> <span class="o">=</span> <span class="n">state_</span><span class="o">-&gt;</span><span class="n">handleInput</span><span class="p">(</span><span class="o">*</span><span class="k">this</span><span class="p">,</span> <span class="n">input</span><span class="p">);</span>
   <span class="k">if</span> <span class="p">(</span><span class="n">state</span> <span class="o">!=</span> <span class="nb">NULL</span><span class="p">)</span>
@@ -502,7 +502,7 @@ class="pattern">类型</a>对象模式。
 
 <p>这样，我们直到从之前的状态返回，才需要删除它。
 现在，站立状态可以通过创建一个新实例转换为俯卧状态：</p>
-<div class="codehilite"><pre><span class="n">HeroineState</span><span class="o">*</span> <span class="n">StandingState</span><span class="o">::</span><span class="n">handleInput</span><span class="p">(</span><span class="n">Heroine</span><span class="o">&amp;</span> <span class="n">heroine</span><span class="p">,</span>
+<div class="codehilite"><pre><span></span><span class="n">HeroineState</span><span class="o">*</span> <span class="n">StandingState</span><span class="o">::</span><span class="n">handleInput</span><span class="p">(</span><span class="n">Heroine</span><span class="o">&amp;</span> <span class="n">heroine</span><span class="p">,</span>
                                          <span class="n">Input</span> <span class="n">input</span><span class="p">)</span>
 <span class="p">{</span>
   <span class="k">if</span> <span class="p">(</span><span class="n">input</span> <span class="o">==</span> <span class="n">PRESS_DOWN</span><span class="p">)</span>
@@ -528,7 +528,7 @@ class="pattern">类型</a>对象模式。
 <p>当英雄改变状态，我们也改变她的图片。
 现在，那部分代码在她转换<em>前</em>的状态上。
 当她从俯卧转为站立，俯卧状态设置了她的图片：</p>
-<div class="codehilite"><pre><span class="n">HeroineState</span><span class="o">*</span> <span class="n">DuckingState</span><span class="o">::</span><span class="n">handleInput</span><span class="p">(</span><span class="n">Heroine</span><span class="o">&amp;</span> <span class="n">heroine</span><span class="p">,</span>
+<div class="codehilite"><pre><span></span><span class="n">HeroineState</span><span class="o">*</span> <span class="n">DuckingState</span><span class="o">::</span><span class="n">handleInput</span><span class="p">(</span><span class="n">Heroine</span><span class="o">&amp;</span> <span class="n">heroine</span><span class="p">,</span>
                                         <span class="n">Input</span> <span class="n">input</span><span class="p">)</span>
 <span class="p">{</span>
   <span class="k">if</span> <span class="p">(</span><span class="n">input</span> <span class="o">==</span> <span class="n">RELEASE_DOWN</span><span class="p">)</span>
@@ -543,7 +543,7 @@ class="pattern">类型</a>对象模式。
 
 
 <p>我们想做的是每个状态控制她自己的图像。我们可以给状态一个<em>入口行为</em>来实现：</p>
-<div class="codehilite"><pre><span class="k">class</span> <span class="nc">StandingState</span> <span class="o">:</span> <span class="k">public</span> <span class="n">HeroineState</span>
+<div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">StandingState</span> <span class="o">:</span> <span class="k">public</span> <span class="n">HeroineState</span>
 <span class="p">{</span>
 <span class="k">public</span><span class="o">:</span>
   <span class="k">virtual</span> <span class="kt">void</span> <span class="n">enter</span><span class="p">(</span><span class="n">Heroine</span><span class="o">&amp;</span> <span class="n">heroine</span><span class="p">)</span>
@@ -557,7 +557,7 @@ class="pattern">类型</a>对象模式。
 
 
 <p>在<code>Heroine</code>中，我们修改了处理状态改变的代码，在新的状态上调用：</p>
-<div class="codehilite"><pre><span class="kt">void</span> <span class="n">Heroine</span><span class="o">::</span><span class="n">handleInput</span><span class="p">(</span><span class="n">Input</span> <span class="n">input</span><span class="p">)</span>
+<div class="codehilite"><pre><span></span><span class="kt">void</span> <span class="n">Heroine</span><span class="o">::</span><span class="n">handleInput</span><span class="p">(</span><span class="n">Input</span> <span class="n">input</span><span class="p">)</span>
 <span class="p">{</span>
   <span class="n">HeroineState</span><span class="o">*</span> <span class="n">state</span> <span class="o">=</span> <span class="n">state_</span><span class="o">-&gt;</span><span class="n">handleInput</span><span class="p">(</span><span class="o">*</span><span class="k">this</span><span class="p">,</span> <span class="n">input</span><span class="p">);</span>
   <span class="k">if</span> <span class="p">(</span><span class="n">state</span> <span class="o">!=</span> <span class="nb">NULL</span><span class="p">)</span>
@@ -573,7 +573,7 @@ class="pattern">类型</a>对象模式。
 
 
 <p>这让我们将俯卧代码简化为：</p>
-<div class="codehilite"><pre><span class="n">HeroineState</span><span class="o">*</span> <span class="n">DuckingState</span><span class="o">::</span><span class="n">handleInput</span><span class="p">(</span><span class="n">Heroine</span><span class="o">&amp;</span> <span class="n">heroine</span><span class="p">,</span>
+<div class="codehilite"><pre><span></span><span class="n">HeroineState</span><span class="o">*</span> <span class="n">DuckingState</span><span class="o">::</span><span class="n">handleInput</span><span class="p">(</span><span class="n">Heroine</span><span class="o">&amp;</span> <span class="n">heroine</span><span class="p">,</span>
                                         <span class="n">Input</span> <span class="n">input</span><span class="p">)</span>
 <span class="p">{</span>
   <span class="k">if</span> <span class="p">(</span><span class="n">input</span> <span class="o">==</span> <span class="n">RELEASE_DOWN</span><span class="p">)</span>
@@ -630,7 +630,7 @@ FSMs不够灵活，不是它们中的一员。</p>
 然后定义她携带了什么的单独状态机。
 <code>Heroine</code>将会有<em>两个</em>“状态”引用，每个对应一个状态机，就像这样：</p>
 <p><span name="equip-state"></span></p>
-<div class="codehilite"><pre><span class="k">class</span> <span class="nc">Heroine</span>
+<div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">Heroine</span>
 <span class="p">{</span>
   <span class="c1">// Other code...</span>
 
@@ -647,7 +647,7 @@ FSMs不够灵活，不是它们中的一员。</p>
 </aside>
 <p>当英雄把输入委托给了状态，她两个都会委托：</p>
 <p><span name="consume"></span></p>
-<div class="codehilite"><pre><span class="kt">void</span> <span class="n">Heroine</span><span class="o">::</span><span class="n">handleInput</span><span class="p">(</span><span class="n">Input</span> <span class="n">input</span><span class="p">)</span>
+<div class="codehilite"><pre><span></span><span class="kt">void</span> <span class="n">Heroine</span><span class="o">::</span><span class="n">handleInput</span><span class="p">(</span><span class="n">Input</span> <span class="n">input</span><span class="p">)</span>
 <span class="p">{</span>
   <span class="n">state_</span><span class="o">-&gt;</span><span class="n">handleInput</span><span class="p">(</span><span class="o">*</span><span class="k">this</span><span class="p">,</span> <span class="n">input</span><span class="p">);</span>
   <span class="n">equipment_</span><span class="o">-&gt;</span><span class="n">handleInput</span><span class="p">(</span><span class="o">*</span><span class="k">this</span><span class="p">,</span> <span class="n">input</span><span class="p">);</span>
@@ -682,7 +682,7 @@ FSMs不够灵活，不是它们中的一员。</p>
 换言之，它像重载的继承方法那样运作。</p>
 <p>事实上，如果我们使用状态模式实现FSM，我们可以使用继承来实现层次。
 定义一个基类作为父状态：</p>
-<div class="codehilite"><pre><span class="k">class</span> <span class="nc">OnGroundState</span> <span class="o">:</span> <span class="k">public</span> <span class="n">HeroineState</span>
+<div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">OnGroundState</span> <span class="o">:</span> <span class="k">public</span> <span class="n">HeroineState</span>
 <span class="p">{</span>
 <span class="k">public</span><span class="o">:</span>
   <span class="k">virtual</span> <span class="kt">void</span> <span class="n">handleInput</span><span class="p">(</span><span class="n">Heroine</span><span class="o">&amp;</span> <span class="n">heroine</span><span class="p">,</span> <span class="n">Input</span> <span class="n">input</span><span class="p">)</span>
@@ -701,7 +701,7 @@ FSMs不够灵活，不是它们中的一员。</p>
 
 
 <p>每个子状态继承它：</p>
-<div class="codehilite"><pre><span class="k">class</span> <span class="nc">DuckingState</span> <span class="o">:</span> <span class="k">public</span> <span class="n">OnGroundState</span>
+<div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">DuckingState</span> <span class="o">:</span> <span class="k">public</span> <span class="n">OnGroundState</span>
 <span class="p">{</span>
 <span class="k">public</span><span class="o">:</span>
   <span class="k">virtual</span> <span class="kt">void</span> <span class="n">handleInput</span><span class="p">(</span><span class="n">Heroine</span><span class="o">&amp;</span> <span class="n">heroine</span><span class="p">,</span> <span class="n">Input</span> <span class="n">input</span><span class="p">)</span>
@@ -782,8 +782,8 @@ FSMs不够灵活，不是它们中的一员。</p>
 <p>在游戏中，它们因在AI中使用而闻名，但是它也常用于其他实现，
 比如处理玩家输入，导航菜单界面，分析文字，网络协议以及其他异步行为。</p>
 <nav>
-  <span class="prev">&larr; <a href="单例.html">Previous Chapter</a></span>
-  <span class="next"><a href="序列模式.html">Next Chapter</a> &rarr;</span>
+  <span class="prev">&larr; <a href="singleton.html">Previous Chapter</a></span>
+  <span class="next"><a href="sequencing-patterns.html">Next Chapter</a> &rarr;</span>
   <span class="toc">&equiv; <a href="/">The Book</a></span>
 </nav>
 </div>

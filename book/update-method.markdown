@@ -1,5 +1,5 @@
 ^title 更新方法
-^section 序列模式
+^section Sequencing Patterns
 
 ## 意图
 
