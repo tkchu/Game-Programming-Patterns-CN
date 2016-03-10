@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="Content-type" content="text/html;charset=UTF-8" />
 
-<title>单例 &middot; Design Patterns Revisited &middot; Game Programming Patterns</title>
+<title>单例 &middot; 重访设计模式 &middot; Game Programming Patterns</title>
 
 <!-- Tell mobile browsers we're optimized for them and they don't need to crop
      the viewport. -->
@@ -26,12 +26,12 @@
 <div class="page sidebar">
 <div class="content">
 <nav class="top">
-  <span class="prev">&larr; <a href="prototype.html">Previous Chapter</a></span>
-  <span class="next"><a href="state.html">Next Chapter</a> &rarr;</span>
+  <span class="prev">&larr; <a href="原型.html">Previous Chapter</a></span>
+  <span class="next"><a href="状态.html">Next Chapter</a> &rarr;</span>
   <span class="toc">&equiv; <a href="/">The Book</a></span>
 </nav>
 <h1>单例</h1>
-<h1 class="book"><a href="/">Game Programming Patterns</a><span class="section"><a href="design-patterns-revisited.html">Design Patterns Revisited</a></span></h1>
+<h1 class="book"><a href="/">Game Programming Patterns</a><span class="section"><a href="重访设计模式.html">重访设计模式</a></span></h1>
 <p>这个章节不同寻常。
 这本书其他章节展示如何使用一个设计模式。
 这个章节向你展示如何<em>不</em>使用一个设计模式。</p>
@@ -68,7 +68,7 @@
 创建单一实例以外，它也提供了一种全局获得它的方法。
 这种范式，无论何处何人都可以得到祝福的实例。
 全部加起来，类经典的实现如下：</p>
-<div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">FileSystem</span>
+<div class="codehilite"><pre><span class="k">class</span> <span class="nc">FileSystem</span>
 <span class="p">{</span>
 <span class="k">public</span><span class="o">:</span>
   <span class="k">static</span> <span class="n">FileSystem</span><span class="o">&amp;</span> <span class="n">instance</span><span class="p">()</span>
@@ -91,7 +91,7 @@
 公开的静态方法<code>instance()</code>让代码的任何地方都能获取实例。
 它同样负责在第一个有人请求的时候才惰性实例化单例。</p>
 <p>一个现代的实现看起来是这样的：</p>
-<div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">FileSystem</span>
+<div class="codehilite"><pre><span class="k">class</span> <span class="nc">FileSystem</span>
 <span class="p">{</span>
 <span class="k">public</span><span class="o">:</span>
   <span class="k">static</span> <span class="n">FileSystem</span><span class="o">&amp;</span> <span class="n">instance</span><span class="p">()</span>
@@ -126,18 +126,18 @@
 </li>
 <li>
 <p><strong>可将单例作为子类。</strong>这是个很有用但通常过度了的能力。假设我们需要文件系统包装类跨平台。为了使之工作，我们需要它成为文件系统抽象出来的接口，有子类为每个平台实现接口。这里是基类：</p>
-<div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">FileSystem</span>
+<div class="codehilite"><pre><span class="k">class</span> <span class="nc">FileSystem</span>
 <span class="p">{</span>
 <span class="k">public</span><span class="o">:</span>
   <span class="k">virtual</span> <span class="o">~</span><span class="n">FileSystem</span><span class="p">()</span> <span class="p">{}</span>
   <span class="k">virtual</span> <span class="kt">char</span><span class="o">*</span> <span class="n">readFile</span><span class="p">(</span><span class="kt">char</span><span class="o">*</span> <span class="n">path</span><span class="p">)</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
-  <span class="k">virtual</span> <span class="kt">void</span>  <span class="nf">writeFile</span><span class="p">(</span><span class="kt">char</span><span class="o">*</span> <span class="n">path</span><span class="p">,</span> <span class="kt">char</span><span class="o">*</span> <span class="n">contents</span><span class="p">)</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+  <span class="k">virtual</span> <span class="kt">void</span>  <span class="n">writeFile</span><span class="p">(</span><span class="kt">char</span><span class="o">*</span> <span class="n">path</span><span class="p">,</span> <span class="kt">char</span><span class="o">*</span> <span class="n">contents</span><span class="p">)</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
 <span class="p">};</span>
 </pre></div>
 
 
 <p>然后我们为一堆平台定义子类。</p>
-<div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">PS3FileSystem</span> <span class="o">:</span> <span class="k">public</span> <span class="n">FileSystem</span>
+<div class="codehilite"><pre><span class="k">class</span> <span class="nc">PS3FileSystem</span> <span class="o">:</span> <span class="k">public</span> <span class="n">FileSystem</span>
 <span class="p">{</span>
 <span class="k">public</span><span class="o">:</span>
   <span class="k">virtual</span> <span class="kt">char</span><span class="o">*</span> <span class="n">readFile</span><span class="p">(</span><span class="kt">char</span><span class="o">*</span> <span class="n">path</span><span class="p">)</span>
@@ -168,14 +168,14 @@
 
 
 <p>下一步，我们把<code>FileSystem</code>变成一个单例：</p>
-<div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">FileSystem</span>
+<div class="codehilite"><pre><span class="k">class</span> <span class="nc">FileSystem</span>
 <span class="p">{</span>
 <span class="k">public</span><span class="o">:</span>
   <span class="k">static</span> <span class="n">FileSystem</span><span class="o">&amp;</span> <span class="n">instance</span><span class="p">();</span>
 
   <span class="k">virtual</span> <span class="o">~</span><span class="n">FileSystem</span><span class="p">()</span> <span class="p">{}</span>
   <span class="k">virtual</span> <span class="kt">char</span><span class="o">*</span> <span class="n">readFile</span><span class="p">(</span><span class="kt">char</span><span class="o">*</span> <span class="n">path</span><span class="p">)</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
-  <span class="k">virtual</span> <span class="kt">void</span>  <span class="nf">writeFile</span><span class="p">(</span><span class="kt">char</span><span class="o">*</span> <span class="n">path</span><span class="p">,</span> <span class="kt">char</span><span class="o">*</span> <span class="n">contents</span><span class="p">)</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+  <span class="k">virtual</span> <span class="kt">void</span>  <span class="n">writeFile</span><span class="p">(</span><span class="kt">char</span><span class="o">*</span> <span class="n">path</span><span class="p">,</span> <span class="kt">char</span><span class="o">*</span> <span class="n">contents</span><span class="p">)</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
 
 <span class="k">protected</span><span class="o">:</span>
   <span class="n">FileSystem</span><span class="p">()</span> <span class="p">{}</span>
@@ -184,7 +184,7 @@
 
 
 <p>灵巧之处在于实例是如何被创建的。</p>
-<div class="codehilite"><pre><span></span><span class="n">FileSystem</span><span class="o">&amp;</span> <span class="n">FileSystem</span><span class="o">::</span><span class="n">instance</span><span class="p">()</span>
+<div class="codehilite"><pre><span class="n">FileSystem</span><span class="o">&amp;</span> <span class="n">FileSystem</span><span class="o">::</span><span class="n">instance</span><span class="p">()</span>
 <span class="p">{</span>
   <span class="cp">#if PLATFORM == PLAYSTATION3</span>
     <span class="k">static</span> <span class="n">FileSystem</span> <span class="o">*</span><span class="n">instance</span> <span class="o">=</span> <span class="k">new</span> <span class="n">PS3FileSystem</span><span class="p">();</span>
@@ -268,7 +268,7 @@
 在线部分，UI，声音，游戏玩法。
 但是我们不能，不仅仅因为<code>Log</code>类不再允许我们创建多个实例，
 设计限制保证每个使用它的都是单一调用：</p>
-<div class="codehilite"><pre><span></span><span class="nt">Log</span><span class="o">:</span><span class="nd">:instance</span><span class="o">()</span><span class="nc">.write</span><span class="o">(</span><span class="s2">&quot;Some event.&quot;</span><span class="o">);</span>
+<div class="codehilite"><pre><span class="nt">Log</span><span class="o">:</span><span class="nd">:instance</span><span class="o">()</span><span class="nc">.write</span><span class="o">(</span><span class="s2">&quot;Some event.&quot;</span><span class="o">);</span>
 </pre></div>
 
 
@@ -293,7 +293,7 @@
 </aside>
 <p>因为这两个原因，我见到的大多数游戏都不依赖惰性初始化。
 相反，它们像这样实现单例模式：</p>
-<div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">FileSystem</span>
+<div class="codehilite"><pre><span class="k">class</span> <span class="nc">FileSystem</span>
 <span class="p">{</span>
 <span class="k">public</span><span class="o">:</span>
   <span class="k">static</span> <span class="n">FileSystem</span><span class="o">&amp;</span> <span class="n">instance</span><span class="p">()</span> <span class="p">{</span> <span class="k">return</span> <span class="n">instance_</span><span class="p">;</span> <span class="p">}</span>
@@ -335,7 +335,7 @@
 更多情况下，它们有时会在那里放“系统”或“引擎”，但是思路还是一样的。</p>
 <p>小心处理类有时是有用的，
 通常它们只是反映对OOP的不熟悉。思考这两个特制的类：</p>
-<div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">Bullet</span>
+<div class="codehilite"><pre><span class="k">class</span> <span class="nc">Bullet</span>
 <span class="p">{</span>
 <span class="k">public</span><span class="o">:</span>
   <span class="kt">int</span> <span class="n">getX</span><span class="p">()</span> <span class="k">const</span> <span class="p">{</span> <span class="k">return</span> <span class="n">x_</span><span class="p">;</span> <span class="p">}</span>
@@ -381,7 +381,7 @@
 无论如何，任何有<code>Bullet</code>的都需要管理，而你需要多少<code>BulletManager</code>实例呢？</p>
 <p>事实上，这里的答案是<em>零</em>。
 这是我们如何为管理类解决“单例”问题：</p>
-<div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">Bullet</span>
+<div class="codehilite"><pre><span class="k">class</span> <span class="nc">Bullet</span>
 <span class="p">{</span>
 <span class="k">public</span><span class="o">:</span>
   <span class="n">Bullet</span><span class="p">(</span><span class="kt">int</span> <span class="n">x</span><span class="p">,</span> <span class="kt">int</span> <span class="n">y</span><span class="p">)</span> <span class="o">:</span> <span class="n">x_</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="n">y_</span><span class="p">(</span><span class="n">y</span><span class="p">)</span> <span class="p">{}</span>
@@ -419,7 +419,7 @@
 <p>我们想要一种方式保证只有一个实例而<em>无需</em>提供全局接触。
 有好几种方法能行。这是其中之一：</p>
 <p><span name="assert"></span></p>
-<div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">FileSystem</span>
+<div class="codehilite"><pre><span class="k">class</span> <span class="nc">FileSystem</span>
 <span class="p">{</span>
 <span class="k">public</span><span class="o">:</span>
   <span class="n">FileSystem</span><span class="p">()</span>
@@ -485,7 +485,7 @@ programming</a>被设计处理应对它们。</p>
 <li>
 <p><strong>从基类中获得。</strong>很多游戏架构有浅层但是广泛的继承层次，通常只有一层深。举个例子，你也许有<code>GameObject</code>基类，每个游戏中的敌人或者对象都继承它。使用这样的架构，很大一部分游戏代码会存在这些“子”推导类中。这就意味着这些类已经有了对同样事物的相同获取方法：它们的<code>GameObject</code>基类。我们可以利用这点：</p>
 <p><span name="gameobject"></span></p>
-<div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">GameObject</span>
+<div class="codehilite"><pre><span class="k">class</span> <span class="nc">GameObject</span>
 <span class="p">{</span>
 <span class="k">protected</span><span class="o">:</span>
   <span class="n">Log</span><span class="o">&amp;</span> <span class="n">getLog</span><span class="p">()</span> <span class="p">{</span> <span class="k">return</span> <span class="n">log_</span><span class="p">;</span> <span class="p">}</span>
@@ -516,7 +516,7 @@ href="subclass-sandbox.html">子类沙箱</a> 这章中。</p>
 <li>
 <p><strong>从已经是全局的东西中获取。</strong>移除<em>所有</em>全局状态的目标令人钦佩，但是并不实际。大多数代码库还有一些全局可用对象，比如一个代表了整个游戏状态的<code>Game</code>或<code>World</code>对象。</p>
 <p>我们可以让现有的全局对象捎带需要的东西，来减少全局变量类的数目。不让<code>Log</code>，<code>FileSystem</code>和<code>AudioPlayer</code>变成单例，而这样做：</p>
-<div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">Game</span>
+<div class="codehilite"><pre><span class="k">class</span> <span class="nc">Game</span>
 <span class="p">{</span>
 <span class="k">public</span><span class="o">:</span>
   <span class="k">static</span> <span class="n">Game</span><span class="o">&amp;</span> <span class="n">instance</span><span class="p">()</span> <span class="p">{</span> <span class="k">return</span> <span class="n">instance_</span><span class="p">;</span> <span class="p">}</span>
@@ -538,7 +538,7 @@ href="subclass-sandbox.html">子类沙箱</a> 这章中。</p>
 
 
 <p>这样，只有<code>Game</code>是全局可用的。需要到其他系统的函数得<span name="demeter">经过</span>它：</p>
-<div class="codehilite"><pre><span></span><span class="n">Game</span><span class="o">::</span><span class="n">instance</span><span class="p">().</span><span class="n">getAudioPlayer</span><span class="p">().</span><span class="n">play</span><span class="p">(</span><span class="n">VERY_LOUD_BANG</span><span class="p">);</span>
+<div class="codehilite"><pre><span class="n">Game</span><span class="o">::</span><span class="n">instance</span><span class="p">().</span><span class="n">getAudioPlayer</span><span class="p">().</span><span class="n">play</span><span class="p">(</span><span class="n">VERY_LOUD_BANG</span><span class="p">);</span>
 </pre></div>
 
 
@@ -562,8 +562,8 @@ href="subclass-sandbox.html">子类沙箱</a> 这章中。</p>
 <p><a class="pattern" href="subclass-sandbox.html">子类沙箱</a>模式通过分享状态，给实例以类访问权限而无需让其全局可用。
 <a class="pattern" href="service-locator.html">服务定位器</a>模式<em>确实</em>让一个对象全局可用，但它给了你如何设置对象的更多自由度。</p>
 <nav>
-  <span class="prev">&larr; <a href="prototype.html">Previous Chapter</a></span>
-  <span class="next"><a href="state.html">Next Chapter</a> &rarr;</span>
+  <span class="prev">&larr; <a href="原型.html">Previous Chapter</a></span>
+  <span class="next"><a href="状态.html">Next Chapter</a> &rarr;</span>
   <span class="toc">&equiv; <a href="/">The Book</a></span>
 </nav>
 </div>

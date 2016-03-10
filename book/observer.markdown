@@ -1,5 +1,5 @@
 ^title 观察者
-^section Design Patterns Revisited
+^section 重访设计模式
 
 扔块石头到电脑世界中，
 不可能砸不中一个不使用<span name="devised">[MVC架构][MVC]</span>的应用，

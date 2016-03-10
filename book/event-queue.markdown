@@ -1,5 +1,5 @@
 ^title 事件队列
-^section Decoupling Patterns
+^section 解耦模式
 
 ## 意图
 

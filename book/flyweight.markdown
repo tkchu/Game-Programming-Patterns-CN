@@ -1,5 +1,5 @@
 ^title 享元
-^section Design Patterns Revisited
+^section 重访设计模式
 
 迷雾散尽，露出了古朴庄严的森林。古老的铁杉，在头顶编成绿色穹顶。阳光在树叶间破碎成金色顶棚。从树干间远眺，远处的森林渐渐隐去。
 

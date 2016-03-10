@@ -1,5 +1,5 @@
 ^title 双缓冲
-^section Sequencing Patterns
+^section 序列模式
 
 ## 意图
 

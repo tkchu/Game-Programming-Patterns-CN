@@ -1,5 +1,5 @@
 ^title 游戏循环
-^section Sequencing Patterns
+^section 序列模式
 
 ## 意图
 

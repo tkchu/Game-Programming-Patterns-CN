@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="Content-type" content="text/html;charset=UTF-8" />
 
-<title>服务定位器 &middot; Decoupling Patterns &middot; Game Programming Patterns</title>
+<title>服务定位器 &middot; 解耦模式 &middot; Game Programming Patterns</title>
 
 <!-- Tell mobile browsers we're optimized for them and they don't need to crop
      the viewport. -->
@@ -26,12 +26,12 @@
 <div class="page sidebar">
 <div class="content">
 <nav class="top">
-  <span class="prev">&larr; <a href="event-queue.html">Previous Chapter</a></span>
-  <span class="next"><a href="optimization-patterns.html">Next Chapter</a> &rarr;</span>
+  <span class="prev">&larr; <a href="事件队列.html">Previous Chapter</a></span>
+  <span class="next"><a href="优化模式.html">Next Chapter</a> &rarr;</span>
   <span class="toc">&equiv; <a href="/">The Book</a></span>
 </nav>
 <h1>服务定位器</h1>
-<h1 class="book"><a href="/">Game Programming Patterns</a><span class="section"><a href="decoupling-patterns.html">Decoupling Patterns</a></span></h1>
+<h1 class="book"><a href="/">Game Programming Patterns</a><span class="section"><a href="解耦模式.html">解耦模式</a></span></h1>
 <h2><a href="#意图" name="意图">意图</a></h2>
 <p><em>提供服务的全局接入点，而不必让用户和实现它的具体类耦合。</em></p>
 <h2><a href="#动机" name="动机">动机</a></h2>
@@ -44,7 +44,7 @@
 NPC狙击手开了一枪，射出子弹（AI）。
 用户选择菜单项需要响一声确认（用户界面）。</p>
 <p>这些中的每处都需要用像下面的东西调用音频系统：</p>
-<div class="codehilite"><pre><span></span><span class="c1">// Use a static class?</span>
+<div class="codehilite"><pre><span class="c1">// Use a static class?</span>
 <span class="n">AudioSystem</span><span class="o">::</span><span class="n">playSound</span><span class="p">(</span><span class="n">VERY_LOUD_BANG</span><span class="p">);</span>
 
 <span class="c1">// Or maybe a singleton?</span>
@@ -102,13 +102,13 @@ NPC狙击手开了一枪，射出子弹（AI）。
 <p>重回我们的音频问题，让我们将代码通过服务定位器暴露给代码库的剩余部分来解决问题。</p>
 <h3><a href="#服务" name="服务">服务</a></h3>
 <p>我们从音频API开始。这是我们服务要暴露的接口：</p>
-<div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">Audio</span>
+<div class="codehilite"><pre><span class="k">class</span> <span class="nc">Audio</span>
 <span class="p">{</span>
 <span class="k">public</span><span class="o">:</span>
   <span class="k">virtual</span> <span class="o">~</span><span class="n">Audio</span><span class="p">()</span> <span class="p">{}</span>
   <span class="k">virtual</span> <span class="kt">void</span> <span class="n">playSound</span><span class="p">(</span><span class="kt">int</span> <span class="n">soundID</span><span class="p">)</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
-  <span class="k">virtual</span> <span class="kt">void</span> <span class="nf">stopSound</span><span class="p">(</span><span class="kt">int</span> <span class="n">soundID</span><span class="p">)</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
-  <span class="k">virtual</span> <span class="kt">void</span> <span class="nf">stopAllSounds</span><span class="p">()</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+  <span class="k">virtual</span> <span class="kt">void</span> <span class="n">stopSound</span><span class="p">(</span><span class="kt">int</span> <span class="n">soundID</span><span class="p">)</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+  <span class="k">virtual</span> <span class="kt">void</span> <span class="n">stopAllSounds</span><span class="p">()</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
 <span class="p">};</span>
 </pre></div>
 
@@ -118,7 +118,7 @@ NPC狙击手开了一枪，射出子弹（AI）。
 <h3><a href="#服务提供者" name="服务提供者">服务提供者</a></h3>
 <p>只有它自己，我们的音频接口不是很有用。
 我们需要具体实现。这本书不是关于如何为游戏主机写音频代码，所以你得想象这些函数中有实际的代码，但你知道什么意思：</p>
-<div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">ConsoleAudio</span> <span class="o">:</span> <span class="k">public</span> <span class="n">Audio</span>
+<div class="codehilite"><pre><span class="k">class</span> <span class="nc">ConsoleAudio</span> <span class="o">:</span> <span class="k">public</span> <span class="n">Audio</span>
 <span class="p">{</span>
 <span class="k">public</span><span class="o">:</span>
   <span class="k">virtual</span> <span class="kt">void</span> <span class="n">playSound</span><span class="p">(</span><span class="kt">int</span> <span class="n">soundID</span><span class="p">)</span>
@@ -144,7 +144,7 @@ NPC狙击手开了一枪，射出子弹（AI）。
 <h3><a href="#一个简单的定位器" name="一个简单的定位器">一个简单的定位器</a></h3>
 <p>这里的实现是你可以定义的最简单的服务定位器：</p>
 <p><span name="di"></span></p>
-<div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">Locator</span>
+<div class="codehilite"><pre><span class="k">class</span> <span class="nc">Locator</span>
 <span class="p">{</span>
 <span class="k">public</span><span class="o">:</span>
   <span class="k">static</span> <span class="n">Audio</span><span class="o">*</span> <span class="n">getAudio</span><span class="p">()</span> <span class="p">{</span> <span class="k">return</span> <span class="n">service_</span><span class="p">;</span> <span class="p">}</span>
@@ -169,14 +169,14 @@ NPC狙击手开了一枪，射出子弹（AI）。
 </aside>
 <p>这个静态的<code>getAudio()</code>函数完成了定位。
 我们可以从代码库的任何地方调用它，它会给我们一个<code>Audio</code>服务实例使用：</p>
-<div class="codehilite"><pre><span></span><span class="n">Audio</span> <span class="o">*</span><span class="n">audio</span> <span class="o">=</span> <span class="n">Locator</span><span class="o">::</span><span class="n">getAudio</span><span class="p">();</span>
+<div class="codehilite"><pre><span class="n">Audio</span> <span class="o">*</span><span class="n">audio</span> <span class="o">=</span> <span class="n">Locator</span><span class="o">::</span><span class="n">getAudio</span><span class="p">();</span>
 <span class="n">audio</span><span class="o">-&gt;</span><span class="n">playSound</span><span class="p">(</span><span class="n">VERY_LOUD_BANG</span><span class="p">);</span>
 </pre></div>
 
 
 <p>它“定位”的方式十分简单——依靠在使用服务前注册服务提供者的外部代码。
 当游戏开始时，它调用一些这样的代码：</p>
-<div class="codehilite"><pre><span></span><span class="n">ConsoleAudio</span> <span class="o">*</span><span class="n">audio</span> <span class="o">=</span> <span class="k">new</span> <span class="n">ConsoleAudio</span><span class="p">();</span>
+<div class="codehilite"><pre><span class="n">ConsoleAudio</span> <span class="o">*</span><span class="n">audio</span> <span class="o">=</span> <span class="k">new</span> <span class="n">ConsoleAudio</span><span class="p">();</span>
 <span class="n">Locator</span><span class="o">::</span><span class="n">provide</span><span class="p">(</span><span class="n">audio</span><span class="p">);</span>
 </pre></div>
 
@@ -201,7 +201,7 @@ NPC狙击手开了一枪，射出子弹（AI）。
 <p>幸运的是，还有一种设计模式叫做“空对象”，我们可用它处理这个。
 这里的基本思路就是在我们没能找到或者没有让程序以正确运行的顺序调用时，我们不返回<code>NULL</code>，而是返回一个特定的，实现了请求对象一样的接口的对象。它的实现什么也不做，但是它允许代码接受对象，保证代码安全运行，好像代码收到了“真的”服务对象。</p>
 <p>为了使用它，我们定义另一个“空”服务提供者：</p>
-<div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">NullAudio</span><span class="o">:</span> <span class="k">public</span> <span class="n">Audio</span>
+<div class="codehilite"><pre><span class="k">class</span> <span class="nc">NullAudio</span><span class="o">:</span> <span class="k">public</span> <span class="n">Audio</span>
 <span class="p">{</span>
 <span class="k">public</span><span class="o">:</span>
   <span class="k">virtual</span> <span class="kt">void</span> <span class="n">playSound</span><span class="p">(</span><span class="kt">int</span> <span class="n">soundID</span><span class="p">)</span> <span class="p">{</span> <span class="cm">/* Do nothing. */</span> <span class="p">}</span>
@@ -214,7 +214,7 @@ NPC狙击手开了一枪，射出子弹（AI）。
 <p>就像你看到的那样，它实现了服务接口，但是没有干任何实事。
 现在，我们将我们的定位器改成这样：</p>
 <p><span name="ref"></span></p>
-<div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">Locator</span>
+<div class="codehilite"><pre><span class="k">class</span> <span class="nc">Locator</span>
 <span class="p">{</span>
 <span class="k">public</span><span class="o">:</span>
   <span class="k">static</span> <span class="kt">void</span> <span class="n">initialize</span><span class="p">()</span> <span class="p">{</span> <span class="n">service_</span> <span class="o">=</span> <span class="o">&amp;</span><span class="n">nullService_</span><span class="p">;</span> <span class="p">}</span>
@@ -268,7 +268,7 @@ NPC狙击手开了一枪，射出子弹（AI）。
 AI程序员不关心什么时候声音在播放，声音程序员也不在乎AI状态转换，但是它们现在都得在对方的日志中跋涉。</p>
 <p>理念上，我们应该可以选择性的为关心的事物启动日志，而游戏成品中，不应该有日志。
 如果有条件地为不同的系统记录日志被改写为服务，那么我们就可以用<a class="gof-pattern" href="http://www.c2.com/cgi/wiki?DecoratorPattern">装饰器</a>模式。让我们定义另一个音频服务提供者实现如下：</p>
-<div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">LoggedAudio</span> <span class="o">:</span> <span class="k">public</span> <span class="n">Audio</span>
+<div class="codehilite"><pre><span class="k">class</span> <span class="nc">LoggedAudio</span> <span class="o">:</span> <span class="k">public</span> <span class="n">Audio</span>
 <span class="p">{</span>
 <span class="k">public</span><span class="o">:</span>
   <span class="n">LoggedAudio</span><span class="p">(</span><span class="n">Audio</span> <span class="o">&amp;</span><span class="n">wrapped</span><span class="p">)</span>
@@ -307,7 +307,7 @@ AI程序员不关心什么时候声音在播放，声音程序员也不在乎AI�
 <p>就像你看到的那样，它包裹了另一个音频提供者，暴露同样的接口。
 它将实际的音频行为转发给内部的提供者，但它也同时记录每个音频调用。
 如果程序员需要启动音频日志，它们调用这个：</p>
-<div class="codehilite"><pre><span></span><span class="kt">void</span> <span class="nf">enableAudioLogging</span><span class="p">()</span>
+<div class="codehilite"><pre><span class="kt">void</span> <span class="nf">enableAudioLogging</span><span class="p">()</span>
 <span class="p">{</span>
   <span class="c1">// Decorate the existing service.</span>
   <span class="n">Audio</span> <span class="o">*</span><span class="n">service</span> <span class="o">=</span> <span class="k">new</span> <span class="n">LoggedAudio</span><span class="p">(</span><span class="n">Locator</span><span class="o">::</span><span class="n">getAudio</span><span class="p">());</span>
@@ -347,7 +347,7 @@ AI程序员不关心什么时候声音在播放，声音程序员也不在乎AI�
 <li>
 <p><strong>在编译时绑定：</strong></p>
 <p>这里的思路是使用预处理器，在编译时间处理“位置”。就像这样：</p>
-<div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">Locator</span>
+<div class="codehilite"><pre><span class="k">class</span> <span class="nc">Locator</span>
 <span class="p">{</span>
 <span class="k">public</span><span class="o">:</span>
   <span class="k">static</span> <span class="n">Audio</span><span class="o">&amp;</span> <span class="n">getAudio</span><span class="p">()</span> <span class="p">{</span> <span class="k">return</span> <span class="n">service_</span><span class="p">;</span> <span class="p">}</span>
@@ -422,7 +422,7 @@ AI程序员不关心什么时候声音在播放，声音程序员也不在乎AI�
 <li>
 <p><strong>挂起游戏：</strong></p>
 <p>我说过我们不能<em>保证</em>服务在编译时总是可用的，但是不意味着我们不能<em>声明</em>可用性是游戏定位器运行合约的一部分。做这点最简答的方法就是使用断言：</p>
-<div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">Locator</span>
+<div class="codehilite"><pre><span class="k">class</span> <span class="nc">Locator</span>
 <span class="p">{</span>
 <span class="k">public</span><span class="o">:</span>
   <span class="k">static</span> <span class="n">Audio</span><span class="o">&amp;</span> <span class="n">getAudio</span><span class="p">()</span>
@@ -482,7 +482,7 @@ AI程序员不关心什么时候声音在播放，声音程序员也不在乎AI�
 <h3><a href="#服务的服务范围有多大？" name="服务的服务范围有多大？">服务的服务范围有多大？</a></h3>
 <p>到了现在，我们假设定位器会提供服务给<em>任何</em>需要它的地方。
 当让这是这个模式通常的使用方式，另一选项是局限到类和它的子类，就像这样：</p>
-<div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">Base</span>
+<div class="codehilite"><pre><span class="k">class</span> <span class="nc">Base</span>
 <span class="p">{</span>
   <span class="c1">// Code to locate service and set service_...</span>
 
@@ -538,8 +538,8 @@ AI程序员不关心什么时候声音在播放，声音程序员也不在乎AI�
 </li>
 </ul>
 <nav>
-  <span class="prev">&larr; <a href="event-queue.html">Previous Chapter</a></span>
-  <span class="next"><a href="optimization-patterns.html">Next Chapter</a> &rarr;</span>
+  <span class="prev">&larr; <a href="事件队列.html">Previous Chapter</a></span>
+  <span class="next"><a href="优化模式.html">Next Chapter</a> &rarr;</span>
   <span class="toc">&equiv; <a href="/">The Book</a></span>
 </nav>
 </div>
