@@ -8,4 +8,4 @@ project.xcworkspace/
 xml/
 *~
 *.swp
-html/
+html/*.html

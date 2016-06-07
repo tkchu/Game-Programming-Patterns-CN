@@ -875,28 +875,21 @@ while also having another collection that directly holds the list of objects.
 
      *  *遍历所有的对象更快。*如果所有对象都是“活的”而且它们需要做些处理，你也许会发现你需要频繁拜访每个对象而不在乎它的位置。想想看，早先的例子中，大多数格子都是空的。访问那些空的格子是对时间的浪费。
 
-        存储对象的第二集合给了你直接遍历它们的方法。你有两个数据结构，每种为各种的用况优化。
-
         A second collection that just stores the objects gives you a way to walk
         all them directly. You have two data structures, one optimized for each
         use case.
 
-## 参见
+        存储对象的第二集合给了你直接遍历它们的方法。你有两个数据结构，每种为各种的用况优化。
 
 ## See Also
-
- *  我试图在这里不讨论特定的空间划分结构细节来保证这章处于高层（而且不过长！），但你的下一步应该是学习一下常见的结构。不管它们的恐怖的名字，它们都令人惊讶的直观。常见的有：
+## 参见
 
  *  I've tried not to discuss specific spatial partitioning structures in detail
     here to keep the chapter high-level (and not too long!), but your next step
     from here should be to learn a few of the common structures. Despite their
     scary names, they are all surprisingly straightforward. The common ones are:
 
-    * [Grid](http://en.wikipedia.org/wiki/Grid_(spatial_index))
-    * [Quadtree](http://en.wikipedia.org/wiki/Quad_tree)
-    * [BSP](http://en.wikipedia.org/wiki/Binary_space_partitioning)
-    * [k-d tree](http://en.wikipedia.org/wiki/Kd-tree)
-    * [Bounding volume hierarchy](http://en.wikipedia.org/wiki/Bounding_volume_hierarchy)
+ *  我试图在这里不讨论特定的空间划分结构细节来保证这章处于高层（而且不过长！），但你的下一步应该是学习一下常见的结构。不管它们的恐怖的名字，它们都令人惊讶的直观。常见的有：
 
     * [Grid](http://en.wikipedia.org/wiki/Grid_(spatial_index))
     * [Quadtree](http://en.wikipedia.org/wiki/Quad_tree)
@@ -904,11 +897,12 @@ while also having another collection that directly holds the list of objects.
     * [k-d tree](http://en.wikipedia.org/wiki/Kd-tree)
     * [Bounding volume hierarchy](http://en.wikipedia.org/wiki/Bounding_volume_hierarchy)
 
- *  每种空间划分数据结构基本上都是将一维数据结构扩展成更高维度的数据结构。知道它的直系子孙有助于分辨它对问题是不是好解答：
 
  *  Each of these spatial data structures basically extends an existing
     well-known data structure from 1D into more dimensions. Knowing their linear
     cousins will help you tell if they are a good fit for your problem:
+
+ *  每种空间划分数据结构基本上都是将一维数据结构扩展成更高维度的数据结构。知道它的直系子孙有助于分辨它对问题是不是好解答：
 
     * 网格是持久的[桶排序](http://en.wikipedia.org/wiki/Bucket_sort)。
     * BSPs，k-d trees和包围盒是[线性搜索树](http://en.wikipedia.org/wiki/Binary_search_tree)。

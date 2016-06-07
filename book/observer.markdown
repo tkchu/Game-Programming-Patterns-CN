@@ -19,10 +19,6 @@ the *language* (the [`event`][event] keyword).
 [java]: http://docs.oracle.com/javase/7/docs/api/java/util/Observer.html
 [event]: http://msdn.microsoft.com/en-us/library/8627sbea.aspx
 
-[MVC]: http://en.wikipedia.org/wiki/Model%E2%80%93view%E2%80%93controller
-[java]: http://docs.oracle.com/javase/7/docs/api/java/util/Observer.html
-[event]: http://msdn.microsoft.com/en-us/library/8627sbea.aspx
-
 <aside name="devised">
 
 Like so many things in software, MVC was invented by Smalltalkers in the
@@ -58,13 +54,14 @@ specific milestones like "Kill 100 Monkey Demons", "Fall off a Bridge", or
 
 <aside name="weasel">
 
-<img src="images/observer-weasel-wielder.png" width="240" alt="Achievement: Weasel Wielder" />
+<img src="images/observer-weasel-wielder.png" width="240" alt="Achievement: Weasel Wielder">
 
 I swear I had no double meaning in mind when I drew this.
 
 我发誓画的这个没有第二个意思。
 
 </aside>
+
 
 This is tricky to implement cleanly since we have such a wide range of
 achievements that are unlocked by all sorts of different behaviors. If we aren't
@@ -1143,8 +1140,6 @@ observers instead of instances of some `Observer` interface.
 
 [delegate]: http://molecularmusings.wordpress.com/2011/09/19/generic-type-safe-delegates-and-events-in-c/
 
-[delegate]: http://molecularmusings.wordpress.com/2011/09/19/generic-type-safe-delegates-and-events-in-c/
-
 </aside>
 
 ## Observers Tomorrow
@@ -1156,17 +1151,15 @@ They're a well-worn path. But if you write a few large apps using them, you
 start to notice something. A lot of the code in your observers ends up looking
 the same. It's usually something like:
 
+  1. Get notified that some state has changed.
+  2. Imperatively modify some chunk of UI to reflect the new state.
+
 事件系统和其他类观察者模式在今日令人惊奇的多。
 它们都是经典方法。
 但是如果你用它们写一个稍微大一些的应用，你会发现一件事情。
 在观察者中很多代码最后都长得一样。通常是像这样：
 
-  1. Get notified that some state has changed.
-
   1. 获知有状态改变了。
-
-  2. Imperatively modify some chunk of UI to reflect the new state.
-
   2. 命令式的改变一些UI来反映新的状态。
 
 It's all, "Oh, the hero health is 7 now? Let me set the width of the health bar

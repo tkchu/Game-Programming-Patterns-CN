@@ -68,18 +68,9 @@ games:
 
 <span name="cave"></span>
 
-<span name="cave"></span>
-
     YOU ARE STANDING AT THE END OF A ROAD BEFORE A SMALL BRICK
     BUILDING . AROUND YOU IS A FOREST. A SMALL
     STREAM FLOWS OUT OF THE BUILDING AND DOWN A GULLY.
-
-    YOU ARE STANDING AT THE END OF A ROAD BEFORE A SMALL BRICK
-    BUILDING . AROUND YOU IS A FOREST. A SMALL
-    STREAM FLOWS OUT OF THE BUILDING AND DOWN A GULLY.
-
-    > GO IN
-    YOU ARE INSIDE A BUILDING, A WELL HOUSE FOR A LARGE SPRING.
 
     > GO IN
     YOU ARE INSIDE A BUILDING, A WELL HOUSE FOR A LARGE SPRING.
@@ -458,8 +449,6 @@ The code looks a bit like this:
 
 *1000 ms / FPS = ms per frame*.
 
-*1000 ms / FPS = ms per frame*.
-
 </aside>
 
 ^code 4
@@ -490,14 +479,12 @@ impacts the quality of gameplay for all users, even ones on fast machines.
 Let's try something a bit more sophisticated. The problem we have basically
 boils down to:
 
-让我们尝试一些更加复杂的东西。我们拥有的问题基本上是：
-
   1. Each update advances game time by a certain amount.
-
-  1. 每次更新将游戏时间推动一个固定量。
-
   2. It takes a certain amount of *real* time to process that.
 
+  让我们尝试一些更加复杂的东西。我们拥有的问题基本上是：
+
+  1. 每次更新将游戏时间推动一个固定量。
   2. 这消耗一定量的*真实*时间来处理它。
 
 If step two takes longer than step one, the game slows down. If it takes more
@@ -1089,50 +1076,46 @@ PDP-1是一个仅有4096字内存的2kHz机器，但是Steve Russell和他的朋
 
  *  **Fixed update time step, variable rendering:**
 
- *  **Fixed update time step, variable rendering:**
+ *  **固定更新间隔，动态渲染：**
 
     The last option we covered in the sample code is the most complex, but also
     the most adaptable. It updates with a fixed time step, but it can drop
     *rendering* frames if it needs to to catch up to the player's clock.
 
- *  **固定更新间隔，动态渲染：**
+    在示例代码中覆盖的最后一个选项是最复杂的，但是也是最有适应性的。它以固定时间间隔更新，但是如果需要赶上玩家的时钟，可以扔掉一些*渲染*帧。
 
      *  *It adapts to playing both too slowly and too fast.* As long as the game
         can *update* in real time, the game won't fall behind. If the player's
         machine is top-of-the-line, it will respond with a smoother gameplay
         experience.
 
-    在示例代码中覆盖的最后一个选项是最复杂的，但是也是最有适应性的。它以固定时间间隔更新，但是如果需要赶上玩家的时钟，可以扔掉一些*渲染*帧。
+     *  *适应运行太快或者太慢。*只要可以在真实时间上*更新*，游戏就不会落后。如果玩家的机器是顶配，它会回以更平滑的游戏体验。
 
      *  *It's more complex.* The main downside is there is a bit more going on
         in the implementation. You have to tune the update time step to be both
         as small as possible for the high-end, while not being too slow on the
         low end.
 
-     *  *适应运行太快或者太慢。*只要可以在真实时间上*更新*，游戏就不会落后。如果玩家的机器是顶配，它会回以更平滑的游戏体验。
+     *  *更复杂。*主要负面问题是需要在实现中写更多东西。你需要将更新时间间隔调整的尽可能小来适应高端机，同时不至于在低端机上太慢。
 
 ## See Also
-
-     *  *更复杂。*主要负面问题是需要在实现中写更多东西。你需要将更新时间间隔调整的尽可能小来适应高端机，同时不至于在低端机上太慢。
+## 参见
 
  *  The classic article on game loops is Glenn Fiedler's "[Fix Your
     Timestep](http://gafferongames.com/game-physics/fix-your-timestep/)". This
     chapter wouldn't be the same without it.
 
-## 参见
+ *  关于游戏循环的经典文章是Glenn Fiedler的"[Fix Your Timestep](http://gafferongames.com/game-physics/fix-your-timestep/)"。如果没有这一篇文章，这章就不会是这个样子。
 
  *  Witters' article on [game
     loops](http://www.koonsolo.com/news/dewitters-gameloop/) is a close
     runner-up.
 
- *  关于游戏循环的经典文章是Glenn Fiedler的"[Fix Your Timestep](http://gafferongames.com/game-physics/fix-your-timestep/)"。如果没有这一篇文章，这章就不会是这个样子。
+ *  Witters关于[game loops](http://www.koonsolo.com/news/dewitters-gameloop/)的文章是一个很接近的亚军。
 
  *  The [Unity](http://unity3d.com/) framework has a complex game loop detailed
     in a wonderful illustration [here][unity].
 
- *  Witters关于[game loops](http://www.koonsolo.com/news/dewitters-gameloop/)的文章是一个很接近的亚军。
+ *  [Unity](http://unity3d.com/)框架有一个复杂的游戏循环，细节在[这里][unity]有完美的解释。
 
 [unity]: http://docs.unity3d.com/Manual/ExecutionOrder.html
-
-
- *  [Unity](http://unity3d.com/)框架有一个复杂的游戏循环，细节在[这里][unity]有完美的解释。

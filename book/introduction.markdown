@@ -18,11 +18,6 @@ to prefer programs that were only a few lines long:
 
 <span name="radical"></span>
 
-<span name="radical"></span>
-
-    10 PRINT "BOBBY IS RADICAL!!!"
-    20 GOTO 10
-
     10 PRINT "BOBBY IS RADICAL!!!"
     20 GOTO 10
 

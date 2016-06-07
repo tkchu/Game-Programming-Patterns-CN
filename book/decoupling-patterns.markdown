@@ -31,15 +31,12 @@ code access a facility without being bound to the code that provides it.
 
 ## The Patterns
 
-## 模式
-
 * [Component](component.html)
 * [Event Queue](event-queue.html)
 * [Service Locator](service-locator.html)
 
+## 模式
 
 * [组件模式](component.html)
 * [事件序列](event-queue.html)
 * [服务定位器](service-locator.html)
-
-

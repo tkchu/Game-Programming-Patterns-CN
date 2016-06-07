@@ -249,8 +249,6 @@ C++ today uses templates too.
 
 <span name="base"></span>
 
-<span name="base"></span>
-
 ^code templates
 
 Using it looks like:
@@ -461,16 +459,14 @@ the way you do this in Self is by *cloning*.
 In Self, it's as if *every* object supports the Prototype design pattern
 automatically. Any object can be cloned. To make a bunch of similar objects, you:
 
+1. Beat one object into the shape you want. You can just clone the base `Object`
+built into the system and then stuff fields and methods into it.
+2. Clone it to make as many... uh... clones as you want.
+
 在Self中，就好像*每个*对象都自动支持原型设计模式。
 任何对象都能被克隆。为了获得一堆相似的对象，你：
 
-1. Beat one object into the shape you want. You can just clone the base `Object`
-   built into the system and then stuff fields and methods into it.
-
 1. 将对象拍打成你想要的形状。你可以直接克隆系统内建的基本`Object`，然后向其中添加字段和方法。
-
-2. Clone it to make as many... uh... clones as you want.
-
 2. 克隆它来产出……额……随你想要多少克隆。
 
 This gives us the elegance of the Prototype design pattern without the tedium of

@@ -406,7 +406,7 @@ object.
 这保证它永远能获得有效的对象。
 
 This is also useful for *intentionally* failing to find services. If we want to
-<span name="disable">disable</span> a system temporarily, we now have an easy
+disable a system temporarily, we now have an easy
 way to do so: simply don't register a provider for the service, and the locator
 will default to a null provider.
 

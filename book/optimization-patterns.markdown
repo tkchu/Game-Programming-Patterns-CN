@@ -31,22 +31,19 @@ inhabitants' arrangement in space.
 这里，我描述了几个加速游戏的中间层模式。
 [数据局部性](data-locality.html)介绍了计算机的存储层次以及如何使用其以获得优势。
 [脏标识](dirty-flag.html)帮你避开不必要的计算。
-[对象池](object-pool.html)帮你避开不必要的分配。 
+[对象池](object-pool.html)帮你避开不必要的分配。
 [空间分区](spatial-partition.html)加速了虚拟世界和其中居民的空间布局。
 
 ## The Patterns
-
-## 模式
 
 * [Data Locality](data-locality.html)
 * [Dirty Flag](dirty-flag.html)
 * [Object Pool](object-pool.html)
 * [Spatial Partition](spatial-partition.html)
 
+## 模式
 
 * [数据局部性](data-locality.html)
 * [脏标识](dirty-flag.html)
 * [对象池](object-pool.html)
 * [空间分区](spatial-partition.html)
-
-

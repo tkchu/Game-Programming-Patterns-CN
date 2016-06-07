@@ -96,11 +96,11 @@ Spot the bug this time?
 
 With this code, the player could:
 
-用这个代码，玩家可以：
-
 1. Press down to duck.
 2. Press B to jump from a ducking position.
 3. Release down while still in the air.
+
+用这个代码，玩家可以：
 
 1. 按下键卧倒。
 2. 按B从卧倒状态跳起。

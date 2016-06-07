@@ -507,13 +507,13 @@ captured when the event is sent so they can be used later.
 
 All event and message systems have to worry about cycles:
 
-任何事件系统和消息系统都得担心环路：
-
  1. A sends an event.
  2. B receives it and responds by sending an event.
  3. That event happens to be one that A cares about, so it receives it. In
     response, it sends an event...
  5. Go to 2.
+
+任何事件系统和消息系统都得担心环路：
 
  1. A发送了一个事件
  2. B接收然后发送事件作为回应。
@@ -946,18 +946,14 @@ really helps.
 
 We're in good shape to do that now that we have three critical pieces:
 
-我们很容易就能做到这一点是因为三个关键点：
-
  1. The code for requesting a sound is decoupled from the code that plays it.
-
- 1. 请求音频的代码与播放音频的代码解耦。
-
  2. We have a queue for marshalling between the two.
-
- 2. 有队列在两者之间整理它们。
-
  3. The queue is encapsulated from the rest of the program.
 
+我们很容易就能做到这一点是因为三个关键点：
+
+ 1. 请求音频的代码与播放音频的代码解耦。
+ 2. 有队列在两者之间整理它们。
  3. 队列与程序其他部分是隔离的。
 
 All that's left is to make the methods that modify the queue -- `playSound()`

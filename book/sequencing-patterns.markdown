@@ -32,12 +32,11 @@ update simultaneously.
 
 ## The Patterns
 
-## 模式
-
 * [Double Buffer](double-buffer.html)
 * [Game Loop](game-loop.html)
 * [Update Method](update-method.html)
 
+## 模式
 
 * [双缓冲](double-buffer.html)
 * [游戏循环](game-loop.html)

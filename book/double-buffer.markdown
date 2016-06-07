@@ -600,14 +600,6 @@ we step through the code, we'll find that the following occurs:
       Chump was slapped, so he slaps Harry
     Stage update ends
 
-    Stage updates actor 0 (Harry)
-      Harry was slapped, so he slaps Baldy
-    Stage updates actor 1 (Baldy)
-      Baldy was slapped, so he slaps Chump
-    Stage updates actor 2 (Chump)
-      Chump was slapped, so he slaps Harry
-    Stage update ends
-
 In a single frame, our initial slap on Harry has propagated through all of
 the comedians. Now, to mix things up a bit, let's say we reorder the comedians
 within the stage's array but leave them facing each other the same way.
@@ -628,14 +620,6 @@ where we add the actors to the stage with this:
 Let's see what happens when we run our experiment again:
 
 让我们看看再次运行时会发生什么：
-
-    Stage updates actor 0 (Chump)
-      Chump was not slapped, so he does nothing
-    Stage updates actor 1 (Baldy)
-      Baldy was not slapped, so he does nothing
-    Stage updates actor 2 (Harry)
-      Harry was slapped, so he slaps Baldy
-    Stage update ends
 
     Stage updates actor 0 (Chump)
       Chump was not slapped, so he does nothing

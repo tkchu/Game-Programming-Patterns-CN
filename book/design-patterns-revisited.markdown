@@ -38,8 +38,6 @@ href="state.html">State</a>).
 
 ## The Patterns
 
-## 模式
-
   * [Command](command.html)
   * [Flyweight](flyweight.html)
   * [Observer](observer.html)
@@ -47,6 +45,7 @@ href="state.html">State</a>).
   * [Singleton](singleton.html)
   * [State](state.html)
 
+## 模式
 
   * [命令](command.html)
   * [享元](flyweight.html)
@@ -54,5 +53,3 @@ href="state.html">State</a>).
   * [原型](prototype.html)
   * [单例](singleton.html)
   * [状态](state.html)
-
-

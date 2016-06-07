@@ -80,9 +80,6 @@ the sea. The crow's nest's transform positions the nest on the ship, and so on.
 <span name="pirate"></span>
 <img src="images/dirty-flag-pirate.png" alt="A pirate ship containing a crow's nest with a pirate in it with a parrot on his shoulder." />
 
-<span name="pirate"></span>
-<img src="images/dirty-flag-pirate.png" alt="A pirate ship containing a crow's nest with a pirate in it with a parrot on his shoulder." />
-
 <aside name="pirate">
 
 Programmer art!
@@ -129,9 +126,6 @@ transforms as you go. In other words, the parrot's world transform is:
 
 计算对象的世界转换很直接——从它的父节点一直追踪到对象，将经过的所有转换绑在一起。
 换言之，鹦鹉的世界转换如下：
-
-<span name="degenerate"></span>
-<img src="images/dirty-flag-multiply.png" alt="The parrot's world position comes from multiplying the local positions for the ship, nest, pirate, and parrot." />
 
 <span name="degenerate"></span>
 <img src="images/dirty-flag-multiply.png" alt="The parrot's world position comes from multiplying the local positions for the ship, nest, pirate, and parrot." />
@@ -204,9 +198,6 @@ happening?
 想象游戏中忙碌的时刻。
 在一帧中，船在海上颠簸，瞭望塔在风中摇晃，海盗甩到了边缘，而鹦鹉撞上了他的脑袋。
 我们改变了四个自身转换。如果每次自身转换都立即更新世界转换，会发生什么？
-
-<span name="stars"></span>
-<img src="images/dirty-flag-update-bad.png" alt="Any time an object moves, the world coordinates are recalculated eagerly and redundantly." />
 
 <span name="stars"></span>
 <img src="images/dirty-flag-update-bad.png" alt="Any time an object moves, the world coordinates are recalculated eagerly and redundantly." />

@@ -128,21 +128,17 @@ Once we have these toys to play with, we need a place to use them. For that,
 we'll define a *sandbox method*, an abstract protected method that subclasses
 must implement. Given those, to implement a new kind of power, you:
 
+1.  Create a new class that inherits from `Superpower`.
+2.  Override `activate()`, the sandbox method.
+3.  Implement the body of that by calling the protected methods that
+`Superpower` provides.
+
 一旦有了这些东西来使用，我们需要一个地方使用他们。
 为了做到那点，我们定义*沙箱方法*，子类必须实现的抽象的protected方法。
 有了那些，要实现一种新的能力，你需要：
 
-1.  Create a new class that inherits from `Superpower`.
-
 1. 创建从`Superpower`继承的新类。
-
-2.  Override `activate()`, the sandbox method.
-
 2. 重载`activate()`，沙箱方法。
-
-3.  Implement the body of that by calling the protected methods that
-    `Superpower` provides.
-
 3. 通过调用`Superpower`提供的protected方法实现主体。
 
 We can fix our redundant code problem now by making those provided operations as

@@ -425,8 +425,6 @@ design limitation is entrenched in every single call site that uses it:
 
     Log::instance().write("Some event.");
 
-    Log::instance().write("Some event.");
-
 In order to make our `Log` class support multiple instantiation (like it
 originally did), we'll have to fix both the class itself and every line of code
 that mentions it. Our convenient access isn't so convenient anymore.
