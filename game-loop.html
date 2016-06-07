@@ -9,7 +9,7 @@
      the viewport. -->
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
 <link rel="stylesheet" type="text/css" href="style.css" />
-
+<link href="http://fonts.useso.com/css?family=Merriweather:400,400italic,700,700italic|Source+Code+Pro|Source+Sans+Pro:200,300,400,600,400italic,600italic|Rock+Salt" rel="stylesheet" type="text/css">
 <script src="jquery-1.10.1.min.js"></script>
 <script src="script.js"></script>
 </head>
@@ -23,22 +23,45 @@
 </nav>
 <h1>游戏循环</h1>
 <h1 class="book"><a href="/Game-Programming-Patterns-CN/">游戏设计模式</a><span class="section"><a href="sequencing-patterns.html">Sequencing Patterns</a></span></h1>
+<h2><a href="#intent" name="intent">Intent</a></h2>
 <h2><a href="#意图" name="意图">意图</a></h2>
+<p><em>Decouple the progression of game time from user input and processor speed.</em></p>
 <p><em>将游戏的处理过程和玩家输入解耦，和处理器速度解耦。</em></p>
+<h2><a href="#motivation" name="motivation">Motivation</a></h2>
 <h2><a href="#动机" name="动机">动机</a></h2>
+<p>If there is one pattern this book couldn&#8217;t live without, this is it. Game loops
+are the quintessential example of a &#8220;game programming pattern&#8221;. Almost every
+game has one, no two are exactly alike, and relatively few programs outside of
+games use them.</p>
 <p>如果本书中有一个不可或缺模式，那就是这个了。
 游戏循环是“游戏设计模式”的精华例子。
 几乎每个游戏都有，两两不同，除游戏外几乎没有程序使用。</p>
+<p>To see how they&#8217;re useful, let&#8217;s take a quick trip down memory lane. In the
+olden days of computer programming when everyone had <span
+name="beard">beards</span>, programs worked like your dishwasher. You dumped a
+load of code in, pushed a button, waited, and got results out. Done. These were
+<em>batch mode</em> programs&#8202;&mdash;&#8202;once the work was done, the program stopped.</p>
 <p>为了看看它多有用，让我们快速缅怀往事。
 计算机程序的早先日子，每个人都长着<span name="beard">胡子</span>，程序像洗碗机一样工作。
 你输入一堆代码，按个按钮，等待，然后获得结果，完成。
 这些都是<em>批处理</em>程序——一旦工作完成，程序就停止了。</p>
 <aside name="beard">
+<p>Ada Lovelace and Rear Admiral Grace Hopper had honorary beards.</p>
 <p>Ada Lovelace和Rear Admiral Grace Hopper都有名义上的胡须。</p>
 </aside>
+<p>You still see these today, though thankfully we don&#8217;t have to write them on
+punch cards anymore. Shell scripts, command line programs, and even the little
+Python script that turns a pile of Markdown into this book are all batch mode
+programs.</p>
 <p>你在今日仍然能看到这些，虽然感谢上天我们不必在打孔纸上面编写它们了。
 终端脚本，命令行程序，甚至将Markdown翻译成这本书的Python脚本都是批处理程序。</p>
+<h3><a href="#interview-with-a-cpu" name="interview-with-a-cpu">Interview with a CPU</a></h3>
 <h3><a href="#采访cpu" name="采访cpu">采访CPU</a></h3>
+<p>Eventually, programmers realized having to drop off a batch of code at the
+computing office and come back a few hours later for the results was a terribly
+slow way to get the bugs out of a program. They wanted immediate feedback.
+<em>Interactive</em> programs were born. Some of the first interactive programs were
+games:</p>
 <p>最终，程序员意识到将批处理代码留在计算办公室，几个小时后获得结果，这样找程序漏洞又慢有糟糕。
 他们想要立即的反馈。<em>交互式</em>程序诞生了。
 第一批交互式程序中的就有游戏：</p>
@@ -53,12 +76,20 @@ YOU ARE INSIDE A BUILDING, A WELL HOUSE FOR A LARGE SPRING.
 
 
 <aside name="cave">
+<p>This is <a href="http://en.wikipedia.org/wiki/Colossal_Cave_Adventure">Colossal Cave
+Adventure</a>, the first
+adventure game.</p>
 <p>这是<a href="http://en.wikipedia.org/wiki/Colossal_Cave_Adventure">Colossal Cave Adventure</a>，史上首个冒险游戏。</p>
 </aside>
+<p>You could have a live conversation with the program. It waited for your input,
+then it would respond to you. You would reply back, taking turns just like you
+learned to do in kindergarten. When it was your turn, it sat there doing
+nothing. Something like:</p>
 <p>你可以和这个程序进行一些交流。
 它等待你的输入，然后回应你。
 你再回复，就像你在幼儿园中学到的那样轮流做事。
 在你的回合，它坐在那里啥也不做。像这样：</p>
+<p><span name="exit"></span></p>
 <p><span name="exit"></span></p>
 <div class="codehilite"><pre><span></span><span class="k">while</span> <span class="p">(</span><span class="nb">true</span><span class="p">)</span>
 <span class="p">{</span>
@@ -69,11 +100,18 @@ YOU ARE INSIDE A BUILDING, A WELL HOUSE FOR A LARGE SPRING.
 
 
 <aside name="exit">
+<p>This loops forever, so there&#8217;s no way to quit the game. A real game would do
+something like <code>while (!done)</code> and set <code>done</code> to exit. I&#8217;ve omitted that to keep
+things simple.</p>
 <p>这会永久循环，所以没法退出游戏。
 真实的游戏会做些<code>while (!done)</code>，设置<code>done</code>为真来退出。
 我省略了那些来保持简单。</p>
 </aside>
+<h3><a href="#event-loops" name="event-loops">Event loops</a></h3>
 <h3><a href="#事件循环" name="事件循环">事件循环</a></h3>
+<p>Modern graphic UI applications are surprisingly similar to old adventure games
+once you shuck their skin off. Your word processor usually just sits there doing
+nothing until you press a key or click something:</p>
 <p>如果你剥开现代的图形UI的外皮，会惊讶地发现它们与老旧的冒险游戏差不多。
 你的文本处理器通常呆在那里什么也不做，直到按了个键或者点了什么东西：</p>
 <div class="codehilite"><pre><span></span><span class="k">while</span> <span class="p">(</span><span class="nb">true</span><span class="p">)</span>
@@ -84,15 +122,28 @@ YOU ARE INSIDE A BUILDING, A WELL HOUSE FOR A LARGE SPRING.
 </pre></div>
 
 
+<p>The main difference is that instead of <em>text commands</em>, the program is waiting
+for <em>user input events</em>&#8202;&mdash;&#8202;mouse clicks and key presses. It still works
+basically like the old text adventures where the program <span
+name="idle"><em>blocks</em></span> waiting for user input, which is a problem.</p>
 <p>最大的不同是，不使用<em>文本命令</em>，程序等待<em>用户输入事件</em>——鼠标点击和按键按下。
 还是和以前的老式文本冒险游戏一样，程序<span name="idle"><em>阻塞</em></span>等待用户输入，这是一个问题。</p>
+<p>Unlike most other software, games keep moving even when the user isn&#8217;t providing
+input. If you sit staring at the screen, the game doesn&#8217;t freeze. Animations
+keep animating. Visual effects dance and sparkle. If you&#8217;re unlucky, that
+monster keeps chomping on your hero.</p>
 <p>不像大多数其他软件，游戏即使没有玩家输入时也继续运行。
 如果你站在那里看着屏幕，游戏不会冻结。动画继续动着。视觉效果继续闪烁。
 如果不幸的话，怪物继续吞噬你的英雄。</p>
 <aside name="idle">
+<p>Most event loops do have &#8220;idle&#8221; events so you can intermittently do stuff
+without user input. That&#8217;s good enough for a blinking cursor or a progress bar,
+but too rudimentary for games.</p>
 <p>大多数事件循环有“空转”事件，这样你可以无需用户输入间歇地做事。
 对于闪烁的光标或者进度条已经足够了，但对于游戏就太原始了。</p>
 </aside>
+<p>This is the first key part of a real game loop: <em>it processes user input, but
+doesn&#8217;t wait for it</em>. The loop always keeps spinning:</p>
 <p>这是游戏循环的第一个关键部分：<em>它处理用户输入，但是不等待它</em>。循环总是继续旋转：</p>
 <div class="codehilite"><pre><span></span><span class="k">while</span> <span class="p">(</span><span class="nb">true</span><span class="p">)</span>
 <span class="p">{</span>
@@ -103,87 +154,179 @@ YOU ARE INSIDE A BUILDING, A WELL HOUSE FOR A LARGE SPRING.
 </pre></div>
 
 
+<p>We&#8217;ll refine this later, but the basic pieces are here. <code>processInput()</code> handles
+any user input that has happened since the last call. Then, <span
+name="update"><code>update()</code></span> advances the game simulation one step. It runs
+AI and physics (usually in that order). Finally, <code>render()</code> draws the game so
+the player can see what happened.</p>
 <p>我们之后会改善它，但是基本部分都在这里了。
 <code>processInput()</code>处理上次调用到现在的任何输入。
 然后<span name="update"><code>update()</code></span>运行游戏模拟的下一步。
 这运行了AI和物理（通常是这种顺序）。
 最终，<code>render()</code>绘制游戏，这样玩家可以看到发生了什么。</p>
 <aside name="update">
+<p>As you might guess from the name, <code>update()</code> is a good place to use the <a
+href="update-method.html" class="pattern">Update Method</a> pattern.</p>
 <p>就像你可以从名字中猜到的，<code>update()</code>是使用<a href="update-method.html" class="pattern">更新方法</a>模式的好地方。</p>
 </aside>
+<h3><a href="#a-world-out-of-time" name="a-world-out-of-time">A world out of time</a></h3>
 <h3><a href="#时间之外的世界" name="时间之外的世界">时间之外的世界</a></h3>
+<p>If this loop isn&#8217;t blocking on input, that leads to the obvious question: how
+<em>fast</em> does it spin? Each turn through the game loop advances the state of the
+game by some amount. From the perspective of an inhabitant of the game world,
+the hand of their clock has <span name="tick">ticked</span> forward.</p>
 <p>如果这个循环不在输入阻塞，这就带来了明显的问题，要转<em>多快</em>？
 每次进行游戏循环都会发展一定的游戏状态。
 从游戏世界的居民看来，他们手上的表就会<span name="tick">滴答</span>一下。</p>
 <aside name="tick">
+<p>The common terms for one crank of the game loop are &#8220;tick&#8221; and &#8220;frame&#8221;.</p>
 <p>运行游戏循环一次的常用术语就是“滴答”和“帧”。</p>
 </aside>
+<p>Meanwhile, the <em>player&#8217;s</em> actual clock is ticking. If we measure how quickly the
+game loop cycles in terms of real time, we get the game&#8217;s &#8220;frames per second&#8221;.
+If the game loop cycles quickly, the FPS is high and the game moves smoothly and
+quickly. If it&#8217;s slow, the game jerks along like a stop motion movie.</p>
 <p>同时，<em>玩家的</em>真实手表也在滴答着。
 如果我们用实际时间来测算游戏循环运行的速度，就得到了游戏的“帧每秒”。
 如果游戏循环的更快，FPS就更高，游戏运行的更流畅更快。
 如果很慢，游戏看上去就像是慢动作电影。</p>
+<p>With the crude loop we have now where it just cycles as quickly as it can, two
+factors determine the frame rate. The first is <em>how much work it has to do each
+frame</em>. Complex physics, a bunch of game objects, and lots of graphic detail all
+will keep your CPU and GPU busy, and it will take longer to complete a frame.</p>
 <p>我们现在写的这个循环是能转多快转多快，两个因素决定了帧率。
 第一个是<em>每帧要做多少工作</em>。复杂的物理，众多游戏对象，图形细节都让CPU和GPU繁忙，这决定了需要多久能完成一帧。</p>
+<p>The second is <em>the speed of the underlying platform.</em> Faster chips churn through
+more code in the same amount of time. Multiple cores, GPUs, dedicated audio
+hardware, and the OS&#8217;s scheduler all affect how much you get done in one tick.</p>
 <p>第二个是<em>潜在平台的速度。</em>更快的芯片可以在同样的时间执行更多的代码。
 多核，GPU组，独立声卡，以及系统的调度都影响了在一次滴答中能够做多少东西。</p>
+<h3><a href="#seconds-per-second" name="seconds-per-second">Seconds per second</a></h3>
 <h3><a href="#每秒的秒数" name="每秒的秒数">每秒的秒数</a></h3>
+<p>In early video games, that second factor was fixed. If you wrote a game for the
+NES or Apple IIe, you knew <em>exactly</em> what CPU your game was running on and you
+could (and did) code specifically for that. All you had to worry about was how
+much work you did each tick.</p>
 <p>在早期的视频游戏中，第二个参数是固定的。
 如果你为NES或者Apple IIe写游戏，你<em>明确</em>知道游戏运行在什么CPU上。
 你可以（而且事实也如此）为它特制代码。
 你需要担忧的是每次滴答要做多少工作。</p>
+<p>Older games were carefully coded to do just enough work each frame so that the
+game ran at the speed the developers wanted. But if you tried to play that same
+game on a faster or slower <span name="turbo">machine</span>, then the game
+itself would speed up or slow down.</p>
 <p>老些的游戏被仔细地编码，一帧只做足够的工作，这样游戏可以开发者想要的速率运行。
 但是如果你想要在快些或者慢些的<span name="turbo">机器</span>上运行同一游戏，游戏速度本身就会加速或减速。</p>
 <aside name="turbo">
+<p>This is why old PCs used to have
+&#8220;<a href="http://en.wikipedia.org/wiki/Turbo_button">turbo</a>&#8221; buttons. New PCs were
+faster and couldn&#8217;t play old games because the games would run too fast. Turning
+the turbo button <em>off</em> would slow the machine down and make old games playable.</p>
 <p>这就是为什么老式计算机通常有“<a href="http://en.wikipedia.org/wiki/Turbo_button">turbo</a>”按钮。
 新的计算机更快而无法玩老游戏，因为游戏会运行的过快。<em>关闭</em>turbo按钮，会减慢计算机的运行速度，就可以运行老游戏了。</p>
 </aside>
+<p>These days, though, few developers have the luxury of knowing exactly what
+hardware their game will run on. Instead, our games must intelligently adapt to
+a variety of devices.</p>
 <p>现在，很少有开发者可以奢侈地知道游戏运行的硬件条件。游戏必须自动适应多种设备。</p>
+<p>This is the other key job of a game loop: <em>it runs the game at a consistent
+speed despite differences in the underlying hardware.</em></p>
 <p>这就是游戏循环的另一个关键任务：<em>不管潜在的硬件条件，以固定速度运行。</em></p>
+<h2><a href="#the-pattern" name="the-pattern">The Pattern</a></h2>
 <h2><a href="#模式" name="模式">模式</a></h2>
+<p>A <strong>game loop</strong> runs continuously during gameplay. Each turn of the loop, it
+<strong>processes user input</strong> without blocking, <strong>updates the game state</strong>, and
+<strong>renders the game</strong>. It tracks the passage of time to <strong>control the rate of
+gameplay</strong>.</p>
 <p>一个<strong>游戏循环</strong>在游玩中不断运行。
 每一循环回合，它无阻塞地<strong>处理玩家输入</strong>，<strong>更新游戏状态</strong>，<strong>渲染游戏</strong>。
 它追踪时间的消耗来<strong>控制游戏的速度。</strong></p>
+<h2><a href="#when-to-use-it" name="when-to-use-it">When to Use It</a></h2>
 <h2><a href="#何时使用" name="何时使用">何时使用</a></h2>
+<p>Using the wrong pattern can be worse than using no pattern at all, so this
+section is normally here to caution against over-enthusiasm. The goal of design
+patterns isn&#8217;t to cram as many into your codebase as you can.</p>
 <p>使用错误的模式比不使用模式更糟，所以这节通常是要小心过于热衷。
 设计模式的目标不是往代码库里尽可能的塞东西。</p>
+<p>But this pattern is a bit different. I can say with pretty good confidence that
+you <em>will</em> use this pattern. If you&#8217;re using a game <span
+name="engine">engine</span>, you won&#8217;t write it yourself, but it&#8217;s still there.</p>
 <p>但是这个模式有所不同。我可以很自信的说你<em>会</em>使用这个模式。
 如果你使用一个游戏<span name="engine">引擎</span>，你不需要自己写，但是它还在那里。</p>
 <aside name="engine">
+<p>For me, this is the difference between an &#8220;engine&#8221; and a &#8220;library&#8221;. With
+libraries, you own the main game loop and call into the library. An engine owns
+the loop and calls into <em>your</em> code.</p>
 <p>对于我，这是“引擎”与“库”的不同之处。
 通过库，你拥有游戏循环，调用库。
 引擎拥有游戏循环，调用<em>你的</em>代码。</p>
 </aside>
+<p>You might think you won&#8217;t need this if you&#8217;re making a turn-based game. But even
+there, though the <em>game state</em> won&#8217;t advance until the user takes their turn,
+the <em>visual</em> and <em>audible</em> states of the game usually do. Animation and music
+keep running even when the game is &#8220;waiting&#8221; for you to take your turn.</p>
 <p>你可能认为在做回合制游戏时不需要它。
 但是哪怕是那里，就算<em>游戏状态</em>到玩家回合才改变，<em>视觉</em>和<em>听觉</em>状态仍会改变。
 动画和音乐会继续运行，哪怕游戏在“等待”你进行你的回合。</p>
+<h2><a href="#keep-in-mind" name="keep-in-mind">Keep in Mind</a></h2>
 <h2><a href="#记住" name="记住">记住</a></h2>
+<p>The loop we&#8217;re talking about here is some of the most important code in your
+game. They say a program spends <span name="percent">90%</span> of its time in
+10% of the code. Your game loop will be firmly in that 10%. Take care with this
+code, and be mindful of its efficiency.</p>
 <p>我们这里谈到的循环是游戏代码中最重要的部分。
 有人说程序会花费<span name="percent">90%</span>的事件在10%的代码上。
 游戏循环代码肯定在这10%中。
 好好对待代码，注意它的效率。</p>
 <aside name="percent">
+<p>Made up statistics like this are why &#8220;real&#8221; engineers like mechanical and
+electrical engineers don&#8217;t take us seriously.</p>
 <p>像这样使用统计学是“真正的”工程师，比如机械或电子工程师，不认真对待我们的原因。</p>
 </aside>
+<h3><a href="#you-may-need-to-coordinate-with-the-platform's-event-loop" name="you-may-need-to-coordinate-with-the-platform's-event-loop">You may need to coordinate with the platform&#8217;s event loop</a></h3>
 <h3><a href="#你需要与平台的事件循环协调" name="你需要与平台的事件循环协调">你需要与平台的事件循环协调</a></h3>
+<p>If you&#8217;re building your game on top of an OS or platform that has a graphic UI
+and an event loop built in, then you have <em>two</em> application loops in play. They&#8217;ll
+need to play nice together.</p>
 <p>如果你将游戏构建在操作系统的顶层或者有图形UI和内建事件循环的平台上，
 那你就有了两个应用循环在运作。
 它们需要很好的配合。</p>
+<p>Sometimes, you can take control and make your loop the only one. For
+example, if you&#8217;re writing a game against the venerable Windows API, your
+<code>main()</code> can just have a game loop. Inside, you can call <code>PeekMessage()</code> to
+handle and dispatch events from the OS. Unlike <code>GetMessage()</code>, <code>PeekMessage()</code>
+doesn&#8217;t block waiting for user input, so your game loop will keep cranking.</p>
 <p>有时候，你可以控制只运行其中一个。
 举个例子，如果舍弃了Windows的珍贵API，<code>main()</code>可以只有一个游戏循环。
 在里面，你可以调用<code>PeekMessage()</code>来处理和分发系统的事件。
 不像<code>GetMessage()</code>，<code>PeekMessage()</code>没有阻塞等待用户输入，
 因此你的游戏循环会保持运作。</p>
+<p>Other platforms don&#8217;t let you opt out of the event loop so easily. If you&#8217;re
+targeting a web browser, the event loop is deeply built into browser&#8217;s execution
+model. There, the event loop will run the show, and you&#8217;ll use it as your game
+loop too. You&#8217;ll call something like <code>requestAnimationFrame()</code> and it will
+call back into your code to keep the game running.</p>
 <p>其他的平台不会让你这么轻松的选择事件循环。
 如果你基于网页浏览器，事件循环被内建在浏览器的执行模型深处。
 这样，你会用事件循环作为游戏循环。
 你会调用<code>requestAnimationFrame()</code>之类的，它会返回代码让游戏继续运行。</p>
+<h2><a href="#sample-code" name="sample-code">Sample Code</a></h2>
 <h2><a href="#示例代码" name="示例代码">示例代码</a></h2>
+<p>For such a long introduction, the code for a game loop is actually pretty
+straightforward. We&#8217;ll walk through a couple of variations and go over their
+good and bad points.</p>
 <p>如此长的介绍，而游戏循环的代码实际上很直观。
 我们会浏览一堆变种并比较它们的好处和坏处。</p>
+<p>The game loop drives AI, rendering, and other game systems, but those aren&#8217;t the
+point of the pattern itself, so we&#8217;ll just call into fictitious methods here.
+Actually implementing <code>render()</code>, <code>update()</code> and others is left as a
+(challenging!) exercise for the reader.</p>
 <p>游戏循环驱动了AI，渲染和其他游戏系统，但这些不是模式的要点，
 所以我们会调用虚拟的方法。在实现了<code>render()</code>，<code>update()</code>之后，
 剩下的作为（挑战！）练习给读者。</p>
+<h3><a href="#run,-run-as-fast-as-you-can" name="run,-run-as-fast-as-you-can">Run, run as fast as you can</a></h3>
 <h3><a href="#跑，能跑多快跑多快" name="跑，能跑多快跑多快">跑，能跑多快跑多快</a></h3>
+<p>We&#8217;ve already seen the simplest possible game loop:</p>
 <p>我们已经看到了可能是最简单的游戏循环：</p>
 <div class="codehilite"><pre><span></span><span class="k">while</span> <span class="p">(</span><span class="nb">true</span><span class="p">)</span>
 <span class="p">{</span>
@@ -194,16 +337,28 @@ YOU ARE INSIDE A BUILDING, A WELL HOUSE FOR A LARGE SPRING.
 </pre></div>
 
 
+<p>The problem with it is you have no control over how fast the game runs. On a
+fast machine, that loop will spin so fast users won&#8217;t be able to see what&#8217;s
+going on. On a slow machine, the game will crawl. If you have a part of the game
+that&#8217;s content-heavy or does more AI or physics, the game will actually play
+slower there.</p>
 <p>它的问题是你不能控制游戏运行的有多快。
 在快速机器上，循环会运行的太快，玩家看不清发生了什么。
 在慢速机器上，游戏在爬行。
 如果游戏的一部分有大量内容或者做了很多AI或物理，游戏就会慢一些。</p>
+<h3><a href="#take-a-little-nap" name="take-a-little-nap">Take a little nap</a></h3>
 <h3><a href="#休息一下" name="休息一下">休息一下</a></h3>
+<p>The first variation we&#8217;ll look at adds a simple fix. Say you want your game to
+run at 60 FPS. That gives you about <span name="16">16</span> milliseconds per
+frame. As long as you can reliably do all of your game processing and rendering
+in less than that time, you can run at a steady frame rate. All you do is process
+the frame and then <em>wait</em> until it&#8217;s time for the next one, like so:</p>
 <p>我们看到的第一个变化是增加一个简单的修复。
 假设你想要你的游戏以60FPS运行。这样每帧大约16毫秒。
 只要你用少于这个时间可靠地进行游戏所有的处理和渲染，就可以以稳定的帧率运行。
 你需要做的就是处理这一帧然后<em>等待</em>，直到是时候处理下一个，就像这样：</p>
 <p><img src="images/game-loop-simple.png" alt="A simple game loop flowchart. Process Input &rarr; Update Game &rarr; Render &rarr; Wait, then loop back to the beginning." /></p>
+<p>The code looks a bit like this:</p>
 <p>代码看上去像这样：</p>
 <aside name="16">
 <p><em>1000 ms / FPS = ms per frame</em>.</p>
@@ -220,26 +375,46 @@ YOU ARE INSIDE A BUILDING, A WELL HOUSE FOR A LARGE SPRING.
 </pre></div>
 
 
+<p>The <code>sleep()</code> here makes sure the game doesn&#8217;t run too <em>fast</em> if it processes a
+frame quickly. It <em>doesn&#8217;t</em> help if your game runs too <em>slowly</em>. If it takes
+longer than 16ms to update and render the frame, your sleep time goes
+<em>negative</em>. If we had computers that could travel back in time, lots of things
+would be easier, but we don&#8217;t.</p>
 <p>如果它很快的处理完一帧，这里的<code>sleep()</code>保证了游戏不会运行太<em>快</em>。
 如果你的游戏运行太<em>慢</em>这无法帮忙。
 如果需要超过16ms来更新并渲染一帧，休眠的时间就变成了<em>负的</em>。
 如果计算机能回退时间，很多事情就很容易了，但是它不能。</p>
+<p>Instead, the game slows down. You can work around this by doing less work each
+frame&#8202;&mdash;&#8202;cut down on the graphics and razzle dazzle or dumb down the AI. But that
+impacts the quality of gameplay for all users, even ones on fast machines.</p>
 <p>相反，游戏变慢了。
 可以通过每帧少做些工作来解决这个问题——减少物理效果和绚丽光影，或者把AI变笨。
 但是这影响了玩家的游戏体验，哪怕是那些有快速机器的。</p>
+<h3><a href="#one-small-step,-one-giant-step" name="one-small-step,-one-giant-step">One small step, one giant step</a></h3>
 <h3><a href="#一小步，一大步" name="一小步，一大步">一小步，一大步</a></h3>
+<p>Let&#8217;s try something a bit more sophisticated. The problem we have basically
+boils down to:</p>
+<ol>
+<li>Each update advances game time by a certain amount.</li>
+<li>It takes a certain amount of <em>real</em> time to process that.</li>
+</ol>
 <p>让我们尝试一些更加复杂的东西。我们拥有的问题基本上是：</p>
 <ol>
-<li>
-<p>每次更新将游戏时间推动一个固定量。</p>
-</li>
-<li>
-<p>这消耗一定量的<em>真实</em>时间来处理它。</p>
-</li>
+<li>每次更新将游戏时间推动一个固定量。</li>
+<li>这消耗一定量的<em>真实</em>时间来处理它。</li>
 </ol>
+<p>If step two takes longer than step one, the game slows down. If it takes more
+than 16 ms of processing to advance game time by 16ms, it can&#8217;t possibly keep
+up. But if we can advance the game by <em>more</em> than 16ms of game time in a single
+step, then we can update the game less frequently and still keep up.</p>
 <p>如果第二步消耗的时间超过第一步，游戏变慢了。
 如果它需要超过16ms来推动游戏时间16ms，它永远跟不上。
 但是如果一步中推动游戏时间<em>超过</em>16ms，那我们可以减少更新频率，仍可以跟得上。</p>
+<p>The idea then is to choose a time step to advance based on how much <em>real</em> time
+passed since the last frame. The longer the frame takes, the bigger steps the
+game takes. It always keeps up with real time because it will take bigger and
+bigger steps to get there. They call this a <em>variable</em> or <em>fluid</em> time step. It
+looks like:</p>
 <p>接着的思路是基于上帧到现在有多少<em>真实</em>时间流逝来选择前进的时间。
 这一帧花费的时间越长，游戏的间隔越大。
 它总能跟上真实时间，因为它走的步子越来越大。
@@ -257,9 +432,18 @@ YOU ARE INSIDE A BUILDING, A WELL HOUSE FOR A LARGE SPRING.
 </pre></div>
 
 
+<p>Each frame, we determine how much <em>real</em> time passed since the last game update
+(<code>elapsed</code>). When we update the game state, we pass that in. The engine is then
+responsible for advancing the game world forward by that amount of time.</p>
 <p>每一帧，我们计算上次游戏更新（<code>elapsed</code>）到现在有多少<em>真实</em>时间过去了。
 当我们更新游戏状态时将其传入。
 游戏引擎负责推进游戏世界确定的时间量。</p>
+<p>Say you&#8217;ve got a bullet shooting across the screen. With a fixed time step, in each
+frame, you&#8217;ll move it according to its velocity. With a variable time step, you
+<em>scale that velocity by the elapsed time</em>. As the time step gets bigger, the
+bullet moves farther in each frame. That bullet will get across the screen in
+the <em>same</em> amount of <em>real</em> time whether it&#8217;s twenty small fast steps or four
+big slow ones. This looks like a winner:</p>
 <p>假设有一颗子弹跨过屏幕。
 使用固定的时间间隔，在每一帧中，你根据它的速度移动它。
 使用变化的时间间隔，你<em>根据过去的时间决定速度增加的比例</em>。
@@ -268,48 +452,101 @@ YOU ARE INSIDE A BUILDING, A WELL HOUSE FOR A LARGE SPRING.
 这看上去是获胜者：</p>
 <ul>
 <li>
+<p>The game plays at a consistent rate on different hardware.</p>
+</li>
+<li>
 <p>游戏在不同的硬件上以固定的速度运行。</p>
+</li>
+<li>
+<p>Players with faster machines are rewarded with smoother gameplay.</p>
 </li>
 <li>
 <p>使用更快机器的玩家获得了更流畅的游戏体验。</p>
 </li>
 </ul>
+<p>But, alas, there&#8217;s a serious problem lurking ahead: we&#8217;ve made the game <span
+name="deterministic">non-deterministic</span> and unstable. Here&#8217;s one example
+of the trap we&#8217;ve set for ourselves:</p>
 <p>但是，悲哀，这里有一个严重的问题：
 游戏不再是<span name="deterministic">确定的</span>了，也不再稳定。
 这是我们给自己挖的一个坑：</p>
 <aside name="deterministic">
+<p>&#8220;Deterministic&#8221; means that every time you run the program, if you give it the
+same inputs, you get the exact same outputs back. As you can imagine, it&#8217;s much
+easier to track down bugs in deterministic programs&#8202;&mdash;&#8202;find the inputs that caused
+the bug the first time, and you can cause it every time.</p>
 <p>“确定的”代表每次你运行程序，如果你给了它同样的输入，你就获得同样的输出。你可以想得到，在确定的程序中追踪漏洞更容易——一次找到造成漏洞的输入，每次你都能重现之。</p>
+<p>Computers are naturally deterministic; they follow programs mechanically.
+Non-determinism appears when the messy real world creeps in. For example,
+networking, the system clock, and thread scheduling all rely on bits of the
+external world outside of the program&#8217;s control.</p>
 <p>计算机本身是确定的；它们机械地遵循程序。非确定性出现在在纷乱的真实世界加入时。举个例子，网络，系统时钟，和线程调度都依赖于超出程序控制的外部世界。</p>
 </aside>
+<p>Say we&#8217;ve got a two-player networked game and Fred has some beast of a gaming
+machine while George is using his grandmother&#8217;s antique PC. That aforementioned
+bullet is flying across both of their screens. On Fred&#8217;s machine, the game is
+running super fast, so each time step is tiny. We cram, like, 50 frames in the
+second it takes the bullet to cross the screen. Poor George&#8217;s machine can only fit in about
+five frames.</p>
 <p>假设我们有个双人联网游戏，Fred的游戏机是性能猛兽，而George正在使用他祖母的老爷机。
 前面提到的子弹在他们的屏幕上飞行。
 在Fred的机器上，游戏跑的超级快，每个时间间隔都很小。
 比如，我们塞了50帧在子弹穿过屏幕的那一秒。
 可怜的George的机器只能跑到大约5帧。</p>
+<p>This means that on Fred&#8217;s machine, the physics engine updates the bullet&#8217;s position
+50 times, but George&#8217;s only does it five times. Most games use floating point
+numbers, and those are subject to <em>rounding error</em>. Each time you add two
+floating point numbers, the answer you get back can be a bit off. Fred&#8217;s machine
+is doing ten times as many operations, so he&#8217;ll accumulate a bigger error than
+George. The <em>same</em> bullet will end up in <em>different places</em> on their machines.</p>
 <p>这就意味着在Fred的机器上，物理引擎每秒更新50次位置，但是George的只能做5次。
 大多数游戏使用浮点数，它们有<em>每轮误差</em>。
 每次你将两个浮点数加在一起，获得的结果就会有点偏差。
 Fred的机器做了10倍多的操作，所以它的误差要比George的更大。
 <em>同样</em>的子弹最终在他们的机器上到了<em>不同的位置</em>。</p>
+<p>This is just one nasty problem a variable time step can cause, but there are more.
+In order to run in real time, game physics engines are approximations of the
+real laws of mechanics. To keep those approximations from <span
+name="blowup">blowing up</span>, damping is applied. That damping is carefully
+tuned to a certain time step. Vary that, and the physics gets unstable.</p>
 <p>这是使用变化时间可引起的一个问题，但是还有更多。
 为了以真实时间运行，游戏图形引擎是实际机制法则的近似值。
 为了从<span name="blowup">爆炸</span>计算这些近似值，添加了阻尼。
 这个阻尼每次时间间隔都被小心的调整。
 改变它，物理就不再稳定。</p>
 <aside name="blowup">
+<p>&#8220;Blowing up&#8221; is literal here. When a physics engine flakes out, objects can get
+completely wrong velocities and launch themselves into the air.</p>
 <p>“爆炸”在这里就是它的字面意思。当物理引擎卡住，对象获得了完全错误的速度，把它们射到了天空中。</p>
 </aside>
+<p>This instability is bad enough that this example is only here as a cautionary
+tale and to lead us to something better&#8230;</p>
 <p>这种不稳定性太糟了，这个例子在这里的唯一原因是作为警示寓言，引领我们到更好的东西……</p>
+<h3><a href="#play-catch-up" name="play-catch-up">Play catch up</a></h3>
 <h3><a href="#追逐游戏" name="追逐游戏">追逐游戏</a></h3>
+<p>One part of the engine that usually <em>isn&#8217;t</em> affected by a variable time step is
+<span name="render">rendering</span>. Since the rendering engine captures an
+instant in time, it doesn&#8217;t care how much time advanced since the last one. It
+renders things wherever they happen to be right then.</p>
 <p>游戏中<span name="render">渲染</span>通常<em>不会</em>被动态时间间隔影响到。
 由于渲染引擎使用时间上的一瞬，它不会计算上次到现在过了多久。
 它在事物该在的地方渲染。</p>
 <aside name="render">
+<p>This is more or less true. Things like motion blur can be affected by time step,
+but if they&#8217;re a bit off, the player doesn&#8217;t usually notice.</p>
 <p>这或多或少是真的。像动态模糊的东西会被时间间隔影响，但如果它们有一点延迟，玩家通常不会注意到。</p>
 </aside>
+<p>We can use this fact to our advantage. We&#8217;ll <em>update</em> the game using a fixed
+time step because that makes everything simpler and more stable for physics and
+AI. But we&#8217;ll allow flexibility in when we <em>render</em> in order to free up some
+processor time.</p>
 <p>我们可以利用这点作为优势。
 用固定的时间间隔<em>更新</em>游戏，因为这让所有事情变得简单，物理和AI也更加稳定。
 但是我们允许灵活<em>渲染</em>来释放一些处理器时间。</p>
+<p>It goes like this: A certain amount of real time has elapsed since the last turn
+of the game loop. This is how much game time we need to simulate for the game&#8217;s
+&#8220;now&#8221; to catch up with the player&#8217;s. We do that using a <em>series</em> of <em>fixed</em> time
+steps. The code looks a bit like:</p>
 <p>它像这样运作：自上一次游戏循环前进定量的时间。
 这就是需要为游戏的“现在”模拟前进，追上玩家的时间。
 我们使用一<em>系列</em>的<em>固定</em>时间间隔。
@@ -336,88 +573,180 @@ Fred的机器做了10倍多的操作，所以它的误差要比George的更大�
 </pre></div>
 
 
+<p>There&#8217;s a few pieces here. At the beginning of each frame, we update <code>lag</code> based
+on how much real time passed. This measures how far the game&#8217;s clock is behind
+compared to the real world. We then have an inner loop to update the game, one
+fixed step at a time, until it&#8217;s caught up. Once we&#8217;re caught up, we render and
+start over again. You can visualize it sort of like this:</p>
 <p>这里还有几个小块。
 在每一帧的开头，基于有多少真实时间过去更新<code>lag</code>。
 这测量了游戏世界时钟比真实世界落后了多少，直到追上。
 一旦我们追上，我们就渲染然后重新开始。
 你可以将其视觉化如下：</p>
 <p><img src="images/game-loop-fixed.png" alt="A modified flowchart. Process Input &rarr; Update Game &rarr; Wait, then loop back to this step then &rarr; Render &rarr; Loop back to the beginning." /></p>
+<p>Note that the time step here isn&#8217;t the <em>visible</em> frame rate anymore.
+<code>MS_PER_UPDATE</code> is just the <em>granularity</em> we use to update the game. The shorter
+this step is, the more processing time it takes to catch up to real time. The
+longer it is, the choppier the gameplay is. Ideally, you want it pretty short,
+often faster than 60 FPS, so that the game simulates with high fidelity on fast
+machines.</p>
 <p>注意这里的时间间隔不是<em>可见的</em>帧率了。
 <code>MS_PER_UPDATE</code>只是我们更新游戏的<em>间隔</em>。
 这个间隔越短，需要越多的处理时间来追上真实时间。
 它越长，游戏抖动的越厉害。
 理想上，你想要它特别短，通常快过60FPS，所以游戏在快速机器上会有高效的表现。</p>
+<p>But be careful not to make it <em>too</em> short. You need to make sure the time step
+is greater than the time it takes to process an <code>update()</code>, even on the <span
+name="bail">slowest</span> hardware. Otherwise, your game simply can&#8217;t catch up.</p>
 <p>但是小心不要把它整得<em>太</em>短了。
 你需要保证即使在<span name="bail">最慢</span>的硬件上，这个时间间隔长于处理一个<code>update()</code>的时间。
 否则，你的游戏就跟不上了。</p>
 <aside name="bail">
+<p>I left it out here, but you can safeguard this by having the inner update loop
+bail after a maximum number of iterations. The game will slow down then, but
+that&#8217;s better than locking up completely.</p>
 <p>我暂时不谈这个，但你可以通过限定内层循环最多迭代数量来保证这一点。
 游戏会变慢，但是比完全卡死要好。</p>
 </aside>
+<p>Fortunately, we&#8217;ve bought ourselves some breathing room here. The trick is that
+we&#8217;ve <em>yanked rendering out of the update loop</em>. That frees up a bunch of CPU
+time. The end result is the game <em>simulates</em> at a constant rate using safe fixed
+time steps across a range of hardware. It&#8217;s just that the player&#8217;s <em>visible
+window</em> into the game gets choppier on a slower machine.</p>
 <p>幸运的是，我们给自己弄出了一些活动空间。
 技巧是我们将<em>渲染拉出了更新循环</em>。
 这释放了很大一部分CPU时间。
 结果是游戏以固定速率<em>模拟</em>，使用了对于硬件安全的固定时间间隔。
 只是玩家的<em>视觉窗口</em>在慢速机器上会有抖动。</p>
+<h3><a href="#stuck-in-the-middle" name="stuck-in-the-middle">Stuck in the middle</a></h3>
 <h3><a href="#卡在中间" name="卡在中间">卡在中间</a></h3>
+<p>There&#8217;s one issue we&#8217;re left with, and that&#8217;s residual lag. We update the game
+at a fixed time step, but we render at arbitrary points in time. This means that
+from the user&#8217;s perspective, the game will often display at a point in time
+between two updates.</p>
 <p>我们还剩一个问题，就是剩下的延迟。
 以固定的时间间隔更新游戏，但是在任意时间渲染。
 这就意味着从玩家的角度看，游戏经常在两次更新之间的时候显示。</p>
+<p>Here&#8217;s a timeline:</p>
 <p>这是时间线：</p>
 <p><img src="images/game-loop-timeline.png" alt="A timeline containing evenly spaced Updates and intermittent Renders." /></p>
+<p>As you can see, we update at a nice tight, fixed interval. Meanwhile, we render
+whenever we can. It&#8217;s less frequent than updating, and it isn&#8217;t steady either. Both
+of those are OK. The lame part is that we don&#8217;t always render right at the point
+of updating. Look at the third render time. It&#8217;s right between two updates:</p>
 <p>就像你看到的那样，我们以紧凑固定的间隔更新。
 同时，我们在任何可以的时候渲染。
 它比更新发生的要少，而且也不稳定。
 两者都没问题。糟糕的是，我们不总能在正确的时间点渲染。
 看看第三次渲染时间。它在两次更新之间。</p>
 <p><img src="images/game-loop-timeline-close.png" alt="Close-up of the timeline showing Renders falling between Update steps." /></p>
+<p>Imagine a bullet is flying across the screen. On the first update, it&#8217;s on the
+left side. The second update moves it to the right side. The game is rendered at
+a point in time between those two updates, so the user expects to see that
+bullet in the center of the screen. With our current implementation, it will
+still be on the left side. This means motion looks jagged or stuttery.</p>
 <p>想象子弹飞过屏幕。第一次更新中，它在左边。
 第二次更新将它移到了右边。
 这个游戏在两次更新间的时间点渲染，所以玩家期待看到子弹在屏幕的中间。
 而我们现在的实现中，它还在左边。这意味着移动看上去是锯齿状的。</p>
+<p>Conveniently, we actually know <em>exactly</em> how far between update frames we are
+when we render: it&#8217;s stored in <code>lag</code>. We bail out of the update loop when it&#8217;s
+less than the update time step, not when it&#8217;s <em>zero</em>. That leftover amount?
+That&#8217;s how far into the next frame we are.</p>
 <p>方便的是，我们<em>实际</em>知道渲染时距离两帧的时间：它被存储在<code>lag</code>中。
 我们在它比更新时间间隔小时取出，而不是它是<em>零</em>的时候。
 剩余量？那就是到下一帧的时间。</p>
+<p>When we go to render, we&#8217;ll pass that in:</p>
 <p>当我们要渲染时，我们会将其传入：</p>
+<p><span name="normal"></span></p>
 <p><span name="normal"></span></p>
 <div class="codehilite"><pre><span></span><span class="n">render</span><span class="p">(</span><span class="n">lag</span> <span class="o">/</span> <span class="n">MS_PER_UPDATE</span><span class="p">);</span>
 </pre></div>
 
 
 <aside name="normal">
+<p>We divide by <code>MS_PER_UPDATE</code> here to <em>normalize</em> the value. The value passed to
+<code>render()</code> will vary from 0 (right at the previous frame) to just under 1.0
+(right at the next frame), regardless of the update time step. This way, the
+renderer doesn&#8217;t have to worry about the frame rate. It just deals in values
+from 0 to 1.</p>
 <p>我们在这里除以<code>MS_PER_UPDATE</code>来<em>正规化</em>值。
 传给<code>render()</code>在0（恰巧在前一帧）到1.0（恰巧在下一帧），不管时间更新间隔是多大。
 这样，渲染引擎不必担心帧率。它只需处理0到1的值。</p>
 </aside>
+<p>The renderer knows each game object <em>and its current velocity</em>. Say that bullet
+is 20 pixels from the left side of the screen and is moving right 400 pixels per
+frame. If we are halfway between frames, then we&#8217;ll end up passing 0.5 to
+<code>render()</code>. So it draws the bullet half a frame ahead, at 220 pixels. Ta-da,
+smooth motion.</p>
 <p>渲染器知道每个游戏对象<em>以及它当前的速度</em>。
 假设子弹在屏幕左边20像素的地方，正在以400像素每帧的速度向右移动。
 如果在两帧中间，我们会传0.5给<code>render()</code>。
 它绘制了半帧之前的图形，在220像素，好啦，平滑移动。</p>
+<p>Of course, it may turn out that that extrapolation is wrong. When we
+calculate the next frame, we may discover the bullet hit an obstacle or slowed
+down or something. We rendered its position interpolated between where it was on
+the last frame and where we <em>think</em> it will be on the next frame. But we don&#8217;t
+know that until we&#8217;ve actually done the full update with physics and AI.</p>
 <p>当然，也许这种推断是错误的。
 在我们计算下一帧时，也许会发现子弹碰撞到另一障碍或减速或别的什么。
 我们在它上一帧和我们*认为下一帧的位置之间插值。
 但是在完成物理和AI更新后我们才能真的知道。</p>
+<p>So the extrapolation is a bit of a guess and sometimes ends up wrong.
+Fortunately, though, those kinds of corrections usually aren&#8217;t noticeable. At
+least, they&#8217;re less noticeable than the stuttering you get if you don&#8217;t
+extrapolate at all.</p>
 <p>所以推断有猜测的成分，有时候结果是错误的。
 但是，幸运的，这种修正通常不可感知。
 最起码，它们比你不使用推断导致的结巴更不明显。</p>
+<h2><a href="#design-decisions" name="design-decisions">Design Decisions</a></h2>
 <h2><a href="#设计决策" name="设计决策">设计决策</a></h2>
+<p>Despite the length of this chapter, I&#8217;ve left out more than I&#8217;ve included. Once
+you throw in things like synchronizing with the display&#8217;s refresh rate,
+multithreading, and GPUs, a real game loop can get pretty hairy. At a high
+level, though, here are a few questions you&#8217;ll likely answer:</p>
 <p>不管这一章的长度，我没提的超过我包含的。
 一旦你将显示的刷新频率，多线程，多GPU，加到里面，真正的游戏循环就会变得毛绒绒。
 在高层中，这里还有一些问题你需要回答：</p>
+<h3><a href="#do-you-own-the-game-loop,-or-does-the-platform" name="do-you-own-the-game-loop,-or-does-the-platform">Do you own the game loop, or does the platform?</a></h3>
 <h3><a href="#你拥有游戏循环，还是平台？" name="你拥有游戏循环，还是平台？">你拥有游戏循环，还是平台？</a></h3>
+<p>This is less a choice you make and more one that&#8217;s made for you. If you&#8217;re
+making a game that runs in a web browser, you pretty much <em>can&#8217;t</em> write your own
+classic game loop. The browser&#8217;s event-based nature precludes it. Likewise, if
+you&#8217;re using an existing game engine, you will probably rely on its game loop
+instead of rolling your own.</p>
 <p>与其说这是你的选择，不如说有人为你选了。
 如果你在做浏览器中的游戏，你很可能<em>不能</em>写自己的经典游戏循环。
 浏览器本身的事件驱动阻碍了这一点。
 同样，如果你使用现存的游戏引擎，你很可能依赖于它的游戏循环而不是自己写一个。</p>
 <ul>
 <li>
+<p><strong>Use the platform&#8217;s event loop:</strong></p>
+</li>
+<li>
 <p><strong>使用平台的事件循环：</strong></p>
 <ul>
+<li>
+<p><em>It&#8217;s simple.</em> You don&#8217;t have to worry about writing and optimizing the
+    core loop of the game.</p>
+</li>
 <li>
 <p><em>简单</em>。你不必担心写和优化自己的游戏核心循环。</p>
 </li>
 <li>
+<p><em>It plays nice with the platform.</em> You don&#8217;t have to worry about
+    explicitly giving the host time to process its own events, caching
+    events, or otherwise managing the impedance mismatch between the
+    platform&#8217;s input model and yours.</p>
+</li>
+<li>
 <p><em>平台友好。</em>你不必明确地给平台时间处理它自己的事件，缓存事件，或者任何管理平台输入模型和你的不同之处。</p>
+</li>
+<li>
+<p><em>You lose control over timing.</em> The platform will call your code as it
+    sees fit. If that&#8217;s not as frequently or as smoothly as you&#8217;d like, too
+    bad. Worse, most application event loops weren&#8217;t designed with games in
+    mind and usually <em>are</em> slow and choppy.</p>
 </li>
 <li>
 <p><em>你失去了对时间的控制。</em>平台会在它方便时调用代码。如果这不如你想要的平滑或者频繁，太糟了。更糟的是，大多数应用的事件循环没有为游戏设计，通常<em>是</em>又慢又抖动。</p>
@@ -425,10 +754,24 @@ Fred的机器做了10倍多的操作，所以它的误差要比George的更大�
 </ul>
 </li>
 <li>
+<p><strong>Use a game engine&#8217;s loop:</strong></p>
+</li>
+<li>
 <p><strong>使用游戏引擎的循环：</strong></p>
 <ul>
 <li>
+<p><em>You don&#8217;t have to write it.</em> Writing a game loop can get pretty tricky.
+    Since that core code gets executed every frame, minor bugs or
+    performance problems can have a large impact on your game. A tight game
+    loop is one reason to consider using an existing engine.</p>
+</li>
+<li>
 <p><em>不必自己写。</em>写游戏循环非常需要技巧。由于是每帧都要执行的核心代码，小小的漏洞或者性能问题就对游戏有巨大的影响。紧密的游戏循环是使用现有引擎的原因之一。</p>
+</li>
+<li>
+<p><em>You don&#8217;t get to write it.</em> Of course, the flip side to that coin is
+    the loss of control if you <em>do</em> have needs that aren&#8217;t a perfect fit for
+    the engine.</p>
 </li>
 <li>
 <p><em>不必自己写。</em>当然，硬币的另一面是，如果你<em>真的</em>要的不是引擎给的，你就失去了控制。</p>
@@ -436,10 +779,24 @@ Fred的机器做了10倍多的操作，所以它的误差要比George的更大�
 </ul>
 </li>
 <li>
+<p><strong>Write it yourself:</strong></p>
+</li>
+<li>
 <p><strong>自己写：</strong></p>
 <ul>
 <li>
+<p><em>Total control.</em> You can do whatever you want with it. You can design it
+    specifically for the needs of your game.</p>
+</li>
+<li>
 <p><em>完全的控制。</em>你可以做任何想做的事情。你可以为游戏的需求订制。</p>
+</li>
+<li>
+<p><em>You have to interface with the platform.</em> Application frameworks and
+    operating systems usually expect to have a slice of time to process
+    events and do other work. If you own your app&#8217;s core loop,
+    it won&#8217;t get any. You&#8217;ll have to explicitly hand off control
+    periodically to make sure the framework doesn&#8217;t hang or get confused.</p>
 </li>
 <li>
 <p><em>你需要与平台交互。</em>应用框架和操作系统通常有时间片去处理事件和做其他工作。如果你拥有应用的核心循环，它就没有。你得显式定期检查，保证框架没有挂起或者糊涂。</p>
@@ -447,42 +804,95 @@ Fred的机器做了10倍多的操作，所以它的误差要比George的更大�
 </ul>
 </li>
 </ul>
+<h3><a href="#how-do-you-manage-power-consumption" name="how-do-you-manage-power-consumption">How do you manage power consumption?</a></h3>
 <h3><a href="#如何管理能量消耗？" name="如何管理能量消耗？">如何管理能量消耗？</a></h3>
+<p>This wasn&#8217;t an issue five years ago. Games ran on things plugged into walls or on
+dedicated handheld devices. But with the advent of smartphones, laptops, and
+mobile gaming, the odds are good that you do care about this now. A game that runs
+beautifully but turns players&#8217; phones into space heaters before running out of
+juice thirty minutes later is not a game that makes people happy.</p>
 <p>这在五年前还不是问题。
 游戏运行在插到插座上的或者专用的设备上。
 但是随着智能手机，笔记本以及移动游戏的发展，这些东西现在需要关注了。
 能完美运行但会耗干三十分钟前充的电，并将手机变成空间加热器，可不是一个能让人开心的游戏。</p>
+<p>Now, you may need to think not only about making your game look great, but also use as
+little CPU as possible. There will likely be an <em>upper</em> bound to performance
+where you let the CPU sleep if you&#8217;ve done all the work you need to do in a
+frame.</p>
 <p>现在，你需要考虑的不仅仅是让游戏看上去很好，同时也要尽可能少的使用CPU。
 如果让需要的工作在一帧之内完成后，让CPU睡眠，那会对性能造成<em>上限</em>。</p>
 <ul>
 <li>
+<p><strong>Run as fast as it can:</strong></p>
+</li>
+<li>
 <p><strong>尽可能快的运行：</strong></p>
+<p>This is what you&#8217;re likely to do for PC games (though even those are
+increasingly being played on laptops). Your game loop will never explicitly
+tell the OS to sleep. Instead, any spare cycles will be spent cranking up
+the FPS or graphic fidelity.</p>
 <p>这就是你通常想让PC游戏做的事情（即使在笔记本上运行的数目不断增加）。游戏循环永远不会显式告诉系统休眠。相反，空闲的循环被划在提升FPS或者图像显示上了。</p>
+<p>This gives you the best possible gameplay experience but, it will use as much
+power as it can. If the player is on a laptop, they&#8217;ll have a nice lap
+warmer.</p>
 <p>这会给你最好的游戏体验。但是，也会尽可能多的使用电量。如果玩家在笔记本上玩，他们得到了一个很好的笔记本加热器。</p>
 </li>
 <li>
+<p><strong>Clamp the frame rate:</strong></p>
+</li>
+<li>
 <p><strong>固定帧率</strong></p>
+<p>Mobile games are often more focused on the quality of gameplay than they are
+on maximizing the detail of the graphics. Many of these games will set an upper
+limit on the frame rate (usually 30 or 60 FPS). If the game loop is done
+processing before that slice of time is spent, it will just sleep for the
+rest.</p>
 <p>移动游戏更加注意游戏体验质量，而不是图形细节的最大化。很多这种游戏都会设置最大帧率（通常是30或60FPS）。如果游戏循环在分配的时间片消耗完之前完成，在剩余的时间它会休眠。</p>
+<p>This gives the player a &#8220;good enough&#8221; experience and then goes easy on their
+battery beyond that.</p>
 <p>这给了玩家“足够好的”游戏体验，也让背后的电池轻松了一点。</p>
 </li>
 </ul>
+<h3><a href="#how-do-you-control-gameplay-speed" name="how-do-you-control-gameplay-speed">How do you control gameplay speed?</a></h3>
 <h3><a href="#你如何控制游戏速度？" name="你如何控制游戏速度？">你如何控制游戏速度？</a></h3>
+<p>A game loop has two key pieces: non-blocking user input and adapting to the
+passage of time. Input is straightforward. The magic is in how you deal with
+time. There are a <span name="platform">near-infinite</span> number of platforms
+that games can run on, and any single game may run on quite a few. How it
+accommodates that variation is key.</p>
 <p>游戏循环有两个关键部分：不阻塞用户输入和对通过事件的适应。
 输入很直观。魔力之处在于你如何处理事件。
 这里有<span name="platform">数不尽的</span>游戏可运行的平台，
 每个游戏都能在其中一些上运行。
 如何适应变化就是关键。</p>
 <aside name="platform">
+<p>Game-making seems to be part of human nature, because every time we&#8217;ve built a
+machine that can do computing, one of the first things we&#8217;ve done is made games
+on it. The PDP-1 was a 2 kHz machine with only 4,096 words of memory, yet Steve
+Russell and friends managed to create Spacewar! on it.</p>
 <p>创作游戏看来是人类的天性，因为每当我们建构可以计算的机器，首先做的就是在上面编游戏。
 PDP-1是一个仅有4096字内存的2kHz机器，但是Steve Russell和他的朋友也在上面创建了Spacewar!。</p>
 </aside>
 <ul>
 <li>
+<p><strong>Fixed time step with no synchronization:</strong></p>
+</li>
+<li>
 <p><strong>固定间隔，没有同步：</strong></p>
+<p>This was our first sample code. You just run the game loop as fast as you
+can.</p>
 <p>这是我们第一个样例代码。你只需尽可能的快运行游戏。</p>
 <ul>
 <li>
+<p><em>It&#8217;s simple</em>. This is its main (well, only) virtue.</p>
+</li>
+<li>
 <p><em>简单</em>。这是主要的（好吧，唯一的）好处。</p>
+</li>
+<li>
+<p><em>Game speed is directly affected by hardware and game complexity.</em> And
+    its main vice is that if there&#8217;s any variation, it will directly affect
+    the game speed. It&#8217;s the fixie of game loops.</p>
 </li>
 <li>
 <p><em>游戏速度直接与硬件和游戏复杂度相关。</em>主要的缺点是如果有变化，会直接影响游戏速度。它与游戏循环咬死了。</p>
@@ -490,17 +900,47 @@ PDP-1是一个仅有4096字内存的2kHz机器，但是Steve Russell和他的朋
 </ul>
 </li>
 <li>
+<p><strong>Fixed time step with synchronization:</strong></p>
+</li>
+<li>
 <p><strong>固定间隔，有同步：</strong></p>
+<p>The next step up on the complexity ladder is running the game at a fixed
+time step but adding a delay or synchronization point at the end of the
+loop to keep the game from running too fast.</p>
 <p>下一步对复杂度控制是使用固定的时间间隔，但是在循环的末尾增加同步点，保证游戏不会运行的过快。</p>
 <ul>
 <li>
+<p><em>Still quite simple.</em> It&#8217;s only one line of code more than the
+    probably-too-simple-to-actually-work example. In most game loops, you
+    will likely do synchronization <em>anyway</em>. You will probably <a href="double-buffer.html">double
+    buffer</a> your graphics and synchronize the buffer
+    flip to the refresh rate of the display.</p>
+</li>
+<li>
 <p><em>还是很简单。</em>这比过于简单而不能运行的例子只多了一行代码。在多数游戏循环中，你可能<em>总</em>会做一些同步。你可能<a href="double-buffer.html">双缓冲</a>图形并将缓存块与显示更新的频率同步。</p>
+</li>
+<li>
+<p><em>It&#8217;s power-friendly.</em> This is a surprisingly important consideration
+    for mobile games. You don&#8217;t want to kill the user&#8217;s battery
+    unnecessarily. By simply sleeping for a few milliseconds instead of
+    trying to cram ever more processing into each tick, you save power.</p>
 </li>
 <li>
 <p><em>电量友好。</em>这是移动游戏惊人重要的关注点。你不想不必要的消耗电量。通过简单的休眠几个毫秒而不是试图把更多处理塞入每个滴答，你节约了电量。</p>
 </li>
 <li>
+<p><em>The game doesn&#8217;t play too fast.</em> This fixes half of the speed concerns
+    of a fixed loop.</p>
+</li>
+<li>
 <p><em>游戏不会运行的太快。</em>这解决了固定循环速度的一半问题。</p>
+</li>
+<li>
+<p><em>The game can play too slowly.</em> If it takes too long to update and render
+    a game frame, playback will slow down. Because this style doesn&#8217;t
+    separate updating from rendering, it&#8217;s likely to hit this sooner than
+    more advanced options. Instead of just dropping <em>rendering</em> frames to
+    catch up, gameplay will slow down.</p>
 </li>
 <li>
 <p><em>游戏可能运行的太快。</em>如果花了太多时间更新和渲染一帧，播放也会减缓。因为这个风格没有分离更新和渲染，它比高级更新系统更容易碰到这点。没有扔掉<em>渲染</em>帧来追上，游戏本身会变慢。</p>
@@ -508,11 +948,27 @@ PDP-1是一个仅有4096字内存的2kHz机器，但是Steve Russell和他的朋
 </ul>
 </li>
 <li>
+<p><strong>Variable time step:</strong></p>
+</li>
+<li>
 <p><strong>动态间隔：</strong></p>
+<p>I&#8217;ll put this in here as an option in the solution space with the caveat
+that most game developers I know recommend against it. It&#8217;s good to remember
+<em>why</em> it&#8217;s a bad idea, though.</p>
 <p>我把这个放在这里作为问题的解决办法之一，附加警告：大多数我认识的游戏开发者反对它。不过记住<em>为什么</em>这是坏主意是很有用的。</p>
 <ul>
 <li>
+<p><em>It adapts to playing both too slowly and too fast.</em> If the game can&#8217;t
+    keep up with real time, it will just take larger and larger time steps
+    until it does.</p>
+</li>
+<li>
 <p><em>适应运行太快或者太慢。</em>如果游戏不能追上真实时间，那就要消耗越来越多的时间间隔直到它跟上。</p>
+</li>
+<li>
+<p><em>It makes gameplay non-deterministic and unstable.</em> And this is the real
+    problem, of course. Physics and networking in particular become much
+    harder with a variable time step.</p>
 </li>
 <li>
 <p><em>让游戏不确定而且不稳定。</em>这是真正的问题，当然。特别是物理和网络部分使用动态时间间隔会愈发的困难。</p>
@@ -524,10 +980,25 @@ PDP-1是一个仅有4096字内存的2kHz机器，但是Steve Russell和他的朋
 </li>
 <li>
 <p><strong>固定更新间隔，动态渲染：</strong></p>
+<p>The last option we covered in the sample code is the most complex, but also
+the most adaptable. It updates with a fixed time step, but it can drop
+<em>rendering</em> frames if it needs to to catch up to the player&#8217;s clock.</p>
 <p>在示例代码中覆盖的最后一个选项是最复杂的，但是也是最有适应性的。它以固定时间间隔更新，但是如果需要赶上玩家的时钟，可以扔掉一些<em>渲染</em>帧。</p>
 <ul>
 <li>
+<p><em>It adapts to playing both too slowly and too fast.</em> As long as the game
+    can <em>update</em> in real time, the game won&#8217;t fall behind. If the player&#8217;s
+    machine is top-of-the-line, it will respond with a smoother gameplay
+    experience.</p>
+</li>
+<li>
 <p><em>适应运行太快或者太慢。</em>只要可以在真实时间上<em>更新</em>，游戏就不会落后。如果玩家的机器是顶配，它会回以更平滑的游戏体验。</p>
+</li>
+<li>
+<p><em>It&#8217;s more complex.</em> The main downside is there is a bit more going on
+    in the implementation. You have to tune the update time step to be both
+    as small as possible for the high-end, while not being too slow on the
+    low end.</p>
 </li>
 <li>
 <p><em>更复杂。</em>主要负面问题是需要在实现中写更多东西。你需要将更新时间间隔调整的尽可能小来适应高端机，同时不至于在低端机上太慢。</p>
@@ -535,13 +1006,28 @@ PDP-1是一个仅有4096字内存的2kHz机器，但是Steve Russell和他的朋
 </ul>
 </li>
 </ul>
+<h2><a href="#see-also" name="see-also">See Also</a></h2>
 <h2><a href="#参见" name="参见">参见</a></h2>
 <ul>
+<li>
+<p>The classic article on game loops is Glenn Fiedler&#8217;s &#8220;<a href="http://gafferongames.com/game-physics/fix-your-timestep/">Fix Your
+    Timestep</a>&#8220;. This
+    chapter wouldn&#8217;t be the same without it.</p>
+</li>
 <li>
 <p>关于游戏循环的经典文章是Glenn Fiedler的&#8221;<a href="http://gafferongames.com/game-physics/fix-your-timestep/">Fix Your Timestep</a>&#8220;。如果没有这一篇文章，这章就不会是这个样子。</p>
 </li>
 <li>
+<p>Witters&#8217; article on <a href="http://www.koonsolo.com/news/dewitters-gameloop/">game
+    loops</a> is a close
+    runner-up.</p>
+</li>
+<li>
 <p>Witters关于<a href="http://www.koonsolo.com/news/dewitters-gameloop/">game loops</a>的文章是一个很接近的亚军。</p>
+</li>
+<li>
+<p>The <a href="http://unity3d.com/">Unity</a> framework has a complex game loop detailed
+    in a wonderful illustration <a href="http://docs.unity3d.com/Manual/ExecutionOrder.html">here</a>.</p>
 </li>
 <li>
 <p><a href="http://unity3d.com/">Unity</a>框架有一个复杂的游戏循环，细节在<a href="http://docs.unity3d.com/Manual/ExecutionOrder.html">这里</a>有完美的解释。</p>

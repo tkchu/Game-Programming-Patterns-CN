@@ -9,7 +9,7 @@
      the viewport. -->
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
 <link rel="stylesheet" type="text/css" href="style.css" />
-
+<link href="http://fonts.useso.com/css?family=Merriweather:400,400italic,700,700italic|Source+Code+Pro|Source+Sans+Pro:200,300,400,600,400italic,600italic|Rock+Salt" rel="stylesheet" type="text/css">
 <script src="jquery-1.10.1.min.js"></script>
 <script src="script.js"></script>
 </head>
@@ -23,14 +23,33 @@
 </nav>
 <h1>解耦模式</h1>
 <h1 class="book"><a href="/Game-Programming-Patterns-CN/">游戏设计模式</a></h1>
+<p>Once you get the hang of a programming language, writing code to do what you
+want is actually pretty easy. What&#8217;s hard is writing code that&#8217;s easy to adapt
+when your requirements <em>change</em>. Rarely do we have the luxury of a perfect
+feature set before we&#8217;ve fired up our editor.</p>
 <p>一旦你掌握了编程语言，编写想要写的东西就会变得相当容易。
 困难的是编写适应需求<em>变化</em>的代码，在我们用文本编辑器开火之前，通常没有完美的特性表供我们使用。</p>
+<p>A powerful tool we have for making change easier is <em>decoupling</em>. When we say
+two pieces of code are &#8220;decoupled&#8221;, we mean a change in one usually doesn&#8217;t
+require a change in the other. When you change some feature in your game, the
+fewer places in code you have to touch, the easier it is.</p>
 <p>能让我们更好适应变化的工具是<em>解耦</em>。
 当我们说两块代码“解耦”时，是指修改一块代码一般不会需要修改另一块代码。
 当我们修改游戏中的特性时，需要修改的代码越少，就越容易。</p>
+<p><a href="component.html">Components</a> decouple different domains in your game from each
+other within a single entity that has aspects of all of them. <a href="event-queue.html">Event
+Queues</a> decouple two objects communicating with each other,
+both statically and <em>in time</em>. <a href="service-locator.html">Service Locators</a> let
+code access a facility without being bound to the code that provides it.</p>
 <p><a href="component.html">组件模式</a>将一个实体拆成多个，解耦不同的领域。
 <a href="event-queue.html">事件序列</a>解耦了两个互相通信的事物，稳定而且<em>及时</em>。
 <a href="service-locator.html">服务定位器</a>让代码使用服务而无需绑定到提供服务的代码。</p>
+<h2><a href="#the-patterns" name="the-patterns">The Patterns</a></h2>
+<ul>
+<li><a href="component.html">Component</a></li>
+<li><a href="event-queue.html">Event Queue</a></li>
+<li><a href="service-locator.html">Service Locator</a></li>
+</ul>
 <h2><a href="#模式" name="模式">模式</a></h2>
 <ul>
 <li><a href="component.html">组件模式</a></li>
