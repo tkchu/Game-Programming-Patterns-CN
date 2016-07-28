@@ -9,3 +9,5 @@ xml/
 *~
 *.swp
 html/*.html
+
+!html/index.html
