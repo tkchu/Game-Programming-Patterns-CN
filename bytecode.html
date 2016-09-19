@@ -814,15 +814,12 @@ and the interpreter pointing to the first instruction:</p>
 <p>让我们串起来其中的几条指令，看看解释器如何执行它们，感受栈如何工作。
 从空栈开始，解释器指向第一个指令：</p>
 <p><img src="images/bytecode-stack-1.png" alt="Executing a bytecode sequence. The execution pointer points to the first literal instruction and the stack is empty." /></p>
-<p><img src="images/bytecode-stack-1.png" alt="Executing a bytecode sequence. The execution pointer points to the first literal instruction and the stack is empty." /></p>
 <p>First, it executes the first <code>INST_LITERAL</code>. That reads the next byte from the
 bytecode (<code>0</code>) and pushes it onto the stack:</p>
 <p>首先，它执行第一条<code>INST_LITERAL</code>，读取字节码流的下一个字节(<code>0</code>)并压入栈中。</p>
 <p><img src="images/bytecode-stack-2.png" alt="The next step. The literal 0 has been pushed onto the stack and the execution pointer is on the next literal." /></p>
-<p><img src="images/bytecode-stack-2.png" alt="The next step. The literal 0 has been pushed onto the stack and the execution pointer is on the next literal." /></p>
 <p>Then, it executes the second <code>INST_LITERAL</code>. That reads the <code>10</code> and pushes it:</p>
 <p>然后，它执行第二条<code>INST_LITERAL</code>，读取<code>10</code>然后压入。</p>
-<p><img src="images/bytecode-stack-3.png" alt="The next step. Now 10 has been pushed onto the stack and the execution pointer is at the Health instruction." /></p>
 <p><img src="images/bytecode-stack-3.png" alt="The next step. Now 10 has been pushed onto the stack and the execution pointer is at the Health instruction." /></p>
 <p>Finally, it executes <code>INST_SET_HEALTH</code>. That pops <code>10</code> and stores it in
 <code>amount</code>, then pops <code>0</code> and stores it in <code>wizard</code>. Then, it calls <code>setHealth()</code>
