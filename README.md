@@ -1,4 +1,9 @@
-﻿# [游戏编程模式中文版](http://tkchushbm.github.io/Game-Programming-Patterns-CN/)
+Waring: 中国邮电出版社已有中文版 http://www.epubit.com.cn/book/details/4184。
+我没有参与这个项目，他们的翻译质量确实比我强很多。
+我想我不会再更新这个项目了。
+但是毕竟在这里投入了很多很多的精力，将现有的状态留在这里吧。
+
+# [游戏编程模式中文版](http://tkchushbm.github.io/Game-Programming-Patterns-CN/)
 ###### 点击上面标题在线阅读
 
 《游戏编程模式》是由曾在EA工作八年的Bob Nystrom写就，讲述在游戏开发中各种常见的编程模式。
