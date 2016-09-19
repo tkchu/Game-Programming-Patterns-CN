@@ -816,8 +816,6 @@ and the interpreter pointing to the first instruction:
 
 <img src="images/bytecode-stack-1.png" alt="Executing a bytecode sequence. The execution pointer points to the first literal instruction and the stack is empty." />
 
-<img src="images/bytecode-stack-1.png" alt="Executing a bytecode sequence. The execution pointer points to the first literal instruction and the stack is empty." />
-
 First, it executes the first `INST_LITERAL`. That reads the next byte from the
 bytecode (`0`) and pushes it onto the stack:
 
@@ -825,13 +823,9 @@ bytecode (`0`) and pushes it onto the stack:
 
 <img src="images/bytecode-stack-2.png" alt="The next step. The literal 0 has been pushed onto the stack and the execution pointer is on the next literal." />
 
-<img src="images/bytecode-stack-2.png" alt="The next step. The literal 0 has been pushed onto the stack and the execution pointer is on the next literal." />
-
 Then, it executes the second `INST_LITERAL`. That reads the `10` and pushes it:
 
 然后，它执行第二条`INST_LITERAL`，读取`10`然后压入。
-
-<img src="images/bytecode-stack-3.png" alt="The next step. Now 10 has been pushed onto the stack and the execution pointer is at the Health instruction." />
 
 <img src="images/bytecode-stack-3.png" alt="The next step. Now 10 has been pushed onto the stack and the execution pointer is at the Health instruction." />
 
