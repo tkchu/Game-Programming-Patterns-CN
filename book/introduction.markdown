@@ -1,17 +1,7 @@
-^title Introduction
-
 ^title 序
-
-In fifth grade, my friends and I were given access to a little unused
-classroom housing a couple of very beat-up TRS-80s. Hoping to inspire us, a
-teacher found a printout of some simple BASIC programs for us to tinker with.
 
 在五年级时，我和我的朋友被准许使用一间存放有几台非常破旧的TRS-80s的房间。
 为了鼓舞我们，一位老师给我们找了一些简单的BASIC程序打印文档。
-
-The audio cassette drives on the computers were broken, so any time we wanted to
-run some code, we'd have to carefully type it in from scratch. This led us
-to prefer programs that were only a few lines long:
 
 电脑的磁带驱动器已经坏掉了，所以每当我们想要运行代码，就得小心地从头开始输入代码。
 因此，我们更喜欢那些只有几行长的程序：
@@ -23,119 +13,55 @@ to prefer programs that were only a few lines long:
 
 <aside name="radical">
 
-Maybe if the computer prints it enough times, it will magically become true.
-
 如果电脑打印的次数足够多，也许这句话就会魔法成真。
 
 </aside>
 
-Even so, the process was fraught with peril. We didn't know *how* to program,
-so a tiny syntax error was impenetrable to us. If the program didn't work,
-which was often, we started over from the beginning.
-
 哪怕这样，过程也充满了困难。我们不知道如何编程，所以小小的语法错误对我们也是天险。
 如果程序没有工作——这经常发生——我们就得从头再来一遍。
-
-At the back of the stack of pages was a real monster: a program that took up
-several dense pages of code. It took a while before we worked up the courage
-to even try it, but it was irresistible -- the title above the listing was
-"Tunnels and Trolls". We had no idea what it did, but it sounded like a game,
-and what could be cooler than a computer game that you programmed yourself?
 
 文档的最后几页是个真正的怪物：一个占据了几页篇幅的程序。
 我们得花些时间才能鼓起勇气去试一试，但它实在太诱人——它的标题是“地道与巨魔”。
 我们不知道它能做什么，但听起来像是个游戏，还有什么比自己编个电脑游戏更酷的吗？
 
-We never did get it running, and after a year, we moved out of that classroom.
-(Much later when I actually knew a bit of BASIC, I realized that it was just a
-character generator for the table-top game and not a game in itself.) But the
-die was cast -- from there on out, I wanted to be a game programmer.
-
 我们从来没能让它运行起来，一年以后，我们离开了那间教室。
 （很久以后，当我真的学会了点BASIC，我意识到那只是个桌面游戏角色生成器，而不是游戏。）
 但是命运的车轮已经开始转动——自那时起，我就想要成为一名游戏程序员。
 
-When I was in my teens, my family got a Macintosh with QuickBASIC and later
-THINK C. I spent almost all of my <span name="snakes">summer vacations</span>
-hacking together games. Learning on my own was slow and painful. I'd get
-something up and running easily -- maybe a map screen or a little puzzle --
-but as the program grew, it got harder and harder.
-
-青少年时，我家有了一台能运行QuickBASIC的Macintosh，之后THINK C也能在其上运行。
-几乎整个<span name="snakes">暑假</span>我都在用它编游戏。
+<span name="snakes"></span>青少年时，我家有了一台能运行QuickBASIC的Macintosh，之后THINK C也能在其上运行。
+几乎整个暑假我都在用它编游戏。
 自学缓慢而痛苦。
 我能轻松地编写并运行某些部分——地图或者小谜题——但随着程序代码量的增长，这越来越难。
 
 <aside name="snakes">
-
-Many of my summers were also spent catching snakes and turtles in the swamps
-of southern Louisiana. If it wasn't so blisteringly hot outside, there's a
-good chance this would be a herpetology book instead of a programming one.
 
 暑假中的不少时间我花在路易斯安那州南部的沼泽里逮蛇和乌龟上了。
 如果外面不是那么酷热，很有可能这是一本讲爬虫而不是编程的书了。
 
 </aside>
 
-At first, the challenge was just getting something working. Then, it became
-figuring out how to write programs bigger than what would fit in my head. Instead
-of just reading about "How to Program in C++", I started trying to find books
-about how to *organize* programs.
-
 起初，挑战之处仅仅在于让程序成功运行。然后，是搞明白怎样写出内容超出我大脑容量的代码。
 我不再只阅读关于“如何用C++编程”的书籍，而开始尝试找那些讲如何*组织*程序的书。
 
-Fast-forward several years, and a <span name="friend">friend</span> hands me a
-book: *Design Patterns: Elements of Reusable Object-Oriented Software*.
-Finally! The book I'd been looking for since I was a teenager. I read it cover
-to cover in one sitting. I still struggled with my own programs, but it was
-such a relief to see that other people struggled too and came up with
-solutions. I felt like I finally had a couple of *tools* to use instead of
-just my bare hands.
-
-几年过后，一位<span name="friend">朋友</span>给我一本书：《设计模式：可复用面向对象软件的基础》。
+<span name="friend"></span>几年过后，一位朋友给我一本书：《设计模式：可复用面向对象软件的基础》。
 终于！正是我从青年时期就在寻找的书。
 我一口气从头读到尾。虽然我仍然与自己的程序挣扎，但看到别人也在挣扎并提出了解决方案是一种解脱。
 我意识到手无寸铁的我终于有件像样的*工具*了。
 
 <aside name="friend">
 
-This was the first time we'd met, and five minutes after being introduced, I
-sat down on his couch and spent the next few hours completely ignoring him and
-reading. I'd like to think my social skills have improved at least a little
-since then.
-
 那是我首次见到这位朋友，相互介绍五分钟后，我坐在他的沙发上，接下来几个小时，无视他并全神贯注地阅读。
 我想自那以后我的社交技能还是有所提高的。
 
 </aside>
 
-In 2001, I landed my dream job: software engineer at Electronic Arts. I
-couldn't wait to get a look at some real games and see how the pros put them
-together. What was the architecture like for an enormous game like Madden
-Football? How did the different systems interact? How did they get a single
-codebase to run on multiple platforms?
-
 在2001年，我获得了梦想中的工作：EA的软件工程师。
 我等不及要看看真正的游戏，还有专业人士是如何将组织一切的。
 像实况足球这样的大型游戏使用了什么样的架构？不同的系统是如何交互的？一套代码库是如何在多个平台上运行的？
 
-Cracking open the source code was a humbling and surprising experience. There
-was brilliant code in graphics, AI, animation, and visual effects. We had
-people who knew how to squeeze every last cycle out of a CPU and put it to
-good use. Stuff I didn't even know was *possible*, these people did before
-lunch.
-
 分析理解源代码是种震颤的体验。图形，AI，动画，视觉效果皆有杰出代码。
 有专家知道如何榨干CPU的最后一个循环并好好使用。
 那些我都不知道是否*可行*的事情，这些人在午饭前就能完成。
-
-But the *architecture* this brilliant code hung from was often an
-afterthought. They were so focused on *features* that organization went overlooked. Coupling was rife between modules.
-New features were often bolted onto the codebase wherever they could be made
-to fit. To my disillusioned eyes, it looked like many programmers, if they ever
-cracked open *Design Patterns* at all, never got past <a class="pattern"
-href="singleton.html">Singleton</a>.
 
 但是这些杰出代码依赖的*架构*通常是事后设计。
 他们太注重*功能*而忽视了架构。耦合充斥在模块间。
@@ -143,132 +69,61 @@ href="singleton.html">Singleton</a>.
 在梦想幻灭的我看来，这和其他程序员没什么不同，
 如果他们阅读过《设计模式》，最多也就用用 <a class="pattern" href="singleton.html">单例</a>。
 
-Of course, it wasn't really that bad. I'd imagined game programmers sitting in
-some ivory tower covered in whiteboards, calmly discussing architectural
-minutiae for weeks on end. The reality was that the code I was looking at was
-written by people working to meet intense deadlines. They did the best they
-could, and, as I gradually realized, their best was often very good. The more
-time I spent working on game code, the more bits of brilliance I found hiding
-under the surface.
-
 当然，没那么糟。我曾幻想游戏程序员坐在白板包围的象牙塔里，为架构冷静地讨论上几周。
 而实际情况，我看到的代码是努力应对紧张截止期限的人赶工完成的。
 他们已经竭尽全力，而且，就像我慢慢意识到的那样，他们的全力以赴的结果通常很好。
 我花在游戏代码上的时间越多，我越能发现藏在表面下的天才之处。
 
-Unfortunately, "hiding" was often a good description. There were gems buried
-in the code, but many people walked right over them. I watched coworkers
-struggle to reinvent good solutions when examples of exactly what they needed
-were nestled in the same codebase they were standing on.
-
 不幸的是，“藏”是普遍现象。
 宝石埋在代码中，但人们从未意识到它们的存在。
 我看到同事重复寻找解决方案，而需要的示例代码就埋在他们所用的代码库中。
 
-That problem is what this book aims to solve. I dug up and polished the best
-patterns I've found in games, and presented them here so that we can spend our
-time inventing new things instead of *re*-inventing them.
-
 这个问题正是这本书要解决的。
 我挖出了游戏代码库中能找到的设计模式，打磨然后在这里展示它们，这样可以节约时间用于在发明新事物上，而非*重新*发明它们。
 
-## What's in Store
-
 ## 书店里已有的书籍
-
-There are already dozens of game programming books out there. Why write
-another?
 
 书店里已经有很多游戏编程书籍了。为什么要再写一本呢？
 
-Most game programming books I've seen fall into one of two categories:
-
 我看到的很多编程书籍可以归为这两类：
-
-* **Domain-specific books.** These narrowly-focused books give you a deep dive
-  on some specific aspect of game development. They'll teach you about 3D
-  graphics, real-time rendering, physics simulation, artificial intelligence,
-  or audio. These are the areas that many game programmers specialize in as
-  their careers progress.
 
 * **特定领域的书籍。** 这些关于细分领域的书籍带你深入理解游戏开发某一特定层面。
 它们会教授你3D图形，实时渲染，物理模拟，人工智能，或者音频播放。
 那些很多程序员穷其一生研究的细分领域。
 
-* **Whole-engine books.** In contrast, these try to span all of the different
-  parts of an entire game engine. They are oriented towards building a
-  complete engine suited to some specific genre of game, usually a 3D first-person shooter.
-
 * **完整引擎的书籍。** 另一个方向，还有书籍试图包含游戏引擎的各个部分。
 它们倾向于构建特定种类游戏的完整引擎，通常是3D FPS游戏。
-
-I like both of these kinds of books, but I think they leave some gaps. Books
-specific to a domain rarely tell you how that chunk of code interacts with the
-rest of the game. You may be a wizard at physics and rendering, but do you
-know how to tie them together gracefully?
 
 这两种书我都喜欢，但我认为它们并未覆盖全部空间。
 特定领域的书籍很少告诉你这些代码如何与游戏的其他部分打交道。
 你擅长物理或者渲染，但是你知道怎么将两者优雅地组合吗？
 
-The second category covers that, but I often find whole-engine books to be too monolithic and too
-genre-specific. Especially with the rise of mobile and casual gaming, we're in
-a period where lots of different genres of games are being created. We aren't
-all just cloning Quake anymore. Books that walk you through a single engine
-aren't helpful when *your* game doesn't fit that mold.
-
 第二类书包含这些，但是发现完整引擎的书籍通常过于整体，过于专注某类游戏了。
 特别是，随着手游和休闲游戏的兴起，我们正处于众多游戏类型欣欣向荣的时刻。
 我们不再只是复制Quake了。如果*你的*游戏与该类游戏不同，那些介绍单一引擎的书就不那么有用了。
 
-Instead, what I'm trying to do here is more <span name="carte">*à la
-carte*</span>. Each of the chapters in this book is an independent idea that
-you can apply to your code. This way, you can mix and match them in a way that
-works best for the game *you* want to make.
-
-相反，我在这里做的更<span name="carte">*à la carte* </span>。
+<span name="carte"></span>相反，我在这里做的更*à la carte* 。
 每一章都是独立的，可应用到代码上的思路。
 这样，你可以用*你*认为最好的方式组合这些思路，用到你的游戏上去。
 
 <aside name="carte">
 
-Another example of this *à la carte* style is the widely beloved [*Game
-Programming Gems*](http://www.satori.org/game-programming-gems/) series.
-
 另一个广泛使用这种*à la carte*风格的例子是[*Game Programming Gems*](http://www.satori.org/game-programming-gems/)系列。
 
 </aside>
 
-## How it Relates to Design Patterns
-
 ## 和设计模式的关联
 
-Any programming book with <span name="alexander">"Patterns"</span> in its name
-clearly bears a relationship to the classic *Design Patterns: Elements of
-Reusable Object-Oriented Software* by Erich Gamma, Richard Helm, Ralph Johnson,
-and John Vlissides (ominously called the "Gang of Four").
-
-任何名字中有<span name="alexander">“模式”</span>的编程书
+<span name="alexander"></span>任何名字中有“模式”的编程书
 都与Erich Gamma，Richard Helm，Ralph Johnson，和John Vlissides（通常被称为GoF）合著的经典书籍：
 《设计模式：可复用面向对象软件要素》相关。
 
 <aside name="alexander">
 
-*Design Patterns* itself was in turn inspired by a previous book. The idea of
-crafting a language of patterns to describe open-ended solutions to problems
-comes from [*A Pattern
-Language*](http://en.wikipedia.org/wiki/A_Pattern_Language), by Christopher
-Alexander (along with Sarah Ishikawa and Murray Silverstein).
-
 《设计模式》也受到之前的书籍的启发。
 创建一种模式语言来描述问题的开放式解法，
 这思路来自 [*A Pattern Language*](http://en.wikipedia.org/wiki/A_Pattern_Language)，
 作者是Christopher Alexander (还有Sarah Ishikawa和Murray Silverstein).
-
-Their book was about architecture (like *real* architecture with buildings and
-walls and stuff), but they hoped others would use the same structure to
-describe solutions in other fields. *Design Patterns* is the Gang of Four's
-attempt to do that for software.
 
 他们的书是关于架构的（建筑和墙那样的*真正的*框架结构），
 但他们希望其他人能使用相同的方法描述其他领域的解决方案。
@@ -276,224 +131,94 @@ attempt to do that for software.
 
 </aside>
 
-By calling this book "Game Programming Patterns", I'm not trying to imply that
-the Gang of Four's book is <span name="nongames">inapplicable</span> to games.
-On the contrary: the [Design Patterns Revisited](design-patterns-revisited.html)
-section of this book covers many of the patterns from *Design
-Patterns*, but with an emphasis on how they can be applied to game
-programming.
-
-称这本书为“游戏编程模式”，我不是暗示GoF的模式<span name="nongames">不适用</span>于游戏编程。
+<span name="nongames"></span>称这本书为“游戏编程模式”，我不是暗示GoF的模式不适用于游戏编程。
 相反：本书[重返设计模式](design-patterns-revisited.html)一节包含了《设计模式》中的很多模式，
 但强调了这些模式在游戏编程的特定使用。
-
-Conversely, I think this book is applicable to non-game software too. I could
-just as well have called this book *More Design Patterns*, but I think games
-make for more engaging examples. Do you really want to read yet another book
-about employee records and bank accounts?
 
 同样的，我认为本书也适用于非游戏软件。
 我可以依样画瓢称本书为《更多设计模式》，但是我认为举游戏编程为例子更为契合。
 你真的想要另一本介绍员工记录和银行账户的书吗？
 
-That being said, while the patterns introduced here are useful in other
-software, I think they're particularly well-suited to engineering challenges
-commonly encountered in games:
-
 也就是说，虽然这里介绍的模式在其他软件上也很有用，但它们更合适于处理游戏中常见的工程挑战：
-
-*   Time and sequencing are often a core part of a game's architecture. Things
-    must happen in the right order and at the right time.
 
 *   时间和顺序通常是游戏架构的核心部分。事物必须在正确的时间按正确的顺序发生。
 
-*   Development cycles are highly compressed, and a number of programmers need
-    to be able to rapidly build and iterate on a rich set of different
-    behavior without stepping on each other's toes or leaving footprints all
-    over the codebase.
-
 *   高度压缩的开发周期，大量程序员需要能快速构建和迭代一系列不同的行为，同时保证不烦扰他人，也不污染代码库。
-
-*   After all of this behavior is defined, it starts interacting. Monsters
-    bite the hero, potions are mixed together, and bombs blast enemies and
-    friends alike. Those interactions must happen without the codebase turning
-    into an intertwined hairball.
 
 *   在定义所有的行为后，游戏开始互动。怪物攻击英雄，药物相互混合，炸弹炸飞敌人或者友军。
 实现这些互动不能把代码库搞成一团乱麻。
-
-*   And, finally, performance is critical in games. Game developers are in a
-    constant race to see who can squeeze the most out of their platform.
-    Tricks for shaving off cycles can mean the difference between an A-rated
-    game and millions of sales or dropped frames and angry reviewers.
 
 *   最后，游戏中性能很重要。
 游戏开发者处于一场榨干平台性能的竞赛中。
 节约CPU循环的技巧区分了A级百万销量游戏和掉帧差评游戏。
 
-## How to Read the Book
-
 ## 如何阅读这本书
-
-*Game Programming Patterns* is divided into three broad sections. The first
-introduces and frames the book. It's the chapter you're reading now along with
-the [next one](architecture-performance-and-games.html).
 
 《游戏设计模式》分为三大块。
 第一部分介绍并划分本书的框架。包含你现在阅读的这章和[下一章](architecture-performance-and-games.html)。
 
-The second section, [Design Patterns Revisited](design-patterns-revisited.html),
-goes through a handful of patterns from the Gang of Four book. With each chapter,
-I give my spin on a pattern and how I think it relates to game programming.
-
 第二部分，[重放设计模式](design-patterns-revisited.html)，复习了GoF书籍里的很多模式。
 在每一章中，我给出我对这个模式的看法，以及我认为它和游戏编程有什么关系。
-
-The last section is the real meat of the book. It presents thirteen
-design patterns that I've found useful. They're grouped into four categories:
-[Sequencing Patterns](sequencing-patterns.html), [Behavioral Patterns](behavioral-patterns.html), [Decoupling Patterns](decoupling-patterns.html),
-and [Optimization Patterns](optimization-patterns.html).
 
 最后一部分是这本书最肥美的部分。
 它展示了十三种我发现有用的模式。它们被分为四类：
 [序列模式](sequencing-patterns.html), [行为模式](behavioral-patterns.html), [解耦模式](decoupling-patterns.html),和[优化模式](optimization-patterns.html)。
 
-Each of these patterns is described using a consistent structure so that you
-can use this book as a reference and quickly find what you need:
-
 每种模式都使用固定的格式表述，这样你可以将这本书当成引用，快速找到你需要的：
-
-* The **Intent** section provides a snapshot description of the pattern in
-  terms of the problem it intends to solve. This is first so that you can hunt
-  through the book quickly to find a pattern that will help you with your
-  current struggle.
 
 * **意图** 部分提供这个模式想要解决什么问题的简短介绍。
 将它放在首位，这样你可以快速翻阅，找到你现在需要的模式。
-
-* The **Motivation** section describes an example problem that we will be
-  applying the pattern to. Unlike concrete algorithms, a pattern is usually
-  formless unless applied to some specific problem. Teaching a pattern without
-  an example is like teaching baking without mentioning dough. This section
-  provides the dough that the later sections will bake.
 
 * **动机** 部分描述了模式处理的问题示例。
 不同于具体的算法，模式通常不针对某个特定问题。
 不用示例教授模式，就像不用面团教授烘烤。动机部分提供了面团，而下部分会教你烘烤。
 
-* The **Pattern** section distills the essence of the pattern out of the
-  previous example. If you want a dry textbook description of the pattern,
-  this is it. It's also a good refresher if you're familiar with a pattern
-  already and want to make sure you don't forget an ingredient.
-
 * **模式** 部分将模式从示例中剥离出来。
 如果你想要一段对模式的教科书式简短介绍，那就是这部分了。
 如果你已经熟悉了这种模式，想要确保你没有拉下什么，这部分也是很好的提示。
-
-* So far, the pattern has only been explained in terms of a single example.
-  But how do you know if the pattern will be good for *your* problem?
-  The **When to Use It** section provides some guidelines on when the pattern
-  is useful and when it's best avoided. The **Keep in Mind** section points
-  out consequences and risks when using the pattern.
 
 * 到目前为止，模式只是用一两个示例解释。但是如何知道模式对*你的*问题有没有用呢？
 **何时使用** 部分提供了这个模式在何时使用何时不用的指导。
 **记住** 部分指出了使用模式的结果和风险。
 
-* If, like me, you need concrete examples to really *get* something,
-  then **Sample Code** is your section. It walks step by step through a full
-  implementation of the pattern so you can see exactly how it works.
-
 * 如果你像我一样需要具体的例子真正来*理解*某物，那么**示例代码**部分能让你称心如意。
 它描述模式的一步步具体实现，来展现模式是如何工作的。
-
-* Patterns differ from single algorithms because they are open-ended. Each
-  time you use a pattern, you'll likely implement it differently. The next section,
-  **Design Decisions**, explores that space and shows you different options to
-  consider when applying a pattern.
 
 * 模式与算法不同的是它们是开放的。
 每次你使用模式，可以不同的方式实现。
 下一部分**设计决策**，讨论这些方式，告诉你应用模式时可供考虑的不同选项。
 
-* To wrap it up, there's a short **See Also** section that shows how this
-  pattern relates to others and points you to real-world open source code that
-  uses it.
-
 * 作为结尾，这里有**参见**部分展示了这一模式与其他模式的关联，以及那些使用它的真实代码。
-
-## About the Sample Code
 
 ## 关于示例代码
 
-Code samples in this book are in C++, but that isn't to imply that these
-patterns are only useful in that language or that C++ is a better language
-for them than others. Almost any language will work fine, though some patterns
-do tend to presume your language has objects and classes.
-
 这本书的示例代码使用C++写就，但这并不意味着这些模式只在C++中有用，或C++比其他语言更适合使用这些模式。
 这些模式适用于几乎每种编程语言，虽然有的模式假设编程语言有对象和类。
-
-I chose C++ for a couple of reasons. First, it's the most popular language for
-commercially shipped games. It is the *lingua franca* of the industry. Moreso,
-the C syntax that C++ is based on is also the basis for Java, C#, JavaScript,
-and many other languages. Even if you don't know C++, the odds are good you
-can understand the code samples here with a little bit of effort.
 
 我选择C++有几个原因。首先，这是在游戏制作中最流行的语言，是业界的*通用语*。
 通常，C++基于的C语法也是Java，C#，JavaScript和其他很多语言的基础。
 哪怕你不懂C++，你也只需一点点努力就能理解这里的示例代码。
 
-The goal of this book is *not* to teach you C++. The samples are kept as
-simple as possible and don't represent good C++ style or usage. Read the code
-samples for the idea being expressed, not the code expressing it.
-
 这本书的目标*不是*教会你C++。
 示例代码尽可能的简单，不一定符合好的C++风格或规范。
 示例代码展示的是意图，而不是代码。
-
-In particular, the code is not written in "modern" -- C++11 or newer -- style.
-It does not use the standard library and rarely uses templates. This makes for
-"bad" C++ code, but I hope that by keeping it stripped down, it will be more
-approachable to people coming from C, Objective-C, Java, and other languages.
 
 特别的，代码没用“现代的”——C++11或者更新的——标准。
 没有使用标准库，很少使用模板。
 它们是“糟糕”C++代码，但我希望保持这样，这样那些使用C，Objective-C，Java和其他语言的人更容易理解它们。
 
-To avoid wasting space on code you've already seen or that isn't relevant to
-the pattern, code will sometimes be omitted in examples. When this occurs, an
-ellipsis will be placed in the sample to show where the missing code goes.
-
 为了避免花费时间在你已经看过或者是与模式无关的代码上，示例中省略了部分代码。
 如果是那样，示例代码中的省略号表明这里隐藏了一些代码。
 
-Consider a function that will do some work and then return a value. The
-pattern being explained is only concerned with the return value, and not the
-work being done. In that case, the sample code will look like:
-
 假设有个函数，做了些工作然后返回值。
-模式只关心返回的值，而不是完成了什么工作。那样的话，示例代码长的像这样：
+而用它作示例的模式只关心返回的值，而不是完成了什么工作。那样的话，示例代码长的像这样：
 
 ^code update
 
-## Where to Go From Here
-
 ## 接下来呢
 
-Patterns are a constantly changing and expanding part of software development.
-This book continues the process started by the Gang of Four of documenting and
-sharing the software patterns they saw, and that process will continue after
-the ink dries on these pages.
-
 设计模式在软件开发过程中不断地改变和扩展。
-这本书继续了GoF记录分享所见模式的旅程，而这旅程也不会终结于本书。
+这本书继续了GoF记录分享设计模式的旅程，而这旅程也不会终于本书。
 
-You are a core part of that process. As you develop your own patterns and
-refine (or refute!) the patterns in this book, you contribute to the software
-community. If you have suggestions, corrections, or other feedback about
-what's in here, please get in touch!
-
-
-你是这段旅程的核心部分。改良（或者否决）了这本书中的模式，你就是为软件开发社区做贡献。
-如果你有任何建议，更正，或者任何反馈，请联系我！
+你是这段旅程的关键部分。改良（或者否决）了这本书中的模式，你就是为软件开发社区做贡献。
+如果你有任何建议，更正，或者任何反馈，保持联络！
