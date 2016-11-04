@@ -1,6 +1,16 @@
 body, h1, h2, h3, h4, p, blockquote, code, ul, ol, dl, dd, img {
   margin: 0; }
 
+em{
+    font-weight: bold;
+    font-style: normal;
+}
+strong{
+    border-top: 1px solid #0a0a0a;
+    border-bottom: 1px solid #0a0a0a;
+    font-weight: bold;
+}
+
 body {
   line-height: 24px;
   color: #222;
