@@ -8,4 +8,10 @@
 
 Bob Nystrom同时在Github上无私地提供原本：[munificent/game-programming-patterns](https://github.com/munificent/game-programming-patterns)。
 
-如果有任何问题，欢迎提出Issues 和 pull requests，谢谢您的帮助。
+如果有任何表意不明或者疏忽遗漏，欢迎提出Issues，谢谢您的贡献，让我们的世界变得更好。
+
+## 进度
+
+1. 第一轮作业：将整书翻译一遍，翻译质量预期略高于谷歌机翻。 :+1:
+2. 第二轮作业：修复漏洞，翻译所有的旁注并添加链接，同时平滑语言。 :+1:
+3. 第三轮作业：校订，修改图片为中文，将alt也改为中文。:pray:
