@@ -121,7 +121,7 @@ blockquote {
   border-bottom: solid 1px #dee8ed;
   border-radius: 3px; }
   blockquote p {
-    font: italic 14px/24px "Merriweather", Georgia, serif;
+    font: bold 14px/24px "Merriweather", Georgia, serif;
     color: #73848c; }
   blockquote p:first-child {
     margin-top: 0; }
