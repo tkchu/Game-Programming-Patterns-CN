@@ -3,13 +3,16 @@
 <head>
 <meta http-equiv="Content-type" content="text/html;charset=UTF-8" />
 
-<title>组件 &middot; Decoupling Patterns &middot; 游戏设计模式</title>
+<title>组件模式 &middot; Decoupling Patterns &middot; 游戏设计模式</title>
 
 <!-- Tell mobile browsers we're optimized for them and they don't need to crop
      the viewport. -->
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
 <link rel="stylesheet" type="text/css" href="style.css" />
+<!--
+delete the font style for english.
 <link href="http://fonts.gmirror.org/css?family=Merriweather:400,400italic,700,700italic|Source+Code+Pro|Source+Sans+Pro:200,300,400,600,400italic,600italic|Rock+Salt" rel="stylesheet" type="text/css">
+-->
 <!-- delete the google analyse code to improve the speed, sorry. -->
 <script src="jquery-1.10.1.min.js"></script>
 <script src="script.js"></script>
@@ -22,64 +25,34 @@
   <span class="next"><a href="event-queue.html">下一章</a> &rarr;</span>
   <span class="toc">&equiv; <a href="/Game-Programming-Patterns-CN/">首页</a></span>
 </nav>
-<h1>组件</h1>
+<h1>组件模式</h1>
 <h1 class="book"><a href="/Game-Programming-Patterns-CN/">游戏设计模式</a><span class="section"><a href="decoupling-patterns.html">Decoupling Patterns</a></span></h1>
-<h2><a href="#intent" name="intent">Intent</a></h2>
 <h2><a href="#意图" name="意图">意图</a></h2>
-<p><em>Allow a single entity to span multiple domains without coupling the domains to
-each other.</em></p>
-<p><em>允许单一的实体跨越多个领域，无需这些领域彼此耦合。</em></p>
-<h2><a href="#motivation" name="motivation">Motivation</a></h2>
+<p><em>允许单一的实体跨越多个领域而不会导致这些领域彼此耦合。</em></p>
 <h2><a href="#动机" name="动机">动机</a></h2>
-<p>Let&#8217;s say we&#8217;re building a platformer. The Italian plumber demographic is
-covered, so ours will star a Danish <span name="baker">baker</span>, Bj&oslash;rn. It
-stands to reason that we&#8217;ll have a class representing our friendly pastry chef,
-and it will contain everything he does in the game.</p>
-<p>比方说，我们正构建平台跳跃游戏。
-意大利水管工已经有人做了，因此我们将出动丹麦<span name="baker">面包师</span>，Bj?rn。
+<p><span name="baker"></span></p>
+<p>让我们假设我们正构建平台跳跃游戏。
+意大利水管工已经有人做了，因此我们将出动丹麦面包师，Bj?rn。
 照理说，会有一个类来表示友好的糕点厨师，包含他在比赛中做的一切。</p>
 <aside name="baker">
-<p>Brilliant game ideas like this are why I&#8217;m a programmer and not a designer.</p>
-<p>像这样的游戏创意是我是程序员而不是设计师的原因。</p>
+<p>像这样的游戏创意导致了我是程序员而不是设计师。</p>
 </aside>
-<p>Since the player controls him, that means reading controller input and
-translating that input into motion. And, of course, he needs to interact with the level,
-so some physics and collision go in there. Once that&#8217;s done, he&#8217;s got to show
-up on screen, so toss in animation and rendering. He&#8217;ll probably play some
-sounds too.</p>
-<p>由于玩家控制他，这意味着需要读取控制器的输入然后转化为运动。
+<p>由于玩家控制他，这意味着需要读取控制器的输入然后转化为动作。
 而且，当然，他需要与关卡相互作用，所以要引入物理和碰撞。
 一旦这样做了，他必须在屏幕上出现，所以要引入动画和渲染。
 他可能还会播放一些声音。</p>
-<p>Hold on a minute; this is getting out of control. Software Architecture 101
-tells us that different domains in a program should be kept isolated from each
-other. If we&#8217;re making a word processor, the code that handles printing
-shouldn&#8217;t be affected by the code that loads and saves documents. A game doesn&#8217;t
-have the same domains as a business app, but the rule still applies.</p>
-<p>等一下;这在失控。软件体系结构101课程告诉我们，程序的不同领域应保持分离。
+<p>等一下，这在失控。软件体系结构101课程告诉我们，程序的不同领域应保持分离。
 如果我们做一个文字处理器，处理打印的代码不应该受加载和保存文件的代码影响。
-游戏和企业应用程序不在相同的领域，但该规则仍然适用。</p>
-<p>As much as possible, we don&#8217;t want AI, physics, rendering, sound and other
-domains to know about each other, but now we&#8217;ve got all of that crammed into one
-class. We&#8217;ve seen where this road leads to: a 5,000-line dumping ground source
-file so big that only the bravest ninja coders on your team even dare to go in
-there.</p>
+游戏和企业应用程序的领域不尽相同，但该规则仍然适用。</p>
 <p>我们希望AI，物理，渲染，声音和其他领域域尽可能相互不了解，
 但现在我们将所有这一切挤在一个类中。
-我们已经看到了这条路通往何处：5000行的巨大代码文件，哪怕是你们团队中最勇敢的程序员也不敢进去。</p>
-<p>This is great job security for the few who can tame it, but it&#8217;s hell for the rest of
-us. A class that big means even the most seemingly trivial changes can have
-far-reaching implications. Soon, the class collects <em>bugs</em> faster than it
-collects <em>features</em>.</p>
-<p>这对能驯服他的少数人是伟大的工作，但对其他人是地狱。
+我们已经看到了这条路通往何处：5000行的巨大代码文件，哪怕是你们团队中最勇敢的程序员也不敢打开。</p>
+<p>这工作对能驯服他的少数人是有趣的，但对其他人是地狱。
 这么大的类意味着，即使是看似微不足道的变化亦可有深远的影响。
-很快，为类添加<em>错误</em>速度明显快于添加<em>功能</em>。</p>
-<h3><a href="#the-gordian-knot" name="the-gordian-knot">The Gordian knot</a></h3>
+很快，为类添加<em>错误</em>的速度明显快于添加<em>功能</em>的速度。</p>
 <h3><a href="#快刀斩乱麻" name="快刀斩乱麻">快刀斩乱麻</a></h3>
-<p>Even worse than the simple scale problem is the <span name="coupling">coupling
-</span> one. All of the different systems in our game have been tied into a
-giant knotted ball of code like:</p>
-<p>比起单纯的规模问题，更糟糕的是<span name="coupling">耦合</span>。
+<p><span name="coupling"></span></p>
+<p>比起单纯的规模问题，更糟糕的是耦合。
 在游戏中所有不同的系统被绑成了一个巨大的代码球：</p>
 <div class="codehilite"><pre><span></span><span class="k">if</span> <span class="p">(</span><span class="n">collidingWithFloor</span><span class="p">()</span> <span class="o">&amp;&amp;</span> <span class="p">(</span><span class="n">getRenderState</span><span class="p">()</span> <span class="o">!=</span> <span class="n">INVISIBLE</span><span class="p">))</span>
 <span class="p">{</span>
@@ -88,299 +61,143 @@ giant knotted ball of code like:</p>
 </pre></div>
 
 
-<p>Any programmer trying to make a change in code like that will need to know
-something about physics, graphics, and sound just to make sure they don&#8217;t break
-anything.</p>
-<p>任何试图改变代码的程序员，都需要知道一些关于物理，图形和声音的知识，只是为了确保不破坏什么。</p>
+<p>任何试图改变上面代码的程序员，都需要物理，图形和声音的相关知识，以确保没破坏什么。</p>
 <aside name="coupling">
-<p>While coupling like this sucks in <em>any</em> game, it&#8217;s even worse on modern games
-that use concurrency. On multi-core hardware, it&#8217;s vital that code is running on
-multiple threads simultaneously. One common way to split a game across threads
-is along domain boundaries&#8202;&mdash;&#8202;run AI on one core, sound on another, rendering on a
-third, etc.</p>
-<p>这样的耦合虽然在<em>任何</em>游戏中出现，但是对于使用并发的现代游戏更糟。
+<p>这样的耦合在<em>任何</em>游戏中出现都是个问题，但是在使用并发的现代游戏中尤其糟糕。
 在多核硬件上，让代码同时在多个线程上运行是至关重要的。
-一种将游戏分割到线程的通用方法是通过领域边界——在一个核上运行AI代码，在另一个上播放声音，在第三个上渲染，等等。</p>
-<p>Once you do that, it&#8217;s critical that those domains stay decoupled in order to
-avoid deadlocks or other fiendish concurrency bugs. Having a single class with
-an <code>UpdateSounds()</code> method that must be called from one thread and a
-<code>RenderGraphics()</code> method that must be called from another is begging for
-those kinds of bugs to happen.</p>
-<p>一旦你这么做了，这些领域保持解耦就是至关重要的，这是为了避免死锁或者其他恶魔般的并发问题。
-有从一个线程上调用的<code>UpdateSounds()</code>方法，从另一个线程上调用的<code>RenderGraphics()</code>方法是在祈求发生这样的问题。</p>
+将游戏分割到线程的一种通用方法是通过领域划分——在一个核上运行AI代码，在另一个上播放声音，在第三个上渲染，等等。</p>
+<p>一旦你这么做了，在领域间保持解耦就是至关重要的，这是为了避免死锁或者其他恶魔般的并发问题。
+如果某个函数从一个线程上调用<code>UpdateSounds()</code>方法，从另一个线程上调用<code>RenderGraphics()</code>方法，那它是在自找麻烦。</p>
 </aside>
-<p>These two problems compound each other; the class touches so many domains that
-every programmer will have to work on it, but it&#8217;s so huge that doing so is a
-nightmare. If it gets bad enough, coders will start putting hacks in other parts
-of the codebase just to stay out of the hairball that this <code>Bjorn</code> class has
-become.</p>
-<p>这两个问题彼此混合;这个类涉及如此多的域，每个程序员都得接触它，
-但它太过巨大，这就变成了一场噩梦。
+<p>这两个问题互相混合;这个类涉及太多的域，每个程序员都得接触它，
+但它又太过巨大，这就变成了一场噩梦。
 如果变得够糟糕，程序员会黑入代码库的其他部分，仅仅为了躲开这个像毛球一样的<code>Bjorn</code>类。</p>
-<h3><a href="#cutting-the-knot" name="cutting-the-knot">Cutting the knot</a></h3>
-<h3><a href="#抽剑断结" name="抽剑断结">抽剑断结</a></h3>
-<p>We can solve this like Alexander the Great&#8202;&mdash;&#8202;with a sword. We&#8217;ll take our
-monolithic <code>Bjorn</code> class and slice it into separate parts along domain
-boundaries. For example, we&#8217;ll take all of the code for handling user input and
-move it into a separate <code>InputComponent</code> class. <code>Bjorn</code> will then own an
-instance of this component. We&#8217;ll repeat this process for each of the domains that
-<code>Bjorn</code> touches.</p>
-<p>我们可以像亚历山大大帝一样解决这个问题——用剑。
-将<code>Bjorn</code>类切片成按领域独立的部分。
+<h3><a href="#快刀斩乱麻" name="快刀斩乱麻">快刀斩乱麻</a></h3>
+<p>我们可以像亚历山大大帝一样解决这个问题——快刀斩乱麻。
+按领域将<code>Bjorn</code>类切片成相互独立的部分。
 例如，我们抽出所有处理用户输入的代码，将其移动到一个单独的<code>InputComponent</code>类。
 <code>Bjorn</code>拥有这个部件的一个实例。我们将对<code>Bjorn</code>接触的每个领域重复这一过程。</p>
-<p>When we&#8217;re done, we&#8217;ll have moved almost everything out of <code>Bjorn</code>. All that
-remains is a thin shell that binds the components together. We&#8217;ve solved our
-huge class problem by simply dividing it up into multiple smaller classes, but
-we&#8217;ve accomplished more than just that.</p>
-<p>当完成后，我们将几乎所有<code>Bjorn</code>的东西都抽走了。
+<p>当完成后，我们将<code>Bjorn</code>大多数的东西都抽走了。
 剩下的是一个薄壳包着所有的组件。
 通过将类划分为多个小类，我们已经解决了这个问题。但我们完成了远远不止这些。</p>
-<h3><a href="#loose-ends" name="loose-ends">Loose ends</a></h3>
 <h3><a href="#宽松的结果" name="宽松的结果">宽松的结果</a></h3>
-<p>Our component classes are now decoupled. Even though <code>Bjorn</code> has a
-<code>PhysicsComponent</code> and a <code>GraphicsComponent</code>, the two don&#8217;t know about each
-other. This means the person working on physics can modify their component
-without needing to know anything about graphics and vice versa.</p>
 <p>我们的组件类现在解耦了。
 尽管<code>Bjorn</code>有<code>PhysicsComponent</code>和<code>GraphicsComponent</code>，
 但这两部分都不知道对方的存在。
 这意味着处理物理的人可以修改组件而不需要了解图形，反之亦然。</p>
-<p>In practice, the components will need to have <em>some</em> interaction between
-themselves. For example, the AI component may need to tell the physics component
-where Bj&oslash;rn is trying to go. However, we can restrict this to the
-components that <em>do</em> need to talk instead of just tossing them all in the same
-playpen together.</p>
 <p>在实践中，这些部件需要在它们之间有<em>一些</em>相互作用。
-例如，AI组件可能需要告诉物理组件
-Bj?rn试图去哪里。
+例如，AI组件可能需要告诉物理组件Bj?rn试图去哪里。
 然而，我们可以限制这种交互在<em>确实</em>需要交互的组件之间，
 而不是把它们围在同一个围栏里。</p>
-<h3><a href="#tying-back-together" name="tying-back-together">Tying back together</a></h3>
 <h3><a href="#绑到一起" name="绑到一起">绑到一起</a></h3>
-<p>Another feature of this design is that the <span
-name="inheritance">components</span> are now reusable packages. So far, we&#8217;ve
-focused on our baker, but let&#8217;s consider a couple of other kinds of objects in
-our game world. <em>Decorations</em> are things in the world the player sees but
-doesn&#8217;t interact with: bushes, debris and other visual detail. <em>Props</em> are like
-decorations but can be touched: boxes, boulders, and trees. <em>Zones</em> are the
-opposite of decorations&#8202;&mdash;&#8202;invisible but interactive. They&#8217;re useful for things
-like triggering a cutscene when Bj&oslash;rn enters an area.</p>
-<p>这种设计的另一特性是，<span name="inheritance">组件</span>现在是可复用的包。
+<p><span name="inheritance"></span></p>
+<p>这种设计的另一特性是，组件现在是可复用的包。
 到目前为止，我们专注于面包师，但是让我们考虑几个游戏世界中其他类型的对象。
-<em>装饰</em>是玩家看到但不能交互的事物：灌木，杂物等视觉细节。
-<em>道具</em>像<em>装饰</em>，但可以交互：箱，巨石，树木。
-<em>区</em>与装饰相反——无形的，但可互动。
-它们是很好的触发器，比如在Bj?rn进入区域触发过场动画。</p>
+<em>装饰</em> 是玩家看到但不能交互的事物：灌木，杂物等视觉细节。
+<em>道具</em> 像<em>装饰</em>，但可以交互：箱，巨石，树木。
+<em>区域</em> 与装饰相反——无形但可互动。
+它们是很好的触发器，比如在Bj?rn进入区域时触发过场动画。</p>
 <aside name="inheritance">
-<p>When object-oriented programming first hit the scene, inheritance was the
-shiniest tool in its toolbox. It was considered the ultimate code-reuse hammer,
-and coders swung it often. Since then, we&#8217;ve learned the hard way that it&#8217;s a
-heavy hammer indeed. Inheritance has its uses, but it&#8217;s often too cumbersome for
-simple code reuse.</p>
 <p>当面向对象语言第一次接触这个场景时，继承是它箱子里最闪耀的工具。
 它被认为是代码无限重用之锤，编程者常常挥舞着它。
-从那以后，我们以痛苦的方式学到，事实上它是一把重锤。
+然而我们痛苦地学到，事实上它是一把重锤。
 继承有它的用处，但对简单的代码重用太过复杂。</p>
-<p>Instead, the growing trend in software design is to use composition instead of
-inheritance when possible. Instead of sharing code between two classes by having
-them <em>inherit</em> from the same class, we do so by having them both <em>own an
-instance</em> of the same class.</p>
-<p>相反，在今日软件设计的趋势是尽可能使用组件代替继承。不是让两个类<em>继承</em>同一类来分享代码，而是让它们<em>拥有同一个类的实例</em>。</p>
+<p>相反，在今日软件设计的趋势是尽可能使用组件代替继承。
+不是让两个类<em>继承</em>同一类来分享代码，而是让它们<em>拥有同一个类的实例</em>。</p>
 </aside>
-<p>Now, consider how we&#8217;d set up an inheritance hierarchy for those classes if we
-weren&#8217;t using components. A first pass might look like:</p>
 <p>现在，考虑如果不用组件，我们将如何建立这些类的继承层次。第一遍可能是这样的：</p>
-<p><img src="images/component-uml.png" alt="A class diagram. Zone has collision code and inherits from GameObject. Decoration also inherits from GameObject and has rendering code. Prop inherits from Zone but then has redundant rendering code." /></p>
-<p>We have a base <code>GameObject</code> class that has common stuff like position and
-orientation. <code>Zone</code> inherits from that and adds collision detection. Likewise,
-<code>Decoration</code> inherits from <code>GameObject</code> and adds rendering. <code>Prop</code> inherits from
-<code>Zone</code>, so it can reuse the collision code. However, <code>Prop</code> can&#8217;t <em>also</em> inherit
-from <code>Decoration</code> to reuse the <em>rendering</em> code without running into the <span
-name="diamond">Deadly Diamond</span>.</p>
+<p><img src="images/component-uml.png" alt="类的层次图。区域有碰撞检测代码并继承游戏对象。装饰也继承游戏对象而且有渲染代码。道具继承区域，但是有了多余的渲染代码。" /></p>
+<p><span name="diamond"></span></p>
 <p>我们有<code>GameObject</code>基类，包含位置和方向之类的通用部分。
 <code>Zone</code>继承它，增加了碰撞检测。
 同样，<code>Decoration</code>继承<code>GameObject</code>，并增加了渲染。
 <code>Prop</code>继承<code>Zone</code>，因此它可以重用碰撞代码。
 然而，<code>Prop</code>不能<em>同时</em>继承<code>Decoration</code>来重用<em>渲染</em>，
-否则就会造成<span name="diamond">致命菱形</span>结构。</p>
+否则就会造成致命菱形结构。</p>
 <aside name="diamond">
-<p>The &#8220;Deadly Diamond&#8221; occurs in class hierarchies with multiple inheritance where
-there are two different paths to the same base class. The pain that causes is a
-bit out of the scope of this book, but understand that they named it
-&#8220;deadly&#8221; for a reason.</p>
-<p>“致命菱形”发生在类继承了多个类，而这多个类中有两个继承同一基类。
-介绍它引发的痛苦超过了本书的范围，但它被称为“致命”是有原因的。</p>
+<p>“致命菱形”发生在类继承了多个类，而这多个类中有两个继承同一基类时。
+介绍它造成的痛苦超过了本书的范围，但它被称为“致命”是有原因的。</p>
 </aside>
-<p>We could flip things around so that <code>Prop</code> inherits from <code>Decoration</code>, but then
-we end up having to duplicate the <em>collision</em> code. Either way, there&#8217;s no clean
-way to reuse the collision and rendering code between the classes that need it
-without resorting to multiple inheritance. The only other option is to push
-everything up into <code>GameObject</code>, but then <code>Zone</code> is wasting memory on rendering
-data it doesn&#8217;t need and <code>Decoration</code> is doing the same with physics.</p>
-<p>我们可以反过来让<code>Prop</code>继承<code>Decoration</code>，但随后不得不重复<em>碰撞</em>码。
-无论哪种方式，没有干净方式重用碰撞和渲染代码而不诉诸多重继承。
+<p>我们可以反过来让<code>Prop</code>继承<code>Decoration</code>，但随后不得不重复<em>碰撞检测</em>代码。
+无论哪种方式，没有干净的方式重用碰撞和渲染代码而不诉诸多重继承。
 唯一的其他选择是一切都继承<code>GameObject</code>，
-但随后<code>Zone</code>浪费内存在并不需要的渲染数据上，
+但随后<code>Zone</code>会浪费内存在并不需要的渲染数据上，
 <code>Decoration</code>在物理效果上有同样的浪费。</p>
-<p>Now, let&#8217;s try it with components. Our <span name="menu">subclasses</span> disappear
-completely. Instead, we have a single <code>GameObject</code> class and two component
-classes: <code>PhysicsComponent</code> and <code>GraphicsComponent</code>. A decoration is simply a
-<code>GameObject</code> with a <code>GraphicsComponent</code> but no <code>PhysicsComponent</code>. A zone is the
-opposite, and a prop has both components. No code duplication, no multiple
-inheritance, and only three classes instead of four.</p>
-<p>现在，让我们尝试用组件。
-<span name="menu">子类</span>彻底消失。
-取而代之，一个<code>GameObject</code>类和两个组件类：<code>PhysicsComponent</code>和<code>GraphicsComponent</code>。
+<p><span name="menu"></span></p>
+<p>现在，让我们尝试用组件。子类将彻底消失。
+取而代之的是一个<code>GameObject</code>类和两个组件类：<code>PhysicsComponent</code>和<code>GraphicsComponent</code>。
 装饰是个简单的<code>GameObject</code>，包含<code>GraphicsComponent</code>但没有<code>PhysicsComponent</code>。
-区与其恰好相反，而道具包含两种组件。
+区域与其恰好相反，而道具包含两种组件。
 没有代码重复，没有多重继承，只有三个类，而不是四个。</p>
 <aside name="menu">
-<p>A restaurant menu is a good analogy. If each entity is a monolithic class, it&#8217;s
-like you can only order combos. We need to have a separate class for each
-possible <em>combination</em> of features. To satisfy every customer, we would need
-dozens of combos.</p>
-<p>饭店菜单是个好类比。如果每个实体是一个类，那就像只能订套餐。
-我们需要为每种<em>可能</em>组合定义分离的特性。
-为了取悦每位用户，我们需要成打的套餐。</p>
-<p>Components are &agrave; la carte dining&#8202;&mdash;&#8202;each customer can select just the
-dishes they want, and the menu is a list of the dishes they can choose
-from.</p>
-<p>组件是照单点菜——每位顾客都可以选他们想要的，菜单是可选的菜式。</p>
+<p>可以拿饭店菜单打比方。如果每个实体是一个类，那就只能订套餐。
+我们需要为每种<em>可能</em>的组合定义各自的类。
+为了满足每位用户，我们需要十几种套餐。</p>
+<p>组件是照单点菜——每位顾客都可以选他们想要的，菜单记录可选的菜式。</p>
 </aside>
-<p>Components are basically plug-and-play for objects. They let us build complex
-entities with rich behavior by plugging different reusable component
-objects into sockets on the entity. Think software Voltron.</p>
 <p>对对象而言，组件是即插即用的。
-将不同的可重用部件插入对象，让我们构建复杂具有丰富的行为实体。
+将不同的可重用部件插入对象，我们就能构建复杂具有丰富的行为实体。
 就像软件中的战神金刚。</p>
-<h2><a href="#the-pattern" name="the-pattern">The Pattern</a></h2>
 <h2><a href="#模式" name="模式">模式</a></h2>
-<p>A <strong>single entity spans multiple domains</strong>. To keep the domains isolated, the
-code for each is placed in its own <strong><span name="component">component</span>
-class</strong>. The entity is reduced to a simple <strong>container of components</strong>.</p>
-<p><strong>跨越多个领域的单一实体</strong>。为了保持领域分离，将每部分代码放入<span name="component"><strong>各自的组件类</strong></span>中。
+<p><span name="component"></span></p>
+<p><strong>单一实体跨越了多个领域</strong>。为了保持领域之间相互分离，将每部分代码放入<strong>各自的组件类</strong>中。
 实体被简化为<em>组件的容器</em>。</p>
 <aside name="component">
-<p>&#8220;Component&#8221;, like &#8220;Object&#8221;, is one of those words that means everything and
-nothing in programming. Because of that, it&#8217;s been used to describe a few
-concepts. In business software, there&#8217;s a &#8220;Component&#8221; design pattern that
-describes decoupled services that communicate over the web.</p>
 <p>“组件”，就像“对象”，在编程中意味任何东西也不意味任何东西。
-因为这样，它被用来描述一些概念。
-在商业软件中，“组件”设计模式描述了通过网络解耦的服务。</p>
-<p>I tried to find a different name for this unrelated pattern found in games, but
-&#8220;Component&#8221; seems to be the most common term for it. Since design patterns are
-about documenting existing practices, I don&#8217;t have the luxury of coining a new
-term. So, following in the footsteps of XNA, Delta3D, and others, &#8220;Component&#8221; it
-is.</p>
-<p>我试图从游戏中找到这个无关模式的另一个名字，但“组件”看来是最常用的术语。
+正因如此，它被用来描述一些概念。
+在商业软件中，“组件”设计模式描述通过网络解耦的服务。</p>
+<p>我试图从游戏中找到无关这个设计模式的另一个名字，但“组件”看来是最常用的术语。
 由于设计模式是关于记录已存的实践，我没有创建新术语的余地。
 所以，跟着XNA，Delta3D和其他人的脚步，我称之为“组件”。</p>
 </aside>
-<h2><a href="#when-to-use-it" name="when-to-use-it">When to Use It</a></h2>
 <h2><a href="#何时使用" name="何时使用">何时使用</a></h2>
-<p>Components are most commonly found within the core class that defines the
-entities in a game, but they may be useful in other places as well. This pattern can
-be put to good use when any of these are true:</p>
 <p>组件通常在定义游戏实体的核心部分中使用，但它们在其他地方也有用。
 这个模式在如下情况中可以使用：</p>
 <ul>
 <li>
-<p>You have a class that touches multiple domains which you want to keep
-    decoupled from each other.</p>
-</li>
-<li>
 <p>有一个涉及了多个领域的类，而你想保持这些领域互相隔离。</p>
-</li>
-<li>
-<p>A class is getting massive and hard to work with.</p>
 </li>
 <li>
 <p>一个类正在变大而且越来越难以使用。</p>
 </li>
 <li>
-<p>You want to be able to define a variety of objects that share different
-    capabilities, but using inheritance doesn&#8217;t let you pick the parts you
-    want to reuse precisely enough.</p>
-</li>
-<li>
-<p>想要能定义一系列分享不同能力的类，但是使用接口不足以得到足够的重用部分。</p>
+<p>想要能定义一系列分享不同能力的类，但是使用继承无法让你精确选取要重用的部分。</p>
 </li>
 </ul>
-<h2><a href="#keep-in-mind" name="keep-in-mind">Keep in Mind</a></h2>
 <h2><a href="#记住" name="记住">记住</a></h2>
-<p>The Component pattern adds a good bit of complexity over simply making a class and
-putting code in it. Each conceptual &#8220;object&#8221; becomes a cluster of objects that
-must be instantiated, initialized, and correctly wired together. Communication
-between the different components becomes more challenging, and controlling how
-they occupy memory is more complex.</p>
 <p>组件模式比简单地向类中添加代码增加了一点点复杂性。
 每个概念上的“对象”要组成真正对象需要实例化，初始化，然后正确的连接。
 不同组件间沟通会有些困难，而控制它们如何使用内存就更加复杂。</p>
-<p>For a large codebase, this complexity may be worth it for the decoupling and
-code reuse it enables, but take care to ensure you aren&#8217;t over-engineering a
-&#8220;solution&#8221; to a non-existent problem before applying this pattern.</p>
-<p>对于大代码库，为了解耦和重用而付出这样的复杂度是值得的。
+<p>对于大型代码库，为了解耦和重用而付出这样的复杂度是值得的。
 但是在使用这种模式之前，保证你没有为了不存在的问题而“过度设计”。</p>
-<p>Another consequence of using components is that you often have to hop through a
-level of indirection to get anything done. Given the container object, first you
-have to get the component you want, <em>then</em> you can do what you need. In <span
-name="perf">performance</span>-critical inner loops, this pointer following may
-lead to poor performance.</p>
-<p>使用组件的另一后果是，需要多一层跳转你才能做要做的事。
-拿到一个容器对象，先得获得相应的组件，<em>然后</em>你才能获得你想要的组件。
-在<span name="perf">性能攸关</span>的内部循环中，这种跳转也许会导致糟糕的性能。</p>
+<p><span name="perf"></span></p>
+<p>使用组件的另一后果是，需要多一层跳转才能做要做的事。
+拿到容器对象，获得相应的组件，<em>然后</em> 你才能做想做的事情。
+在性能攸关的内部循环中，这种跳转也许会导致糟糕的性能。</p>
 <aside name="perf">
-<p>There&#8217;s a flip side to this coin. The Component pattern can often <em>improve</em>
-performance and cache coherence. Components make it easier to use the <a
-class="pattern" href="data-locality.html"> Data Locality</a> pattern to organize
-your data in the order that the CPU wants it.</p>
-<p>这是硬币的两面。组件模式通常可以<em>增进</em>性能和缓存一致性。组件让使用<a class="pattern" href="data-locality.html">数据局部性</a>模式以CPU需要的方式组织数据更容易。</p>
+<p>这是硬币的两面。组件模式通常可以<em>增进</em>性能和缓存一致性。
+组件让使用<a class="pattern" href="data-locality.html">数据局部性</a>模式的CPU更容易地组织数据。</p>
 </aside>
-<h2><a href="#sample-code" name="sample-code">Sample Code</a></h2>
 <h2><a href="#示例代码" name="示例代码">示例代码</a></h2>
-<p>One of the biggest challenges for me in writing this book is figuring out how to
-isolate each pattern. Many design patterns exist to contain code that itself
-isn&#8217;t part of the pattern. In order to distill the pattern down to its essence,
-I try to cut as much of that out as possible, but at some point it becomes a bit
-like explaining how to organize a closet without showing any clothes.</p>
 <p>我写这本书的最大挑战之一就是搞明白如何隔离各个模式。
 许多设计模式包含了不属于这种模式的代码。
-为了将模式提取到它的本质表现，我尽可能的消减代码，
+为了将提取模式的本质，我尽可能的消减代码，
 但是在某种程度上，这就像没有衣服还要说明如何整理衣柜。</p>
-<p>The Component pattern is a particularly hard one. You can&#8217;t get a real feel for
-it without seeing some code for each of the domains that it decouples, so I&#8217;ll
-have to sketch in a bit more of Bj&oslash;rn&#8217;s code than I&#8217;d like. The pattern is
-really only the component <em>classes</em> themselves, but the code in them should
-help clarify what the classes are for. It&#8217;s fake code&#8202;&mdash;&#8202;it calls into other
-classes that aren&#8217;t presented here&#8202;&mdash;&#8202;but it should give you an idea of what
-we&#8217;re going for.</p>
-<p>组件模式是特别难的一个。
-如果看不到它解耦的各个领域的代码，你就不能获得正确的感觉，
+<p>说明组件模式尤其困难。
+如果看不到它解耦的各个领域的代码，你就不能获得正确的体会，
 因此我会多写一些有关于Bj?rn的代码。
 这个模式事实上只关于将组件变为<em>类</em>，但类中的代码可以帮助表明类是做什么用的。
-这是伪代码——它调用了其他不存在的类——但这应该可以让你理解我们正在做什么。</p>
-<h3><a href="#a-monolithic-class" name="a-monolithic-class">A monolithic class</a></h3>
+它是伪代码——它调用了其他不存在的类——但这应该可以让你理解我们正在做什么。</p>
 <h3><a href="#单块类" name="单块类">单块类</a></h3>
-<p>To get a clearer picture of how this pattern is applied, we&#8217;ll start by showing
-a monolithic <span name="cat"><code>Bjorn</code></span> class that does everything we need
-but <em>doesn&#8217;t</em> use this pattern:</p>
+<p><span name="cat"></span></p>
 <p>为了清晰的看到这个模式是如何应用的，
-我们需要先展示一个<span name="cat"><code>Bjorn</code></span>类，
-它包含了所有我们需要但在模式中<em>不需要</em>的事物：</p>
+我们先展示一个<code>Bjorn</code>类，
+它包含了所有我们需要的事物，但是<em>没有</em>使用这个模式：</p>
 <aside name="cat">
-<p>I should point out that using the actual name of the character in the codebase
-is usually a bad idea. The marketing department has an annoying habit of
-demanding name changes days before you ship. &#8220;Focus tests show males between 11
-and 15 respond negatively to &lsquo;Bj&oslash;rn&rsquo;. Use &lsquo;Sven&rsquo;
-instead.&#8221;</p>
-<p>我应指出在代码使用角色的名字总是个坏主意。市场需求有在发售之前改名字的坏习惯。
-“焦点测试表面在11岁到15岁的男性不喜欢&lsquo;Bj?rn&rsquo;，改为&lsquo;Sven&amp;rsquo”。</p>
-<p>This is why many software projects use internal-only codenames. Well, that and
-because it&#8217;s more fun to tell people you&#8217;re working on &#8220;Big Electric Cat&#8221; than
-just &#8220;the next version of Photoshop.&#8221;</p>
-<p>这就是为什么很多软件项目使用内部代码名。好吧，那只是因为比起告诉人们你在完成“Photoshop的下一版本”，告诉他们你在完成“大电猫”更有趣。</p>
+<p>我应指出在代码使用角色的名字总是个坏主意。市场部有在发售之前改名字的坏习惯。
+“焦点测试表明，在11岁到15岁的男性不喜欢&lsquo;Bj?rn&rsquo;，请改为&lsquo;Sven&amp;rsquo”。</p>
+<p>这就是为什么很多软件项目使用内部代码名。
+而且比起告诉人们你在完成“Photoshop的下一版本”，告诉他们你在完成“大电猫”更有趣。</p>
 </aside>
 <div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">Bjorn</span>
 <span class="p">{</span>
@@ -407,7 +224,6 @@ just &#8220;the next version of Photoshop.&#8221;</p>
 </pre></div>
 
 
-<p><code>Bjorn</code> has an <code>update()</code> method that gets called once per frame by the game:</p>
 <p><code>Bjorn</code>有个每帧调用的<code>update()</code>方法。</p>
 <div class="codehilite"><pre><span></span><span class="kt">void</span> <span class="n">Bjorn</span><span class="o">::</span><span class="n">update</span><span class="p">(</span><span class="n">World</span><span class="o">&amp;</span> <span class="n">world</span><span class="p">,</span> <span class="n">Graphics</span><span class="o">&amp;</span> <span class="n">graphics</span><span class="p">)</span>
 <span class="p">{</span>
@@ -443,30 +259,16 @@ just &#8220;the next version of Photoshop.&#8221;</p>
 </pre></div>
 
 
-<p>It reads the joystick to determine how to accelerate the baker. Then it resolves
-its new position with the physics engine. Finally, it draws Bj&oslash;rn onto the
-screen.</p>
 <p>它读取操纵杆以确定如何加速面包师。
 然后，用物理引擎解析新位置。
 最后，将Bj?rn渲染至屏幕。</p>
-<p>The sample implementation here is trivially simple. There&#8217;s no gravity,
-animation, or any of the dozens of other details that make a character fun to
-play. Even so, we can see that we&#8217;ve got a single function that several
-different coders on our team will probably have to spend time in, and it&#8217;s
-starting to get a bit messy. Imagine this scaled up to a thousand lines and you
-can get an idea of how painful it can become.</p>
 <p>这里的示例实现平凡而简单。
 没有重力，动画，或任何让人物有趣的其他细节。
-即便如此，我们可以看到，已经出现了多个将消耗程序员时间的单一功能函数，而它开始变得有点混乱。
+即便如此，我们可以看到，已经出现了同时消耗多个程序员时间的函数，而它开始变得有点混乱。
 想象增加到一千行，你就知道这会有多难受了。</p>
-<h3><a href="#splitting-out-a-domain" name="splitting-out-a-domain">Splitting out a domain</a></h3>
 <h3><a href="#分离领域" name="分离领域">分离领域</a></h3>
-<p>Starting with one domain, let&#8217;s pull a piece out of <code>Bjorn</code> and push it into a
-separate component class. We&#8217;ll start with the first domain that gets processed:
-input. The first thing <code>Bjorn</code> does is read in user input and adjust his
-velocity based on it. Let&#8217;s move that logic out into a separate class:</p>
-<p>从一个领域开始，让我们从<code>Bjorn</code>去除一部分，将之归入分离的组件类。
-我们从首个开始执行的领域开始：输入。
+<p>从一个领域开始，将<code>Bjorn</code>的代码去除一部分，归入分离的组件类。
+我们从首个执行的领域开始：输入。
 <code>Bjorn</code>做的头件事就是读取玩家的输入，然后基于此调整它的速度。
 让我们将这部分逻辑移入一个分离的类：</p>
 <div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">InputComponent</span>
@@ -492,9 +294,6 @@ velocity based on it. Let&#8217;s move that logic out into a separate class:</p>
 </pre></div>
 
 
-<p>Pretty simple. We&#8217;ve taken the first section of <code>Bjorn</code>&rsquo;s <code>update()</code>
-method and put it into this class. The changes to <code>Bjorn</code> are also
-straightforward:</p>
 <p>很简单吧。我们将<code>Bjorn</code>的<code>update()</code>的第一部分取出，放入这个类中。
 对<code>Bjorn</code>的改变也很直接：</p>
 <div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">Bjorn</span>
@@ -537,22 +336,14 @@ straightforward:</p>
 </pre></div>
 
 
-<p><code>Bjorn</code> now owns an <code>InputComponent</code> object. Where before he was handling user
-input directly in the <code>update()</code> method, now he delegates to the component:</p>
 <p><code>Bjorn</code>现在拥有了一个<code>InputComponent</code>对象。
 之前它在<code>update()</code>方法中直接处理用户输入，现在委托给组件：</p>
 <div class="codehilite"><pre><span></span><span class="n">input_</span><span class="p">.</span><span class="n">update</span><span class="p">(</span><span class="o">*</span><span class="k">this</span><span class="p">);</span>
 </pre></div>
 
 
-<p>We&#8217;ve only started, but already we&#8217;ve gotten rid of some coupling&#8202;&mdash;&#8202;the main
-<code>Bjorn</code> class no longer has any reference to <code>Controller</code>. This will come in
-handy later.</p>
 <p>我们才刚开始，但已经摆脱了一些耦合——<code>Bjorn</code>主体现在已经与<code>Controller</code>无关了。这会派上用场的。</p>
-<h3><a href="#splitting-out-the-rest" name="splitting-out-the-rest">Splitting out the rest</a></h3>
 <h3><a href="#将剩下的分割出来" name="将剩下的分割出来">将剩下的分割出来</a></h3>
-<p>Now, let&#8217;s go ahead and do the same cut-and-paste job on the physics and graphics
-code. Here&#8217;s our new <code>PhysicsComponent</code>:</p>
 <p>现在让我们对物理和图像代码继续这种剪切粘贴的工作。
 这是我们新的 <code>PhysicsComponent</code>：</p>
 <div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">PhysicsComponent</span>
@@ -571,11 +362,7 @@ code. Here&#8217;s our new <code>PhysicsComponent</code>:</p>
 </pre></div>
 
 
-<p>In addition to moving the physics <em>behavior</em> out of the main <code>Bjorn</code> class, you
-can see we&#8217;ve also moved out the <em>data</em> too: The <code>Volume</code> object is now owned by
-the component.</p>
 <p>为了将物理<em>行为</em>移出<code>Bjorn</code>类，你可以看到我们也移出了<em>数据</em>：<code>Volume</code>对象已经是组件的一部分了。</p>
-<p>Last but not least, here&#8217;s where the rendering code lives now:</p>
 <p>最后，这是现在的渲染代码：</p>
 <div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">GraphicsComponent</span>
 <span class="p">{</span>
@@ -603,9 +390,7 @@ the component.</p>
 </pre></div>
 
 
-<p>We&#8217;ve yanked almost everything out, so what&#8217;s left of our humble pastry chef?
-Not much:</p>
-<p>我们几乎将所有的东西都移出来了，所以谦虚的面包师还剩下什么？没什么了：</p>
+<p>我们几乎将所有的东西都移出来了，所以面包师还剩下什么？没什么了：</p>
 <div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">Bjorn</span>
 <span class="p">{</span>
 <span class="k">public</span><span class="o">:</span>
@@ -627,30 +412,15 @@ Not much:</p>
 </pre></div>
 
 
-<p>The <code>Bjorn</code> class now basically does two things: it holds the set of components
-that actually define it, and it holds the state that is shared across multiple
-domains. Position and velocity are still in the core <code>Bjorn</code> class for two
-reasons. First, they are &#8220;pan-domain&#8221; state&#8202;&mdash;&#8202;almost every component will make
-use of them, so it isn&#8217;t clear which component <em>should</em> own them if we did want
-to push them down.</p>
 <p><code>Bjorn</code>类现在基本上就做两件事：拥有定义它的组件，以及在不同域间分享的数据。
 有两个原因导致位置和速度仍然在<code>Bjorn</code>的核心类中：
 首先，它们是“泛领域”状态——几乎每个组件都需要使用它们，
-所以我们想要提取出来的时候，哪个组件<em>应该</em>拥有它们并不明确。</p>
-<p>Secondly, and more importantly, it gives us an easy way for the components to
-communicate without being coupled to each other. Let&#8217;s see if we can put that to
-use.</p>
+所以我们想要提取它出来时，哪个组件<em>应该</em>拥有它们并不明确。</p>
 <p>第二，也是更重要的一点，它给了我们无需让组件耦合就能沟通的简易方法。
 让我们看看能不能利用这一点。</p>
-<h3><a href="#robo-bj&oslash;rn" name="robo-bj&oslash;rn">Robo-Bj&oslash;rn</a></h3>
 <h3><a href="#机器人bjrn" name="机器人bjrn">机器人Bj?rn</a></h3>
-<p>So far, we&#8217;ve pushed our behavior out to separate component classes, but we
-haven&#8217;t <em>abstracted</em> the behavior out. <code>Bjorn</code> still knows the exact concrete
-classes where his behavior is defined. Let&#8217;s change that.</p>
 <p>到目前为止，我们将行为归入了不同的组件类，但还没将行为<em>抽象</em>出来。
 <code>Bjorn</code>仍知道每个类的具体定义的行为。让我们改变这一点。</p>
-<p>We&#8217;ll take our component for handling user input and hide it behind an
-interface. We&#8217;ll turn <code>InputComponent</code> into an abstract base class:</p>
 <p>取出处理输入的部件，将其藏在接口之后，将<code>InputComponent</code>变为抽象基类。</p>
 <div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">InputComponent</span>
 <span class="p">{</span>
@@ -661,8 +431,6 @@ interface. We&#8217;ll turn <code>InputComponent</code> into an abstract base cl
 </pre></div>
 
 
-<p>Then, we&#8217;ll take our existing user input handling code and push it down into a
-class that implements that interface:</p>
 <p>然后，将现有的处理输入的代码取出，放进一个实现接口的类中。</p>
 <div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">PlayerInputComponent</span> <span class="o">:</span> <span class="k">public</span> <span class="n">InputComponent</span>
 <span class="p">{</span>
@@ -687,8 +455,6 @@ class that implements that interface:</p>
 </pre></div>
 
 
-<p>We&#8217;ll change <code>Bjorn</code> to hold a pointer to the input component instead of having
-an inline instance:</p>
 <p>我们将<code>Bjorn</code>改为只拥有一个指向输入组件的指针，而不是拥有一个内联的实例。</p>
 <div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">Bjorn</span>
 <span class="p">{</span>
@@ -715,29 +481,16 @@ an inline instance:</p>
 </pre></div>
 
 
-<p>Now, when we instantiate <code>Bjorn</code>, we can pass in an input component for it to
-use, like so:</p>
 <p>现在当我们实例化<code>Bjorn</code>，我们可以传入输入组件使用，就像下面这样：</p>
 <div class="codehilite"><pre><span></span><span class="n">Bjorn</span><span class="o">*</span> <span class="n">bjorn</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Bjorn</span><span class="p">(</span><span class="k">new</span> <span class="n">PlayerInputComponent</span><span class="p">());</span>
 </pre></div>
 
 
-<p>This instance can be any concrete type that implements our abstract
-<code>InputComponent</code> interface. We pay a price for this&#8202;&mdash;&#8202;<code>update()</code> is now a virtual
-method call, which is a little slower. What do we get in return for this cost?</p>
 <p>这个实例可以是任何实现了抽象<code>InputComponent</code>接口的类型。
 我们为此付出了代价——<code>update()</code>现在是虚方法调用了，这会慢一些。这一代价的回报是什么？</p>
-<p>Most consoles require a game to support &#8220;demo mode.&#8221; If the player sits at the
-main menu without doing anything, the game will start playing automatically,
-with the computer standing in for the player. This keeps the game from burning
-the main menu into your TV and also makes the game look nicer when it&#8217;s running
-on a kiosk in a store.</p>
 <p>大多数的主机需要游戏支持“演示模式”。
 如果玩家停在主菜单没有做任何事情，游戏就会自动开始运行，直到接入一个玩家。
-这让屏幕上的主菜单看上去更有生机，同时也是游戏厅中很好的展示。</p>
-<p>Hiding the input component class behind an interface lets us get that working.
-We already have our concrete <code>PlayerInputComponent</code> that&#8217;s normally used when
-playing the game. Now, let&#8217;s make another one:</p>
+这让屏幕上的主菜单看上去更有生机，同时也是销售商店里很好的展示。</p>
 <p>隐藏在输入组件后的类帮我们实现了这点，
 我们已经有了具体的<code>PlayerInputComponent</code>供在玩游戏时使用。
 现在让我们完成另一个：</p>
@@ -752,38 +505,23 @@ playing the game. Now, let&#8217;s make another one:</p>
 </pre></div>
 
 
-<p>When the game goes into demo mode, instead of constructing Bj&oslash;rn like we did
-earlier, we&#8217;ll wire him up with our new component:</p>
 <p>当游戏进入演示模式，不像之前演示的那样构造Bj?rn，
 我们将它和一个新组件连接起来：</p>
 <div class="codehilite"><pre><span></span><span class="n">Bjorn</span><span class="o">*</span> <span class="n">bjorn</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Bjorn</span><span class="p">(</span><span class="k">new</span> <span class="n">DemoInputComponent</span><span class="p">());</span>
 </pre></div>
 
 
-<p>And now, just by swapping out a component, we&#8217;ve got a fully functioning
-computer-controlled player for demo mode. We&#8217;re able to reuse all of the other
-code for Bj&oslash;rn&#8202;&mdash;&#8202;physics and graphics don&#8217;t even know there&#8217;s a difference.
-Maybe I&#8217;m a bit strange, but it&#8217;s stuff like this that gets me up in the <span
-name="coffee">morning</span>.</p>
+<p><span name="coffee"></span></p>
 <p>现在，只需要更改组件，我们就有了为演示模式而设计的电脑控制的玩家。
 我们可以重用所有Bj?rn的代码——物理和图像都不知道这里有了变化。
-也许有些诡异，但这就是<span name="coffee">每天</span>能让我从起床的事物。</p>
+也许我有些奇怪，但这就是每天能让我从起床的事物。</p>
 <aside name="coffee">
-<p>That, and coffee. Sweet, steaming hot coffee.</p>
 <p>那个，还有咖啡。热气腾腾的咖啡。</p>
 </aside>
-<h3><a href="#no-bj&oslash;rn-at-all" name="no-bj&oslash;rn-at-all">No Bj&oslash;rn at all?</a></h3>
-<h3><a href="#完全没有bjrn？" name="完全没有bjrn？">完全没有Bj?rn？</a></h3>
-<p>If you look at our <code>Bjorn</code> class now, you&#8217;ll notice there&#8217;s nothing really
-&#8220;Bj&oslash;rn&#8221; about it&#8202;&mdash;&#8202;it&#8217;s just a component bag. In fact, it looks like a pretty
-good candidate for a base &#8220;game object&#8221; class that we can use for <em>every</em> object
-in the game. All we need to do is pass in <em>all</em> the components, and we can build
-any kind of object by picking and choosing parts like Dr. Frankenstein.</p>
+<h3><a href="#删掉bjrn？" name="删掉bjrn？">删掉Bj?rn？</a></h3>
 <p>如果你看看现在的<code>Bj?rn</code>类，你会意识到那里完全没有“Bj?rn”——那只是个组件包。
-事实上，它是<em>每个</em>游戏中的对象都能继承的“游戏对象”基类的好候选人。
+事实上，它是个好候选人，能够作为<em>每个</em>游戏中的对象都能继承的“游戏对象”基类。
 我们可以像弗兰肯斯坦一样，通过挑选拼装部件构建任何对象。</p>
-<p>Let&#8217;s take our two remaining concrete components&#8202;&mdash;&#8202;physics and graphics&#8202;&mdash;&#8202;and
-hide them behind interfaces like we did with input:</p>
 <p>让我们将剩下的两个具体组件——物理和图像——像输入那样藏到接口之后。</p>
 <div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">PhysicsComponent</span>
 <span class="p">{</span>
@@ -801,9 +539,8 @@ hide them behind interfaces like we did with input:</p>
 </pre></div>
 
 
-<p>Then we re-christen <code>Bjorn</code> into a <span name="id">generic</span> <code>GameObject</code>
-class that uses those interfaces:</p>
-<p>然后将<code>Bj?rn</code>改为使用这些接口的<span name="id">通用</span><code>GameObject</code>类。</p>
+<p><span name="id"></span></p>
+<p>然后将<code>Bj?rn</code>改为使用这些接口的通用<code>GameObject</code>类。</p>
 <div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">GameObject</span>
 <span class="p">{</span>
 <span class="k">public</span><span class="o">:</span>
@@ -834,22 +571,12 @@ class that uses those interfaces:</p>
 
 
 <aside name="id">
-<p>Some component systems take this even further. Instead of a <code>GameObject</code> that
-contains its components, the game entity is just an ID, a number. Then, you
-maintain separate collections of components where each one knows the ID of the
-entity its attached to.</p>
 <p>有些人走的更远。
 不使用包含组件的<code>GameObject</code>，游戏实体只是一个ID，一个数字。
-然后在每个人都知道实体连接的ID的情况下，管理分离的组件。</p>
-<p>These <a href="http://en.wikipedia.org/wiki/Entity_component_system">entity component
-systems</a> take decoupling
-components to the extreme and let you add new components to an entity without
-the entity even knowing. The <a href="data-locality.html" class="pattern">Data
-Locality</a> chapter has more details.</p>
+每个组件都知道它们连接的实体ID，然后管理分离的组件。</p>
 <p>这些<a href="http://en.wikipedia.org/wiki/Entity_component_system">实体组件系统</a>将组件发挥到了极致，让你向实体添加组件而无需通知实体。
 <a href="data-locality.html" class="pattern">数据局部性</a>一章有更多细节。</p>
 </aside>
-<p>Our existing concrete classes will get renamed and implement those interfaces:</p>
 <p>我们现有的具体类被重命名并实现这些接口：</p>
 <div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">BjornPhysicsComponent</span> <span class="o">:</span> <span class="k">public</span> <span class="n">PhysicsComponent</span>
 <span class="p">{</span>
@@ -871,10 +598,7 @@ Locality</a> chapter has more details.</p>
 </pre></div>
 
 
-<p>And now we can build an object that has all of Bj&oslash;rn&#8217;s original behavior without
-having to actually create a class for him, just like this:</p>
 <p>现在我们无需为Bj?rn建立具体类，就能构建拥有所有Bj?rn行为的对象。</p>
-<p><span name="factory"></span></p>
 <p><span name="factory"></span></p>
 <div class="codehilite"><pre><span></span><span class="n">GameObject</span><span class="o">*</span> <span class="nf">createBjorn</span><span class="p">()</span>
 <span class="p">{</span>
@@ -886,178 +610,92 @@ having to actually create a class for him, just like this:</p>
 
 
 <aside name="factory">
-<p>This <code>createBjorn()</code> function is, of course, an example of the classic Gang of
-Four <a class="gof-pattern" href="http://c2.com/cgi/wiki?FactoryMethod">Factory
-Method</a> pattern.</p>
 <p>这个<code>createBjorn()</code>函数是，当然，经典GoF<a class="gof-pattern" href="http://c2.com/cgi/wiki?FactoryMethod">工厂模式</a>的例子。</p>
 </aside>
-<p>By defining other functions that instantiate <code>GameObjects</code> with different
-components, we can create all of the different kinds of objects our game needs.</p>
-<p>通过用不同组件实例化<code>GameObject</code>，我们可以构建游戏需要的任何组件。</p>
-<h2><a href="#design-decisions" name="design-decisions">Design Decisions</a></h2>
+<p>通过用不同组件实例化<code>GameObject</code>，我们可以构建游戏需要的任何对象。</p>
 <h2><a href="#设计决策" name="设计决策">设计决策</a></h2>
-<p>The most important design question you&#8217;ll need to answer with this pattern is,
-&#8220;What set of components do I need?&#8221; The answer there is going to depend on the
-needs and genre of your game. The bigger and more complex your engine is, the
-more finely you&#8217;ll likely want to slice your components.</p>
 <p>这章中你最需要回答的设计问题是“我需要什么样的组件？”
 回答取决于你游戏的需求和风格。
-引擎越大越复杂，你就越想将其划分成组件。</p>
-<p>Beyond that, there are a couple of more specific options to consider:</p>
+引擎越大越复杂，你就想将组件划分得更细。</p>
 <p>除此之外，还有几个更具体的选项要回答：</p>
-<h3><a href="#how-does-the-object-get-its-components" name="how-does-the-object-get-its-components">How does the object get its components?</a></h3>
 <h3><a href="#对象如何获取组件？" name="对象如何获取组件？">对象如何获取组件？</a></h3>
-<p>Once we&#8217;ve split up our monolithic object into a few separate component parts,
-we have to decide who puts the parts back together.</p>
 <p>一旦将单块对象分割为多个分离的组件，就需要决定谁将它们拼到一起。</p>
 <ul>
 <li>
-<p><strong>If the object creates its own components:</strong></p>
-</li>
-<li>
-<p><em>如果对象创建它的组件：</em></p>
+<p><strong>如果对象创建组件：</strong></p>
 <ul>
 <li>
-<p><em>It ensures that the object always has the components it needs.</em> You
-    never have to worry about someone forgetting to wire up the right
-    components to the object and breaking the game. The container object
-    itself takes care of it for you.</p>
+<p><em>这保证了对象总是能拿到需要的组件。</em>
+你永远不必担心某人忘记连接正确的组件然后破坏了整个游戏。容器类自己会处理这个问题。</p>
 </li>
 <li>
-<p><em>这保证了对象总是能拿到他需要的组件。</em>你永远不必担心某人忘记连接正确的组件然后破坏了整个游戏。容器类自己会处理这个问题。</p>
-</li>
-<li>
-<p><em>It&#8217;s harder to reconfigure the object.</em> One of the powerful features of
-    this pattern is that it lets you build new kinds of objects simply by
-    recombining components. If our object always wires itself with the same
-    set of hard-coded components, we aren&#8217;t taking advantage of that
-    flexibility.</p>
-</li>
-<li>
-<p><em>重新设置对象比较困难。</em>这个模式的强力特性之一就是只需重新组合组件就可以创建新的对象。如果对象总是自己用硬编码的组件组装自己，我们就无法利用这个灵活度。</p>
+<p><em>重新设置对象比较困难。</em>
+这个模式的强力特性之一就是只需重新组合组件就可以创建新的对象。
+如果对象总是用硬编码的组件组装自己，我们就无法利用这个特性。</p>
 </li>
 </ul>
 </li>
 <li>
-<p><strong>If outside code provides the components:</strong></p>
-</li>
-<li>
-<p><em>如果外部代码提供组件：</em></p>
+<p><strong>如果外部代码提供组件：</strong></p>
 <ul>
 <li>
-<p><em>The object becomes more flexible.</em> We can completely change the
-    behavior of the object by giving it different components to work with.
-    Taken to its fullest extent, our object becomes a generic component
-    container that we can reuse over and over again for different purposes.</p>
+<p><em>对象更加灵活。</em>
+ 我们可以提供不同的组件，这样就能改变对象的行为。
+ 通过共用组件，对象变成了组件容器，我们可以为不同目的一遍又一遍重用它。</p>
 </li>
 <li>
-<p><em>对象更加灵活。</em>我们可以提供不同的组件，这样就能改变对象的行为。通过共用组件，对象变成了组件容器，我们可以为不同目的一遍又一遍重用它。</p>
-</li>
-<li>
-<p><em>The object can be decoupled from the concrete component types.</em> If
-    we&#8217;re allowing outside code to pass in components, odds are good that
-    we&#8217;re also letting it pass in <em>derived</em> component types. At that point,
-    the object only knows about the component <em>interfaces</em> and not the
-    concrete types themselves. This can make for a nicely encapsulated
-    architecture.</p>
-</li>
-<li>
-<p><em>对象可以与确定的组件类型解耦。</em>如果我们允许外部代码提供组件，好处是也可以传递<em>派生</em>的组件类型。这样，对象只知道组件<em>接口</em>而不知道组件的具体类型。这是一个很好的封装结构。</p>
+<p><em>对象可以与具体的组件类型解耦。</em>
+如果我们允许外部代码提供组件，好处是也可以传递<em>派生</em>的组件类型。
+这样，对象只知道组件<em>接口</em>而不知道组件的具体类型。这是一个很好的封装结构。</p>
 </li>
 </ul>
 </li>
 </ul>
-<h3><a href="#how-do-components-communicate-with-each-other" name="how-do-components-communicate-with-each-other">How do components communicate with each other?</a></h3>
 <h3><a href="#组件之间如何通信？" name="组件之间如何通信？">组件之间如何通信？</a></h3>
-<p>Perfectly decoupled components that function in isolation is a nice ideal, but
-it doesn&#8217;t really work in practice. The fact that these components are part of the
-<em>same</em> object implies that they are part of a larger whole and need to
-coordinate. That means communication.</p>
 <p>完美解耦的组件不需要考虑这个问题，但在真正的实践中行不通。
 事实上组件属于<em>同一</em>对象暗示它们属于需要相互协同的更大整体的一部分。
 这就意味着通信。</p>
-<p>So how can the components talk to each other? There are a couple of options, but
-unlike most design &#8220;alternatives&#8221; in this book, these aren&#8217;t exclusive&#8202;&mdash;&#8202;you will
-likely support more than one at the same time in your designs.</p>
-<p>所以组件如何相互通信呢？这里有很多选项，但不像这本书中其他的“选项”，它们并不冲突——你可以在一个设计中支持多种方案。</p>
+<p>所以组件如何相互通信呢？
+这里有很多选项，但不像这本书中其他的“选项”，它们相互并不冲突——你可以在一个设计中支持多种方案。</p>
 <ul>
-<li>
-<p><strong>By modifying the container object&#8217;s state:</strong></p>
-</li>
 <li>
 <p><em>通过修改容器对象的状态：</em></p>
 <ul>
 <li>
-<p><em>It keeps the components decoupled.</em> When our <code>InputComponent</code> set
-    Bj&oslash;rn&#8217;s velocity and the <code>PhysicsComponent</code> later used it, the two
-    components had no idea that the other even existed. For all they knew,
-    Bj&oslash;rn&#8217;s velocity could have changed through black magic.</p>
+<p><em>这保持组件解耦。</em>
+当我们的<code>InputComponent</code>设置了Bj?rn的速度，而后<code>PhysicsComponent</code>使用它，
+这两个组件都不知道对方的存在。在它们的理解中，Bj?rn的速度是被黑魔法改变的。</p>
 </li>
 <li>
-<p><em>这保持组件解耦。</em>当我们的<code>InputComponent</code>设置了Bj?rn的速度，而后<code>PhysicsComponent</code>使用它，这两个组件都不知道对方的存在。在它们的理解中，Bj?rn的速度是被黑魔法改变的。</p>
+<p><em>需要将组件分享的任何数据存储在容器类中。</em>
+通常状态只在几个组件间共享。比如，动画组件和渲染组件需要共享图形专用的信息。
+将信息存入容器类会让<em>所有</em>组件都获得这样的信息。</p>
+<p>更糟的是，如果我们为不同组件配置使用相同的容器类，最终会浪费内存存储不被<em>任何</em>对象组件需要的状态。
+如果我们将渲染专用的数据放入容器对象中，任何隐形对象都会无益的消耗内存。</p>
 </li>
 <li>
-<p><em>It requires any information that components need to share to get pushed
-    up into the container object.</em> Often, there&#8217;s state that&#8217;s really only
-    needed by a subset of the components. For example, an animation and a
-    rendering component may need to share information that&#8217;s
-    graphics-specific. Pushing that information up into the container object
-    where <em>every</em> component can get to it muddies the object class.</p>
-</li>
-<li>
-<p><em>需要将组件需要分享的任何数据存储在容器类中。</em>通常状态只在几个组件间共享。比如，动画组件和渲染组件需要共享图形专用的信息。将信息存入容器类会让<em>所有</em>组件都获得这样的信息。</p>
-<p>Worse, if we use the same container object class with different
-component configurations, we can end up wasting memory on state that
-isn&#8217;t needed by <em>any</em> of the object&#8217;s components. If we push some
-rendering-specific data into the container object, any invisible object
-will be burning memory on it with no benefit.</p>
-<p>更糟的是，如果我们为不同组件设置构建相同的容器类，最终会浪费内存存储没有<em>任何</em>对象组件需要的状态。如果我们将渲染专用的数据放入容器对象中，任何隐形对象都会无益的消耗内存。</p>
-</li>
-<li>
-<p><em>It makes communication implicit and dependent on the order that
-    components are processed.</em> In our sample code, the original monolithic
-    <code>update()</code> method had a very carefully laid out order of operations. The
-    user input modified the velocity, which was then used by the physics
-    code to modify the position, which in turn was used by the rendering
-    code to draw Bj&oslash;rn at the right spot. When we split that code out into
-    components, we were careful to preserve that order of operations.</p>
-</li>
-<li>
-<p><em>这让组件的通信基于组件运行的顺序。</em>在同样的代码中，原先一整块的<code>update()</code>代码小心的排列这些操作。玩家的输入修改了速度，速度被物理代码使用修改位置，位置被渲染代码使用将Bj?rn绘到该有的地方。当我们将这些代码划入组件时，还是得小心翼翼的保持这种操作顺序。</p>
-<p>If we hadn&#8217;t, we would have introduced <span name="pure">subtle</span>,
-hard-to-track bugs. For example, if we&#8217;d updated the graphics component
-<em>first</em>, we would wrongly render Bj&oslash;rn at his position on the <em>last</em>
-frame, not this one. If you imagine several more components and lots
-more code, then you can get an idea of how hard it can be to avoid bugs
-like this.</p>
-<p>如果我们没有，就引入了 <span name="pure">微妙</span>而难以追踪的漏洞。比如，我们<em>先</em>更新图形组件，就错误地将Bj?rn渲染在他<em>上一帧</em>所处的位置上，而不是这一帧的。如果你考虑更多的组件和更多的代码，那你可以想象要避免这样的错误有多么困难了。</p>
+<p><em>这让组件的通信基于组件运行的顺序。</em>
+在同样的代码中，原先一整块的<code>update()</code>代码小心地排列这些操作。
+玩家的输入修改了速度，速度被物理代码使用并修改位置，位置被渲染代码使用将Bj?rn绘到该有的地方。
+当我们将这些代码划入组件时，还是得小心翼翼的保持这种操作顺序。</p>
+<p><span name="pure"></span></p>
+<p>如果我们不那么做，就引入了 微妙而难以追踪的漏洞。
+比如，我们<em>先</em>更新图形组件，就错误地将Bj?rn渲染在他<em>上一帧</em>而不是这一帧所处的位置上。
+如果你考虑更多的组件和更多的代码，那你可以想象要避免这样的错误有多么困难了。</p>
 <aside name="pure">
 
-<p>Shared mutable state like this where lots of code is reading and writing
-the same data is notoriously hard to get right. That&#8217;s a big part of why
-academics are spending time researching pure functional languages like
-Haskell where there is no mutable state at all.</p>
-<p>很难正确完成读写共享可变状态的相同数据的代码。这就是为什么学术界花时间研究完全函数式语言，比如Haskell，那里根本没有可变状态。</p>
+<p>大量这样共享状态的代码很难正确完成读写的相同数据。
+这就是为什么学术界花时间研究完全函数式语言，比如Haskell，那里根本没有可变状态。</p>
 </aside>
 
 </li>
 </ul>
 </li>
 <li>
-<p><strong>By referring directly to each other:</strong></p>
-</li>
-<li>
-<p><em>通过他们之间相互引用：</em></p>
-<p>The idea here is that components that need to talk will have direct
-references to each other without having to go through the container
-object at all.</p>
+<p><em>通过它们之间相互引用：</em></p>
 <p>这里的思路是组件有要交流的组件的引用，这样它们直接交流，无需通过容器类。</p>
-<p>Let&#8217;s say we want to let Bj&oslash;rn jump. The graphics code needs to know if
-he should be drawn using a jump sprite or not. It can determine this by
-asking the physics engine if he&#8217;s currently on the ground. An easy way
-to do this is by letting the graphics component know about the physics
-component directly:</p>
-<p>假设我们想让Bj?rn跳跃。图像代码想知道它需要用跳跃图像还是不用。这可以通过询问物理引擎它现在在不在地上来确定。一种简单的方式是图像组件直接知道物理组件的存在：</p>
+<p>假设我们想让Bj?rn跳跃。图形代码想知道它需要用跳跃图像还是不用。
+这可以通过询问物理引擎它当前是否在地上来确定。一种简单的方式是图形组件直接知道物理组件的存在：</p>
 <div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">BjornGraphicsComponent</span>
 <span class="p">{</span>
 <span class="k">public</span><span class="o">:</span>
@@ -1091,46 +729,25 @@ component directly:</p>
 </pre></div>
 
 
-<p>When we construct Bj&oslash;rn&#8217;s <code>GraphicsComponent</code>, we&#8217;ll give it a reference
-to his corresponding <code>PhysicsComponent</code>.</p>
 <p>当构建Bj?rn的<code>GraphicsComponent</code>时，我们给它相应的<code>PhysicsComponent</code>引用。</p>
 <ul>
 <li>
-<p><em>It&#8217;s simple and fast.</em> Communication is a direct method call from one
-    object to another. The component can call any method that is supported
-    by the component it has a reference to. It&#8217;s a free-for-all.</p>
+<p><em>简单快捷。</em>
+通信是一个对象到另一个的直接方法调用。组件可以调用任一引用对象的方法。做什么都可以。</p>
 </li>
 <li>
-<p><em>简单快捷。</em>通信是一个对象到另一个的直接方法调用。组件可以调用任一引用对象的方法。做什么都可以。</p>
-</li>
-<li>
-<p><em>The two components are tightly coupled.</em> The downside of the
-    free-for-all. We&#8217;ve basically taken a step back towards our monolithic
-    class. It&#8217;s not quite as bad as the original single class though, since
-    we&#8217;re at least restricting the coupling to only the component pairs that
-    need to interact.</p>
-</li>
-<li>
-<p><em>两个组件紧绑在一起。</em>这是什么都可以的坏处。我们向使用整块类又退回了一步。这比只用单一类好一点，至少我们现在只是把需要通信的类绑在一起。</p>
+<p><em>两个组件紧绑在一起。</em>
+这是什么都可以的坏处。我们向使用整块类又退回了一步。
+这比只用单一类好一点，至少我们现在只是把需要通信的类绑在一起。</p>
 </li>
 </ul>
-</li>
-<li>
-<p><strong>By sending messages:</strong></p>
 </li>
 <li>
 <p><em>通过发送消息：</em></p>
 <ul>
 <li>
-<p>This is the most complex alternative. We can actually build a little
-    messaging system into our container object and let the components
-    broadcast information to each other.</p>
-</li>
-<li>
 <p>这是最复杂的选项。我们可以在容器类中建小小的消息系统，允许组件相互发送消息。</p>
-<p>Here&#8217;s one possible implementation. We&#8217;ll start by defining a base
-<code>Component</code> interface that all of our components will implement:</p>
-<p>这是一种可能的实现。我们从每个组件都会实现的<code>Component</code>接口开始：</p>
+<p>下面是一种可能的实现。我们从每个组件都会实现的<code>Component</code>接口开始：</p>
 <div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">Component</span>
 <span class="p">{</span>
 <span class="k">public</span><span class="o">:</span>
@@ -1140,12 +757,8 @@ to his corresponding <code>PhysicsComponent</code>.</p>
 </pre></div>
 
 
-<p>It has a single <code>receive()</code> method that component classes implement in
-order to listen to an incoming message. Here, we&#8217;re just using an <code>int</code>
-to identify the message, but a fuller implementation could attach
-additional data to the message.</p>
-<p>它有一个简单的<code>receive()</code>方法，每个需要接受消息的组件类都要实现它。这里，我们使用一个<code>int</code>来定义消息，但更完整的消息实现应该可以引用附加的消息。</p>
-<p>Then, we&#8217;ll add a method to our container object for sending messages:</p>
+<p>它有一个简单的<code>receive()</code>方法，每个需要接受消息的组件类都要实现它。
+这里，我们使用一个<code>int</code>来定义消息，但更完整的消息实现应该可以附加数据。</p>
 <p>然后，向容器类添加发送消息的方法。</p>
 <div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">ContainerObject</span>
 <span class="p">{</span>
@@ -1168,119 +781,65 @@ additional data to the message.</p>
 </pre></div>
 
 
-<p><span name="queue">Now</span>, if a component has access to its
-container, it can send messages to the container, which will
-rebroadcast the message to all of the contained components. (That
-includes the original component that sent the message; be careful that
-you don&#8217;t get stuck in a feedback loop!) This has a couple of
-consequences:</p>
-<p><span name="queue">现在</span>，如果组件能够接触容器，它就能向容器发送消息，直接向所有的组件广播。（包括了原先发送消息的组件，小心别陷入消息的无限循环中！）这会有一些结果：</p>
+<p><span name="queue"></span></p>
+<p>现在，如果组件能够接触容器，它就能向容器发送消息，直接向所有的组件广播。
+（包括了原先发送消息的组件，小心别陷入消息的无限循环中！）这会造成一些结果：</p>
 <aside name="queue">
 
-<p>If you really want to get fancy, you can even make this message system
-<em>queue</em> messages to be delivered later. For more on this, see <a
-href="event-queue.html" class="pattern">Event Queue</a>.</p>
-<p>如果你真的想突破限制，甚至可以将消息存储在<em>队列</em>中，晚些发送。要知道更多，看看<a href="event-queue.html" class="pattern">事件队列</a>。</p>
+<p>如果你真的乐意，甚至可以将消息存储在<em>队列</em>中，晚些发送。
+要知道更多，看看<a href="event-queue.html" class="pattern">事件队列</a>。</p>
 </aside>
 
 </li>
+</ul>
+<p><span name="mediator"></span></p>
+<ul>
 <li>
-<p><em>Sibling components are decoupled.</em> By going <span
-    name="mediator">through</span> the parent container object, like our
-    shared state alternative, we ensure that the components are still
-    decoupled from each other. With this system, the only coupling they have
-    is the message values themselves.</p>
-</li>
-<li>
-<p><em>同级组件解耦。</em><span name="mediator">通过</span>父级容器对象，就像共享状态的方案一样，我们保证了组件之间仍然是解耦的。使用了这套系统，组件之间唯一的耦合是它们发送的消息值。</p>
+<p><em>同级组件解耦。</em>
+通过父级容器对象，就像共享状态的方案一样，我们保证了组件之间仍然是解耦的。
+使用了这套系统，组件之间唯一的耦合是它们发送的消息。</p>
 <aside name="mediator">
 
-<p>The Gang of Four call this the <a class="gof-pattern"
-href="http://c2.com/cgi-bin/wiki?MediatorPattern">Mediator</a> pattern &#8212;
-two or more objects communicate with each other indirectly by routing
-the message through an intermediate object. In this case, the container
-object itself is the mediator.</p>
-<p>GoF称之为<a class="gof-pattern" href="http://c2.com/cgi-bin/wiki?MediatorPattern">中介</a>模式——两个或更多的对象通过中介对象通信。在这种情况下，容器对象本身就是中介。</p>
+<p>GoF称之为<a class="gof-pattern" href="http://c2.com/cgi-bin/wiki?MediatorPattern">中介</a>模式——两个或更多的对象通过中介对象通信。
+现在这种情况下，容器对象本身就是中介。</p>
 </aside>
 
 </li>
 <li>
-<p><em>The container object is simple.</em> Unlike using shared state where the
-    container object itself owns and knows about data used by the
-    components, here, all it does is blindly pass the messages along. That
-    can be useful for letting two components pass very domain-specific
-    information between themselves without having that bleed into the
-    container object.</p>
-</li>
-<li>
-<p><em>容器类很简单。</em>不像使用共享状态那样，容器类无需知道组件使用了什么数据，它只是将消息发送出去。这可以让组件发送领域特有的数据而无需打扰容器对象。</p>
+<p><em>容器类很简单。</em>
+ 不像使用共享状态那样，容器类无需知道组件使用了什么数据，它只是将消息发送出去。
+ 这可以让组件发送领域特有的数据而无需打扰容器对象。</p>
 </li>
 </ul>
 </li>
 </ul>
-<p>Unsurprisingly, there&#8217;s no one best answer here. What you&#8217;ll likely end up doing
-is using a bit of all of them. Shared state is useful for the really basic stuff
-that you can take for granted that every object has&#8202;&mdash;&#8202;things like position and
-size.</p>
 <p>不出意料的，这里没有最好的答案。这些方法你最终可能都会使用一些。
 共享状态对于每个对象都有的数据是很好用的——比如位置和大小。</p>
-<p>Some domains are distinct but still closely related. Think animation and
-rendering, user input and AI, or physics and collision. If you have separate
-components for each half of those pairs, you may find it easiest to just let
-them know directly about their other half.</p>
-<p>有些领域不同却仍然紧密相关。想想动画和渲染，输入和AI，或物理和粒子。
+<p>有些不同领域仍然紧密相关。想想动画和渲染，输入和AI，或物理和粒子。
 如果你有这样一对分离的组件，你会发现直接相互引用也许更加容易。</p>
-<p>Messaging is useful for &#8220;less important&#8221; communication. Its fire-and-forget
-nature is a good fit for things like having an audio component play a sound when
-a physics component sends a message that the object has collided with something.</p>
-<p>消息对于“不那么重要”的通信很有用。发送后不管的特性对物理组件发现事物碰撞后发送消息，让音乐组件播放声音这种事情是很有效的。</p>
-<p>As always, I recommend you start simple and then add in additional
-communication paths if you need them.</p>
+<p>消息对于“不那么重要”的通信很有用。
+发送后不管的特性对物理组件发现事物碰撞后发送消息，让音乐组件播放声音这种事情是很有效的。</p>
 <p>就像以前一样，我建议你从简单的开始，然后如果需要的话，加入其他的通信路径。</p>
 <h2><a href="#see-also" name="see-also">See Also</a></h2>
 <h2><a href="#参见" name="参见">参见</a></h2>
 <ul>
 <li>
-<p>The <a href="http://unity3d.com">Unity</a> framework&#8217;s core <a href="http://docs.unity3d.com/Documentation/Manual/GameObjects.html"><code>GameObject</code></a> class is designed
-    entirely around <a href="http://docs.unity3d.com/Manual/UsingComponents.html">components</a>.</p>
+<p><a href="http://unity3d.com">Unity</a>核心架构中<a href="http://docs.unity3d.com/Documentation/Manual/GameObjects.html"><code>GameObject</code></a>类完全根据这样的原则设计<a href="http://docs.unity3d.com/Manual/UsingComponents.html">components</a>。</p>
 </li>
 <li>
-<p><a href="http://unity3d.com">Unity</a>核心架构中<a href="http://docs.unity3d.com/Documentation/Manual/GameObjects.html"><code>GameObject</code></a>类完全根据这样的原则设计 <a href="http://docs.unity3d.com/Manual/UsingComponents.html">components</a>。</p>
-</li>
-<li>
-<p>The open source <a href="http://www.delta3d.org">Delta3D</a> engine has a base
-    <code>GameActor</code> class that implements this pattern with the appropriately named
-    <code>ActorComponent</code> base class.</p>
-</li>
-<li>
-<p>开源的<a href="http://www.delta3d.org">Delta3D</a>引擎有<code>GameActor</code>基类通过<code>ActorComponent</code>基类实现了这种模式。</p>
-</li>
-<li>
-<p>Microsoft&#8217;s <a href="http://creators.xna.com/en-US/">XNA</a> game framework
-    comes with a core <code>Game</code> class. It owns a collection of <code>GameComponent</code>
-    objects. Where our example uses components at the individual game entity
-    level, XNA implements the pattern at the level of the main game object
-    itself, but the purpose is the same.</p>
+<p>开源的<a href="http://www.delta3d.org">Delta3D</a>引擎有<code>GameActor</code>基类通过<code>ActorComponent</code>实现了这种模式。</p>
 </li>
 <li>
 <p>微软的<a href="http://creators.xna.com/en-US/">XNA</a>游戏框架有一个核心的<code>Game</code>类。它拥有一系列<code>GameComponent</code>对象。我们在游戏实体层使用组件，XNA在游戏主对象上实现了这种模式，但意图是一样的。</p>
 </li>
 <li>
-<p>This pattern bears resemblance to the Gang of Four&#8217;s <a class="gof-pattern"
-    href="http://c2.com/cgi-bin/wiki?StrategyPattern">Strategy</a> pattern. Both
-    patterns are about taking part of an object&#8217;s behavior and delegating it to
-    a separate subordinate object. The difference is that with the Strategy
-    pattern, the separate &#8220;strategy&#8221; object is usually stateless&#8202;&mdash;&#8202;it
-    encapsulates an algorithm, but no data. It defines <em>how</em> an object behaves,
-    but not <em>what</em> it is.</p>
-<p>这种模式与GoF的<a class="gof-pattern" href="http://c2.com/cgi-bin/wiki?StrategyPattern">策略模式</a> 类似。两种模式都是将对象的行为取出划入单独的重述对象。与对象模式不同的是，分离的策略模式通常是无状态的——它封装了算法，而没有数据。它定义了对象<em>如何</em>行动，但没有定义对象<em>是</em>什么。</p>
-<p>Components are a bit more self-important. They often hold state that
-describes the object and helps define its actual identity. However, the line
-may blur. You may have some components that don&#8217;t need any local state. In
-that case, you&#8217;re free to use the same component <em>instance</em> across multiple
-container objects. At that point, it really is behaving more akin to a
-strategy.</p>
-<p>组件本身更加重要。它们经常保存了对象的状态，这有助于确定其真正的身份。但是，这条界限很模糊。有一些组件也许根本没有任何状态。在这种情况下，你可以在不同的容器对象中使用相同的组件<em>实例</em>。这样看来，它的行为确实更像一种策略。</p>
+<p>这种模式与GoF的<a class="gof-pattern" href="http://c2.com/cgi-bin/wiki?StrategyPattern">策略模式</a>类似。
+两种模式都是将对象的行为取出，划入单独的重述对象。
+与对象模式不同的是，分离的策略模式通常是无状态的——它封装了算法，而没有数据。
+它定义了对象<em>如何</em>行动，但没有定义对象<em>是</em>什么。</p>
+<p>组件更加重要。它们经常保存了对象的状态，这有助于确定其真正的身份。
+但是，这条界限很模糊。有一些组件也许根本没有任何状态。
+在这种情况下，你可以在不同的容器对象中使用相同的组件<em>实例</em>。这样看来，它的行为确实更像一种策略。</p>
 </li>
 </ul>
 <nav>

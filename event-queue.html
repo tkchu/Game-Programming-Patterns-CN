@@ -9,7 +9,10 @@
      the viewport. -->
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
 <link rel="stylesheet" type="text/css" href="style.css" />
+<!--
+delete the font style for english.
 <link href="http://fonts.gmirror.org/css?family=Merriweather:400,400italic,700,700italic|Source+Code+Pro|Source+Sans+Pro:200,300,400,600,400italic,600italic|Rock+Salt" rel="stylesheet" type="text/css">
+-->
 <!-- delete the google analyse code to improve the speed, sorry. -->
 <script src="jquery-1.10.1.min.js"></script>
 <script src="script.js"></script>
@@ -24,45 +27,26 @@
 </nav>
 <h1>事件队列</h1>
 <h1 class="book"><a href="/Game-Programming-Patterns-CN/">游戏设计模式</a><span class="section"><a href="decoupling-patterns.html">Decoupling Patterns</a></span></h1>
-<h2><a href="#intent" name="intent">Intent</a></h2>
 <h2><a href="#意图" name="意图">意图</a></h2>
-<p><em>Decouple when a message or event is sent from when it is processed.</em></p>
 <p><em>解耦发出消息或事件的时间和处理它的时间。</em></p>
-<h2><a href="#motivation" name="motivation">Motivation</a></h2>
 <h2><a href="#动机" name="动机">动机</a></h2>
-<p>Unless you live under one of the few rocks that still lack Internet access,
-you&#8217;ve probably already heard of an <span name="message">&#8220;event queue&#8221;</span>.
-If not, maybe &#8220;message queue&#8221;, or &#8220;event loop&#8221;, or &#8220;message pump&#8221; rings a bell.
-To refresh your memory, let&#8217;s walk through a couple of common manifestations of
-the pattern.</p>
-<p>除非还呆在一两个没有互联网接入的犄角旮旯，你可能已经听说过<span name="message">“事件序列”</span>了。
+<p><span name="message"></span></p>
+<p>除非还呆在一两个没有互联网接入的犄角旮旯，否则你很可能已经听说过“事件序列”了。
 如果没有，也许“消息队列”或“事件循环”或“消息泵”可以让你想起些什么。
-为了唤醒你的记忆，让我们了解几个此模式的常用表示。</p>
+为了唤醒你的记忆，让我们了解几个此模式的常见应用吧。</p>
 <aside name="message">
-<p>For most of the chapter, I use &#8220;event&#8221; and &#8220;message&#8221; interchangeably. Where the
-distinction matters, I&#8217;ll make it obvious.</p>
-<p>对于这章的大部分，我交替使用“事件”和“消息”。
+<p>这章的大部分里，我交替使用“事件”和“消息”。
 在两者的意义有区别时，我会表明的。</p>
 </aside>
-<h3><a href="#gui-event-loops" name="gui-event-loops">GUI event loops</a></h3>
 <h3><a href="#gui事件循环" name="gui事件循环">GUI事件循环</a></h3>
-<p>If you&#8217;ve ever done any <span name="event-driven">user interface</span>
-programming, then you&#8217;re well acquainted with <em>events</em>. Every time the user
-interacts with your program&#8202;&mdash;&#8202;clicks a button, pulls down a menu, or presses a
-key&#8202;&mdash;&#8202;the operating system generates an event. It throws this object at your
-app, and your job is to grab it and hook it up to some interesting behavior.</p>
-<p>如果你曾做过任何<span name="event-driven">用户界面</span>编程，你就会很熟悉<em>事件</em>。
+<p><span name="event-driven"></span></p>
+<p>如果你曾做过任何用户界面编程，你就会很熟悉<em>事件</em>。
 每当用户与你的程序交互——点击按钮，拉出菜单，或者按个键——操作系统就会生成一个事件。
-它会将这个对象扔给你的应用，你的工作就是抓住它然后挂上一些有趣的行为。</p>
+它会将这个对象扔给你的应用程序，你的工作就是获取它然后将其与有趣的行为相挂钩。</p>
 <aside name="event-driven">
-<p>This application style is so common, it&#8217;s considered a paradigm: <a
-href="http://en.wikipedia.org/wiki/Event-driven_programming"><em>event-driven
-programming</em></a>.</p>
-<p>这个程序风格非常普遍，被认为是一种范式：<a href="http://en.wikipedia.org/wiki/Event-driven_programming"><em>事件驱动编程</em></a>。</p>
+<p>这个程序风格非常普遍，被认为是一种编程范式：<a href="http://en.wikipedia.org/wiki/Event-driven_programming"><em>事件驱动编程</em></a>。</p>
 </aside>
-<p>In order to receive these missives, somewhere deep in the bowels of your code is
-an <em>event loop</em>. It looks roughly like this:</p>
-<p>为了处理这些事件，代码的深处是<em>事件循环</em>。它大体上是这样的：</p>
+<p>为了获取这些事件，代码底层是<em>事件循环</em>。它大体上是这样的：</p>
 <div class="codehilite"><pre><span></span><span class="k">while</span> <span class="p">(</span><span class="n">running</span><span class="p">)</span>
 <span class="p">{</span>
   <span class="n">Event</span> <span class="n">event</span> <span class="o">=</span> <span class="n">getNextEvent</span><span class="p">();</span>
@@ -71,118 +55,61 @@ an <em>event loop</em>. It looks roughly like this:</p>
 </pre></div>
 
 
-<p>The call to <code>getNextEvent()</code> pulls a bit of unprocessed user input into your
-app. You route it to an event handler and, like magic, your application comes to
-life. The interesting part is that the application <em>pulls</em> in the event when
-<em>it</em> wants it. The operating system doesn&#8217;t just immediately <span
-name="interrupt">jump</span> to some code in your app when the user pokes a
-peripheral.</p>
-<p>对<code>getNextEvent()</code>调用将一堆未处理的用户输出传到应用中。
-你将它导向事件处理器，之后，魔术般，应用获得了生命。
+<p><span name="interrupt"></span></p>
+<p>对<code>getNextEvent()</code>的调用将一堆未处理的用户输出传到应用程序中。
+你将它导向事件处理器，之后应用魔术般获得了生命。
 有趣的部分是应用在<em>它</em>想要的时候<em>获取</em>事件。
-操作系统在用户接触外部代码时不是<span name="interrupt">直接跳转</span>到你应用的某处代码。</p>
+操作系统在用户操作时不是直接跳转到你应用的某处代码。</p>
 <aside name="interrupt">
-<p>In contrast, <em>interrupts</em> from the operating system <em>do</em> work like that. When an
-interrupt happens, the OS stops whatever your app was doing and forces it to
-jump to an interrupt handler. This abruptness is why interrupts are so hard to
-work with.</p>
-<p>相反，操作系统的<em>中断</em>确实那样工作。
+<p>相反，操作系统的<em>中断</em>确实是直接跳转的。
 当中断发生时，操作系统中断应用在做的事，强制它跳到中断处理。
-这种唐突是中断很难使用的原因。</p>
+这种唐突的做法是中断很难使用的原因。</p>
 </aside>
-<p>That means when user input comes in, it needs to go somewhere so that the
-operating system doesn&#8217;t lose it between when the device driver reported the
-input and when your app gets around to calling <code>getNextEvent()</code>. That
-&#8220;somewhere&#8221; is a <em>queue</em>.</p>
-<p>这就意味着当用户输入进来时，它需要去某处，这样操作系统在设备驱动报告输入和应用去调用<code>getNextEvent()</code>之间不会丢失它。
+<p>这就意味着当用户输入进来时，它需要到某处去，
+这样操作系统在设备驱动报告输入和应用去调用<code>getNextEvent()</code>之间不会漏掉它。
 这个“某处”是一个<em>队列</em>。</p>
-<p><img src="images/event-queue-loop.png" alt="An event queue. The operating system enqueues Shift, Down, Up, and Click events, and the getNextEvent() function dequeues them." /></p>
-<p>When user input comes in, the OS adds it to a queue of unprocessed events. When
-you call <code>getNextEvent()</code>, that pulls the oldest event off the queue and hands it
-to your application.</p>
+<p><img src="images/event-queue-loop.png" alt="一个事件队列。操作系统入队Shift键，下方向键，上方向键，以及点击事件，getNextEvent()函数可以让它们出队。" /></p>
 <p>当用户输入抵达时，操作系统将其添加到未处理事件的队列中。
-当你调用<code>getNextEvent()</code>时，它从队列中获取最老的事件然后交给应用。</p>
-<h3><a href="#central-event-bus" name="central-event-bus">Central event bus</a></h3>
+当你调用<code>getNextEvent()</code>时，它从队列中获取最旧的事件然后交给应用程序。</p>
 <h3><a href="#中心事件总线" name="中心事件总线">中心事件总线</a></h3>
-<p>Most <span name="game-loop">games</span> aren&#8217;t event-driven like this, but it
-is common for a game to have its own event queue as the backbone of its nervous
-system. You&#8217;ll often hear &#8220;central&#8221;, &#8220;global&#8221;, or &#8220;main&#8221; used to describe it.
-It&#8217;s used for high level communication between game systems that want to stay
-decoupled.</p>
-<p>大多数<span name="game-loop">游戏</span>不是像这样事件驱动的，但是在游戏中使用一个事件循环来支撑中枢系统是很常见的。
+<p><span name="game-loop"></span></p>
+<p>大多数游戏不是像这样事件驱动的，但是在游戏中使用事件循环来支撑中枢系统是很常见的。
 你通常听到用“中心”“全局”“主体”描述它。
-这对于游戏系统想要保持解耦的高层相互交流是很方便的。</p>
+它通常被用于想要相互保持解耦的高层模块间通信。</p>
 <aside name="game-loop">
-<p>If you want to know <em>why</em> they aren&#8217;t event-driven, crack open the <a href="game-loop.html"
-class="pattern">Game Loop</a> chapter.</p>
 <p>如果你想知道<em>为什么</em>它们不是事件驱动的，看看<a href="game-loop.html" class="pattern">游戏循环</a>一章。</p>
 </aside>
-<p>Say your game has a <span name="tutorial">tutorial</span> system to display help
-boxes after specific in-game events. For example, the first time the player
-vanquishes a foul beastie, you want to show a little balloon that says, &#8220;Press X
-to grab the loot!&#8221;</p>
-<p>假设游戏有<span name="tutorial">教程系统</span>在某些特定游戏事件后显示帮助框。
-举个例子，当玩家第一次击败了邪恶野兽，你想要一个小气泡显示着，“按X拿起战利品！”</p>
+<p><span name="tutorial"></span></p>
+<p>假设游戏有新手教程系统，在某些特定游戏事件后显示帮助框。
+举个例子，当玩家第一次击败了邪恶野兽，你想要一个显示着“按X拿起战利品！”的小气泡。</p>
 <aside name="tutorial">
-<p>Tutorial systems are a pain to implement gracefully, and most players will spend
-only a fraction of their time using in-game help, so it feels like they aren&#8217;t
-worth the effort. But that fraction where they <em>are</em> using the tutorial can be
-invaluable for easing the player into your game.</p>
-<p>教程系统很难优雅的实现，大多数玩家很少使用游戏内的帮助，所以感觉不值得做教程。
-但对那些<em>使用</em>教程的玩家，这是无价的。</p>
+<p>新手教程系统很难优雅地实现，大多数玩家很少使用游戏内的帮助，所以这感觉上吃力不讨好。
+但对那些<em>使用</em>教程的玩家，这是无价之物。</p>
 </aside>
-<p>Your gameplay and combat code are likely complex enough as it is. The last thing
-you want to do is stuff a bunch of checks for triggering tutorials in there.
-Instead, you could have a central event queue. Any game system can send to it,
-so the combat code can add an &#8220;enemy died&#8221; event every time you slay a foe.</p>
 <p>游戏玩法和战斗代码也许像上面一样复杂。
-最后想做的是检查一堆教程的触发器。
-又或者，你可以使用中心事件队列。
-任何游戏系统都可以发给它，这样战斗代码可以在砍倒敌人时发出“敌人死亡”事件。</p>
-<p><span name="blackboard">Likewise</span>, any game system can <em>receive</em> events
-from the queue. The tutorial engine registers itself with the queue and
-indicates it wants to receive &#8220;enemy died&#8221; events. This way, knowledge of an
-enemy dying makes its way from the combat system over to the tutorial engine
-without the two being directly aware of each other.</p>
-<p><span name="blackboard">就像这样</span>，任何游戏系统都能从队列<em>接受</em>事件。
+你最不想做的就是检查一堆教程的触发器。
+相反，你可以使用中心事件队列。
+任何游戏系统都可以发事件给队列，这样战斗代码可以在砍倒敌人时发出“敌人死亡”事件。</p>
+<p><span name="blackboard"></span></p>
+<p>类似的，任何游戏系统都能从队列<em>接受</em>事件。
 教程引擎在队列中注册自己，然后表明它想要收到“敌人死亡”事件。
 用这种方式，敌人死了的消息从战斗系统传到了教程引擎，而不需要这两个系统直接知道对方的存在。</p>
 <aside name="blackboard">
-<p>This model where you have a shared space that entities can post information to
-and get notified by is similar to <a
-href="http://en.wikipedia.org/wiki/Blackboard_system">blackboard systems</a> in
-the AI field.</p>
 <p>实体可以发送和收到消息的模型很像AI界的<a href="http://en.wikipedia.org/wiki/Blackboard_system">blackboard systems</a>。</p>
 </aside>
-<p><img src="images/event-queue-central.png" alt="A central event queue is read from and written to by the Combat and Tutorial code." /></p>
-<p>I thought about using this as the example for the rest of the chapter, but I&#8217;m
-not generally a fan of big global systems. Event queues don&#8217;t have to be for
-communicating across the entire game engine. They can be just as useful within a single class or domain.</p>
-<p>我想过使用这个作为这章其他部分的例子，但是我真不喜欢这样巨大的全局系统。
-事件队列不需要在整个游戏引擎中沟通。在一个类或者领域中就足够有用了。</p>
-<h3><a href="#say-what" name="say-what">Say what?</a></h3>
+<p><img src="images/event-queue-central.png" alt="一个战斗代码和教程代码都可以读写的中心事件队列。" /></p>
+<p>我本想将这个作为这章其他部分的例子，但是我真不喜欢这样巨大的全局系统。
+事件队列不需要在整个游戏引擎中沟通。在一个类或者领域中沟通就足够有用了。</p>
 <h3><a href="#你说什么？" name="你说什么？">你说什么？</a></h3>
-<p>So, instead, let&#8217;s add sound to our game. Humans are mainly visual animals, but
-hearing is deeply connected to our emotions and our sense of physical space. The
-right simulated echo can make a black screen feel like an enormous cavern, and a
-well-timed violin adagio can make your heartstrings hum in sympathetic
-resonance.</p>
-<p>所以，相反，让我们给游戏添加一些声音。
-人类主要是视觉动物，但是听觉强烈影响到情感系统和空间感觉。
-正确模拟的回声可以让黑屏感觉上是巨大的洞穴，而适时的小提琴慢板可以让你的心弦哼着同样的旋律。</p>
-<p>To get our game wound for sound, we&#8217;ll start with the simplest possible approach
-and see how it goes. We&#8217;ll add a little <span name="singleton">&#8220;audio
-engine&#8221;</span> that has an API for playing a sound given an identifier and a
-volume:</p>
-<p>为了获得受伤时的声音，我们从最简单的解决方法开始，看看结果如何。
-添加一个<span name="singleton">“声音引擎”</span>，其中有使用标识符和音量就可以播放音乐的API：</p>
+<p>所以说点别的，让我们给游戏添加一些声音。
+人类是视觉动物，但是听觉强烈影响到情感系统和空间感觉。
+正确模拟的回声可以让漆黑的屏幕感觉上是巨大的洞穴，而适时的小提琴慢板可以让心弦拉响同样的旋律。</p>
+<p><span name="singleton"></span></p>
+<p>为了获得优秀的音效表现，我们从最简单的解决方法开始，看看结果如何。
+添加一个“声音引擎”，其中有使用标识符和音量就可以播放音乐的API：</p>
 <aside name="singleton">
-<p>While I almost always shy away from the <a href="singleton.html"
-class="gof-pattern">Singleton</a> pattern, this is one of the places where it
-may fit since the machine likely only has one set of speakers. I&#8217;m taking a
-simpler approach and just making the method static.</p>
 <p>我总是离<a href="singleton.html" class="gof-pattern">单例模式</a>远远的。
-这是少数它可以使用的领域，因为机器通常只有一系列声源。
+这是少数它可以使用的领域，因为机器通常只有一个声源系统。
 我使用更简单的方法，直接将方法定为静态。</p>
 </aside>
 <div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">Audio</span>
@@ -193,10 +120,6 @@ simpler approach and just making the method static.</p>
 </pre></div>
 
 
-<p>It&#8217;s responsible for loading the appropriate sound resource, finding an
-available channel to play it on, and starting it up. This chapter isn&#8217;t about
-some platform&#8217;s real audio API, so I&#8217;ll conjure one up that we can presume is
-implemented elsewhere. Using it, we write our method like so:</p>
 <p>它负责加载合适的声音资源，找到可靠的播放频道，然后启动它。
 这章不是关于某个平台真实的音频API，所以我会假设在其他某处魔术般实现了一个。
 使用它，我们像这样写方法：</p>
@@ -210,11 +133,8 @@ implemented elsewhere. Using it, we write our method like so:</p>
 </pre></div>
 
 
-<p>We check that in, create a few sound files, and start sprinkling <code>playSound()</code>
-calls through our codebase like some magical audio fairy. For example, in our UI
-code, we play a little bloop when the selected menu item changes:</p>
-<p>我们签入以上代码，加入声音文件，然后在代码中像魔法仙女一样调用<code>playSound()</code>。
-举个例子，在UI代码中，我们在选择菜单项变化时播放一点杂音：</p>
+<p>我们签入以上代码，创建一些声音文件，然后在代码中加入一些对<code>playSound()</code>的调用。
+举个例子，在UI代码中，我们在选择菜单项变化时播放一点小音效：</p>
 <div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">Menu</span>
 <span class="p">{</span>
 <span class="k">public</span><span class="o">:</span>
@@ -227,218 +147,96 @@ code, we play a little bloop when the selected menu item changes:</p>
 </pre></div>
 
 
-<p>After doing this, we notice that sometimes when you switch menu items, the whole
-screen freezes for a few frames. We&#8217;ve hit our first issue:</p>
-<p>这样做了之后，注意到当你改变菜单项目时，整个屏幕就会冻住几帧。
-我们找到了第一个问题：</p>
+<p>这样做了之后，注意到有时候你改变菜单项目，整个屏幕就会冻住几帧。
+我们遇到了第一个问题：</p>
 <ul>
-<li>
-<p><strong>Problem 1: The API blocks the caller until the audio engine has completely
-    processed the request.</strong></p>
-</li>
-<li>
-<p><strong>问题一：API在音频引擎完成处理请求前阻塞了调用者。</strong></p>
-</li>
+<li><strong>问题一：API在音频引擎完成对请求的处理前阻塞了调用者。</strong></li>
 </ul>
-<p>Our <code>playSound()</code> method is <em>synchronous</em>&#8202;&mdash;&#8202;it doesn&#8217;t return back to the
-caller until bloops are coming out of the speakers. If a sound file has to be
-loaded from disc first, that may take a while. In the meantime, the rest of the
-game is frozen.</p>
 <p>我们的<code>playSound()</code>方法是<em>同步</em>的——它在从播放器放出声音前不会返回调用者。
 如果声音文件要从光盘上加载，那就得花费一定时间。
-与此同时，游戏的其他部分被冻住了。</p>
-<p>Ignoring that for now, we move on. In the AI code, we add a call to let out a
-wail of anguish when an enemy takes damage from the player. Nothing warms a
-gamer&#8217;s heart like inflicting simulated pain on a virtual living being.</p>
+与此同时，游戏的其他部分被卡住了。</p>
 <p>现在忽视这一点，我们继续。
 在AI代码中，我们增加了一个调用，在敌人承受玩家伤害时发出痛苦的低号。
 没有什么比在虚拟的生物身上施加痛苦更能温暖玩家心灵的了。</p>
-<p>It works, but sometimes when the hero does a mighty attack, it hits two enemies
-in the exact same frame. That causes the game to play the wail sound twice
-simultaneously. <span name="hatsworth">If</span> you know anything about audio,
-you know mixing multiple sounds together sums their waveforms. When those are
-the <em>same</em> waveform, it&#8217;s the same as <em>one</em> sound played <em>twice as loud</em>. It&#8217;s
-jarringly loud.</p>
+<p><span name="hatsworth"></span></p>
 <p>这能行，但是有时玩家打出暴击，他在同一帧可打到两个敌人。
 这让游戏同时要播放两遍哀嚎。
-<span name="hatsworth">如果</span>你知道任何有关音频的事，那么就知道要把两个不同的声音混合在一起，需要加和它们的波形。
-当这两个是<em>同一</em>波形时，它与<em>一个</em>声音播放<em>两倍响</em>是一样的。那会响得刺耳。</p>
+如果你了解一些音频的知识，那么就知道要把两个不同的声音混合在一起，就要加和它们的波形。
+当这两个是<em>同一</em>波形时，它与<em>一个</em>声音播放<em>两倍响</em>是一样的。那会很刺耳。</p>
 <aside name="hatsworth">
-<p>I ran into this exact issue working on <a href="http://en.wikipedia.org/wiki/Hen
-ry_Hatsworth_in_the_Puzzling_Adventure">Henry Hatsworth in the Puzzling
-Adventure</a>. My solution there is similar to what we&#8217;ll cover here.</p>
 <p>我在完成<a href="http://en.wikipedia.org/wiki/Henry_Hatsworth_in_the_Puzzling_Adventure">Henry Hatsworth in the Puzzling Adventure</a>遇到了同样的问题。解决方法和这里的很相似。</p>
 </aside>
-<p>We have a related problem in boss fights when piles of minions are running
-around causing mayhem. The hardware can only play so many sounds at one time.
-When we go over that limit, sounds get ignored or cut off.</p>
 <p>在Boss战中有个相关的问题，当有一堆小怪跑动制造伤害时。
 硬件只能同时播放一定数量的音频。当数量超过限度时，声音就被忽视或者切断了。</p>
-<p>To handle these issues, we need to look at the entire <em>set</em> of sound calls to
-aggregate and prioritize them. Unfortunately, our audio API handles each
-<code>playSound()</code> call independently. It sees requests through a pinhole, one at a
-time.</p>
-<p>为了处理这些问题，我们需要看到声音调用的整体<em>集合</em>，用来整合和排序。
+<p>为了处理这些问题，我们需要获得音频调用的整个<em>集合</em>，用来整合和排序。
 不幸的是，音频API独立处理每一个<code>playSound()</code>调用。
-看起来这些请求是从针眼穿过，一次一个。</p>
+看起来这些请求是从针眼穿过一样，一次只能有一个。</p>
 <ul>
-<li>
-<p><strong>Problem 2: Requests cannot be processed in aggregate.</strong></p>
-</li>
-<li>
-<p><strong>问题二：请求无法合并处理。</strong></p>
-</li>
+<li><strong>问题二：请求无法合并处理。</strong></li>
 </ul>
-<p>These problems seem like mere annoyances compared to the next issue that falls
-in our lap. By now, we&#8217;ve strewn <code>playSound()</code> calls throughout the codebase in
-lots of different game systems. But our game engine is running on modern
-multi-core hardware. To take advantage of those cores, we distribute those
-systems on different threads&#8202;&mdash;&#8202;rendering on one, AI on another, etc.</p>
-<p>这个问题与下面的相比似乎只是烦恼。
+<p>这个问题与下面的问题相比只是小烦恼。
 现在，我们在很多不同的游戏系统中散布了<code>playSound()</code>调用。
 但是游戏引擎是在现代多核机器上运行的。
-为了使用这些核带来的优势，我们将系统分散在不同线程上——渲染在一个，AI在另一个，诸如此类。</p>
-<p>Since our API is synchronous, it runs on the <em>caller&#8217;s</em> thread. When we call it
-from different game systems, we&#8217;re hitting our API concurrently from multiple
-threads. Look at that sample code. See any thread synchronization? Me neither.</p>
+为了使用多核带来的优势，我们将系统分散在不同线程上——渲染在一个，AI在另一个，诸如此类。</p>
 <p>由于我们的API是同步的，它在<em>调用者</em>的线程上运行。
 当从不同的游戏系统调用时，我们从多个线程同时使用API。
-看看示例代码，看到任何线程同步性了吗？我也没看到。</p>
-<p>This is particularly egregious because we intended to have a <em>separate</em> thread
-for audio. It&#8217;s just sitting there totally idle while these other threads are
-busy stepping all over each other and breaking things.</p>
-<p>当我们想要一个<em>分离的</em>线程给音频，这个问题就更加严重。
-当其他线程都忙于跟随对方和制造事物，它只是傻傻待在那里。</p>
+看看示例代码，看到任何线程同步性吗？我也没看到。</p>
+<p>当我们想要分配一个<em>单独的</em>线程给音频，这个问题就更加严重。
+当其他线程都忙于互相跟随和制造事物，它只是傻傻待在那里。</p>
 <ul>
-<li>
-<p><strong>Problem 3: Requests are processed on the wrong thread.</strong></p>
-</li>
-<li>
-<p><strong>问题三：请求在错误的线程上执行。</strong></p>
-</li>
+<li><strong>问题三：请求在错误的线程上执行。</strong></li>
 </ul>
-<p>The common theme to these problems is that the audio engine interprets a call to
-<code>playSound()</code> to mean, &#8220;Drop everything and play the sound right now!&#8221;
-<em>Immediacy</em> is the problem. Other game systems call <code>playSound()</code> at <em>their</em>
-convenience, but not necessarily when it&#8217;s convenient for the audio engine to
-handle that request. To fix that, we&#8217;ll decouple <em>receiving</em> a request from
-<em>processing</em> it.</p>
-<p>音频引擎调用<code>playSound()</code>意味着，“放下任何东西，现在就播放声音！”<em>立即</em>就是问题。
+<p>音频引擎调用<code>playSound()</code>意味着，“放下任何东西，现在就播放声音！”<em>立即</em> 就是问题。
 游戏系统在<em>它们</em>方便时调用<code>playSound()</code>，但是音频引擎不一定能方便去处理这个请求。
-为了解决这点，我们将<em>接受</em>请求和<em>处理</em>请求解耦。</p>
-<h2><a href="#the-pattern" name="the-pattern">The Pattern</a></h2>
+为了解决这点，我们需要将<em>接受</em>请求和<em>处理</em>请求解耦。</p>
 <h2><a href="#模式" name="模式">模式</a></h2>
-<p>A <strong>queue</strong> stores a series of <strong>notifications or requests</strong> in first-in,
-first-out order. Sending a notification <strong>enqueues the request and returns</strong>.
-The request processor then <strong>processes items from the queue</strong> at a later time.
-Requests can be <strong>handled directly</strong> or <strong>routed to interested parties</strong>. This
-<strong>decouples the sender from the receiver</strong> both <strong>statically</strong> and <strong>in time</strong>.</p>
-<p><strong>队列</strong>在先入先出队列中存储一系列<strong>通知或请求</strong>。
-发送通知<strong>将请求放入队列并返回</strong>。
-请求处理器之后稍晚<strong>从队列中处理事项</strong>。
+<p><strong>事件队列</strong>在队列中按先入先出的顺序存储一系列<strong>通知或请求</strong>。
+发送通知时，<strong>将请求放入队列并返回</strong>。
+处理请求的系统之后稍晚<strong>从队列中获取请求</strong>并处理。
 这<strong>解耦了发送者和接收者</strong>，既<strong>静态</strong>又<strong>及时</strong>。</p>
-<h2><a href="#when-to-use-it" name="when-to-use-it">When to Use It</a></h2>
 <h2><a href="#何时使用" name="何时使用">何时使用</a></h2>
-<p>If you only want to decouple <em>who</em> receives a message from its sender, patterns
-like <a href="observer.html">Observer</a> and <a href="command.html">Command</a>
-will take care of this with less <span name="simple">complexity</span>. You only
-need a queue when you want to decouple something <em>in time</em>.</p>
-<p>如果你只是想解耦<em>接收者</em>和发送者，像<a href="observer.html">观察者模式</a>和<a href="command.html">命令模式</a>都可以用较小的<span name="simple">复杂度</span>处理它。
-在需要解耦某些<em>及时</em>的东西时使用队列。</p>
+<p><span name="simple"></span></p>
+<p>如果你只是想解耦<em>接收者</em>和发送者，像<a href="observer.html">观察者模式</a>
+和<a href="command.html">命令模式</a>都可以用较小的复杂度进行处理。
+在解耦某些需要<em>及时</em>处理的东西时使用队列。</p>
 <aside name="simple">
-<p>I mention this in nearly every chapter, but it&#8217;s worth emphasizing. Complexity
-slows you down, so treat simplicity as a precious resource.</p>
 <p>我在之前的几乎每章都提到了，但这值得反复提。
-复杂度拖慢你，所以将简单视为珍贵的财宝。</p>
+复杂度会拖慢你，所以要将简单视为珍贵的财宝。</p>
 </aside>
-<p>I think of it in terms of pushing and pulling. You have some code A that wants
-another chunk B to do some work. The natural way for A to initiate that is by
-<em>pushing</em> the request to B.</p>
 <p>用推和拉来考虑。
 有一块代码A需要另一块代码B去做些事情。
 对A自然的处理方式是将请求<em>推</em>给B。</p>
-<p>Meanwhile, the natural way for B to process that request is by <em>pulling</em> it in
-at a convenient time in <em>its</em> run cycle. When you have a push model on one end
-and a pull model on the other, you need a buffer between them. That&#8217;s what a
-queue provides that simpler decoupling patterns don&#8217;t.</p>
-<p>同时，对B自然的处理请求的方式是在<em>B</em>方便时将其<em>拉</em>入。
-当你在一个末尾有推模型另一末尾有拉模型，你需要在它们间放缓存。
-这就是队列提供的而简单的解耦模式没有提供的。</p>
-<p>Queues give control to the code that pulls from it&#8202;&mdash;&#8202;the receiver can delay
-processing, aggregate requests, or discard them entirely. But queues do this by
-taking control <em>away</em> from the sender. All the sender can do is throw a request on the
-queue and hope for the best. This makes queues a poor fit when the sender needs
-a response.</p>
-<p>队列给了代码拉的控制权——接收者可以延迟处理，合并或者忽视请求。
+<p>同时，对B自然的处理方式是在<em>B</em>方便时将请求<em>拉</em>入。
+当一端有推模型另一端有拉模型，你需要在它们间放缓存。
+这就是队列比简单的解耦模式多提供的部分。</p>
+<p>队列给了代码对拉取的控制权——接收者可以延迟处理，合并或者忽视请求。
 但队列做这些事是通过将控制权从发送者那里<em>拿走</em>完成的。
 发送者能做的就是向队列发送请求然后祈祷。
 当发送者需要回复时，队列不是好选择。</p>
-<h2><a href="#keep-in-mind" name="keep-in-mind">Keep in Mind</a></h2>
 <h2><a href="#记住" name="记住">记住</a></h2>
-<p>Unlike some more modest patterns in this book, event queues are complex and tend
-to have a wide-reaching effect on the architecture of our games. That means
-you&#8217;ll want to think hard about how&#8202;&mdash;&#8202;or if&#8202;&mdash;&#8202;you use one.</p>
-<p>不像这书中的其他谦虚的模式，事件队列很复杂，会对游戏架构引起广泛影响。
-这就意味着你会努力思考如何——或者要不要——使用一个。</p>
-<h3><a href="#a-central-event-queue-is-a-global-variable" name="a-central-event-queue-is-a-global-variable">A central event queue is a global variable</a></h3>
+<p>不像这书中的其他模式，事件队列很复杂，会对游戏架构引起广泛影响。
+这就意味着你仔细考虑如何——或者要不要——使用它。</p>
 <h3><a href="#中心事件队列是一个全局变量" name="中心事件队列是一个全局变量">中心事件队列是一个全局变量</a></h3>
-<p>One common use of this pattern is for a sort of Grand Central Station that all
-parts of the game can route messages through. It&#8217;s a powerful piece of
-infrastructure, but <em>powerful</em> doesn&#8217;t always mean <em>good</em>.</p>
-<p>这个模式的通常方法是一个大的交换站，游戏中的每个部分都能将消息送过这里。
-这是很有用的基础架构，但是<em>有用</em>并不代表<em>好</em>。</p>
-<p>It took a while, but most of us learned the hard way that global variables are
-bad. When you have a piece of state that any part of the program can poke at,
-all sorts of subtle interdependencies creep in. This pattern wraps that state in
-a nice little protocol, but it&#8217;s still a global, with all of the danger that
-entails.</p>
-<p>这会花费一点时间，但是我们中的大多数艰难地学到了全局变量是不好的。
-当有一小片状态，程序的每部分都能接触到，各种精妙的相关性都会产生。
-这个模式将状态包裹在协议中，但是它还是全局的，仍然有全局变量引发的全部危险。</p>
-<h3><a href="#the-state-of-the-world-can-change-under-you" name="the-state-of-the-world-can-change-under-you">The state of the world can change under you</a></h3>
+<p>这个模式的常用方法是一个大的交换站，游戏中的每个部分都能将消息送过这里。
+这是很有用的基础架构，但是<em>有用</em>并不代表<em>好用</em>。</p>
+<p>可能要走一些弯路，但是我们中的大多数最终学到了全局变量是不好的。
+当有一小片状态，程序的每部分都能接触到，会产生各种微妙的相关性。
+这个模式将状态封装在协议中，但是它还是全局的，仍然有全局变量引发的全部危险。</p>
 <h3><a href="#世界的状态可以因你改变" name="世界的状态可以因你改变">世界的状态可以因你改变</a></h3>
-<p>Say some AI code posts an &#8220;entity died&#8221; event to a queue when a virtual minion
-shuffles off its mortal coil. That event hangs out in the queue for who knows
-how many frames until it eventually works its way to the front and gets
-processed.</p>
-<p>假设一些AI代码在虚拟小怪结束它一生时，将“实体死亡”事件发送到队列中。
+<p>假设在虚拟的小怪结束它一生时，一些AI代码将“实体死亡”事件发送到队列中。
 这个事件在队列中等待了谁知有多少帧后才排到了前面，得以处理。</p>
-<p>Meanwhile, the experience system wants to track the heroine&#8217;s body count and
-reward her for her grisly efficiency. It receives each &#8220;entity died&#8221; event
-and determines the kind of entity slain and the difficulty of the kill so it
-can dish out an appropriate reward.</p>
-<p>同时，系统想要追踪英雄的杀敌数，并奖励他的高效。
-它接受每个“实体死亡”事件，然后决定他杀死了何种怪物，以及杀戮的难易程度，最终计算处理合适的奖励值。</p>
-<p>That requires various pieces of state in the world. We need the entity that died
-so we can see how tough it was. We may want to inspect its surroundings to see
-what other obstacles or minions were nearby. But if the event isn&#8217;t received
-until later, that stuff may be gone. The entity may have been deallocated, and
-other nearby foes may have wandered off.</p>
+<p>同时，经验系统想要追踪英雄的杀敌数，并对他的效率加以奖励。
+它接受每个“实体死亡”事件，然后决定英雄击杀了何种怪物，以及击杀的难易程度，最终计算出合适的奖励。</p>
 <p>这需要游戏世界的多种不同状态。
-我们需要死亡的实体看看它的难度。
-我们也许要看看他的周围有什么其他的障碍物或者怪物。
+我们需要死亡的实体以获取击杀它的难度。
+我们也许要看看英雄的周围有什么其他的障碍物或者怪物。
 但是如果事件没有及时处理，这些东西都会消失。
 实体可能被清除，周围的东西也有可能移开。</p>
-<p>When you receive an event, you have to be careful not to assume the <em>current</em>
-state of the world reflects how the world was <em>when the event was raised</em>. This
-means queued events tend to be more data heavy than events in synchronous systems. With
-the latter, the notification can say &#8220;something happened&#8221; and the receiver
-can look around for the details. With a queue, those ephemeral details must be
-captured when the event is sent so they can be used later.</p>
 <p>当你接到事件时，得小心，不能假设<em>现在的</em>状态反映了<em>事件发生时</em>的世界。
 这就意味着队列中的事件比同步系统中的事件需要存储更多数据。
-在后者中，通知可以说“某事发生了”然后接收者可以寻找细节。
-通过队列，这些短暂的细节必须在事件发送时就被捕获，以方便之后的使用。</p>
-<h3><a href="#you-can-get-stuck-in-feedback-loops" name="you-can-get-stuck-in-feedback-loops">You can get stuck in feedback loops</a></h3>
-<h3><a href="#会陷于反馈循环中" name="会陷于反馈循环中">会陷于反馈循环中</a></h3>
-<p>All event and message systems have to worry about cycles:</p>
-<ol>
-<li>A sends an event.</li>
-<li>B receives it and responds by sending an event.</li>
-<li>That event happens to be one that A cares about, so it receives it. In
-    response, it sends an event&#8230;</li>
-<li>Go to 2.</li>
-</ol>
+在后者中，通知只需说“某事发生了”然后接收者可以找到细节。
+使用队列时，这些短暂的细节必须在事件发送时就被捕获，以方便之后使用。</p>
+<h3><a href="#会陷于反馈系统环路中" name="会陷于反馈系统环路中">会陷于反馈系统环路中</a></h3>
 <p>任何事件系统和消息系统都得担心环路：</p>
 <ol>
 <li>A发送了一个事件</li>
@@ -446,37 +244,21 @@ captured when the event is sent so they can be used later.</p>
 <li>这个事件恰好是A关注的，所以它收到了。为了回应，它发送了一个事件。</li>
 <li>回到2.</li>
 </ol>
-<p>When your messaging system is <em>synchronous</em>, you find cycles quickly&#8202;&mdash;&#8202;they
-overflow the stack and crash your game. With a queue, the asynchrony unwinds the
-stack, so the game may keep running even though spurious events are <span
-name="log">sloshing</span> back and forth in there. A common rule to avoid this
-is to avoid <em>sending</em> events from within code that&#8217;s <em>handling</em> one.</p>
-<p>当消息系统是<em>同步的</em>，你很快就能找到环路——它们溢出了栈并让游戏崩溃。
-使用队列，异步地使用栈，即使虚假事件<span name="log">晃来晃去</span>时，游戏仍然可以继续运行。
+<p><span name="log"></span></p>
+<p>当消息系统是<em>同步的</em>，你很快就能找到环路——它们造成了栈溢出并让游戏崩溃。
+使用队列，异步地使用栈，即使虚假事件晃来晃去时，游戏仍然可以继续运行。
 避免这个的通用方法就是避免在<em>处理</em>事件的代码中<em>发送</em>事件。</p>
 <aside name="log">
-<p>A little debug logging in your event system is probably a good idea too.</p>
 <p>在你的事件系统中加一个小小的漏洞日志也是一个好主意。</p>
 </aside>
-<h2><a href="#sample-code" name="sample-code">Sample Code</a></h2>
 <h2><a href="#示例代码" name="示例代码">示例代码</a></h2>
-<p>We&#8217;ve already seen some code. It&#8217;s not perfect, but it has the right basic
-functionality&#8202;&mdash;&#8202;the public API we want and the right low-level audio calls. All
-that&#8217;s left for us to do now is fix its problems.</p>
 <p>我们已经看到一些代码了。它不完美，但是有基本的正确功能——公用的API和正确的底层音频调用。
 剩下需要做的就是修复它的问题。</p>
-<p>The first is that our API <em>blocks</em>. When a piece of code plays a sound, it can&#8217;t
-do anything else until <code>playSound()</code> finishes loading the resource and actually
-starts making the speaker wiggle.</p>
-<p>首先我们的API是<em>阻塞的</em>。
-当代码播放声音时，它不能做任何其他事情，直到<code>playSound()</code>加载完音频然后真正的开始播放。</p>
-<p>We want to defer that work until later so that <code>playSound()</code> can return quickly.
-To do that, we need to <em>reify</em> the request to play a sound. We need a little
-structure that stores the details of a pending request so we can keep it around
-until later:</p>
+<p>第一个问题是我们的API是<em>阻塞的</em>。
+当代码播放声音时，它不能做任何其他事情，直到<code>playSound()</code>加载完音频然后真正地开始播放。</p>
 <p>我们想要推迟这项工作，这样 <code>playSound()</code> 可以很快的返回。
 为了达到这一点，我们需要<em>具体化</em>播放声音的请求。
-我们需要一个小结构存储发送请求的细节，这样我们晚些时候可以使用：</p>
+我们需要一个小结构存储发送请求时的细节，这样我们晚些时候可以使用：</p>
 <div class="codehilite"><pre><span></span><span class="k">struct</span> <span class="n">PlayMessage</span>
 <span class="p">{</span>
   <span class="n">SoundId</span> <span class="n">id</span><span class="p">;</span>
@@ -485,50 +267,30 @@ until later:</p>
 </pre></div>
 
 
-<p>Next, we need to give <code>Audio</code> some storage space to keep track of these pending
-play messages. Now, your <span name="prof">algorithms professor</span> might
-tell you to use some exciting data structure here like a <a href="http://en.wikipedia.org/wiki/Fibonacci_heap">Fibonacci
-heap</a> or a <a href="http://en.wikipedia.org/wiki/Skip_list">skip
-list</a>, or, hell, at least a <em>linked</em>
-list. But in practice, the best way to store a bunch of homogenous things is
-almost always a plain old array:</p>
-<p>下面我们需要给<code>Audio</code>一些存储空间来追踪正在进行中的播放消息。
+<p>下面我们需要给<code>Audio</code>一些存储空间来追踪正在播放的声音。
 现在，你的算法专家也许会告诉你使用激动人心的数据结构，
 比如<a href="http://en.wikipedia.org/wiki/Fibonacci_heap">Fibonacci heap</a>或者<a href="http://en.wikipedia.org/wiki/Skip_list">skip list</a>或者最起码<em>链表</em>。
 但是在实践中，存储一堆同类事物最好的办法是使用一个平凡无奇的经典数组：</p>
 <aside name="prof">
-<p>Algorithm researchers get paid to publish analyses of novel data structures.
-They aren&#8217;t exactly incentivized to stick to the basics.</p>
 <p>算法研究者通过发表新奇数据结构的研究获得收入。
 他们不鼓励使用基本的结构。</p>
 </aside>
 <ul>
 <li>
-<p>No dynamic allocation.</p>
-</li>
-<li>
 <p>没有动态分配。</p>
 </li>
 <li>
-<p>No memory overhead for bookkeeping information or pointers.</p>
-</li>
-<li>
-<p>没有记录信息或者指针的内存天花板。</p>
-</li>
-<li>
-<p><span name="locality">Cache-friendly</span> contiguous memory usage.</p>
-</li>
-<li>
-<p><span name="locality">缓存友好</span>的连续空间使用。</p>
+<p>没有为记录信息造成额外的开销或者多余的指针。</p>
 </li>
 </ul>
+<p><span name="locality"></span></p>
+<ul>
+<li>对缓存友好的连续存储空间。</li>
+</ul>
 <aside name="locality">
-<p>For lots more on what being &#8220;cache friendly&#8221; means, see the chapter on <a
-href="data-locality.html" class="pattern">Data Locality</a>.</p>
 <p>更多“缓存友好”的内容，见<a href="data-locality.html" class="pattern">数据局部性</a>一章。</p>
 </aside>
-<p>So let&#8217;s do that:</p>
-<p>所以让我们那样做吧：</p>
+<p>所以让我们开干吧：</p>
 <div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">Audio</span>
 <span class="p">{</span>
 <span class="k">public</span><span class="o">:</span>
@@ -547,9 +309,7 @@ href="data-locality.html" class="pattern">Data Locality</a>.</p>
 </pre></div>
 
 
-<p>We can tune the array size to cover our worst case. To play a sound, we simply
-slot a new message in there at the end:</p>
-<p>我们可以将数组大小设置为最糟的情况。
+<p>我们可以将数组大小设置为最糟情况下的大小。
 为了播放声音，简单的将新消息插到最后：</p>
 <div class="codehilite"><pre><span></span><span class="kt">void</span> <span class="n">Audio</span><span class="o">::</span><span class="n">playSound</span><span class="p">(</span><span class="n">SoundId</span> <span class="n">id</span><span class="p">,</span> <span class="kt">int</span> <span class="n">volume</span><span class="p">)</span>
 <span class="p">{</span>
@@ -562,12 +322,8 @@ slot a new message in there at the end:</p>
 </pre></div>
 
 
-<p>This lets <code>playSound()</code> return almost instantly, but we do still have to play
-the sound, of course. That code needs to go somewhere, and that somewhere is an
-<code>update()</code> method:</p>
 <p>这让<code>playSound()</code>几乎是立即返回，当然我们仍得播放声音。
-那块代码在某处，某处是个<code>update()</code>方法：</p>
-<p><span name="update"></span></p>
+那块代码在某处，即<code>update()</code>方法中：</p>
 <p><span name="update"></span></p>
 <div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">Audio</span>
 <span class="p">{</span>
@@ -591,69 +347,34 @@ the sound, of course. That code needs to go somewhere, and that somewhere is an
 
 
 <aside name="update">
-<p>As the name implies, this is the <a href="update-method.html"
-class="pattern">Update Method</a> pattern.</p>
 <p>就像名字暗示的，这是<a href="update-method.html" class="pattern">更新方法</a>模式。</p>
 </aside>
-<p>Now, we need to call that from somewhere convenient. What &#8220;convenient&#8221; means
-depends on your game. It may mean calling it from the main <a
-href="game-loop.html" class="pattern">game loop</a> or from a dedicated audio
-thread.</p>
-<p>现在我们需要从方便的某处调用。
+<p>现在我们需要从方便时候调用。
 这个“方便”取决于你的游戏。
 它也许要从主<a href="game-loop.html" class="pattern">游戏循环中</a>或者专注于音频的线程中调用。</p>
-<p>This works fine, but it does presume we can process <em>every</em> sound request in a
-single call to <code>update()</code>. If you&#8217;re doing something like processing a request
-asynchronously after its sound resource is loaded, that won&#8217;t work. For
-<code>update()</code> to work on one request at a time, it needs to be able to pull
-requests out of the buffer while leaving the rest. In other words, we need an
-actual queue.</p>
 <p>这可行，但是这假定了我们在对<code>update()</code>的单一调用中可以处理<em>每个</em>声音请求。
-如果你做了像在声音资源加载后做异步请求的事情，这就没法工作了。
-<code>update()</code>一次处理一个请求，它需要有完成一个后从缓存中再拉出一个请求的能力。
+如果你做了像在声音资源加载后处理异步请求的事情，这就没法工作了。
+<code>update()</code>一次处理一个请求，它需要有完成一个请求后从缓存中再拉取一个请求的能力。
 换言之，我们需要一个真实的队列。</p>
-<h3><a href="#a-ring-buffer" name="a-ring-buffer">A ring buffer</a></h3>
 <h3><a href="#环状缓存" name="环状缓存">环状缓存</a></h3>
-<p>There are a bunch of ways to implement queues, but my favorite is called a <em>ring
-buffer</em>. It preserves everything that&#8217;s great about arrays while letting us
-incrementally remove items from the front of the queue.</p>
-<p>这里有很多种方式实现队列，但我最喜欢的是<em>环状缓存</em>。
-它保留了数组的很多好东西，同时让我们不断从队列的前方移除事物。</p>
-<p>Now, I know what you&#8217;re thinking. If we remove items from the beginning of the
-array, don&#8217;t we have to shift all of the remaining items over? Isn&#8217;t that slow?</p>
+<p>有很多种方式能实现队列，但我最喜欢的是<em>环状缓存</em>。
+它保留了数组的所有优点，同时能让我们不断从队列的前方移除事物。</p>
 <p>现在，我知道你在想什么。
-如果我们从数组的前方移除东西，不是需要将所有剩下的都移动一次吗？这不是很慢吗？</p>
-<p>This is why they made us learn linked lists&#8202;&mdash;&#8202;you can remove nodes from them
-without having to shift things around. Well, it turns out you can implement a
-queue without any shifting in an array too. I&#8217;ll walk you through it, but first
-let&#8217;s get precise on some terms:</p>
-<p>这就是为什么要学习链接列表——你可以从中移除一个节点，而无需移动东西。
+如果我们从数组的前方移除东西，不是需要将所有剩下的部分都移动一次吗？这不是很慢吗？</p>
+<p>这就是为什么要学习链表——你可以从中移除一个节点，而无需移动东西。
 好吧，其实你可以用数组实现一个队列而无需移动东西。
 我会展示给你看，但是首先预习一些术语：</p>
 <ul>
 <li>
-<p>The <strong>head</strong> of the queue is where requests are <em>read</em> from. The head is the
-    oldest pending request.</p>
+<p>队列的<strong>头部</strong>是<em>读取</em>请求的地方。头部存储最早发出的请求。</p>
 </li>
 <li>
-<p>队列的<strong>头部</strong>是请求<em>读取</em>的地方。头部存储最早发出的请求。</p>
-</li>
-<li>
-<p>The <strong>tail</strong> is the other end. It&#8217;s the slot in the array where the next
-    enqueued request will be <em>written</em>. Note that it&#8217;s just <em>past</em> the end of
-    the queue. You can think of it as a half-open range, if that helps.</p>
-</li>
-<li>
-<p><strong>尾部</strong>是另一种终点。它是数组中下个入队请求要<em>写</em>的地方。注意它是队列的终点的下一个。你可以将其理解为一个半开半闭区间，如果这有帮助的话。</p>
+<p><strong>尾部</strong> 是另一端。它是数组中下个<em>写入</em>请求的地方。注意它指向队列终点的下一个。你可以将其理解为一个半开半闭区间，如果这有帮助的话。</p>
 </li>
 </ul>
-<p>Since <code>playSound()</code> appends new requests at the end of the array, the head
-starts at element zero and the tail grows to the right.</p>
-<p>由于 <code>playSound()</code> 向数组的结尾添加了新的请求，头部在元素0上而尾部向右增长。</p>
-<p><img src="images/event-queue-queue.png" alt="An array of events. The head points to the first element, and the tail grows to the right." /></p>
-<p>Let&#8217;s code that up. First, we&#8217;ll tweak our fields a bit to make these two
-markers explicit in the class:</p>
-<p>让我们将其编码。首先，我们显示定义这两个标记在类中的意义：</p>
+<p>由于 <code>playSound()</code> 向数组的末尾添加了新的请求，头部开始指向元素0而尾部向右增长。</p>
+<p><img src="images/event-queue-queue.png" alt="一数组事件。头部指向第一个元素，尾部向右增长。" /></p>
+<p>让我们开始编码。首先，我们显式定义这两个标记在类中的意义：</p>
 <div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">Audio</span>
 <span class="p">{</span>
 <span class="k">public</span><span class="o">:</span>
@@ -673,8 +394,6 @@ markers explicit in the class:</p>
 </pre></div>
 
 
-<p>In the implementation of <code>playSound()</code>, <code>numPending_</code> has been replaced with
-<code>tail_</code>, but otherwise it&#8217;s the same:</p>
 <p>在 <code>playSound()</code> 的实现中，<code>numPending_</code>被<code>tail_</code>取代，但是其他都是一样的：</p>
 <div class="codehilite"><pre><span></span><span class="kt">void</span> <span class="n">Audio</span><span class="o">::</span><span class="n">playSound</span><span class="p">(</span><span class="n">SoundId</span> <span class="n">id</span><span class="p">,</span> <span class="kt">int</span> <span class="n">volume</span><span class="p">)</span>
 <span class="p">{</span>
@@ -688,7 +407,6 @@ markers explicit in the class:</p>
 </pre></div>
 
 
-<p>The more interesting change is in <code>update()</code>:</p>
 <p>更有趣的变化在<code>update()</code>中：</p>
 <div class="codehilite"><pre><span></span><span class="kt">void</span> <span class="n">Audio</span><span class="o">::</span><span class="n">update</span><span class="p">()</span>
 <span class="p">{</span>
@@ -705,45 +423,27 @@ markers explicit in the class:</p>
 </pre></div>
 
 
-<p>We process the request at the head and then discard it by advancing the head
-pointer to the right. We detect an <span name="empty">empty queue</span> by
-seeing if there&#8217;s any distance between the head and tail.</p>
 <p>我们在头部处理，然后通过将头部指针向右移动来消除它。
 我们定义头尾之间没有距离的队列为<span name="empty">空队列</span>。</p>
 <aside name="empty">
-<p>This is why we made the tail one <em>past</em> the last item. It means that the queue
-will be empty if the head and tail are the same index.</p>
-<p>这就是为什么我们让尾部是最后元素<em>之后</em>的那个。
+<p>这就是为什么我们让尾部指向最后元素<em>之后</em>的那个位置。
 这意味着头尾相等则队列为空。</p>
 </aside>
-<p>Now we&#8217;ve got a queue&#8202;&mdash;&#8202;we can add to the end and remove from the front.
-There&#8217;s an obvious problem, though. As we run requests through the queue, the
-head and tail keep crawling to the right. Eventually, <code>tail_</code> hits the end
-of the array, and <span name="party">party time</span> is over. This is where it
-gets clever.</p>
-<p>现在，我们获得了一个队列——我们可以向尾部添加从前面移除。
-这里有很明显的问题。在我们向队列添加请求时，头和尾继续向右移动。
-最终<code>tail_</code>碰到了数组的尾部，<span name="party">欢乐时光</span>结束了。
-之后是这个方法的灵巧之处。</p>
+<p><span name="party"></span></p>
+<p>现在，我们获得了一个队列——我们可以向尾部添加元素，从头部移除元素。
+这里有很明显的问题。在我们让队列跑起来后，头部和尾部继续向右移动。
+最终<code>tail_</code>碰到了数组的尾部，欢乐时光结束了。
+接下来是这个方法的灵巧之处。</p>
 <aside name="party">
-<p>Do you want party time to be over? No. You do not.</p>
 <p>你想结束欢乐时光吗？不，你不想。</p>
 </aside>
-<p><img src="images/event-queue-crawl.png" alt="The same array as before but now the head is moving towards the right, leaving available cells on the left." /></p>
-<p>Notice that while the tail is creeping forward, the <em>head</em> is too. That means
-we&#8217;ve got array elements at the <em>beginning</em> of the array that aren&#8217;t being used
-anymore. So what we do is wrap the tail back around to the beginning of the
-array when it runs off the end. That&#8217;s why it&#8217;s called a <em>ring</em> buffer&#8202;&mdash;&#8202;it acts
-like a circular array of cells.</p>
-<p>注意当尾部向后移动时，<em>头部</em>也是如此。
-这就意味着我们在数组<em>开始</em>部分的元素再也没有使用了。
+<p><img src="images/event-queue-crawl.png" alt="像之前一样的数组，但是现在头部在向右移动，在左侧留下空白格子。" /></p>
+<p>注意当尾部移动时，<em>头部</em> 也是如此。
+这就意味着在数组<em>开始</em>部分的元素不再被使用了。
 所以我们做的就是，当抵达末尾时，将尾部回折到数组的头部。
 这就是为什么它被称为<em>环状</em>缓存，它表现的像是一个环状的数组。</p>
-<p><img src="images/event-queue-ring.png" alt="The array wraps around and now the head can circle back to the beginning." /></p>
-<p>Implementing that is remarkably easy. When we enqueue an item, we just need to
-make sure the tail wraps around to the beginning of the array when it reaches
-the end:</p>
-<p>实现这个非常简单。
+<p><img src="images/event-queue-ring.png" alt="数组绕了一圈，现在头部可以回到开始时指向的地方了。" /></p>
+<p>这个的实现非常简单。
 当我们入队一个事物时，只需要保证尾部在抵达结束的时候回折到数组的开头：</p>
 <div class="codehilite"><pre><span></span><span class="kt">void</span> <span class="n">Audio</span><span class="o">::</span><span class="n">playSound</span><span class="p">(</span><span class="n">SoundId</span> <span class="n">id</span><span class="p">,</span> <span class="kt">int</span> <span class="n">volume</span><span class="p">)</span>
 <span class="p">{</span>
@@ -757,20 +457,12 @@ the end:</p>
 </pre></div>
 
 
-<p>Replacing <code>tail_++</code> with an increment modulo the array size wraps the tail back
-around. The other change is the assertion. We need to ensure the queue doesn&#8217;t
-overflow. As long as there are fewer than <code>MAX_PENDING</code> requests in the queue,
-there will be a little gap of unused cells between the head and the tail. If the
-queue fills up, those will be gone and, like some weird backwards Ouroboros, the
-tail will collide with the head and start overwriting it. The assertion ensures
-that this doesn&#8217;t happen.</p>
-<p>替代<code>tail++</code>为一个增量，增量取数组长度的模，这样可将尾部回折回来。
+<p>替代<code>tail++</code>，将增量设为数组长度的模，这样可将尾部回折回来。
 另一个改变是断言。我们得保证队列不会溢出。
 只要这里有少于<code>MAX_PENDING</code>的请求在队列中，在头部和尾部之间就有没有使用的间隔。
-如果队列满了，这些不会有了，就像古怪的衔尾蛇一样，尾部会遇到头部然后复写它。
-断言保证了这点不会发生。</p>
-<p>In <code>update()</code>, we wrap the head around too:</p>
-<p>在<code>update()</code>中，我们也回折了头部：</p>
+如果队列满了，那就不会有了，就像古怪的衔尾蛇一样，尾部会遇到头部然后覆盖它。
+断言保证了这不会发生。</p>
+<p>在<code>update()</code>中，头部也回折了：</p>
 <div class="codehilite"><pre><span></span><span class="kt">void</span> <span class="n">Audio</span><span class="o">::</span><span class="n">update</span><span class="p">()</span>
 <span class="p">{</span>
   <span class="c1">// If there are no pending requests, do nothing.</span>
@@ -786,28 +478,17 @@ that this doesn&#8217;t happen.</p>
 </pre></div>
 
 
-<p>There you go&#8202;&mdash;&#8202;a queue with <span name="capacity">no dynamic allocation</span>,
-no copying elements around, and the cache-friendliness of a simple array.</p>
-<p>这样就好——没有<span name="capacity">动态分配</span>，没有数据拷贝，缓存友好的简单数组实现的队列完成了。</p>
+<p><span name="capacity"></span></p>
+<p>这样就好——没有动态分配，没有数据拷贝，缓存友好的简单数组实现的队列完成了。</p>
 <aside name="capacity">
-<p>If the maximum capacity bugs you, you can use a growable array. When the queue
-gets full, allocate a new array twice the size of the current array (or some
-other multiple), then copy the items over.</p>
 <p>如果最大容量影响了你，你可以使用增长的数组。
-当队列满了，分配一块当前数组两倍大的数组（或者更多倍），然后将对象拷进去。</p>
-<p>Even though you copy when they array grows, enqueuing an item still has constant
-<em>amortized</em> complexity.</p>
+当队列满了后，分配一块当前数组两倍大的数组（或者更多倍），然后将对象拷进去。</p>
 <p>哪怕你在队列增长时拷贝，入队仍然有常数级的<em>摊销</em>复杂度。</p>
 </aside>
-<h3><a href="#aggregating-requests" name="aggregating-requests">Aggregating requests</a></h3>
 <h3><a href="#合并请求" name="合并请求">合并请求</a></h3>
-<p>Now that we&#8217;ve got a queue in place, we can move onto the other problems. The
-first is that multiple requests to play the same sound end up too loud. Since we
-know which requests are waiting to be processed now, all we need to do is merge
-a request if it matches an already pending one:</p>
-<p>现在有队列了，我们可以解决其他问题了。
-首先是多重播放同一音频请求最终会让其播放的太响了。
-由于我们知道哪些请求在等待处理，需要做的所有事就是将请求和早先处理的同一请求合并：</p>
+<p>现在有队列了，我们可以转向其他问题了。
+首先来解决多重请求播放同一音频，最终导致音量过大的问题。
+由于我们知道哪些请求在等待处理，需要做的所有事就是将请求和早先等待处理的请求合并：</p>
 <div class="codehilite"><pre><span></span><span class="kt">void</span> <span class="n">Audio</span><span class="o">::</span><span class="n">playSound</span><span class="p">(</span><span class="n">SoundId</span> <span class="n">id</span><span class="p">,</span> <span class="kt">int</span> <span class="n">volume</span><span class="p">)</span>
 <span class="p">{</span>
   <span class="c1">// Walk the pending requests.</span>
@@ -829,480 +510,255 @@ a request if it matches an already pending one:</p>
 </pre></div>
 
 
-<p>When we get two requests to play the same sound, we collapse them to a single
-request for whichever is loudest. This &#8220;aggregation&#8221; is pretty rudimentary, but
-we could use the same idea to do more interesting batching.</p>
-<p>当有两个请求播放同一音频时，我们将它们合并成播放最响的那个。
+<p>当有两个请求播放同一音频时，我们将它们合并成只保留声音最大的请求。
 这一“合并”非常简陋，但是我们可以用同样的方法做很多有趣的合并。</p>
-<p>Note that we&#8217;re merging when the request is <em>enqueued</em>, not when it&#8217;s
-<em>processed</em>. That&#8217;s easier on our queue since we don&#8217;t waste slots on redundant
-requests that will end up being collapsed later. It&#8217;s also simpler to implement.</p>
-<p>注意在请求<em>入队</em>时合并，而不是<em>运行</em>时。
-在队列中处理更加容易，因为不需要在最后会被合并的多余请求上浪费时间。
+<p>注意在请求<em>入队</em>时合并，而不是<em>处理</em>时。
+在队列中处理更加容易，因为不需要在最终会被合并的多余请求上浪费时间。
 这也更加容易被实现。</p>
-<p>It does, however, put the processing burden on the caller. A call to
-<code>playSound()</code> will walk the entire queue before it returns, which could be <span
-name="slow">slow</span> if the queue is large. It may make more sense to
-aggregate in <code>update()</code> instead.</p>
+<p><span name="slow"></span></p>
 <p>但是，这确实将处理的职责放在了调用者肩上。
-在对<code>playSound()</code>的调用返回前会遍历整个队列。
-如果队列很长，那么会很<span name="slow">慢</span>。
+对<code>playSound()</code>的调用返回前会遍历整个队列。
+如果队列很长，那么会很慢。
 在<code>update()</code>中合并也许更加合理。</p>
 <aside name="slow">
-<p>Another way to avoid the <em>O(n)</em> cost of scanning the queue is to use a different
-data structure. If we use a hash table keyed on the <code>SoundId</code>, then we can check
-for duplicates in constant time.</p>
-<p>另一条避免<em>O(n)</em>的扫描队列代价是使用不同的数据结构。
-如果我们将<code>SoundId</code>作为哈希表的键，那么我们就可以在常量时间检查重复。</p>
+<p>避免<em>O(n)</em> 的队列扫描代价的另一种方式是使用不同的数据结构。
+如果我们将<code>SoundId</code>作为哈希表的键，那么我们就可以在常量时间内检查重复。</p>
 </aside>
-<p>There&#8217;s something important to keep in mind here. The window of &#8220;simultaneous&#8221;
-requests that we can aggregate is only as big as the queue. If we process
-requests more quickly and the queue size stays small, then we&#8217;ll have fewer
-opportunities to batch things together. Likewise, if processing lags behind and
-the queue gets full, we&#8217;ll find more things to collapse.</p>
 <p>这里有些要记住的要点。
-我们能够合并的“同步”请求窗口只有队列那么大。
-如果我们快速处理请求，队列长度就会保持较短，我们就有更少的机会组合东西。
+我们能够合并的“同步”请求窗口只有队列长度那么大。
+如果我们快速处理请求，队列长度就会保持较短，我们就有更少的机会合并东西。
 同样的，如果处理慢了，队列满了，我们能找到更多的东西合并。</p>
-<p>This pattern insulates the requester from knowing when the request gets
-processed, but when you treat the entire queue as a live data structure to be
-played with, then lag between making a request and processing it can visibly
-affect behavior. Make sure you&#8217;re OK with that before doing this.</p>
-<p>这个模式隔离了请求者和何时请求被处理，但当你将整个队列视为与活动的数组结构交互，那么发出请求和处理它之间的延迟可以显式的影响行为。
-做之前保证这不会造成问题。</p>
-<h3><a href="#spanning-threads" name="spanning-threads">Spanning threads</a></h3>
+<p>这个模式隔离了请求者和何时请求被处理，但如果你将整个队列交互视为与数组结构交互，
+那么发出请求和处理它之间的延迟会显式的影响行为。
+确认这么做之前保证这不会造成问题。</p>
 <h3><a href="#分离线程" name="分离线程">分离线程</a></h3>
-<p>Finally, the most pernicious problem. With our synchronous audio API, whatever
-thread called <code>playSound()</code> was the thread that processed the request. That&#8217;s
-often not what we want.</p>
 <p>最终，最险恶的问题。
-通过同步音频API，调用<code>playSound()</code>的线程就是处理请求的线程。
+使用同步的音频API，调用<code>playSound()</code>的线程就是处理请求的线程。
 这通常不是我们想要的。</p>
-<p>On today&#8217;s <span name="multicore">multi-core</span> hardware, you need more than
-one thread if you want to get the most out of your chip. There are infinite ways
-to distribute code across threads, but a common strategy is to move each domain
-of the game onto its own thread&#8202;&mdash;&#8202;audio, rendering, AI, etc.</p>
-<p>在今日<span name="multicore">多核</span>硬件上，你需要不止一个线程来使用芯片的大部分。
-这里有无数的范式在线程间分散代码，但是最通用的策略是将每个独立的领域分散到一个线程——音频，渲染，AI等等。</p>
+<p><span name="multicore"></span></p>
+<p>在今日的多核硬件上，你需要不止一个线程来最大程度使用芯片。
+有无数的编程范式在线程间分散代码，但是最通用的策略是将每个独立的领域分散到一个线程——音频，渲染，AI等等。</p>
 <aside name="multicore">
-<p>Straight-line code only runs on a single core at a time. If you don&#8217;t use
-threads, even if you do the asynchronous-style programming that&#8217;s in vogue, the
-best you&#8217;ll do is keep one core busy, which is a fraction of your CPU&#8217;s
-abilities.</p>
 <p>单线程代码同时只在一个核心上运行。
-如果你不使用线程，哪怕做了流行的异步风格编程，能做的极限就是让一个核心繁忙，这是CPU的限制。</p>
-<p>Server programmers compensate for that by splitting their application into
-multiple independent <em>processes</em>. That lets the OS run them concurrently on
-different cores. Games are almost always a single process, so a bit of threading
-really helps.</p>
-<p>服务器程序员将他们的程序分割成多个独立<em>进程</em>作为补偿。
+如果你不使用线程，哪怕做了流行的异步风格编程，能做的极限就是让一个核心繁忙，那也只发挥CPU能力的一小部分。</p>
+<p>服务器程序员将他们的程序分割成多个独立<em>进程</em>作为弥补。
 这让系统在不同的核上同时运行它们。
 游戏几乎总是单进程的，所以增加线程真的有用。</p>
 </aside>
-<p>We&#8217;re in good shape to do that now that we have three critical pieces:</p>
-<ol>
-<li>The code for requesting a sound is decoupled from the code that plays it.</li>
-<li>We have a queue for marshalling between the two.</li>
-<li>The queue is encapsulated from the rest of the program.</li>
-</ol>
 <p>我们很容易就能做到这一点是因为三个关键点：</p>
 <ol>
 <li>请求音频的代码与播放音频的代码解耦。</li>
 <li>有队列在两者之间整理它们。</li>
 <li>队列与程序其他部分是隔离的。</li>
 </ol>
-<p>All that&#8217;s left is to make the methods that modify the queue&#8202;&mdash;&#8202;<code>playSound()</code>
-and <code>update()</code>&#8202;&mdash;&#8202;thread-safe. Normally, I&#8217;d whip up some concrete code to do
-that, but since this is a book about architecture, I don&#8217;t want to get mired in
-the details of any specific API or locking mechanism.</p>
 <p>剩下要做的事情就是写修改队列的方法——<code>playSound()</code>和<code>update()</code>——使之线程安全。
-通常，我会写一写具体代码完成之，但是由于这是一本关于架构的书，我不想让其着眼于一些特定的API或者锁机制。</p>
-<p>At a high level, all we need to do is ensure that the queue isn&#8217;t modified
-concurrently. Since <code>playSound()</code> does a very small amount of work&#8202;&mdash;&#8202;basically
-just assigning a few fields&#8202;&mdash;&#8202;it can lock without blocking processing for long.
-In <code>update()</code>, we wait on something like a condition variable so that we don&#8217;t
-burn CPU cycles until there&#8217;s a request to process.</p>
-<p>在高层，所有我们需要做的是保证队列不是同时被修改的。
+通常，我会写一写具体代码完成之，但是由于这是一本关于架构的书，我不想着眼于一些特定的API或者锁机制。</p>
+<p>从高层看来，我们只需保证队列不是同时被修改的。
 由于<code>playSound()</code>只做了一点点事情——基本上就是声明字段。——不会阻塞线程太长时间。
-在<code>update()</code>中，我们等待像条件变量的东西，直到有请求需要处理时才会消耗CPU循环。</p>
-<h2><a href="#design-decisions" name="design-decisions">Design Decisions</a></h2>
+在<code>update()</code>中，我们等待条件变量之类的东西，直到有请求需要处理时才会消耗CPU循环。</p>
 <h2><a href="#设计决策" name="设计决策">设计决策</a></h2>
-<p>Many games use event queues as a key part of their communication structure, and
-you can spend a ton of time designing all sorts of complex routing and filtering
-for messages. But before you go off and build something like the Los Angeles
-telephone switchboard, I encourage you to start simple. Here&#8217;s a few starter
-questions to consider:</p>
 <p>很多游戏使用事件队列作为交流结构的关键部分，你可以花很多时间设计各种复杂的路径和消息过滤器。
 但是在构建洛杉矶电话交换机之类的东西之前，我推荐你从简单开始。这里是几个需要在开始时思考的问题：</p>
-<h3><a href="#what-goes-in-the-queue" name="what-goes-in-the-queue">What goes in the queue?</a></h3>
 <h3><a href="#队列中存储了什么？" name="队列中存储了什么？">队列中存储了什么？</a></h3>
-<p>I&#8217;ve used &#8220;event&#8221; and &#8220;message&#8221; interchangeably so far because it mostly doesn&#8217;t
-matter. You get the same decoupling and aggregation abilities regardless of what
-you&#8217;re stuffing in the queue, but there are some conceptual differences.</p>
-<p>到目前为止，我交替使用了“事件”和“消息”因为大多时候两者的区别并不重要。
-无论你在队列中塞了什么都可以获得解耦和合并能力，但是还是有几个地方不同。</p>
+<p>到目前为止，我交替使用“事件”和“消息”，因为大多时候两者的区别并不重要。
+无论你在队列中塞了什么都可以获得解耦和合并的能力，但是还是有几个地方不同。</p>
 <ul>
-<li>
-<p><strong>If you queue events:</strong></p>
-</li>
 <li>
 <p><strong>如果你存储事件：</strong></p>
-<p>An &#8220;event&#8221; or &#8220;notification&#8221; describes something that <em>already</em> happened,
-like &#8220;monster died&#8221;. You queue it so that other objects can <em>respond</em> to the
-event, sort of like an asynchronous <a href="observer.html"
-class="gof-pattern">Observer</a> pattern.</p>
-<p>“事件”或者“通知”描绘<em>已经</em>发生的事情，比如“怪物死了”。你入队它，这样其他对象可以对这个事件作出<em>回应</em>，有点像异步的<a href="observer.html" class="gof-pattern">观察者</a>模式。</p>
+<p>“事件”或者“通知”描绘<em>已经</em>发生的事情，比如“怪物死了”。
+你入队它，这样其他对象可以对这个事件作出<em>回应</em>，有点像异步的<a href="observer.html" class="gof-pattern">观察者</a>模式。</p>
 <ul>
 <li>
-<p><em>You are likely to allow multiple listeners.</em> Since the queue contains
-    things that already happened, the sender probably doesn&#8217;t care who
-    receives it. From its perspective, the event is in the past and is
-    already forgotten.</p>
+<p><em>很可能允许多个监听者。</em>
+由于队列包含的是已经发生的事情，发送者可能不关心谁接受它。
+从这个层面来说，事件发生在过去，早已被遗忘。</p>
 </li>
 <li>
-<p><em>很可能允许多个监听者。</em>由于队列包含的是已经发生的事情，发送者可能不关心谁接受它。从这个层面来说，事件发生在过去，早已被遗忘。</p>
-</li>
-<li>
-<p><em>The scope of the queue tends to be broader.</em> Event queues are often
-    used to <em>broadcast</em> events to any and all interested parties. To allow
-    maximum flexibility for which parties can be interested, these queues
-    tend to be more globally visible.</p>
-</li>
-<li>
-<p><em>队列的余地一般比较广阔。</em>事件队列通常<em>广播</em>事件到任何感兴趣的部分。为了允许最大程度满足哪些部分感兴趣，队列一般是全局可见的。</p>
+<p><em>访问队列的模块更广。</em>
+事件队列通常<em>广播</em>事件到任何感兴趣的部分。为了最大程度允许哪些部分能兴趣，队列一般是全局可见的。</p>
 </li>
 </ul>
-</li>
-<li>
-<p><strong>If you queue messages:</strong></p>
 </li>
 <li>
 <p><strong>如果你存储消息：</strong></p>
-<p>A <span name="command">&#8220;message&#8221;</span> or &#8220;request&#8221;
-describes an action that we <em>want</em> to happen <em>in the future</em>, like &#8220;play
-sound&#8221;. You can think of this as an asynchronous API to a service.</p>
-<p><span name="command">“消息”</span>或“请求”描绘了<em>想要</em>发生<em>在未来</em>的事情，比如“播放声音”。可以将其视为服务的异步API。</p>
+<p><span name="command"></span></p>
+<p>“消息”或“请求”描绘了<em>想要</em>发生<em>在未来</em>的事情，比如“播放声音”。可以将其视为服务的异步API。</p>
 <aside name="command">
 
-<p>Another word for &#8220;request&#8221; is &#8220;command&#8221;, as in the <a href="command.html"
-class="gof-pattern">Command</a> pattern, and queues can be used there too.</p>
 <p>另一个描述“请求”的词是“命令”，就像在<a href="command.html" class="gof-pattern">命令模式</a>中那样，队列也可以在那里使用。</p>
 </aside>
 
+<p><span name="locator"></span></p>
 <ul>
 <li>
-<p><em>You are more <span name="locator">likely</span> to have a single
-    listener.</em> In the example, the queued messages are requests specifically
-    for <em>the audio API</em> to play a sound. If other random parts of the game
-    engine started stealing messages off the queue, it wouldn&#8217;t do much
-    good.</p>
-</li>
-<li>
-<p><em>更<span name="locator">可能</span>只有一个监听者。</em>在这个例子中，存储的消息只请求<em>音频API</em>播放声音。如果引擎的随便什么部分都能从队列中拿走消息，那可不好。</p>
+<p><em>更可能只有一个监听者。</em>
+ 在这个例子中，存储的消息只请求<em>音频API</em>播放声音。如果引擎的随便什么部分都能从队列中拿走消息，那可不好。</p>
 <aside name="locator">
 
-<p>I say &#8220;more likely&#8221; here, because you can enqueue messages without
-caring which code processes it, as long as it gets processed <em>how</em> you
-expect. In that case, you&#8217;re doing something akin to a <a
-href="service-locator.html" class="pattern">Service Locator</a>.</p>
-<p>我在这里说“更可能”，因为只要消息像期望的<em>那样</em>被处理，消息入队时可以不必担心哪块代码处理消息。这样的话，你在做类似于<a href="service-locator.html" class="pattern">服务定位器</a>的事。</p>
+<p>我在这里说“更可能”，因为只要像期望的<em>那样</em>处理消息，消息入队时可以不必担心哪块代码处理它。
+这样的话，你在做的事情类似于<a href="service-locator.html" class="pattern">服务定位器</a>。</p>
 </aside>
 
 </li>
 </ul>
 </li>
 </ul>
-<h3><a href="#who-can-read-from-the-queue" name="who-can-read-from-the-queue">Who can read from the queue?</a></h3>
 <h3><a href="#谁能从队列中读取？" name="谁能从队列中读取？">谁能从队列中读取？</a></h3>
-<p>In our example, the queue is encapsulated and only the <code>Audio</code> class can read
-from it. In a user interface&#8217;s event system, you can register listeners to your
-heart&#8217;s content. You sometimes hear the terms &#8220;single-cast&#8221; and &#8220;broadcast&#8221; to
-distinguish these, and both styles are useful.</p>
 <p>在例子中，队列是密封的，只有<code>Audio</code>类可以从中读取。
 在用户交互的事件系统中，你可以在核心内容中注册监听器。
 有时可以听到术语“单播”和“广播”来描述它，两者都很有用。</p>
 <ul>
 <li>
-<p><strong>A single-cast queue:</strong></p>
-</li>
-<li>
 <p><strong>单播队列：</strong></p>
-<p>This is the natural fit when a queue is part of a class&#8217;s API. Like in our
-audio example, from the caller&#8217;s perspective, they just see a
-<code>playSound()</code> method they can call.</p>
-<p>这在队列是类API的一部分时是很自然的。就像音频的例子，从调用者的角度，它们只能看到它们可以调用的<code>playSound()</code>方法。</p>
+<p>在队列是类API的一部分时是，单播很自然的。
+就像我们的音频例子，从调用者的角度，它们只能看到可以调用的<code>playSound()</code>方法。</p>
 <ul>
 <li>
-<p><em>The queue becomes an implementation detail of the reader.</em> All the
-    sender knows is that it sent a message.</p>
+<p><em>队列变成了读取者的实现细节。</em> 发送者知道的所有事就是发条消息。</p>
 </li>
 <li>
-<p><em>队列变成了读取者的实现细节。</em>发送者知道的所有事就是发条消息。</p>
+<p><em>队列更封装。</em> 其他都一样时，越多封装越方便。</p>
 </li>
 <li>
-<p><em>The queue is more encapsulated.</em> All other things being equal, more
-    encapsulation is usually better.</p>
-</li>
-<li>
-<p><em>队列更封装。</em>其他都一样时，越多封装越方便。</p>
-</li>
-<li>
-<p><em>You don&#8217;t have to worry about contention between listeners.</em> With
-    multiple listeners, you have to decide if they <em>all</em> get every item
-    (broadcast) or if <em>each</em> item in the queue is parceled out to <em>one</em>
-    listener (something more like a work queue).</p>
-</li>
-<li>
-<p><em>无须担心监听者之间的竞争。</em>使用多个监听者，你需要决定是否它们<em>全部</em>都要获得每个事物（广播）还是<em>每个</em>队列中的事物都被分给<em>同一</em>监听者（更加像工作队列）。</p>
-<p>In either case, the listeners may end up doing redundant work or
-interfering with each other, and you have to think carefully about the
-behavior you want. With a single listener, that complexity disappears.</p>
-<p>在两种情况下，监听者最终要么做了多余的事情要么相互干扰，你得谨慎考虑想要的行为。通过单一的监听者，这样复杂性消失了。</p>
+<p><em>无须担心监听者之间的竞争。</em>
+使用多个监听者，你需要决定每个队列中的事物<em>一对多</em>分给全部的监听者（广播）
+还是<em>每个</em>队列中的事物<em>一对一</em>分给单独的监听者（更加像工作队列）。</p>
+<p>在两种情况下，监听者最终要么做了多余的事情要么在相互干扰，你得谨慎考虑想要的行为。
+使用单一的监听者，这种复杂性消失了。</p>
 </li>
 </ul>
-</li>
-<li>
-<p><strong>A broadcast queue:</strong></p>
 </li>
 <li>
 <p><strong>广播队列：</strong></p>
-<p>This is how most &#8220;event&#8221; systems work. If you have ten listeners when an
-event comes in, all ten of them see the event.</p>
-<p>这是大多数“事件”系统工作的方法。如果你有十个监听者，一个事件进来，所有的都能看到这个事件。</p>
+<p>这是大多数“事件”系统工作的方法。如果你有十个监听者，一个事件进来，所有监听者都能看到这个事件。</p>
 <ul>
 <li>
-<p><em>Events can get dropped on the floor.</em> A corollary to the previous point
-    is that if you have <em>zero</em> listeners, all zero of them see the event. In
-    most broadcast systems, if there are no listeners at the point in time
-    that an event is processed, the event gets discarded.</p>
+<p>事件可能无人接收。<em>
+前面那点的必然推论就是如果有</em>零个*监听者，没有谁能看到这个事件。
+在大多数广播系统中，如果处理事件时没有监听者，事件就消失了。</p>
 </li>
 <li>
-<p><em>事件可能会掉到地板上。</em>前面那点的必然推论就是如果有<em>零个</em>监听者，没有谁能看到这个事件。在大多数广播系统中，如果处理事件时没有监听者，事件就消失了。</p>
-</li>
-<li>
-<p><em>You may need to filter events.</em> Broadcast queues are often widely
-    visible to much of the program, and you can end up with a bunch of
-    listeners. Multiply lots of events times lots of listeners, and you end
-    up with a ton of event handlers to invoke.</p>
-</li>
-<li>
-<p><em>也许需要过滤事件。</em>广播队列经常对程序的所有部分广泛可见，最终你会获得一系列监听者。将很多事件乘以很多监听者，你会获取一大堆事件处理器。</p>
-<p>To cut that down to size, most broadcast event systems let a listener
-winnow down the set of events they receive. For example, they may say
-they only want to receive mouse events or events within a certain
-region of the UI.</p>
-<p>为了削减大小，大多数广播事件系统让监听者筛出其需要接受的事件。比如，可能它们只想要接受鼠标事件或者在某一UI区域内的事件。</p>
+<p><em>也许需要过滤事件。</em>
+广播队列经常对程序的所有部分可见，最终你会获得一系列监听者。
+很多事件乘以很多监听者，你会获取一大堆事件处理器。</p>
+<p>为了削减大小，大多数广播事件系统让监听者筛出其需要接受的事件。
+比如，可能它们只想要接受鼠标事件或者在某一UI区域内的事件。</p>
 </li>
 </ul>
-</li>
-<li>
-<p><strong>A work queue:</strong></p>
 </li>
 <li>
 <p><strong>工作队列：</strong></p>
-<p>Like a broadcast queue, here you have multiple listeners too. The difference
-is that each item in the queue only goes to <em>one</em> of them. This is a common
-pattern for parceling out jobs to a pool of concurrently running threads.</p>
-<p>就像广播队列，这有多重监听器。不同之处在于每个队列中的东西只会得到<em>其中之一</em>。在将工作打包给同时运行的线程池中是一个常见的应用。</p>
+<p>类似广播队列，有多个监听器。不同之处在于每个队列中的东西只会投到监听器<em>其中的一个</em>。
+常应用于将工作打包给同时运行的线程池。</p>
 <ul>
-<li>
-<p><em>You have to schedule.</em> Since an item only goes to one listener, the
-    queue needs logic to figure out the best one to choose. This may be as
-    simple as round robin or random choice, or it could be some more complex
-    prioritizing system.</p>
-</li>
-<li>
-<p><em>你得规划。</em>由于一个事物只有一个监听器，队列需要逻辑指出最好的选项。这也许像round robin算法或者乱序选择一样简单，或者可以使用更加复杂的优先度系统。</p>
-</li>
+<li><em>你得规划。</em>
+由于一个事物只有一个监听器，队列逻辑需要指出最好的选项。
+这也许像round robin算法或者乱序选择一样简单，或者可以使用更加复杂的优先度系统。</li>
 </ul>
 </li>
 </ul>
-<h3><a href="#who-can-write-to-the-queue" name="who-can-write-to-the-queue">Who can write to the queue?</a></h3>
 <h3><a href="#谁能写入队列？" name="谁能写入队列？">谁能写入队列？</a></h3>
-<p>This is the flip side of the previous design choice. This pattern works with all
-of the possible read/write <span name="configs">configurations</span>:
-one-to-one, one-to-many, many-to-one, or many-to-many.</p>
-<p>这是前一个设计决策的另一面。这个模式兼容所有可能的读/写<span name="configs">设置</span>上：一对一，一对多，多对一，多对多。</p>
+<p><span name="configs"></span></p>
+<p>这是前一个设计决策的另一面。
+这个模式兼容所有可能的读/写设置：一对一，一对多，多对一，多对多。</p>
 <aside name="configs">
-<p>You sometimes hear &#8220;fan-in&#8221; used to describe many-to-one communication systems
-and &#8220;fan-out&#8221; for one-to-many.</p>
-<p>你有时听到“扇入”描述多对一沟通系统，而“扇出”描述一对多。</p>
+<p>你有时听到用“扇入”描述多对一的沟通系统，而用“扇出”描述一对多的沟通系统。</p>
 </aside>
 <ul>
 <li>
-<p><strong>With one writer:</strong></p>
-</li>
-<li>
-<p><strong> 使用一个写入器：</strong></p>
-<p>This style is most similar to the synchronous <a href="observer.html"
-class="gof-pattern">Observer</a> pattern. You have one
-privileged object that generates events that others can then receive.</p>
-<p>这种风格和同步的<a href="observer.html" class="gof-pattern">观察者</a>模式很像。有特定对象收集所有可接受的事件。</p>
+<p><strong> 使用单个写入器：</strong></p>
+<p>这种风格和同步的<a href="observer.html" class="gof-pattern">观察者</a>模式很像。
+有特定对象收集所有可接受的事件。</p>
 <ul>
 <li>
-<p><em>You implicitly know where the event is coming from.</em> Since there&#8217;s only
-    one object that can add to the queue, any listener can safely assume
-    that&#8217;s the sender.</p>
+<p><em>你隐式知道事件是从哪里来的。</em>
+由于这里只有一个对象可向队列添加事件，任何监听器都可以安全的假设那就是发送者。</p>
 </li>
 <li>
-<p><em>你隐式知道事件是从哪里来的。</em>由于这里只有一个对象可向队列添加事件，任何监听器都可以安全的假设那就是发送者。</p>
-</li>
-<li>
-<p><em>You usually allow multiple readers.</em> You can have a
-    one-sender-one-receiver queue, but that starts to feel less like the
-    communication system this pattern is about and more like a vanilla queue data
-    structure.</p>
-</li>
-<li>
-<p><em>通常允许多个读者。</em>你可以用单发送者对单接收者的队列，但是这样沟通系统更像纯粹的队列数据结构。</p>
+<p><em>通常允许多个读取者。</em>
+你可以使用单发送者对单接收者的队列，但是这样沟通系统更像纯粹的队列数据结构。</p>
 </li>
 </ul>
-</li>
-<li>
-<p><strong>With multiple writers:</strong></p>
 </li>
 <li>
 <p><strong>使用多个写入器：</strong></p>
-<p>This is how our audio engine example works. Since <code>playSound()</code> is a public
-method, any part of the codebase can add a request to the queue. &#8220;Global&#8221; or
-&#8220;central&#8221; event buses work like this too.</p>
-<p>这是我们例子中音频引擎工作的方式。由于<code>playSound()</code>是公开的方法，代码库的任何部分都能给队列添加请求。“全局”或“中心”事件总线像这样工作。</p>
+<p>这是例子中音频引擎工作的方式。
+由于<code>playSound()</code>是公开的方法，代码库的任何部分都能给队列添加请求。“全局”或“中心”事件总线像这样工作。</p>
 <ul>
 <li>
-<p><em>You have to be more careful of cycles.</em> Since anything can
-    potentially put something onto the queue, it&#8217;s easier to accidentally
-    enqueue something in the middle of handling an event. If you aren&#8217;t
-    careful, that may trigger a feedback loop.</p>
+<p><em>得更小心环路。</em>
+由于任何东西都有可能向队列中添加东西，这更容易意外地在处理事件时添加事件。
+如果你不小心，那可能会触发反馈循环。</p>
 </li>
 <li>
-<p><em>得更小心环路。</em>由于任何东西都有可能向队列中添加东西，这更容易意外地在处理事件时添加事件。如果你不小心，那可能会触发循环。</p>
-</li>
-<li>
-<p><em>You&#8217;ll likely want some reference to the sender in the event itself.</em>
-    When a listener gets an event, it doesn&#8217;t know who sent it, since it
-    could be anyone. If that&#8217;s something they need to know, you&#8217;ll want to
-    pack that into the event object so that the listener can use it.</p>
-</li>
-<li>
-<p><em>很可能需要在事件中添加对发送者的引用。</em>当监听者接到事件，它不知道是谁发送的，因为可能是任何人。如果这是它需要知道的，你得将其打包到事件对象中去，这样监听者才可能使用它。</p>
+<p><em>很可能需要在事件中添加对发送者的引用。</em>
+ 当监听者接到事件时，它不知道是谁发送的，因为可能是任何人。
+ 如果它确实需要知道发送者，你得将发送者打包到事件对象中去，这样监听者才可以使用它。</p>
 </li>
 </ul>
 </li>
 </ul>
-<h3><a href="#what-is-the-lifetime-of-the-objects-in-the-queue" name="what-is-the-lifetime-of-the-objects-in-the-queue">What is the lifetime of the objects in the queue?</a></h3>
 <h3><a href="#对象在队列中的生命周期如何？" name="对象在队列中的生命周期如何？">对象在队列中的生命周期如何？</a></h3>
-<p>With a synchronous notification, execution doesn&#8217;t return to the sender until
-all of the receivers have finished processing the message. That means the
-message itself can safely live in a local variable on the stack. With a queue,
-the message outlives the call that enqueues it.</p>
 <p>使用同步的通知，当所有的接收者完成了消息处理才会返回发送者。
 这意味着消息本身可以安全的存在栈的局部变量中。
 使用队列，消息比让它入队的调用活得更久。</p>
-<p>If you&#8217;re using a garbage collected language, you don&#8217;t need to worry about this
-too much. Stuff the message in the queue, and it will stick around in memory as
-long as it&#8217;s needed. In C or C++, it&#8217;s up to you to ensure the object lives long
-enough.</p>
 <p>如果你是用有垃圾回收的语言，你无需过度担心这个。
 消息存到队列中，会一直存到需要它的时候。
-在C或C++中，得由你来保证对象活的足够长。</p>
+而在C或C++中，得由你来保证对象活的足够长。</p>
 <ul>
 <li>
-<p><strong>Pass ownership:</strong></p>
-</li>
-<li>
 <p><strong>传递所有权：</strong></p>
-<p>This is the <span name="unique">traditional</span> way to do things when
-managing memory manually. When a message gets queued, the queue claims it
-and the sender no longer owns it. When it gets processed, the receiver takes
-ownership and is responsible for deallocating it.</p>
-<p>这是手动管理内存的传统方法。当消息入队时，队列拥有了它，发送者不再拥有它。当它被处理时，接收者获取了所有权，负责销毁他。</p>
+<p>这是手动管理内存的传统方法。当消息入队时，队列拥有了它，发送者不再拥有它。
+当它被处理时，接收者获取了所有权，负责销毁他。</p>
 <aside name="unique">
 
-<p>In C++, <code>unique_ptr&lt;T&gt;</code> gives you these exact semantics out of the box.</p>
 <p>在C++中，<code>unique_ptr&lt;T&gt;</code>给了你同样的语义。</p>
 </aside>
 
 </li>
 <li>
-<p><strong>Share ownership:</strong></p>
-</li>
-<li>
 <p><strong>共享所有权：</strong></p>
-<p>These days, now that even C++ programmers are more comfortable with garbage
-collection, <span name="shared">shared</span> ownership is more acceptable.
-With this, the message sticks around as long as anything has a reference to
-it and is automatically freed when forgotten.</p>
-<p>现在，甚至C++程序员都更适应垃圾回收了，分享所有权更加可接受。这样，消息只要有东西对其有引用就会存在，当被遗忘时自动释放。</p>
+<p>现在，甚至C++程序员都更适应垃圾回收了，分享所有权更加可接受。
+这样，消息只要有东西对其有引用就会存在，当被遗忘时自动释放。</p>
 <aside name="shared">
 
-<p>Likewise, the C++ type for this is <code>shared_ptr&lt;T&gt;</code>.</p>
-<p>同样的，C++的类型是<code>shared_ptr&lt;T&gt;</code>。</p>
+<p>同样的，C++的风格是使用<code>shared_ptr&lt;T&gt;</code>。</p>
 </aside>
 
 </li>
 <li>
-<p><strong>The queue owns it:</strong></p>
-</li>
-<li>
 <p><strong>队列拥有它：</strong></p>
-<p><span name="pool">Another option</span> is to have messages <em>always</em> live on
-the queue. Instead of allocating the message itself, the sender requests a
-&#8220;fresh&#8221; one from the queue. The queue returns a reference to a message
-already in memory inside the queue, and the sender fills it in. When the
-message gets processed, the receiver refers to the same message in the
-queue.</p>
-<p><span name="pool">另一个选项</span>是让消息<em>永远</em>在队列中存在。发送者不再自己分配消息，它向内存请求一个“新的”。队列返回一个已经在内存的队列中的消息的引用，接收者引用队列中相同的消息。</p>
+<p><span name="pool"></span></p>
+<p>另一个选项是让消息<em>永远</em>存在于队列中。
+发送者不再自己分配消息的内存，它向内存请求一个“新的”消息。
+队列返回一个队列中已经在内存的消息的引用，接收者引用队列中相同的消息。</p>
 <aside name="pool">
 
-<p>In other words, the backing store for the queue is an <a
-href="object-pool.html" class="pattern">Object Pool</a>.</p>
 <p>换言之，队列存储的背后是一个<a href="object-pool.html" class="pattern">对象池</a>模式。</p>
 </aside>
 
 </li>
 </ul>
-<h2><a href="#see-also" name="see-also">See Also</a></h2>
 <h2><a href="#参见" name="参见">参见</a></h2>
 <ul>
 <li>
-<p>I&#8217;ve mentioned this a few times already, but in many ways, this pattern is
-    the asynchronous cousin to the well-known <a href="observer.html"
-    class="gof-pattern">Observer</a> pattern.</p>
+<p>我在之前提到了几次，很大程度上，
+这个模式是广为人知的<a href="observer.html" class="gof-pattern">观察者</a>模式的异步实现。</p>
 </li>
 <li>
-<p>我在之前提到了几次，但是很大程度上，这个模式是广为人知的<a href="observer.html" class="gof-pattern">观察者</a>模式的异步实现。</p>
+<p>就像其他很多模式一样，事件队列有很多别名。
+其中一个是“消息队列”。这通常指代一个更高层次的实现。
+事件队列在应用<em>中</em>，消息队列通常在应用<em>间</em>交流。</p>
+<p>另一个术语是“发布/提交”，有时被缩写为“pubsub”。
+就像“消息队列”一样，这通常指代更大的分布式系统，而不是现在关注的这个模式。</p>
 </li>
 <li>
-<p>Like many patterns, event queues go by a number of aliases. One established
-    term is &#8220;message queue&#8221;. It&#8217;s usually referring to a higher-level
-    manifestation. Where our event queues are <em>within</em> an application, message
-    queues are usually used for communicating <em>between</em> them.</p>
-<p>就像其他很多模式一样，事件队列有很多别名。一个是“消息队列”。这通常指代一个更高层次的实现。事件队列在应用<em>中</em>，消息队列通常在应用<em>间</em>交流。</p>
-<p>Another term is &#8220;publish/subscribe&#8221;, sometimes abbreviated to &#8220;pubsub&#8221;. Like
-&#8220;message queue&#8221;, it usually refers to larger distributed systems unlike
-the humble coding pattern we&#8217;re focused on.</p>
-<p>另一个术语是“发布/提交”，有时被缩写为“pubsub”。就像“消息队列”一样，这通常指代更大的分布式系统，而不是现在关注的这个模式。</p>
+<p><a href="http://en.wikipedia.org/wiki/Finite-state_machine">确定状态机</a>，很像GoF的<a href="state.html" class="gof-pattern">状态模式</a>，需要一个输入流。如果想要异步响应，可以考虑队列存储它们。</p>
+<p>当你有一对状态机相互发送消息时，每个状态机都有一个小小的未处理队列（被称为一个<em>信箱</em>），
+然后你需要重新发明<a href="http://en.wikipedia.org/wiki/Actor_model">actor model</a>。</p>
 </li>
 <li>
-<p>A <a href="http://en.wikipedia.org/wiki/Finite-state_machine">finite state machine</a>,
-    similar to the Gang of Four&#8217;s <a href="state.html"
-    class="gof-pattern">State</a> pattern, requires a stream of inputs. If you
-    want it to respond to those asynchronously, it makes sense to queue them.</p>
-</li>
-<li>
-<p><a href="http://en.wikipedia.org/wiki/Finite-state_machine">确定状态机</a>，很像GoF的<a href="state.html" class="gof-pattern">状态模式</a>，需要一个输入流。如果想要异步回应他们，用队列存储是个有道理的选项。</p>
-<p>When you have a bunch of state machines sending messages to each other, each
-with a little queue of pending inputs (called a <em>mailbox</em>), then you&#8217;ve
-re-invented the <a href="http://en.wikipedia.org/wiki/Actor_model">actor model</a> of
-computation.</p>
-<p>当你有一对状态机相互发送消息时，每个都有一个小小的未处理队列（被称为一个<em>信箱</em>），然后你需要重新发明<a href="http://en.wikipedia.org/wiki/Actor_model">actor model</a>。</p>
-</li>
-<li>
-<p>The <a href="http://golang.org/">Go</a> programming language&#8217;s built-in &#8220;channel&#8221; type
-    is essentially an event or message queue.</p>
-</li>
-<li>
-<p><a href="http://golang.org/">Go</a>语言内建的“信道”类型本质上是事件或消息队列。</p>
+<p><a href="http://golang.org/">Go</a>语言内建的“通道”类型本质上是事件队列或消息队列。</p>
 </li>
 </ul>
 <nav>
