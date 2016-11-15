@@ -192,7 +192,8 @@ namespace EventQueue
     //^tail-update
     void Audio::update()
     {
-      // 如果这里没有待处理的请求，那就什么也不做。
+      // 如果这里没有待处理的请求
+      // 那就什么也不做。
       if (head_ == tail_) return;
 
       ResourceId resource = loadSound(pending_[head_].id);

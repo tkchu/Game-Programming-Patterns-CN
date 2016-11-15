@@ -261,7 +261,8 @@ namespace CommandPattern
 
         virtual void execute()
         {
-          // 保存移动之前的位置，这样之后可以复原。
+          // 保存移动之前的位置
+          // 这样之后可以复原。
 
           xBefore_ = unit_->x();
           yBefore_ = unit_->y();

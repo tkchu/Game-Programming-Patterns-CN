@@ -239,7 +239,7 @@ namespace DataLocality
     // 不应该已被激活！
     assert(index >= numActive_);
 
-    // 将它和激活粒子后第一个未被激活的粒子交换
+    // 将它和第一个未激活的粒子交换
     Particle temp = particles_[numActive_];
     particles_[numActive_] = particles_[index];
     particles_[index] = temp;
