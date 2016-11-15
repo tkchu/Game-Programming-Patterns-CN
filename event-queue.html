@@ -14,7 +14,7 @@ delete the font style for english.
 <link href="http://fonts.gmirror.org/css?family=Merriweather:400,400italic,700,700italic|Source+Code+Pro|Source+Sans+Pro:200,300,400,600,400italic,600italic|Rock+Salt" rel="stylesheet" type="text/css">
 -->
 <!-- delete the google analyse code to improve the speed, sorry. -->
-<script src="jquery-1.10.1.min.js"></script>
+<script src="http://apps.bdimg.com/libs/jquery/1.10.1/jquery.min.js"></script>
 <script src="script.js"></script>
 </head>
 <body id="top">
@@ -410,7 +410,8 @@ delete the font style for english.
 <p>更有趣的变化在<code>update()</code>中：</p>
 <div class="codehilite"><pre><span></span><span class="kt">void</span> <span class="n">Audio</span><span class="o">::</span><span class="n">update</span><span class="p">()</span>
 <span class="p">{</span>
-  <span class="c1">// 如果这里没有待处理的请求，那就什么也不做。</span>
+  <span class="c1">// 如果这里没有待处理的请求</span>
+  <span class="c1">// 那就什么也不做。</span>
   <span class="k">if</span> <span class="p">(</span><span class="n">head_</span> <span class="o">==</span> <span class="n">tail_</span><span class="p">)</span> <span class="k">return</span><span class="p">;</span>
 
   <span class="n">ResourceId</span> <span class="n">resource</span> <span class="o">=</span> <span class="n">loadSound</span><span class="p">(</span><span class="n">pending_</span><span class="p">[</span><span class="n">head_</span><span class="p">].</span><span class="n">id</span><span class="p">);</span>
