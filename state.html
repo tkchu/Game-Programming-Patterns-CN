@@ -68,7 +68,7 @@ delete the font style for english.
     <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">isJumping_</span><span class="p">)</span>
     <span class="p">{</span>
       <span class="n">isJumping_</span> <span class="o">=</span> <span class="nb">true</span><span class="p">;</span>
-      <span class="c1">// Jump...</span>
+      <span class="c1">// 跳跃……</span>
     <span class="p">}</span>
   <span class="p">}</span>
 <span class="p">}</span>
@@ -84,7 +84,7 @@ delete the font style for english.
 <span class="p">{</span>
   <span class="k">if</span> <span class="p">(</span><span class="n">input</span> <span class="o">==</span> <span class="n">PRESS_B</span><span class="p">)</span>
   <span class="p">{</span>
-    <span class="c1">// Jump if not jumping...</span>
+    <span class="c1">// 如果没在跳跃，就跳起来……</span>
   <span class="p">}</span>
   <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">input</span> <span class="o">==</span> <span class="n">PRESS_DOWN</span><span class="p">)</span>
   <span class="p">{</span>
@@ -115,7 +115,7 @@ delete the font style for english.
   <span class="p">{</span>
     <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">isJumping_</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="n">isDucking_</span><span class="p">)</span>
     <span class="p">{</span>
-      <span class="c1">// Jump...</span>
+      <span class="c1">// 跳跃……</span>
     <span class="p">}</span>
   <span class="p">}</span>
   <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">input</span> <span class="o">==</span> <span class="n">PRESS_DOWN</span><span class="p">)</span>
@@ -145,7 +145,7 @@ delete the font style for english.
   <span class="p">{</span>
     <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">isJumping_</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="n">isDucking_</span><span class="p">)</span>
     <span class="p">{</span>
-      <span class="c1">// Jump...</span>
+      <span class="c1">// 跳跃……</span>
     <span class="p">}</span>
   <span class="p">}</span>
   <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">input</span> <span class="o">==</span> <span class="n">PRESS_DOWN</span><span class="p">)</span>
@@ -165,7 +165,7 @@ delete the font style for english.
   <span class="p">{</span>
     <span class="k">if</span> <span class="p">(</span><span class="n">isDucking_</span><span class="p">)</span>
     <span class="p">{</span>
-      <span class="c1">// Stand...</span>
+      <span class="c1">// 站立……</span>
     <span class="p">}</span>
   <span class="p">}</span>
 <span class="p">}</span>
@@ -327,10 +327,10 @@ GoF的状态模式是一个方法——我们会谈到的——但先从简单�
         <span class="n">chargeTime_</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
         <span class="n">setGraphics</span><span class="p">(</span><span class="n">IMAGE_DUCK</span><span class="p">);</span>
       <span class="p">}</span>
-      <span class="c1">// Handle other inputs...</span>
+      <span class="c1">// 处理其他输入……</span>
       <span class="k">break</span><span class="p">;</span>
 
-      <span class="c1">// Other states...</span>
+      <span class="c1">// 其他状态……</span>
   <span class="p">}</span>
 <span class="p">}</span>
 </pre></div>
@@ -382,7 +382,7 @@ GoF的状态模式是一个方法——我们会谈到的——但先从简单�
   <span class="k">virtual</span> <span class="kt">void</span> <span class="n">handleInput</span><span class="p">(</span><span class="n">Heroine</span><span class="o">&amp;</span> <span class="n">heroine</span><span class="p">,</span> <span class="n">Input</span> <span class="n">input</span><span class="p">)</span> <span class="p">{</span>
     <span class="k">if</span> <span class="p">(</span><span class="n">input</span> <span class="o">==</span> <span class="n">RELEASE_DOWN</span><span class="p">)</span>
     <span class="p">{</span>
-      <span class="c1">// Change to standing state...</span>
+      <span class="c1">// 改回站立状态……</span>
       <span class="n">heroine</span><span class="p">.</span><span class="n">setGraphics</span><span class="p">(</span><span class="n">IMAGE_STAND</span><span class="p">);</span>
     <span class="p">}</span>
   <span class="p">}</span>
@@ -419,7 +419,7 @@ GoF的状态模式是一个方法——我们会谈到的——但先从简单�
     <span class="n">state_</span><span class="o">-&gt;</span><span class="n">update</span><span class="p">(</span><span class="o">*</span><span class="k">this</span><span class="p">);</span>
   <span class="p">}</span>
 
-  <span class="c1">// Other methods...</span>
+  <span class="c1">// 其他方法……</span>
 <span class="k">private</span><span class="o">:</span>
   <span class="n">HeroineState</span><span class="o">*</span> <span class="n">state_</span><span class="p">;</span>
 <span class="p">};</span>
@@ -469,7 +469,7 @@ class="pattern">类型对象</a>模式。
   <span class="k">static</span> <span class="n">JumpingState</span> <span class="n">jumping</span><span class="p">;</span>
   <span class="k">static</span> <span class="n">DivingState</span> <span class="n">diving</span><span class="p">;</span>
 
-  <span class="c1">// Other code...</span>
+  <span class="c1">// 其他代码……</span>
 <span class="p">};</span>
 </pre></div>
 
@@ -513,11 +513,11 @@ class="pattern">类型对象</a>模式。
 <span class="p">{</span>
   <span class="k">if</span> <span class="p">(</span><span class="n">input</span> <span class="o">==</span> <span class="n">PRESS_DOWN</span><span class="p">)</span>
   <span class="p">{</span>
-    <span class="c1">// Other code...</span>
+    <span class="c1">// 其他代码……</span>
     <span class="k">return</span> <span class="k">new</span> <span class="n">DuckingState</span><span class="p">();</span>
   <span class="p">}</span>
 
-  <span class="c1">// Stay in this state.</span>
+  <span class="c1">// 保持这个状态</span>
   <span class="k">return</span> <span class="nb">NULL</span><span class="p">;</span>
 <span class="p">}</span>
 </pre></div>
@@ -544,7 +544,7 @@ class="pattern">类型对象</a>模式。
     <span class="k">return</span> <span class="k">new</span> <span class="nf">StandingState</span><span class="p">();</span>
   <span class="p">}</span>
 
-  <span class="c1">// Other code...</span>
+  <span class="c1">// 其他代码……</span>
 <span class="p">}</span>
 </pre></div>
 
@@ -558,7 +558,7 @@ class="pattern">类型对象</a>模式。
     <span class="n">heroine</span><span class="p">.</span><span class="n">setGraphics</span><span class="p">(</span><span class="n">IMAGE_STAND</span><span class="p">);</span>
   <span class="p">}</span>
 
-  <span class="c1">// Other code...</span>
+  <span class="c1">// 其他代码……</span>
 <span class="p">};</span>
 </pre></div>
 
@@ -572,7 +572,7 @@ class="pattern">类型对象</a>模式。
     <span class="k">delete</span> <span class="n">state_</span><span class="p">;</span>
     <span class="n">state_</span> <span class="o">=</span> <span class="n">state</span><span class="p">;</span>
 
-    <span class="c1">// Call the enter action on the new state.</span>
+    <span class="c1">// 调用新状态的入口行为</span>
     <span class="n">state_</span><span class="o">-&gt;</span><span class="n">enter</span><span class="p">(</span><span class="o">*</span><span class="k">this</span><span class="p">);</span>
   <span class="p">}</span>
 <span class="p">}</span>
@@ -588,7 +588,7 @@ class="pattern">类型对象</a>模式。
     <span class="k">return</span> <span class="k">new</span> <span class="n">StandingState</span><span class="p">();</span>
   <span class="p">}</span>
 
-  <span class="c1">// Other code...</span>
+  <span class="c1">// 其他代码……</span>
 <span class="p">}</span>
 </pre></div>
 
@@ -642,7 +642,7 @@ FSMs不够灵活，并不在其中。</p>
 <p><span name="equip-state"></span></p>
 <div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">Heroine</span>
 <span class="p">{</span>
-  <span class="c1">// Other code...</span>
+  <span class="c1">// 其他代码……</span>
 
 <span class="k">private</span><span class="o">:</span>
   <span class="n">HeroineState</span><span class="o">*</span> <span class="n">state_</span><span class="p">;</span>
@@ -702,11 +702,11 @@ FSMs不够灵活，并不在其中。</p>
   <span class="p">{</span>
     <span class="k">if</span> <span class="p">(</span><span class="n">input</span> <span class="o">==</span> <span class="n">PRESS_B</span><span class="p">)</span>
     <span class="p">{</span>
-      <span class="c1">// Jump...</span>
+      <span class="c1">// 跳跃……</span>
     <span class="p">}</span>
     <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">input</span> <span class="o">==</span> <span class="n">PRESS_DOWN</span><span class="p">)</span>
     <span class="p">{</span>
-      <span class="c1">// Duck...</span>
+      <span class="c1">// 俯卧……</span>
     <span class="p">}</span>
   <span class="p">}</span>
 <span class="p">};</span>
@@ -721,11 +721,11 @@ FSMs不够灵活，并不在其中。</p>
   <span class="p">{</span>
     <span class="k">if</span> <span class="p">(</span><span class="n">input</span> <span class="o">==</span> <span class="n">RELEASE_DOWN</span><span class="p">)</span>
     <span class="p">{</span>
-      <span class="c1">// Stand up...</span>
+      <span class="c1">// 站起……</span>
     <span class="p">}</span>
     <span class="k">else</span>
     <span class="p">{</span>
-      <span class="c1">// Didn&#39;t handle input, so walk up hierarchy.</span>
+      <span class="c1">// 没有处理输入，返回上一层</span>
       <span class="n">OnGroundState</span><span class="o">::</span><span class="n">handleInput</span><span class="p">(</span><span class="n">heroine</span><span class="p">,</span> <span class="n">input</span><span class="p">);</span>
     <span class="p">}</span>
   <span class="p">}</span>

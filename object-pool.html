@@ -252,7 +252,7 @@ delete the font style for english.
                           <span class="kt">double</span> <span class="n">xVel</span><span class="p">,</span> <span class="kt">double</span> <span class="n">yVel</span><span class="p">,</span>
                           <span class="kt">int</span> <span class="n">lifetime</span><span class="p">)</span>
 <span class="p">{</span>
-  <span class="c1">// Find an available particle.</span>
+  <span class="c1">// 找到一个可用粒子</span>
   <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">POOL_SIZE</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span>
   <span class="p">{</span>
     <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">particles_</span><span class="p">[</span><span class="n">i</span><span class="p">].</span><span class="n">inUse</span><span class="p">())</span>
@@ -302,14 +302,14 @@ delete the font style for english.
 
   <span class="k">union</span>
   <span class="p">{</span>
-    <span class="c1">// State when it&#39;s in use.</span>
+    <span class="c1">// 使用时的状态</span>
     <span class="k">struct</span>
     <span class="p">{</span>
       <span class="kt">double</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">;</span>
       <span class="kt">double</span> <span class="n">xVel</span><span class="p">,</span> <span class="n">yVel</span><span class="p">;</span>
     <span class="p">}</span> <span class="n">live</span><span class="p">;</span>
 
-    <span class="c1">// State when it&#39;s available.</span>
+    <span class="c1">// 可重用时的状态</span>
     <span class="n">Particle</span><span class="o">*</span> <span class="n">next</span><span class="p">;</span>
   <span class="p">}</span> <span class="n">state_</span><span class="p">;</span>
 <span class="p">};</span>
@@ -345,16 +345,16 @@ delete the font style for english.
 <p>当首次创建对象池时，<em>所有的</em> 粒子都是可用的，所以空余列表应该贯穿整个对象池。对象池构造器设置了这些：</p>
 <div class="codehilite"><pre><span></span><span class="n">ParticlePool</span><span class="o">::</span><span class="n">ParticlePool</span><span class="p">()</span>
 <span class="p">{</span>
-  <span class="c1">// The first one is available.</span>
+  <span class="c1">// 第一个可用的粒子</span>
   <span class="n">firstAvailable_</span> <span class="o">=</span> <span class="o">&amp;</span><span class="n">particles_</span><span class="p">[</span><span class="mi">0</span><span class="p">];</span>
 
-  <span class="c1">// Each particle points to the next.</span>
+  <span class="c1">// 每个粒子指向下一个</span>
   <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">POOL_SIZE</span> <span class="o">-</span> <span class="mi">1</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span>
   <span class="p">{</span>
     <span class="n">particles_</span><span class="p">[</span><span class="n">i</span><span class="p">].</span><span class="n">setNext</span><span class="p">(</span><span class="o">&amp;</span><span class="n">particles_</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]);</span>
   <span class="p">}</span>
 
-  <span class="c1">// The last one terminates the list.</span>
+  <span class="c1">// 最后一个终结的列表</span>
   <span class="n">particles_</span><span class="p">[</span><span class="n">POOL_SIZE</span> <span class="o">-</span> <span class="mi">1</span><span class="p">].</span><span class="n">setNext</span><span class="p">(</span><span class="nb">NULL</span><span class="p">);</span>
 <span class="p">}</span>
 </pre></div>
@@ -369,10 +369,10 @@ delete the font style for english.
                           <span class="kt">double</span> <span class="n">xVel</span><span class="p">,</span> <span class="kt">double</span> <span class="n">yVel</span><span class="p">,</span>
                           <span class="kt">int</span> <span class="n">lifetime</span><span class="p">)</span>
 <span class="p">{</span>
-  <span class="c1">// Make sure the pool isn&#39;t full.</span>
+  <span class="c1">// 保证池没有满</span>
   <span class="n">assert</span><span class="p">(</span><span class="n">firstAvailable_</span> <span class="o">!=</span> <span class="nb">NULL</span><span class="p">);</span>
 
-  <span class="c1">// Remove it from the available list.</span>
+  <span class="c1">// 将它从可用粒子列表中移除</span>
   <span class="n">Particle</span><span class="o">*</span> <span class="n">newParticle</span> <span class="o">=</span> <span class="n">firstAvailable_</span><span class="p">;</span>
   <span class="n">firstAvailable_</span> <span class="o">=</span> <span class="n">newParticle</span><span class="o">-&gt;</span><span class="n">getNext</span><span class="p">();</span>
 
@@ -403,7 +403,7 @@ delete the font style for english.
   <span class="p">{</span>
     <span class="k">if</span> <span class="p">(</span><span class="n">particles_</span><span class="p">[</span><span class="n">i</span><span class="p">].</span><span class="n">animate</span><span class="p">())</span>
     <span class="p">{</span>
-      <span class="c1">// Add this particle to the front of the list.</span>
+      <span class="c1">// 将粒子加到列表的前部</span>
       <span class="n">particles_</span><span class="p">[</span><span class="n">i</span><span class="p">].</span><span class="n">setNext</span><span class="p">(</span><span class="n">firstAvailable_</span><span class="p">);</span>
       <span class="n">firstAvailable_</span> <span class="o">=</span> <span class="o">&amp;</span><span class="n">particles_</span><span class="p">[</span><span class="n">i</span><span class="p">];</span>
     <span class="p">}</span>
@@ -505,7 +505,7 @@ delete the font style for english.
 如果对象池控制了初始化，它的接口需要支持所有的初始化函数，然后转发给对象。</p>
 <div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">Particle</span>
 <span class="p">{</span>
-  <span class="c1">// Multiple ways to initialize.</span>
+  <span class="c1">// 多种初始化方式……</span>
   <span class="kt">void</span> <span class="n">init</span><span class="p">(</span><span class="kt">double</span> <span class="n">x</span><span class="p">,</span> <span class="kt">double</span> <span class="n">y</span><span class="p">);</span>
   <span class="kt">void</span> <span class="nf">init</span><span class="p">(</span><span class="kt">double</span> <span class="n">x</span><span class="p">,</span> <span class="kt">double</span> <span class="n">y</span><span class="p">,</span> <span class="kt">double</span> <span class="n">angle</span><span class="p">);</span>
   <span class="kt">void</span> <span class="nf">init</span><span class="p">(</span><span class="kt">double</span> <span class="n">x</span><span class="p">,</span> <span class="kt">double</span> <span class="n">y</span><span class="p">,</span> <span class="kt">double</span> <span class="n">xVel</span><span class="p">,</span> <span class="kt">double</span> <span class="n">yVel</span><span class="p">);</span>
@@ -516,17 +516,17 @@ delete the font style for english.
 <span class="k">public</span><span class="o">:</span>
   <span class="kt">void</span> <span class="n">create</span><span class="p">(</span><span class="kt">double</span> <span class="n">x</span><span class="p">,</span> <span class="kt">double</span> <span class="n">y</span><span class="p">)</span>
   <span class="p">{</span>
-    <span class="c1">// Forward to Particle...</span>
+    <span class="c1">// 转发给粒子……</span>
   <span class="p">}</span>
 
   <span class="kt">void</span> <span class="n">create</span><span class="p">(</span><span class="kt">double</span> <span class="n">x</span><span class="p">,</span> <span class="kt">double</span> <span class="n">y</span><span class="p">,</span> <span class="kt">double</span> <span class="n">angle</span><span class="p">)</span>
   <span class="p">{</span>
-    <span class="c1">// Forward to Particle...</span>
+    <span class="c1">// 转发给粒子……</span>
   <span class="p">}</span>
 
   <span class="kt">void</span> <span class="n">create</span><span class="p">(</span><span class="kt">double</span> <span class="n">x</span><span class="p">,</span> <span class="kt">double</span> <span class="n">y</span><span class="p">,</span> <span class="kt">double</span> <span class="n">xVel</span><span class="p">,</span> <span class="kt">double</span> <span class="n">yVel</span><span class="p">)</span>
   <span class="p">{</span>
-    <span class="c1">// Forward to Particle...</span>
+    <span class="c1">// 转发给粒子……</span>
   <span class="p">}</span>
 <span class="p">};</span>
 </pre></div>
@@ -544,7 +544,7 @@ delete the font style for english.
 <div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">Particle</span>
 <span class="p">{</span>
 <span class="k">public</span><span class="o">:</span>
-  <span class="c1">// Multiple ways to initialize.</span>
+  <span class="c1">// 多种初始化方法</span>
   <span class="kt">void</span> <span class="n">init</span><span class="p">(</span><span class="kt">double</span> <span class="n">x</span><span class="p">,</span> <span class="kt">double</span> <span class="n">y</span><span class="p">);</span>
   <span class="kt">void</span> <span class="nf">init</span><span class="p">(</span><span class="kt">double</span> <span class="n">x</span><span class="p">,</span> <span class="kt">double</span> <span class="n">y</span><span class="p">,</span> <span class="kt">double</span> <span class="n">angle</span><span class="p">);</span>
   <span class="kt">void</span> <span class="nf">init</span><span class="p">(</span><span class="kt">double</span> <span class="n">x</span><span class="p">,</span> <span class="kt">double</span> <span class="n">y</span><span class="p">,</span> <span class="kt">double</span> <span class="n">xVel</span><span class="p">,</span> <span class="kt">double</span> <span class="n">yVel</span><span class="p">);</span>
@@ -555,7 +555,7 @@ delete the font style for english.
 <span class="k">public</span><span class="o">:</span>
   <span class="n">Particle</span><span class="o">*</span> <span class="n">create</span><span class="p">()</span>
   <span class="p">{</span>
-    <span class="c1">// Return reference to available particle...</span>
+    <span class="c1">// 返回可用粒子的引用……</span>
   <span class="p">}</span>
 <span class="k">private</span><span class="o">:</span>
   <span class="n">Particle</span> <span class="n">pool_</span><span class="p">[</span><span class="mi">100</span><span class="p">];</span>

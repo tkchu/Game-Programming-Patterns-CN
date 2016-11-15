@@ -65,7 +65,7 @@ delete the font style for english.
   <span class="p">{}</span>
 
 <span class="k">private</span><span class="o">:</span>
-  <span class="kt">int</span> <span class="n">health_</span><span class="p">;</span> <span class="c1">// Current health.</span>
+  <span class="kt">int</span> <span class="n">health_</span><span class="p">;</span> <span class="c1">// 当前血值</span>
 <span class="p">};</span>
 </pre></div>
 
@@ -235,7 +235,7 @@ C++的类是C中的类型对象，由编译器自动处理。</p>
   <span class="k">const</span> <span class="kt">char</span><span class="o">*</span> <span class="n">getAttack</span><span class="p">()</span> <span class="p">{</span> <span class="k">return</span> <span class="n">attack_</span><span class="p">;</span> <span class="p">}</span>
 
 <span class="k">private</span><span class="o">:</span>
-  <span class="kt">int</span> <span class="n">health_</span><span class="p">;</span> <span class="c1">// Starting health.</span>
+  <span class="kt">int</span> <span class="n">health_</span><span class="p">;</span> <span class="c1">// 初始血值</span>
   <span class="k">const</span> <span class="kt">char</span><span class="o">*</span> <span class="n">attack_</span><span class="p">;</span>
 <span class="p">};</span>
 </pre></div>
@@ -257,7 +257,7 @@ C++的类是C中的类型对象，由编译器自动处理。</p>
   <span class="p">}</span>
 
 <span class="k">private</span><span class="o">:</span>
-  <span class="kt">int</span>    <span class="n">health_</span><span class="p">;</span> <span class="c1">// Current health.</span>
+  <span class="kt">int</span>    <span class="n">health_</span><span class="p">;</span> <span class="c1">// 当前血值</span>
   <span class="n">Breed</span><span class="o">&amp;</span> <span class="n">breed_</span><span class="p">;</span>
 <span class="p">};</span>
 </pre></div>
@@ -303,7 +303,7 @@ C++的类是C中的类型对象，由编译器自动处理。</p>
     <span class="n">breed_</span><span class="p">(</span><span class="n">breed</span><span class="p">)</span>
   <span class="p">{}</span>
 
-  <span class="kt">int</span> <span class="n">health_</span><span class="p">;</span> <span class="c1">// Current health.</span>
+  <span class="kt">int</span> <span class="n">health_</span><span class="p">;</span> <span class="c1">// 当前血值</span>
   <span class="n">Breed</span><span class="o">&amp;</span> <span class="n">breed_</span><span class="p">;</span>
 <span class="p">};</span>
 </pre></div>
@@ -362,7 +362,7 @@ C++的类是C中的类型对象，由编译器自动处理。</p>
 
 <span class="k">private</span><span class="o">:</span>
   <span class="n">Breed</span><span class="o">*</span>      <span class="n">parent_</span><span class="p">;</span>
-  <span class="kt">int</span>         <span class="n">health_</span><span class="p">;</span> <span class="c1">// Starting health.</span>
+  <span class="kt">int</span>         <span class="n">health_</span><span class="p">;</span> <span class="c1">// 初始血值</span>
   <span class="k">const</span> <span class="kt">char</span><span class="o">*</span> <span class="n">attack_</span><span class="p">;</span>
 <span class="p">};</span>
 </pre></div>
@@ -377,19 +377,19 @@ C++的类是C中的类型对象，由编译器自动处理。</p>
 一种是每次属性被请求时动态处理委托，就像这样：</p>
 <div class="codehilite"><pre><span></span><span class="kt">int</span> <span class="n">Breed</span><span class="o">::</span><span class="n">getHealth</span><span class="p">()</span>
 <span class="p">{</span>
-  <span class="c1">// Override.</span>
+  <span class="c1">// 重载</span>
   <span class="k">if</span> <span class="p">(</span><span class="n">health_</span> <span class="o">!=</span> <span class="mi">0</span> <span class="o">||</span> <span class="n">parent_</span> <span class="o">==</span> <span class="nb">NULL</span><span class="p">)</span> <span class="k">return</span> <span class="n">health_</span><span class="p">;</span>
 
-  <span class="c1">// Inherit.</span>
+  <span class="c1">// 继承</span>
   <span class="k">return</span> <span class="n">parent_</span><span class="o">-&gt;</span><span class="n">getHealth</span><span class="p">();</span>
 <span class="p">}</span>
 
 <span class="k">const</span> <span class="kt">char</span><span class="o">*</span> <span class="n">Breed</span><span class="o">::</span><span class="n">getAttack</span><span class="p">()</span>
 <span class="p">{</span>
-  <span class="c1">// Override.</span>
+  <span class="c1">// 重载</span>
   <span class="k">if</span> <span class="p">(</span><span class="n">attack_</span> <span class="o">!=</span> <span class="nb">NULL</span> <span class="o">||</span> <span class="n">parent_</span> <span class="o">==</span> <span class="nb">NULL</span><span class="p">)</span> <span class="k">return</span> <span class="n">attack_</span><span class="p">;</span>
 
-  <span class="c1">// Inherit.</span>
+  <span class="c1">// 继承</span>
   <span class="k">return</span> <span class="n">parent_</span><span class="o">-&gt;</span><span class="n">getAttack</span><span class="p">();</span>
 <span class="p">}</span>
 </pre></div>
@@ -404,7 +404,7 @@ C++的类是C中的类型对象，由编译器自动处理。</p>
 <span class="o">:</span> <span class="n">health_</span><span class="p">(</span><span class="n">health</span><span class="p">),</span>
   <span class="n">attack_</span><span class="p">(</span><span class="n">attack</span><span class="p">)</span>
 <span class="p">{</span>
-  <span class="c1">// Inherit non-overridden attributes.</span>
+  <span class="c1">// 继承没有重载的属性</span>
   <span class="k">if</span> <span class="p">(</span><span class="n">parent</span> <span class="o">!=</span> <span class="nb">NULL</span><span class="p">)</span>
   <span class="p">{</span>
     <span class="k">if</span> <span class="p">(</span><span class="n">health</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span> <span class="n">health_</span> <span class="o">=</span> <span class="n">parent</span><span class="o">-&gt;</span><span class="n">getHealth</span><span class="p">();</span>
@@ -487,7 +487,7 @@ C++的类是C中的类型对象，由编译器自动处理。</p>
 <span class="k">public</span><span class="o">:</span>
   <span class="n">Breed</span><span class="o">&amp;</span> <span class="n">getBreed</span><span class="p">()</span> <span class="p">{</span> <span class="k">return</span> <span class="n">breed_</span><span class="p">;</span> <span class="p">}</span>
 
-  <span class="c1">// Existing code...</span>
+  <span class="c1">// 当前的代码……</span>
 <span class="p">};</span>
 </pre></div>
 

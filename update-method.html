@@ -45,13 +45,13 @@ delete the font style for english.
 </aside>
 <div class="codehilite"><pre><span></span><span class="k">while</span> <span class="p">(</span><span class="nb">true</span><span class="p">)</span>
 <span class="p">{</span>
-  <span class="c1">// Patrol right.</span>
+  <span class="c1">// 向右巡逻</span>
   <span class="k">for</span> <span class="p">(</span><span class="kt">double</span> <span class="n">x</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">x</span> <span class="o">&lt;</span> <span class="mi">100</span><span class="p">;</span> <span class="n">x</span><span class="o">++</span><span class="p">)</span>
   <span class="p">{</span>
     <span class="n">skeleton</span><span class="p">.</span><span class="n">setX</span><span class="p">(</span><span class="n">x</span><span class="p">);</span>
   <span class="p">}</span>
 
-  <span class="c1">// Patrol left.</span>
+  <span class="c1">// 向左巡逻</span>
   <span class="k">for</span> <span class="p">(</span><span class="kt">double</span> <span class="n">x</span> <span class="o">=</span> <span class="mi">100</span><span class="p">;</span> <span class="n">x</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">;</span> <span class="n">x</span><span class="o">--</span><span class="p">)</span>
   <span class="p">{</span>
     <span class="n">skeleton</span><span class="p">.</span><span class="n">setX</span><span class="p">(</span><span class="n">x</span><span class="p">);</span>
@@ -73,7 +73,7 @@ delete the font style for english.
 <span class="kt">bool</span> <span class="n">patrollingLeft</span> <span class="o">=</span> <span class="nb">false</span><span class="p">;</span>
 <span class="kt">double</span> <span class="n">x</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
 
-<span class="c1">// Main game loop:</span>
+<span class="c1">// 游戏主循环</span>
 <span class="k">while</span> <span class="p">(</span><span class="nb">true</span><span class="p">)</span>
 <span class="p">{</span>
   <span class="k">if</span> <span class="p">(</span><span class="n">patrollingLeft</span><span class="p">)</span>
@@ -89,7 +89,7 @@ delete the font style for english.
 
   <span class="n">skeleton</span><span class="p">.</span><span class="n">setX</span><span class="p">(</span><span class="n">x</span><span class="p">);</span>
 
-  <span class="c1">// Handle user input and render game...</span>
+  <span class="c1">// 处理用户输入并渲染游戏……</span>
 <span class="p">}</span>
 </pre></div>
 
@@ -102,16 +102,16 @@ delete the font style for english.
 一堆无脑的骨头不会对你的女武神提出太多挑战，
 下一个我们添加的是魔法雕像。它们一直会向她发射闪电球，这样可让她保持移动。</p>
 <p>继续我们的“用最简单的方式编码”的风格，我们得到了：</p>
-<div class="codehilite"><pre><span></span><span class="c1">// Skeleton variables...</span>
+<div class="codehilite"><pre><span></span><span class="c1">// 骷髅的变量……</span>
 <span class="n">Entity</span> <span class="n">leftStatue</span><span class="p">;</span>
 <span class="n">Entity</span> <span class="n">rightStatue</span><span class="p">;</span>
 <span class="kt">int</span> <span class="n">leftStatueFrames</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
 <span class="kt">int</span> <span class="n">rightStatueFrames</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
 
-<span class="c1">// Main game loop:</span>
+<span class="c1">// 游戏主循环：</span>
 <span class="k">while</span> <span class="p">(</span><span class="nb">true</span><span class="p">)</span>
 <span class="p">{</span>
-  <span class="c1">// Skeleton code...</span>
+  <span class="c1">// 骷髅的代码……</span>
 
   <span class="k">if</span> <span class="p">(</span><span class="o">++</span><span class="n">leftStatueFrames</span> <span class="o">==</span> <span class="mi">90</span><span class="p">)</span>
   <span class="p">{</span>
@@ -125,7 +125,7 @@ delete the font style for english.
     <span class="n">rightStatue</span><span class="p">.</span><span class="n">shootLightning</span><span class="p">();</span>
   <span class="p">}</span>
 
-  <span class="c1">// Handle user input and render game...</span>
+  <span class="c1">// 处理用户输入，渲染游戏</span>
 <span class="p">}</span>
 </pre></div>
 
@@ -343,15 +343,15 @@ delete the font style for english.
 <span class="p">{</span>
   <span class="k">while</span> <span class="p">(</span><span class="nb">true</span><span class="p">)</span>
   <span class="p">{</span>
-    <span class="c1">// Handle user input...</span>
+    <span class="c1">// 处理用户输入……</span>
 
-    <span class="c1">// Update each entity.</span>
+    <span class="c1">// 更新每个实体</span>
     <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">numEntities_</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span>
     <span class="p">{</span>
       <span class="n">entities_</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">-&gt;</span><span class="n">update</span><span class="p">();</span>
     <span class="p">}</span>
 
-    <span class="c1">// Physics and rendering...</span>
+    <span class="c1">// 物理和渲染……</span>
   <span class="p">}</span>
 <span class="p">}</span>
 </pre></div>
@@ -438,7 +438,7 @@ delete the font style for english.
     <span class="p">{</span>
       <span class="n">shootLightning</span><span class="p">();</span>
 
-      <span class="c1">// Reset the timer.</span>
+      <span class="c1">// 重置计时器</span>
       <span class="n">frames_</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
     <span class="p">}</span>
   <span class="p">}</span>
@@ -449,7 +449,7 @@ delete the font style for english.
 
   <span class="kt">void</span> <span class="nf">shootLightning</span><span class="p">()</span>
   <span class="p">{</span>
-    <span class="c1">// Shoot the lightning...</span>
+    <span class="c1">// 火光效果……</span>
   <span class="p">}</span>
 <span class="p">};</span>
 </pre></div>
@@ -538,7 +538,7 @@ delete the font style for english.
 在那种情况下，也许主类中仍有<code>update()</code>方法，但是它不是虚方法，可以简单的委托给委托对象。就像这样：</p>
 <div class="codehilite"><pre><span></span><span class="kt">void</span> <span class="n">Entity</span><span class="o">::</span><span class="n">update</span><span class="p">()</span>
 <span class="p">{</span>
-  <span class="c1">// Forward to state object.</span>
+  <span class="c1">// 转发给状态对象</span>
   <span class="n">state_</span><span class="o">-&gt;</span><span class="n">update</span><span class="p">();</span>
 <span class="p">}</span>
 </pre></div>

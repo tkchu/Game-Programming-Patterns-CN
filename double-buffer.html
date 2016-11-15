@@ -232,7 +232,7 @@ GPU可以想什么时候扫就什么时候扫。</p>
 显卡驱动可以在<em>任何</em>时间调用<code>getBuffer()</code>，甚至在这个时候：</p>
 <div class="codehilite"><pre><span></span><span class="n">buffer_</span><span class="p">.</span><span class="n">draw</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">);</span>
 <span class="n">buffer_</span><span class="p">.</span><span class="n">draw</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">1</span><span class="p">);</span>
-<span class="c1">// &lt;- Video driver reads pixels here!</span>
+<span class="c1">// &lt;- 图形驱动从这里读取像素！</span>
 <span class="n">buffer_</span><span class="p">.</span><span class="n">draw</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">);</span>
 <span class="n">buffer_</span><span class="p">.</span><span class="n">draw</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">4</span><span class="p">);</span>
 <span class="n">buffer_</span><span class="p">.</span><span class="n">draw</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">);</span>
@@ -266,7 +266,7 @@ GPU可以想什么时候扫就什么时候扫。</p>
 <span class="k">private</span><span class="o">:</span>
   <span class="kt">void</span> <span class="n">swap</span><span class="p">()</span>
   <span class="p">{</span>
-    <span class="c1">// Just switch the pointers.</span>
+    <span class="c1">// 只需交换指针</span>
     <span class="n">Framebuffer</span><span class="o">*</span> <span class="n">temp</span> <span class="o">=</span> <span class="n">current_</span><span class="p">;</span>
     <span class="n">current_</span> <span class="o">=</span> <span class="n">next_</span><span class="p">;</span>
     <span class="n">next_</span> <span class="o">=</span> <span class="n">temp</span><span class="p">;</span>
@@ -458,10 +458,10 @@ Stage update ends
 
   <span class="kt">void</span> <span class="nf">swap</span><span class="p">()</span>
   <span class="p">{</span>
-    <span class="c1">// Swap the buffer.</span>
+    <span class="c1">// 交换缓冲区</span>
     <span class="n">currentSlapped_</span> <span class="o">=</span> <span class="n">nextSlapped_</span><span class="p">;</span>
 
-    <span class="c1">// Clear the new &quot;next&quot; buffer.</span>
+    <span class="c1">// 清空新的“下一个”缓冲区。.</span>
     <span class="n">nextSlapped_</span> <span class="o">=</span> <span class="nb">false</span><span class="p">;</span>
   <span class="p">}</span>
 

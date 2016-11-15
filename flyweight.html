@@ -167,7 +167,7 @@ Gof称之为<em>固有</em>状态，但是我更喜欢将其视为“上下文�
   <span class="n">TERRAIN_GRASS</span><span class="p">,</span>
   <span class="n">TERRAIN_HILL</span><span class="p">,</span>
   <span class="n">TERRAIN_RIVER</span>
-  <span class="c1">// Other terrains...</span>
+  <span class="c1">// 其他地形</span>
 <span class="p">};</span>
 </pre></div>
 
@@ -197,7 +197,7 @@ Gof称之为<em>固有</em>状态，但是我更喜欢将其视为“上下文�
     <span class="k">case</span> <span class="nl">TERRAIN_GRASS</span><span class="p">:</span> <span class="k">return</span> <span class="mi">1</span><span class="p">;</span>
     <span class="k">case</span> <span class="nl">TERRAIN_HILL</span><span class="p">:</span>  <span class="k">return</span> <span class="mi">3</span><span class="p">;</span>
     <span class="k">case</span> <span class="nl">TERRAIN_RIVER</span><span class="p">:</span> <span class="k">return</span> <span class="mi">2</span><span class="p">;</span>
-      <span class="c1">// Other terrains...</span>
+      <span class="c1">// 其他地形……</span>
   <span class="p">}</span>
 <span class="p">}</span>
 
@@ -208,7 +208,7 @@ Gof称之为<em>固有</em>状态，但是我更喜欢将其视为“上下文�
     <span class="k">case</span> <span class="nl">TERRAIN_GRASS</span><span class="p">:</span> <span class="k">return</span> <span class="nb">false</span><span class="p">;</span>
     <span class="k">case</span> <span class="nl">TERRAIN_HILL</span><span class="p">:</span>  <span class="k">return</span> <span class="nb">false</span><span class="p">;</span>
     <span class="k">case</span> <span class="nl">TERRAIN_RIVER</span><span class="p">:</span> <span class="k">return</span> <span class="nb">true</span><span class="p">;</span>
-      <span class="c1">// Other terrains...</span>
+      <span class="c1">// 其他地形……</span>
   <span class="p">}</span>
 <span class="p">}</span>
 </pre></div>
@@ -263,7 +263,7 @@ Gof称之为<em>固有</em>状态，但是我更喜欢将其视为“上下文�
 <span class="k">private</span><span class="o">:</span>
   <span class="n">Terrain</span><span class="o">*</span> <span class="n">tiles_</span><span class="p">[</span><span class="n">WIDTH</span><span class="p">][</span><span class="n">HEIGHT</span><span class="p">];</span>
 
-  <span class="c1">// Other stuff...</span>
+  <span class="c1">// 其他代码……</span>
 <span class="p">};</span>
 </pre></div>
 
@@ -286,7 +286,7 @@ Gof称之为<em>固有</em>状态，但是我更喜欢将其视为“上下文�
   <span class="n">Terrain</span> <span class="n">hillTerrain_</span><span class="p">;</span>
   <span class="n">Terrain</span> <span class="n">riverTerrain_</span><span class="p">;</span>
 
-  <span class="c1">// Other stuff...</span>
+  <span class="c1">// 其他代码……</span>
 <span class="p">};</span>
 </pre></div>
 
@@ -295,12 +295,12 @@ Gof称之为<em>固有</em>状态，但是我更喜欢将其视为“上下文�
 <p><span name="generate"></span></p>
 <div class="codehilite"><pre><span></span><span class="kt">void</span> <span class="n">World</span><span class="o">::</span><span class="n">generateTerrain</span><span class="p">()</span>
 <span class="p">{</span>
-  <span class="c1">// Fill the ground with grass.</span>
+  <span class="c1">// 将地面填满草皮.</span>
   <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">x</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">x</span> <span class="o">&lt;</span> <span class="n">WIDTH</span><span class="p">;</span> <span class="n">x</span><span class="o">++</span><span class="p">)</span>
   <span class="p">{</span>
     <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">y</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">y</span> <span class="o">&lt;</span> <span class="n">HEIGHT</span><span class="p">;</span> <span class="n">y</span><span class="o">++</span><span class="p">)</span>
     <span class="p">{</span>
-      <span class="c1">// Sprinkle some hills.</span>
+      <span class="c1">// 加入一些丘陵</span>
       <span class="k">if</span> <span class="p">(</span><span class="n">random</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span>
       <span class="p">{</span>
         <span class="n">tiles_</span><span class="p">[</span><span class="n">x</span><span class="p">][</span><span class="n">y</span><span class="p">]</span> <span class="o">=</span> <span class="o">&amp;</span><span class="n">hillTerrain_</span><span class="p">;</span>
@@ -312,7 +312,7 @@ Gof称之为<em>固有</em>状态，但是我更喜欢将其视为“上下文�
     <span class="p">}</span>
   <span class="p">}</span>
 
-  <span class="c1">// Lay a river.</span>
+  <span class="c1">// 放置河流</span>
   <span class="kt">int</span> <span class="n">x</span> <span class="o">=</span> <span class="n">random</span><span class="p">(</span><span class="n">WIDTH</span><span class="p">);</span>
   <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">y</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">y</span> <span class="o">&lt;</span> <span class="n">HEIGHT</span><span class="p">;</span> <span class="n">y</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
     <span class="n">tiles_</span><span class="p">[</span><span class="n">x</span><span class="p">][</span><span class="n">y</span><span class="p">]</span> <span class="o">=</span> <span class="o">&amp;</span><span class="n">riverTerrain_</span><span class="p">;</span>

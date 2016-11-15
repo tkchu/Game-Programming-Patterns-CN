@@ -38,10 +38,10 @@ delete the font style for english.
 NPC狙击手开了一枪，射出子弹（AI）。
 用户选择菜单项需要响一声确认（用户界面）。</p>
 <p>每处都需要用像下面这样的东西调用音频系统：</p>
-<div class="codehilite"><pre><span></span><span class="c1">// Use a static class?</span>
+<div class="codehilite"><pre><span></span><span class="c1">// 使用静态类？</span>
 <span class="n">AudioSystem</span><span class="o">::</span><span class="n">playSound</span><span class="p">(</span><span class="n">VERY_LOUD_BANG</span><span class="p">);</span>
 
-<span class="c1">// Or maybe a singleton?</span>
+<span class="c1">// 还是使用单例？</span>
 <span class="n">AudioSystem</span><span class="o">::</span><span class="n">instance</span><span class="p">()</span><span class="o">-&gt;</span><span class="n">playSound</span><span class="p">(</span><span class="n">VERY_LOUD_BANG</span><span class="p">);</span>
 </pre></div>
 
@@ -119,17 +119,17 @@ NPC狙击手开了一枪，射出子弹（AI）。
 <span class="k">public</span><span class="o">:</span>
   <span class="k">virtual</span> <span class="kt">void</span> <span class="n">playSound</span><span class="p">(</span><span class="kt">int</span> <span class="n">soundID</span><span class="p">)</span>
   <span class="p">{</span>
-    <span class="c1">// Play sound using console audio api...</span>
+    <span class="c1">// 使用主机音频API播放声音……</span>
   <span class="p">}</span>
 
   <span class="k">virtual</span> <span class="kt">void</span> <span class="n">stopSound</span><span class="p">(</span><span class="kt">int</span> <span class="n">soundID</span><span class="p">)</span>
   <span class="p">{</span>
-    <span class="c1">// Stop sound using console audio api...</span>
+    <span class="c1">// 使用主机音频API停止声音……</span>
   <span class="p">}</span>
 
   <span class="k">virtual</span> <span class="kt">void</span> <span class="n">stopAllSounds</span><span class="p">()</span>
   <span class="p">{</span>
-    <span class="c1">// Stop all sounds using console audio api...</span>
+    <span class="c1">// 使用主机音频API停止所有声音……</span>
   <span class="p">}</span>
 <span class="p">};</span>
 </pre></div>
@@ -203,9 +203,9 @@ NPC狙击手开了一枪，射出子弹（AI）。
 <div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">NullAudio</span><span class="o">:</span> <span class="k">public</span> <span class="n">Audio</span>
 <span class="p">{</span>
 <span class="k">public</span><span class="o">:</span>
-  <span class="k">virtual</span> <span class="kt">void</span> <span class="n">playSound</span><span class="p">(</span><span class="kt">int</span> <span class="n">soundID</span><span class="p">)</span> <span class="p">{</span> <span class="cm">/* Do nothing. */</span> <span class="p">}</span>
-  <span class="k">virtual</span> <span class="kt">void</span> <span class="n">stopSound</span><span class="p">(</span><span class="kt">int</span> <span class="n">soundID</span><span class="p">)</span> <span class="p">{</span> <span class="cm">/* Do nothing. */</span> <span class="p">}</span>
-  <span class="k">virtual</span> <span class="kt">void</span> <span class="n">stopAllSounds</span><span class="p">()</span>        <span class="p">{</span> <span class="cm">/* Do nothing. */</span> <span class="p">}</span>
+  <span class="k">virtual</span> <span class="kt">void</span> <span class="n">playSound</span><span class="p">(</span><span class="kt">int</span> <span class="n">soundID</span><span class="p">)</span> <span class="p">{</span> <span class="cm">/* 什么也不做 */</span> <span class="p">}</span>
+  <span class="k">virtual</span> <span class="kt">void</span> <span class="n">stopSound</span><span class="p">(</span><span class="kt">int</span> <span class="n">soundID</span><span class="p">)</span> <span class="p">{</span> <span class="cm">/* 什么也不做 */</span> <span class="p">}</span>
+  <span class="k">virtual</span> <span class="kt">void</span> <span class="n">stopAllSounds</span><span class="p">()</span>        <span class="p">{</span> <span class="cm">/* 什么也不做 */</span> <span class="p">}</span>
 <span class="p">};</span>
 </pre></div>
 
@@ -224,7 +224,7 @@ NPC狙击手开了一枪，射出子弹（AI）。
   <span class="p">{</span>
     <span class="k">if</span> <span class="p">(</span><span class="n">service</span> <span class="o">==</span> <span class="nb">NULL</span><span class="p">)</span>
     <span class="p">{</span>
-      <span class="c1">// Revert to null service.</span>
+      <span class="c1">// 退回空服务</span>
       <span class="n">service_</span> <span class="o">=</span> <span class="o">&amp;</span><span class="n">nullService_</span><span class="p">;</span>
     <span class="p">}</span>
     <span class="k">else</span>
@@ -298,7 +298,7 @@ AI程序员不关心什么时候声音在播放，声音程序员也不在乎AI�
 <span class="k">private</span><span class="o">:</span>
   <span class="kt">void</span> <span class="n">log</span><span class="p">(</span><span class="k">const</span> <span class="kt">char</span><span class="o">*</span> <span class="n">message</span><span class="p">)</span>
   <span class="p">{</span>
-    <span class="c1">// Code to log message...</span>
+    <span class="c1">// 记录日志的代码……</span>
   <span class="p">}</span>
 
   <span class="n">Audio</span> <span class="o">&amp;</span><span class="n">wrapped_</span><span class="p">;</span>
@@ -311,10 +311,10 @@ AI程序员不关心什么时候声音在播放，声音程序员也不在乎AI�
 如果程序员需要启动音频日志，他们可以这样调用：</p>
 <div class="codehilite"><pre><span></span><span class="kt">void</span> <span class="nf">enableAudioLogging</span><span class="p">()</span>
 <span class="p">{</span>
-  <span class="c1">// Decorate the existing service.</span>
+  <span class="c1">// 装饰现有的服务</span>
   <span class="n">Audio</span> <span class="o">*</span><span class="n">service</span> <span class="o">=</span> <span class="k">new</span> <span class="n">LoggedAudio</span><span class="p">(</span><span class="n">Locator</span><span class="o">::</span><span class="n">getAudio</span><span class="p">());</span>
 
-  <span class="c1">// Swap it in.</span>
+  <span class="c1">// 将它换进来</span>
   <span class="n">Locator</span><span class="o">::</span><span class="n">provide</span><span class="p">(</span><span class="n">service</span><span class="p">);</span>
 <span class="p">}</span>
 </pre></div>
@@ -538,10 +538,10 @@ AI程序员不关心什么时候声音在播放，声音程序员也不在乎AI�
 当然这是这个模式的典型的使用方式，另一选项是服务范围限制到类和它的依赖类中，就像这样：</p>
 <div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">Base</span>
 <span class="p">{</span>
-  <span class="c1">// Code to locate service and set service_...</span>
+  <span class="c1">// 定位和设置服务的代码……</span>
 
 <span class="k">protected</span><span class="o">:</span>
-  <span class="c1">// Derived classes can use service</span>
+  <span class="c1">// 派生类可以使用服务</span>
   <span class="k">static</span> <span class="n">Audio</span><span class="o">&amp;</span> <span class="n">getAudio</span><span class="p">()</span> <span class="p">{</span> <span class="k">return</span> <span class="o">*</span><span class="n">service_</span><span class="p">;</span> <span class="p">}</span>
 
 <span class="k">private</span><span class="o">:</span>

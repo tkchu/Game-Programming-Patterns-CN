@@ -227,7 +227,7 @@ delete the font style for english.
 <p><code>Bjorn</code>有个每帧调用的<code>update()</code>方法。</p>
 <div class="codehilite"><pre><span></span><span class="kt">void</span> <span class="n">Bjorn</span><span class="o">::</span><span class="n">update</span><span class="p">(</span><span class="n">World</span><span class="o">&amp;</span> <span class="n">world</span><span class="p">,</span> <span class="n">Graphics</span><span class="o">&amp;</span> <span class="n">graphics</span><span class="p">)</span>
 <span class="p">{</span>
-  <span class="c1">// Apply user input to hero&#39;s velocity.</span>
+  <span class="c1">// 根据用户输入修改英雄的速度</span>
   <span class="k">switch</span> <span class="p">(</span><span class="n">Controller</span><span class="o">::</span><span class="n">getJoystickDirection</span><span class="p">())</span>
   <span class="p">{</span>
     <span class="k">case</span> <span class="nl">DIR_LEFT</span><span class="p">:</span>
@@ -239,11 +239,11 @@ delete the font style for english.
       <span class="k">break</span><span class="p">;</span>
   <span class="p">}</span>
 
-  <span class="c1">// Modify position by velocity.</span>
+  <span class="c1">// 根据速度修改位置</span>
   <span class="n">x_</span> <span class="o">+=</span> <span class="n">velocity_</span><span class="p">;</span>
   <span class="n">world</span><span class="p">.</span><span class="n">resolveCollision</span><span class="p">(</span><span class="n">volume_</span><span class="p">,</span> <span class="n">x_</span><span class="p">,</span> <span class="n">y_</span><span class="p">,</span> <span class="n">velocity_</span><span class="p">);</span>
 
-  <span class="c1">// Draw the appropriate sprite.</span>
+  <span class="c1">// 绘制合适的图形</span>
   <span class="n">Sprite</span><span class="o">*</span> <span class="n">sprite</span> <span class="o">=</span> <span class="o">&amp;</span><span class="n">spriteStand_</span><span class="p">;</span>
   <span class="k">if</span> <span class="p">(</span><span class="n">velocity_</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">)</span>
   <span class="p">{</span>
@@ -306,11 +306,11 @@ delete the font style for english.
   <span class="p">{</span>
     <span class="n">input_</span><span class="p">.</span><span class="n">update</span><span class="p">(</span><span class="o">*</span><span class="k">this</span><span class="p">);</span>
 
-    <span class="c1">// Modify position by velocity.</span>
+    <span class="c1">// 根据速度修改位置</span>
     <span class="n">x</span> <span class="o">+=</span> <span class="n">velocity</span><span class="p">;</span>
     <span class="n">world</span><span class="p">.</span><span class="n">resolveCollision</span><span class="p">(</span><span class="n">volume_</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">velocity</span><span class="p">);</span>
 
-    <span class="c1">// Draw the appropriate sprite.</span>
+    <span class="c1">// 绘制合适的图形</span>
     <span class="n">Sprite</span><span class="o">*</span> <span class="n">sprite</span> <span class="o">=</span> <span class="o">&amp;</span><span class="n">spriteStand_</span><span class="p">;</span>
     <span class="k">if</span> <span class="p">(</span><span class="n">velocity</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">)</span>
     <span class="p">{</span>
@@ -499,7 +499,7 @@ delete the font style for english.
 <span class="k">public</span><span class="o">:</span>
   <span class="k">virtual</span> <span class="kt">void</span> <span class="n">update</span><span class="p">(</span><span class="n">Bjorn</span><span class="o">&amp;</span> <span class="n">bjorn</span><span class="p">)</span>
   <span class="p">{</span>
-    <span class="c1">// AI to automatically control Bjorn...</span>
+    <span class="c1">// 自动控制Bjorn的AI……</span>
   <span class="p">}</span>
 <span class="p">};</span>
 </pre></div>
@@ -583,7 +583,7 @@ delete the font style for english.
 <span class="k">public</span><span class="o">:</span>
   <span class="k">virtual</span> <span class="kt">void</span> <span class="n">update</span><span class="p">(</span><span class="n">GameObject</span><span class="o">&amp;</span> <span class="n">obj</span><span class="p">,</span> <span class="n">World</span><span class="o">&amp;</span> <span class="n">world</span><span class="p">)</span>
   <span class="p">{</span>
-    <span class="c1">// Physics code...</span>
+    <span class="c1">// 物理代码……</span>
   <span class="p">}</span>
 <span class="p">};</span>
 
@@ -592,7 +592,7 @@ delete the font style for english.
 <span class="k">public</span><span class="o">:</span>
   <span class="k">virtual</span> <span class="kt">void</span> <span class="n">update</span><span class="p">(</span><span class="n">GameObject</span><span class="o">&amp;</span> <span class="n">obj</span><span class="p">,</span> <span class="n">Graphics</span><span class="o">&amp;</span> <span class="n">graphics</span><span class="p">)</span>
   <span class="p">{</span>
-    <span class="c1">// Graphics code...</span>
+    <span class="c1">// 图形代码……</span>
   <span class="p">}</span>
 <span class="p">};</span>
 </pre></div>
@@ -712,7 +712,7 @@ delete the font style for english.
     <span class="p">}</span>
     <span class="k">else</span>
     <span class="p">{</span>
-      <span class="c1">// Existing graphics code...</span>
+      <span class="c1">// 现存的图形代码……</span>
     <span class="p">}</span>
 
     <span class="n">graphics</span><span class="p">.</span><span class="n">draw</span><span class="p">(</span><span class="o">*</span><span class="n">sprite</span><span class="p">,</span> <span class="n">obj</span><span class="p">.</span><span class="n">x</span><span class="p">,</span> <span class="n">obj</span><span class="p">.</span><span class="n">y</span><span class="p">);</span>

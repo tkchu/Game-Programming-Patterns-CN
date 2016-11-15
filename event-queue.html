@@ -50,7 +50,7 @@ delete the font style for english.
 <div class="codehilite"><pre><span></span><span class="k">while</span> <span class="p">(</span><span class="n">running</span><span class="p">)</span>
 <span class="p">{</span>
   <span class="n">Event</span> <span class="n">event</span> <span class="o">=</span> <span class="n">getNextEvent</span><span class="p">();</span>
-  <span class="c1">// Handle event...</span>
+  <span class="c1">// 处理事件……</span>
 <span class="p">}</span>
 </pre></div>
 
@@ -141,7 +141,7 @@ delete the font style for english.
   <span class="kt">void</span> <span class="n">onSelect</span><span class="p">(</span><span class="kt">int</span> <span class="n">index</span><span class="p">)</span>
   <span class="p">{</span>
     <span class="n">Audio</span><span class="o">::</span><span class="n">playSound</span><span class="p">(</span><span class="n">SOUND_BLOOP</span><span class="p">,</span> <span class="n">VOL_MAX</span><span class="p">);</span>
-    <span class="c1">// Other stuff...</span>
+    <span class="c1">// 其他代码……</span>
   <span class="p">}</span>
 <span class="p">};</span>
 </pre></div>
@@ -299,7 +299,7 @@ delete the font style for english.
     <span class="n">numPending_</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
   <span class="p">}</span>
 
-  <span class="c1">// Other stuff...</span>
+  <span class="c1">// 其他代码……</span>
 <span class="k">private</span><span class="o">:</span>
   <span class="k">static</span> <span class="k">const</span> <span class="kt">int</span> <span class="n">MAX_PENDING</span> <span class="o">=</span> <span class="mi">16</span><span class="p">;</span>
 
@@ -341,7 +341,7 @@ delete the font style for english.
     <span class="n">numPending_</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
   <span class="p">}</span>
 
-  <span class="c1">// Other stuff...</span>
+  <span class="c1">// 其他代码……</span>
 <span class="p">};</span>
 </pre></div>
 
@@ -384,12 +384,12 @@ delete the font style for english.
     <span class="n">tail_</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
   <span class="p">}</span>
 
-  <span class="c1">// Methods...</span>
+  <span class="c1">// 方法……</span>
 <span class="k">private</span><span class="o">:</span>
   <span class="k">static</span> <span class="kt">int</span> <span class="n">head_</span><span class="p">;</span>
   <span class="k">static</span> <span class="kt">int</span> <span class="n">tail_</span><span class="p">;</span>
 
-  <span class="c1">// Array...</span>
+  <span class="c1">// 数组……</span>
 <span class="p">};</span>
 </pre></div>
 
@@ -410,7 +410,7 @@ delete the font style for english.
 <p>更有趣的变化在<code>update()</code>中：</p>
 <div class="codehilite"><pre><span></span><span class="kt">void</span> <span class="n">Audio</span><span class="o">::</span><span class="n">update</span><span class="p">()</span>
 <span class="p">{</span>
-  <span class="c1">// If there are no pending requests, do nothing.</span>
+  <span class="c1">// 如果这里没有待处理的请求，那就什么也不做。</span>
   <span class="k">if</span> <span class="p">(</span><span class="n">head_</span> <span class="o">==</span> <span class="n">tail_</span><span class="p">)</span> <span class="k">return</span><span class="p">;</span>
 
   <span class="n">ResourceId</span> <span class="n">resource</span> <span class="o">=</span> <span class="n">loadSound</span><span class="p">(</span><span class="n">pending_</span><span class="p">[</span><span class="n">head_</span><span class="p">].</span><span class="n">id</span><span class="p">);</span>
@@ -449,7 +449,7 @@ delete the font style for english.
 <span class="p">{</span>
   <span class="n">assert</span><span class="p">((</span><span class="n">tail_</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">%</span> <span class="n">MAX_PENDING</span> <span class="o">!=</span> <span class="n">head_</span><span class="p">);</span>
 
-  <span class="c1">// Add to the end of the list.</span>
+  <span class="c1">// 添加到列表的尾部</span>
   <span class="n">pending_</span><span class="p">[</span><span class="n">tail_</span><span class="p">].</span><span class="n">id</span> <span class="o">=</span> <span class="n">id</span><span class="p">;</span>
   <span class="n">pending_</span><span class="p">[</span><span class="n">tail_</span><span class="p">].</span><span class="n">volume</span> <span class="o">=</span> <span class="n">volume</span><span class="p">;</span>
   <span class="n">tail_</span> <span class="o">=</span> <span class="p">(</span><span class="n">tail_</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">%</span> <span class="n">MAX_PENDING</span><span class="p">;</span>
@@ -465,7 +465,7 @@ delete the font style for english.
 <p>在<code>update()</code>中，头部也回折了：</p>
 <div class="codehilite"><pre><span></span><span class="kt">void</span> <span class="n">Audio</span><span class="o">::</span><span class="n">update</span><span class="p">()</span>
 <span class="p">{</span>
-  <span class="c1">// If there are no pending requests, do nothing.</span>
+  <span class="c1">// 如果没有待处理的请求，就啥也不做</span>
   <span class="k">if</span> <span class="p">(</span><span class="n">head_</span> <span class="o">==</span> <span class="n">tail_</span><span class="p">)</span> <span class="k">return</span><span class="p">;</span>
 
   <span class="n">ResourceId</span> <span class="n">resource</span> <span class="o">=</span> <span class="n">loadSound</span><span class="p">(</span><span class="n">pending_</span><span class="p">[</span><span class="n">head_</span><span class="p">].</span><span class="n">id</span><span class="p">);</span>
@@ -491,21 +491,21 @@ delete the font style for english.
 由于我们知道哪些请求在等待处理，需要做的所有事就是将请求和早先等待处理的请求合并：</p>
 <div class="codehilite"><pre><span></span><span class="kt">void</span> <span class="n">Audio</span><span class="o">::</span><span class="n">playSound</span><span class="p">(</span><span class="n">SoundId</span> <span class="n">id</span><span class="p">,</span> <span class="kt">int</span> <span class="n">volume</span><span class="p">)</span>
 <span class="p">{</span>
-  <span class="c1">// Walk the pending requests.</span>
+  <span class="c1">// 遍历待处理的请求</span>
   <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="n">head_</span><span class="p">;</span> <span class="n">i</span> <span class="o">!=</span> <span class="n">tail_</span><span class="p">;</span>
        <span class="n">i</span> <span class="o">=</span> <span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">%</span> <span class="n">MAX_PENDING</span><span class="p">)</span>
   <span class="p">{</span>
     <span class="k">if</span> <span class="p">(</span><span class="n">pending_</span><span class="p">[</span><span class="n">i</span><span class="p">].</span><span class="n">id</span> <span class="o">==</span> <span class="n">id</span><span class="p">)</span>
     <span class="p">{</span>
-      <span class="c1">// Use the larger of the two volumes.</span>
+      <span class="c1">// 使用较大的音量</span>
       <span class="n">pending_</span><span class="p">[</span><span class="n">i</span><span class="p">].</span><span class="n">volume</span> <span class="o">=</span> <span class="n">max</span><span class="p">(</span><span class="n">volume</span><span class="p">,</span> <span class="n">pending_</span><span class="p">[</span><span class="n">i</span><span class="p">].</span><span class="n">volume</span><span class="p">);</span>
 
-      <span class="c1">// Don&#39;t need to enqueue.</span>
+      <span class="c1">// 无需入队</span>
       <span class="k">return</span><span class="p">;</span>
     <span class="p">}</span>
   <span class="p">}</span>
 
-  <span class="c1">// Previous code...</span>
+  <span class="c1">// 之前的代码……</span>
 <span class="p">}</span>
 </pre></div>
 

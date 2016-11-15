@@ -147,17 +147,17 @@ delete the font style for english.
 
   <span class="kt">void</span> <span class="nf">move</span><span class="p">(</span><span class="kt">double</span> <span class="n">x</span><span class="p">,</span> <span class="kt">double</span> <span class="n">y</span><span class="p">,</span> <span class="kt">double</span> <span class="n">z</span><span class="p">)</span>
   <span class="p">{</span>
-    <span class="c1">// Code here...</span>
+    <span class="c1">// 实现代码……</span>
   <span class="p">}</span>
 
   <span class="kt">void</span> <span class="nf">playSound</span><span class="p">(</span><span class="n">SoundId</span> <span class="n">sound</span><span class="p">,</span> <span class="kt">double</span> <span class="n">volume</span><span class="p">)</span>
   <span class="p">{</span>
-    <span class="c1">// Code here...</span>
+    <span class="c1">// 实现代码……</span>
   <span class="p">}</span>
 
   <span class="kt">void</span> <span class="nf">spawnParticles</span><span class="p">(</span><span class="n">ParticleType</span> <span class="n">type</span><span class="p">,</span> <span class="kt">int</span> <span class="n">count</span><span class="p">)</span>
   <span class="p">{</span>
-    <span class="c1">// Code here...</span>
+    <span class="c1">// 实现代码……</span>
   <span class="p">}</span>
 <span class="p">};</span>
 </pre></div>
@@ -177,7 +177,7 @@ delete the font style for english.
 <span class="k">protected</span><span class="o">:</span>
   <span class="k">virtual</span> <span class="kt">void</span> <span class="n">activate</span><span class="p">()</span>
   <span class="p">{</span>
-    <span class="c1">// Spring into the air.</span>
+    <span class="c1">// 空中滑行</span>
     <span class="n">playSound</span><span class="p">(</span><span class="n">SOUND_SPROING</span><span class="p">,</span> <span class="mf">1.0f</span><span class="p">);</span>
     <span class="n">spawnParticles</span><span class="p">(</span><span class="n">PARTICLE_DUST</span><span class="p">,</span> <span class="mi">10</span><span class="p">);</span>
     <span class="n">move</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">20</span><span class="p">);</span>
@@ -198,20 +198,20 @@ delete the font style for english.
 <span class="k">protected</span><span class="o">:</span>
   <span class="kt">double</span> <span class="n">getHeroX</span><span class="p">()</span>
   <span class="p">{</span>
-    <span class="c1">// Code here...</span>
+    <span class="c1">// 实现代码……</span>
   <span class="p">}</span>
 
   <span class="kt">double</span> <span class="n">getHeroY</span><span class="p">()</span>
   <span class="p">{</span>
-    <span class="c1">// Code here...</span>
+    <span class="c1">// 实现代码……</span>
   <span class="p">}</span>
 
   <span class="kt">double</span> <span class="n">getHeroZ</span><span class="p">()</span>
   <span class="p">{</span>
-    <span class="c1">// Code here...</span>
+    <span class="c1">// 实现代码……</span>
   <span class="p">}</span>
 
-  <span class="c1">// Existing stuff...</span>
+  <span class="c1">// 退出之类的……</span>
 <span class="p">};</span>
 </pre></div>
 
@@ -224,20 +224,20 @@ delete the font style for english.
   <span class="p">{</span>
     <span class="k">if</span> <span class="p">(</span><span class="n">getHeroZ</span><span class="p">()</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span>
     <span class="p">{</span>
-      <span class="c1">// On the ground, so spring into the air.</span>
+      <span class="c1">// 在地面上，冲向空中</span>
       <span class="n">playSound</span><span class="p">(</span><span class="n">SOUND_SPROING</span><span class="p">,</span> <span class="mf">1.0f</span><span class="p">);</span>
       <span class="n">spawnParticles</span><span class="p">(</span><span class="n">PARTICLE_DUST</span><span class="p">,</span> <span class="mi">10</span><span class="p">);</span>
       <span class="n">move</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">20</span><span class="p">);</span>
     <span class="p">}</span>
     <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">getHeroZ</span><span class="p">()</span> <span class="o">&lt;</span> <span class="mf">10.0f</span><span class="p">)</span>
     <span class="p">{</span>
-      <span class="c1">// Near the ground, so do a double jump.</span>
+      <span class="c1">// 接近地面，再跳一次</span>
       <span class="n">playSound</span><span class="p">(</span><span class="n">SOUND_SWOOP</span><span class="p">,</span> <span class="mf">1.0f</span><span class="p">);</span>
       <span class="n">move</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">getHeroZ</span><span class="p">()</span> <span class="o">+</span> <span class="mi">20</span><span class="p">);</span>
     <span class="p">}</span>
     <span class="k">else</span>
     <span class="p">{</span>
-      <span class="c1">// Way up in the air, so do a dive attack.</span>
+      <span class="c1">// 正在空中，跳劈攻击</span>
       <span class="n">playSound</span><span class="p">(</span><span class="n">SOUND_DIVE</span><span class="p">,</span> <span class="mf">0.7f</span><span class="p">);</span>
       <span class="n">spawnParticles</span><span class="p">(</span><span class="n">PARTICLE_SPARKLES</span><span class="p">,</span> <span class="mi">1</span><span class="p">);</span>
       <span class="n">move</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="n">getHeroZ</span><span class="p">());</span>
@@ -322,20 +322,20 @@ delete the font style for english.
 <span class="k">protected</span><span class="o">:</span>
   <span class="kt">void</span> <span class="n">playSound</span><span class="p">(</span><span class="n">SoundId</span> <span class="n">sound</span><span class="p">,</span> <span class="kt">double</span> <span class="n">volume</span><span class="p">)</span>
   <span class="p">{</span>
-    <span class="c1">// Code here...</span>
+    <span class="c1">// 实现代码……</span>
   <span class="p">}</span>
 
   <span class="kt">void</span> <span class="n">stopSound</span><span class="p">(</span><span class="n">SoundId</span> <span class="n">sound</span><span class="p">)</span>
   <span class="p">{</span>
-    <span class="c1">// Code here...</span>
+    <span class="c1">// 实现代码……</span>
   <span class="p">}</span>
 
   <span class="kt">void</span> <span class="n">setVolume</span><span class="p">(</span><span class="n">SoundId</span> <span class="n">sound</span><span class="p">)</span>
   <span class="p">{</span>
-    <span class="c1">// Code here...</span>
+    <span class="c1">// 实现代码……</span>
   <span class="p">}</span>
 
-  <span class="c1">// Sandbox method and other operations...</span>
+  <span class="c1">// 沙盒方法和其他操作……</span>
 <span class="p">};</span>
 </pre></div>
 
@@ -346,17 +346,17 @@ delete the font style for english.
 <span class="p">{</span>
   <span class="kt">void</span> <span class="n">playSound</span><span class="p">(</span><span class="n">SoundId</span> <span class="n">sound</span><span class="p">,</span> <span class="kt">double</span> <span class="n">volume</span><span class="p">)</span>
   <span class="p">{</span>
-    <span class="c1">// Code here...</span>
+    <span class="c1">// 实现代码……</span>
   <span class="p">}</span>
 
   <span class="kt">void</span> <span class="n">stopSound</span><span class="p">(</span><span class="n">SoundId</span> <span class="n">sound</span><span class="p">)</span>
   <span class="p">{</span>
-    <span class="c1">// Code here...</span>
+    <span class="c1">// 实现代码……</span>
   <span class="p">}</span>
 
   <span class="kt">void</span> <span class="n">setVolume</span><span class="p">(</span><span class="n">SoundId</span> <span class="n">sound</span><span class="p">)</span>
   <span class="p">{</span>
-    <span class="c1">// Code here...</span>
+    <span class="c1">// 实现代码……</span>
   <span class="p">}</span>
 <span class="p">};</span>
 </pre></div>
@@ -371,7 +371,7 @@ delete the font style for english.
     <span class="k">return</span> <span class="n">soundPlayer_</span><span class="p">;</span>
   <span class="p">}</span>
 
-  <span class="c1">// Sandbox method and other operations...</span>
+  <span class="c1">// 沙箱方法和其他操作……</span>
 
 <span class="k">private</span><span class="o">:</span>
   <span class="n">SoundPlayer</span> <span class="n">soundPlayer_</span><span class="p">;</span>
@@ -411,7 +411,7 @@ delete the font style for english.
   <span class="o">:</span> <span class="n">particles_</span><span class="p">(</span><span class="n">particles</span><span class="p">)</span>
   <span class="p">{}</span>
 
-  <span class="c1">// Sandbox method and other operations...</span>
+  <span class="c1">// 沙箱方法和其他操作……</span>
 
 <span class="k">private</span><span class="o">:</span>
   <span class="n">ParticleSystem</span><span class="o">*</span> <span class="n">particles_</span><span class="p">;</span>
@@ -482,7 +482,7 @@ delete the font style for english.
     <span class="n">particles_</span> <span class="o">=</span> <span class="n">particles</span><span class="p">;</span>
   <span class="p">}</span>
 
-  <span class="c1">// Sandbox method and other operations...</span>
+  <span class="c1">// 沙箱方法和其他操作……</span>
 
 <span class="k">private</span><span class="o">:</span>
   <span class="k">static</span> <span class="n">ParticleSystem</span><span class="o">*</span> <span class="n">particles_</span><span class="p">;</span>
@@ -510,7 +510,7 @@ delete the font style for english.
     <span class="n">particles</span><span class="p">.</span><span class="n">spawn</span><span class="p">(</span><span class="n">type</span><span class="p">,</span> <span class="n">count</span><span class="p">);</span>
   <span class="p">}</span>
 
-  <span class="c1">// Sandbox method and other operations...</span>
+  <span class="c1">// 沙箱方法和其他操作……</span>
 <span class="p">};</span>
 </pre></div>
 

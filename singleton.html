@@ -69,7 +69,7 @@ delete the font style for english.
 <span class="k">public</span><span class="o">:</span>
   <span class="k">static</span> <span class="n">FileSystem</span><span class="o">&amp;</span> <span class="n">instance</span><span class="p">()</span>
   <span class="p">{</span>
-    <span class="c1">// Lazy initialize.</span>
+    <span class="c1">// 惰性初始化</span>
     <span class="k">if</span> <span class="p">(</span><span class="n">instance_</span> <span class="o">==</span> <span class="nb">NULL</span><span class="p">)</span> <span class="n">instance_</span> <span class="o">=</span> <span class="k">new</span> <span class="n">FileSystem</span><span class="p">();</span>
     <span class="k">return</span> <span class="o">*</span><span class="n">instance_</span><span class="p">;</span>
   <span class="p">}</span>
@@ -150,13 +150,13 @@ delete the font style for english.
 <span class="p">{</span>
 <span class="k">public</span><span class="o">:</span>
   <span class="k">virtual</span> <span class="kt">char</span><span class="o">*</span> <span class="n">readFile</span><span class="p">(</span><span class="kt">char</span><span class="o">*</span> <span class="n">path</span><span class="p">)</span>
-  <span class="p">{</span> 
-    <span class="c1">// Use Sony file IO API...</span>
+  <span class="p">{</span>
+    <span class="c1">// 使用索尼的文件读写API……</span>
   <span class="p">}</span>
 
   <span class="k">virtual</span> <span class="kt">void</span> <span class="n">writeFile</span><span class="p">(</span><span class="kt">char</span><span class="o">*</span> <span class="n">path</span><span class="p">,</span> <span class="kt">char</span><span class="o">*</span> <span class="n">contents</span><span class="p">)</span>
   <span class="p">{</span>
-    <span class="c1">// Use sony file IO API...</span>
+    <span class="c1">// 使用索尼的文件读写API……</span>
   <span class="p">}</span>
 <span class="p">};</span>
 
@@ -164,13 +164,13 @@ delete the font style for english.
 <span class="p">{</span>
 <span class="k">public</span><span class="o">:</span>
   <span class="k">virtual</span> <span class="kt">char</span><span class="o">*</span> <span class="n">readFile</span><span class="p">(</span><span class="kt">char</span><span class="o">*</span> <span class="n">path</span><span class="p">)</span>
-  <span class="p">{</span> 
-    <span class="c1">// Use Nintendo file IO API...</span>
+  <span class="p">{</span>
+    <span class="c1">// 使用任天堂的文件读写API……</span>
   <span class="p">}</span>
 
   <span class="k">virtual</span> <span class="kt">void</span> <span class="n">writeFile</span><span class="p">(</span><span class="kt">char</span><span class="o">*</span> <span class="n">path</span><span class="p">,</span> <span class="kt">char</span><span class="o">*</span> <span class="n">contents</span><span class="p">)</span>
   <span class="p">{</span>
-    <span class="c1">// Use Nintendo file IO API...</span>
+    <span class="c1">// 使用任天堂的文件读写API……</span>
   <span class="p">}</span>
 <span class="p">};</span>
 </pre></div>
@@ -568,7 +568,7 @@ C语言和汇编程序员前辈能毫无问题的使用全局变量和静态变�
 <span class="k">public</span><span class="o">:</span>
   <span class="k">static</span> <span class="n">Game</span><span class="o">&amp;</span> <span class="n">instance</span><span class="p">()</span> <span class="p">{</span> <span class="k">return</span> <span class="n">instance_</span><span class="p">;</span> <span class="p">}</span>
 
-  <span class="c1">// Functions to set log_, et. al. ...</span>
+  <span class="c1">// 设置log_, et. al. ……</span>
 
   <span class="n">Log</span><span class="o">&amp;</span>         <span class="n">getLog</span><span class="p">()</span>         <span class="p">{</span> <span class="k">return</span> <span class="o">*</span><span class="n">log_</span><span class="p">;</span> <span class="p">}</span>
   <span class="n">FileSystem</span><span class="o">&amp;</span>  <span class="n">getFileSystem</span><span class="p">()</span>  <span class="p">{</span> <span class="k">return</span> <span class="o">*</span><span class="n">fileSystem_</span><span class="p">;</span> <span class="p">}</span>

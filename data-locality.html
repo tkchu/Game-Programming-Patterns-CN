@@ -266,28 +266,28 @@ CPU读到<code>Thing</code>，也会读取<code>Another</code>和<code>Also</cod
 <div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">AIComponent</span>
 <span class="p">{</span>
 <span class="k">public</span><span class="o">:</span>
-  <span class="kt">void</span> <span class="n">update</span><span class="p">()</span> <span class="p">{</span> <span class="cm">/* Work with and modify state... */</span> <span class="p">}</span>
+  <span class="kt">void</span> <span class="n">update</span><span class="p">()</span> <span class="p">{</span> <span class="cm">/* 处理并修改状态…… */</span> <span class="p">}</span>
 
 <span class="k">private</span><span class="o">:</span>
-  <span class="c1">// Goals, mood, etc. ...</span>
+  <span class="c1">// 目标，情绪，等等……</span>
 <span class="p">};</span>
 
 <span class="k">class</span> <span class="nc">PhysicsComponent</span>
 <span class="p">{</span>
 <span class="k">public</span><span class="o">:</span>
-  <span class="kt">void</span> <span class="n">update</span><span class="p">()</span> <span class="p">{</span> <span class="cm">/* Work with and modify state... */</span> <span class="p">}</span>
+  <span class="kt">void</span> <span class="n">update</span><span class="p">()</span> <span class="p">{</span> <span class="cm">/* 处理并修改状态…… */</span> <span class="p">}</span>
 
 <span class="k">private</span><span class="o">:</span>
-  <span class="c1">// Rigid body, velocity, mass, etc. ...</span>
+  <span class="c1">// 刚体，速度，质量，等等……</span>
 <span class="p">};</span>
 
 <span class="k">class</span> <span class="nc">RenderComponent</span>
 <span class="p">{</span>
 <span class="k">public</span><span class="o">:</span>
-  <span class="kt">void</span> <span class="n">render</span><span class="p">()</span> <span class="p">{</span> <span class="cm">/* Work with and modify state... */</span> <span class="p">}</span>
+  <span class="kt">void</span> <span class="n">render</span><span class="p">()</span> <span class="p">{</span> <span class="cm">/* 处理并修改状态…… */</span> <span class="p">}</span>
 
 <span class="k">private</span><span class="o">:</span>
-  <span class="c1">// Mesh, textures, shaders, etc. ...</span>
+  <span class="c1">// 网格，纹理，着色器，等等……</span>
 <span class="p">};</span>
 </pre></div>
 
@@ -301,25 +301,25 @@ CPU读到<code>Thing</code>，也会读取<code>Another</code>和<code>Also</cod
 <p>很多游戏引擎以这种方式实现：</p>
 <div class="codehilite"><pre><span></span><span class="k">while</span> <span class="p">(</span><span class="o">!</span><span class="n">gameOver</span><span class="p">)</span>
 <span class="p">{</span>
-  <span class="c1">// Process AI.</span>
+  <span class="c1">// 处理AI</span>
   <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">numEntities</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span>
   <span class="p">{</span>
     <span class="n">entities</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">-&gt;</span><span class="n">ai</span><span class="p">()</span><span class="o">-&gt;</span><span class="n">update</span><span class="p">();</span>
   <span class="p">}</span>
 
-  <span class="c1">// Update physics.</span>
+  <span class="c1">// 更新物理</span>
   <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">numEntities</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span>
   <span class="p">{</span>
     <span class="n">entities</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">-&gt;</span><span class="n">physics</span><span class="p">()</span><span class="o">-&gt;</span><span class="n">update</span><span class="p">();</span>
   <span class="p">}</span>
 
-  <span class="c1">// Draw to screen.</span>
+  <span class="c1">// 绘制屏幕</span>
   <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">numEntities</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span>
   <span class="p">{</span>
     <span class="n">entities</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">-&gt;</span><span class="n">render</span><span class="p">()</span><span class="o">-&gt;</span><span class="n">render</span><span class="p">();</span>
   <span class="p">}</span>
 
-  <span class="c1">// Other game loop machinery for timing...</span>
+  <span class="c1">// 其他和时间有关的游戏循环机制……</span>
 <span class="p">}</span>
 </pre></div>
 
@@ -378,25 +378,25 @@ calling that <em>all the time</em>.</p>
 <p><span name="arrow"></span></p>
 <div class="codehilite"><pre><span></span><span class="k">while</span> <span class="p">(</span><span class="o">!</span><span class="n">gameOver</span><span class="p">)</span>
 <span class="p">{</span>
-  <span class="c1">// Process AI.</span>
+  <span class="c1">// 处理AI</span>
   <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">numEntities</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span>
   <span class="p">{</span>
     <span class="n">aiComponents</span><span class="p">[</span><span class="n">i</span><span class="p">].</span><span class="n">update</span><span class="p">();</span>
   <span class="p">}</span>
 
-  <span class="c1">// Update physics.</span>
+  <span class="c1">// 更新物理</span>
   <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">numEntities</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span>
   <span class="p">{</span>
     <span class="n">physicsComponents</span><span class="p">[</span><span class="n">i</span><span class="p">].</span><span class="n">update</span><span class="p">();</span>
   <span class="p">}</span>
 
-  <span class="c1">// Draw to screen.</span>
+  <span class="c1">// 绘制屏幕</span>
   <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">numEntities</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span>
   <span class="p">{</span>
     <span class="n">renderComponents</span><span class="p">[</span><span class="n">i</span><span class="p">].</span><span class="n">render</span><span class="p">();</span>
   <span class="p">}</span>
 
-  <span class="c1">// Other game loop machinery for timing...</span>
+  <span class="c1">// 其他和时间有关的游戏循环机制……</span>
 <span class="p">}</span>
 </pre></div>
 
@@ -427,8 +427,8 @@ calling that <em>all the time</em>.</p>
 <div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">Particle</span>
 <span class="p">{</span>
 <span class="k">public</span><span class="o">:</span>
-  <span class="kt">void</span> <span class="n">update</span><span class="p">()</span> <span class="p">{</span> <span class="cm">/* Gravity, etc. ... */</span> <span class="p">}</span>
-  <span class="c1">// Position, velocity, etc. ...</span>
+  <span class="kt">void</span> <span class="n">update</span><span class="p">()</span> <span class="p">{</span> <span class="cm">/* 重力，等等…… */</span> <span class="p">}</span>
+  <span class="c1">// 位置，速度，等等……</span>
 <span class="p">};</span>
 
 <span class="k">class</span> <span class="nc">ParticleSystem</span>
@@ -518,16 +518,15 @@ calling that <em>all the time</em>.</p>
 将不活跃粒子移动到激活序列的尾端，完成一次交换：</p>
 <div class="codehilite"><pre><span></span><span class="kt">void</span> <span class="n">ParticleSystem</span><span class="o">::</span><span class="n">activateParticle</span><span class="p">(</span><span class="kt">int</span> <span class="n">index</span><span class="p">)</span>
 <span class="p">{</span>
-  <span class="c1">// Shouldn&#39;t already be active!</span>
+  <span class="c1">// 不应该已被激活！</span>
   <span class="n">assert</span><span class="p">(</span><span class="n">index</span> <span class="o">&gt;=</span> <span class="n">numActive_</span><span class="p">);</span>
 
-  <span class="c1">// Swap it with the first inactive particle</span>
-  <span class="c1">// right after the active ones.</span>
+  <span class="c1">// 将它和激活粒子后第一个未被激活的粒子交换</span>
   <span class="n">Particle</span> <span class="n">temp</span> <span class="o">=</span> <span class="n">particles_</span><span class="p">[</span><span class="n">numActive_</span><span class="p">];</span>
   <span class="n">particles_</span><span class="p">[</span><span class="n">numActive_</span><span class="p">]</span> <span class="o">=</span> <span class="n">particles_</span><span class="p">[</span><span class="n">index</span><span class="p">];</span>
   <span class="n">particles_</span><span class="p">[</span><span class="n">index</span><span class="p">]</span> <span class="o">=</span> <span class="n">temp</span><span class="p">;</span>
 
-  <span class="c1">// Now there&#39;s one more.</span>
+  <span class="c1">// 现在多了一个激活粒子</span>
   <span class="n">numActive_</span><span class="o">++</span><span class="p">;</span>
 <span class="p">}</span>
 </pre></div>
@@ -536,14 +535,13 @@ calling that <em>all the time</em>.</p>
 <p>为了反激活粒子，只需做相反的事情：</p>
 <div class="codehilite"><pre><span></span><span class="kt">void</span> <span class="n">ParticleSystem</span><span class="o">::</span><span class="n">deactivateParticle</span><span class="p">(</span><span class="kt">int</span> <span class="n">index</span><span class="p">)</span>
 <span class="p">{</span>
-  <span class="c1">// Shouldn&#39;t already be inactive!</span>
+  <span class="c1">// 不应该已被激活！</span>
   <span class="n">assert</span><span class="p">(</span><span class="n">index</span> <span class="o">&lt;</span> <span class="n">numActive_</span><span class="p">);</span>
 
-  <span class="c1">// There&#39;s one fewer.</span>
+  <span class="c1">// 现在少了一个激活粒子</span>
   <span class="n">numActive_</span><span class="o">--</span><span class="p">;</span>
 
-  <span class="c1">// Swap it with the last active particle</span>
-  <span class="c1">// right before the inactive ones.</span>
+  <span class="c1">// 将它和最后一个激活粒子交换</span>
   <span class="n">Particle</span> <span class="n">temp</span> <span class="o">=</span> <span class="n">particles_</span><span class="p">[</span><span class="n">numActive_</span><span class="p">];</span>
   <span class="n">particles_</span><span class="p">[</span><span class="n">numActive_</span><span class="p">]</span> <span class="o">=</span> <span class="n">particles_</span><span class="p">[</span><span class="n">index</span><span class="p">];</span>
   <span class="n">particles_</span><span class="p">[</span><span class="n">index</span><span class="p">]</span> <span class="o">=</span> <span class="n">temp</span><span class="p">;</span>
@@ -598,7 +596,7 @@ calling that <em>all the time</em>.</p>
   <span class="kt">void</span> <span class="n">update</span><span class="p">()</span> <span class="p">{</span> <span class="cm">/* ... */</span> <span class="p">}</span>
 
 <span class="k">private</span><span class="o">:</span>
-  <span class="c1">// Previous fields...</span>
+  <span class="c1">// 之前的字段……</span>
   <span class="n">LootType</span> <span class="n">drop_</span><span class="p">;</span>
   <span class="kt">int</span> <span class="n">minDrops_</span><span class="p">;</span>
   <span class="kt">int</span> <span class="n">maxDrops_</span><span class="p">;</span>
@@ -620,7 +618,7 @@ calling that <em>all the time</em>.</p>
 <div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">AIComponent</span>
 <span class="p">{</span>
 <span class="k">public</span><span class="o">:</span>
-  <span class="c1">// Methods...</span>
+  <span class="c1">// 方法……</span>
 <span class="k">private</span><span class="o">:</span>
   <span class="n">Animation</span><span class="o">*</span> <span class="n">animation_</span><span class="p">;</span>
   <span class="kt">double</span> <span class="n">energy_</span><span class="p">;</span>

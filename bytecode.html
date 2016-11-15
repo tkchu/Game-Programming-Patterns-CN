@@ -133,11 +133,11 @@ delete the font style for english.
 
   <span class="k">virtual</span> <span class="kt">double</span> <span class="n">evaluate</span><span class="p">()</span>
   <span class="p">{</span>
-    <span class="c1">// Evaluate the operands.</span>
+    <span class="c1">// 计算操作数</span>
     <span class="kt">double</span> <span class="n">left</span> <span class="o">=</span> <span class="n">left_</span><span class="o">-&gt;</span><span class="n">evaluate</span><span class="p">();</span>
     <span class="kt">double</span> <span class="n">right</span> <span class="o">=</span> <span class="n">right_</span><span class="o">-&gt;</span><span class="n">evaluate</span><span class="p">();</span>
 
-    <span class="c1">// Add them.</span>
+    <span class="c1">// 把它们加起来</span>
     <span class="k">return</span> <span class="n">left</span> <span class="o">+</span> <span class="n">right</span><span class="p">;</span>
   <span class="p">}</span>
 
@@ -387,7 +387,7 @@ delete the font style for english.
       <span class="kt">char</span> <span class="n">instruction</span> <span class="o">=</span> <span class="n">bytecode</span><span class="p">[</span><span class="n">i</span><span class="p">];</span>
       <span class="k">switch</span> <span class="p">(</span><span class="n">instruction</span><span class="p">)</span>
       <span class="p">{</span>
-        <span class="c1">// Cases for each instruction...</span>
+        <span class="c1">// 每条指令的跳转分支……</span>
       <span class="p">}</span>
     <span class="p">}</span>
   <span class="p">}</span>
@@ -418,7 +418,7 @@ delete the font style for english.
   <span class="o">:</span> <span class="n">stackSize_</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
   <span class="p">{}</span>
 
-  <span class="c1">// Other stuff...</span>
+  <span class="c1">// 其他代码……</span>
 
 <span class="k">private</span><span class="o">:</span>
   <span class="k">static</span> <span class="k">const</span> <span class="kt">int</span> <span class="n">MAX_STACK</span> <span class="o">=</span> <span class="mi">128</span><span class="p">;</span>
@@ -437,19 +437,19 @@ delete the font style for english.
 <span class="k">private</span><span class="o">:</span>
   <span class="kt">void</span> <span class="n">push</span><span class="p">(</span><span class="kt">int</span> <span class="n">value</span><span class="p">)</span>
   <span class="p">{</span>
-    <span class="c1">// Check for stack overflow.</span>
+    <span class="c1">// 检查栈溢出</span>
     <span class="n">assert</span><span class="p">(</span><span class="n">stackSize_</span> <span class="o">&lt;</span> <span class="n">MAX_STACK</span><span class="p">);</span>
     <span class="n">stack_</span><span class="p">[</span><span class="n">stackSize_</span><span class="o">++</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span><span class="p">;</span>
   <span class="p">}</span>
 
   <span class="kt">int</span> <span class="n">pop</span><span class="p">()</span>
   <span class="p">{</span>
-    <span class="c1">// Make sure the stack isn&#39;t empty.</span>
+    <span class="c1">// 保证栈不是空的</span>
     <span class="n">assert</span><span class="p">(</span><span class="n">stackSize_</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">);</span>
     <span class="k">return</span> <span class="n">stack_</span><span class="p">[</span><span class="o">--</span><span class="n">stackSize_</span><span class="p">];</span>
   <span class="p">}</span>
 
-  <span class="c1">// Other stuff...</span>
+  <span class="c1">// 其余的代码</span>
 <span class="p">};</span>
 </pre></div>
 
@@ -467,7 +467,7 @@ delete the font style for english.
 
   <span class="k">case</span> <span class="nl">INST_SET_WISDOM</span><span class="p">:</span>
   <span class="k">case</span> <span class="nl">INST_SET_AGILITY</span><span class="p">:</span>
-    <span class="c1">// Same as above...</span>
+    <span class="c1">// 像上面一样……</span>
 
   <span class="k">case</span> <span class="nl">INST_PLAY_SOUND</span><span class="p">:</span>
     <span class="n">playSound</span><span class="p">(</span><span class="n">pop</span><span class="p">());</span>
@@ -487,7 +487,7 @@ delete the font style for english.
 如下，我们为数值字面量定义了另一条指令类型：</p>
 <div class="codehilite"><pre><span></span><span class="k">case</span> <span class="nl">INST_LITERAL</span><span class="p">:</span>
 <span class="p">{</span>
-  <span class="c1">// Read the next byte from the bytecode.</span>
+  <span class="c1">// 从字节码中读取下一个字节</span>
   <span class="kt">int</span> <span class="n">value</span> <span class="o">=</span> <span class="n">bytecode</span><span class="p">[</span><span class="o">++</span><span class="n">i</span><span class="p">];</span>
   <span class="n">push</span><span class="p">(</span><span class="n">value</span><span class="p">);</span>
   <span class="k">break</span><span class="p">;</span>
@@ -531,7 +531,7 @@ delete the font style for english.
 
 <span class="k">case</span> <span class="nl">INST_GET_WISDOM</span><span class="p">:</span>
 <span class="k">case</span> <span class="nl">INST_GET_AGILITY</span><span class="p">:</span>
-  <span class="c1">// You get the idea...</span>
+  <span class="c1">// 你知道思路了吧……</span>
 </pre></div>
 
 
@@ -863,12 +863,12 @@ Lua转换为基于寄存器的虚拟机从而变得更快，这为寄存器虚�
   <span class="k">virtual</span> <span class="n">ValueType</span> <span class="n">type</span><span class="p">()</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
 
   <span class="k">virtual</span> <span class="kt">int</span> <span class="nf">asInt</span><span class="p">()</span> <span class="p">{</span>
-    <span class="c1">// Can only call this on ints.</span>
+    <span class="c1">// 只能在int上调用</span>
     <span class="n">assert</span><span class="p">(</span><span class="nb">false</span><span class="p">);</span>
     <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
   <span class="p">}</span>
 
-  <span class="c1">// Other conversion methods...</span>
+  <span class="c1">// 其他转换方法……</span>
 <span class="p">};</span>
 </pre></div>
 
