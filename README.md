@@ -21,4 +21,4 @@ Bob Nystrom同时在Github上无私地提供原本：[munificent/game-programmin
     - 删除google analysis代码（完成）。
     - 删除英文特殊字体（完成）。
     - 压缩图片（完成）。
-    - 使用更适合中文的CSS设置
+    - 使用更适合中文的CSS设置（完成）。

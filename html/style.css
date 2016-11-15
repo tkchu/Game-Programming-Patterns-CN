@@ -81,7 +81,12 @@ h3 {
   border-left: solid 8px #d9eaf2; }
 
 p {
-  margin: 15px 0; }
+  margin-bottom: 0.5em;
+  line-height: 1.7em;
+  text-align: justify;
+  text-justify: ideographic;
+  word-break: break-all;
+}
 
 ul, ol {
   padding: 0 0 0 24px; }
