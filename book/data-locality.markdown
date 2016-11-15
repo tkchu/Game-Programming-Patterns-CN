@@ -24,7 +24,7 @@
 
 这个数据来自*Computer Architecture: A Quantitative Approach*
 由John L. Hennessy, David A. Patterson, Andrea C. Arpaci-Dusseau基于Tony
-Albrecht's “[Pitfalls of Object-Oriented Programming][poop]”写就。
+Albrecht的“[Pitfalls of Object-Oriented Programming][poop]”写就。
 
 [poop]: http://seven-degrees-of-freedom.blogspot.com/2009/12/pitfalls-of-object-oriented-programming.html
 
@@ -351,14 +351,6 @@ CPU读到`Thing`，也会读取`Another`和`Also`（取决于数据的大小和c
 
 </aside>
 
-If our goal was to take a whirlwind tour around the game's address space like
-some "256MB of RAM in Four Nights!" cheap vacation package, this would be a
-fantastic deal. But our goal is to run the game quickly, and <span
-name="chase">traipsing</span> all over main memory is *not* the way to do that.
-Remember that `sleepFor500Cycles()` function? Well this code is effectively
-calling that *all the time*.
-
-
 <span name="chase"></span>
 
 如果我们目标是在游戏地址空间中四处乱转，完成“256MB内存四晚廉价游”，这也许是一个很好的决定。
@@ -601,11 +593,6 @@ Noel Llopis的[著名文章](http://gamesfromwithin.com/data-oriented-design)让
 </aside>
 
 ### 你如何处理多态？
-
-Up to this point, we've avoided subclassing and virtual methods. We have assumed we
-have nice packed arrays of *homogenous* objects. That way, we know they're all
-the exact same size. But polymorphism and dynamic dispatch are useful tools
-too. How do we reconcile this?
 
 到了现在，我们避开了子类和虚方法。
 我们假设有打包好的*同类*对象。

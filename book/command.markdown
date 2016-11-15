@@ -124,11 +124,6 @@
 我们刚才定义的类可以在之前的例子上正常工作，但有很大的局限。
 问题在于假设顶层的`jump()`, `fireGun()`之类的函数可以找到玩家的角色，然后像操纵木偶一样操纵它。
 
-That assumed coupling limits the usefulness of those commands. The *only* thing
-the `JumpCommand` can make jump is the player. Let's loosen that restriction.
-Instead of calling functions that find the commanded object themselves, we'll
-*pass in* the object that we want to order around:
-
 这些假定的耦合限制了这些命令的用处。`JumpCommand`*只能* 让玩家的角色跳跃。让我们放松这个限制。
 不让函数去找它们控制的角色，我们将函数控制的角色对象*传进去*：
 
@@ -138,11 +133,6 @@ Instead of calling functions that find the commanded object themselves, we'll
 我们将其传给`execute()`，这样可以在命令的子类中添加函数，来与我们选择的角色关联，就像这样：
 
 ^code jump-actor
-
-Now, we can use this one class to make any character in the game hop around.
-We're just missing a piece between the input handler and the command that takes
-the command and invokes it on the right object. First, we change `handleInput()`
-so that it *returns* commands:
 
 现在，我们可以使用这个类让游戏中的任何角色跳来跳去了。
 在输入控制部分和在对象上调用命令部分之间，我们还缺了一块代码。

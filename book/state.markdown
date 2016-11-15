@@ -258,6 +258,7 @@ class="pattern">类型对象</a>模式。
 ### 静态状态
 
 <span name="fn"></span>
+
 如果状态对象没有其他数据字段，
 那么它存储的唯一数据就是指向虚方法表的指针，用来调用它的方法。
 在这种情况下，没理由产生多个实例。毕竟每个实例都完全一样。
@@ -270,9 +271,10 @@ class="pattern">类型对象</a>模式。
 
 </aside>
 
-<span name="flyweight"></span>
 在那种情况下，你可以用一个*静态*实例。
 哪怕你有一堆FSM同时在同一状态上运行，它们也能指向同一实例，因为状态没有与状态机相关的部分。
+
+<span name="flyweight"></span>
 
 <aside name="flyweight">
 
