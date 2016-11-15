@@ -160,10 +160,6 @@ delete the font style for english.
 <h2><a href="#角色说明" name="角色说明">角色说明</a></h2>
 <p>我们刚才定义的类可以在之前的例子上正常工作，但有很大的局限。
 问题在于假设顶层的<code>jump()</code>, <code>fireGun()</code>之类的函数可以找到玩家的角色，然后像操纵木偶一样操纵它。</p>
-<p>That assumed coupling limits the usefulness of those commands. The <em>only</em> thing
-the <code>JumpCommand</code> can make jump is the player. Let&#8217;s loosen that restriction.
-Instead of calling functions that find the commanded object themselves, we&#8217;ll
-<em>pass in</em> the object that we want to order around:</p>
 <p>这些假定的耦合限制了这些命令的用处。<code>JumpCommand</code><em>只能</em> 让玩家的角色跳跃。让我们放松这个限制。
 不让函数去找它们控制的角色，我们将函数控制的角色对象<em>传进去</em>：</p>
 <div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">Command</span>
@@ -188,10 +184,6 @@ Instead of calling functions that find the commanded object themselves, we&#8217
 </pre></div>
 
 
-<p>Now, we can use this one class to make any character in the game hop around.
-We&#8217;re just missing a piece between the input handler and the command that takes
-the command and invokes it on the right object. First, we change <code>handleInput()</code>
-so that it <em>returns</em> commands:</p>
 <p>现在，我们可以使用这个类让游戏中的任何角色跳来跳去了。
 在输入控制部分和在对象上调用命令部分之间，我们还缺了一块代码。
 第一，我们修改<code>handleInput()</code>，让它可以<em>返回</em>命令：</p>

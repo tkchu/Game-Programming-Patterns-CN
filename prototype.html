@@ -216,15 +216,18 @@ delete the font style for english.
 
 
 <h3><a href="#模板" name="模板">模板</a></h3>
-<p><span name="templates"></span>
-如今，大多数C++开发者已然熟悉模板了。
+<p><span name="templates"></span></p>
+<p>如今，大多数C++开发者已然熟悉模板了。
 生产者类需要为某类怪物构建实例，但是我们不想硬编码是哪类怪物。
 自然的解决方案是将它作为模板中的<em>类型参数</em>：</p>
 <aside name="templates">
 <p>我不太确定程序员是学着喜欢C++模板还是完全畏惧并远离了C++。
 不管怎样，今日我见到的程序员中，使用C++的也都会使用模板。</p>
+<p>这里的<code>Spawner</code>类不必考虑将生产什么样的怪物，
+它总与指向<code>Monster</code>的指针打交道。</p>
+<p>如果我们只有<code>SpawnerFor&lt;T&gt;</code>类，模板类型没有办法共享父模板，
+这样的话，如果一段代码需要与产生多种怪物类型的生产者打交道，就都得接受模板参数。</p>
 </aside>
-<p><span name="base"></span></p>
 <div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">Spawner</span>
 <span class="p">{</span>
 <span class="k">public</span><span class="o">:</span>
@@ -246,12 +249,6 @@ delete the font style for english.
 </pre></div>
 
 
-<aside name="base">
-<p>这里的<code>Spawner</code>类不必考虑将生产什么样的怪物，
-它总与指向<code>Monster</code>的指针打交道。</p>
-<p>如果我们只有<code>SpawnerFor&lt;T&gt;</code>类，模板类型没有办法共享父模板，
-这样的话，如果一段代码需要与产生多种怪物类型的生产者打交道，就都得接受模板参数。</p>
-</aside>
 <h3><a href="#第一公民类型" name="第一公民类型">第一公民类型</a></h3>
 <p><span name="type-obj"></span>
 前面的两个解决方案使用类完成了需求，<code>Spawner</code>使用类型进行参数化。
