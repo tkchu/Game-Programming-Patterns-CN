@@ -20,5 +20,5 @@ Bob Nystrom同时在Github上无私地提供原本：[munificent/game-programmin
     - 通过使用百度CDN提供jquery（完成）。
     - 删除google analysis代码（完成）。
     - 删除英文特殊字体（完成）。
-    - 压缩图片
+    - 压缩图片（完成）。
     - 使用更适合中文的CSS设置
