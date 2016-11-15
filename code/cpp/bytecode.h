@@ -45,11 +45,11 @@ namespace Bytecode
 
       virtual double evaluate()
       {
-        // Evaluate the operands.
+        // 计算操作数
         double left = left_->evaluate();
         double right = right_->evaluate();
 
-        // Add them.
+        // 把它们加起来
         return left + right;
       }
 
@@ -160,7 +160,7 @@ namespace Bytecode
         char instruction = bytecode[i];
         switch (instruction)
         {
-          // Cases for each instruction...
+          // 每条指令的跳转分支……
             //^omit
           case INST_SPAWN_PARTICLES:
             break;
@@ -184,7 +184,7 @@ namespace Bytecode
       : stackSize_(0)
       {}
 
-      // Other stuff...
+      // 其他代码……
 
     private:
       static const int MAX_STACK = 128;
@@ -202,19 +202,19 @@ namespace Bytecode
     private:
       void push(int value)
       {
-        // Check for stack overflow.
+        // 检查栈溢出
         assert(stackSize_ < MAX_STACK);
         stack_[stackSize_++] = value;
       }
 
       int pop()
       {
-        // Make sure the stack isn't empty.
+        // 保证栈不是空的
         assert(stackSize_ > 0);
         return stack_[--stackSize_];
       }
 
-      // Other stuff...
+      // 其余的代码
       //^omit
       void interpret();
       static const int MAX_STACK = 128;
@@ -240,7 +240,7 @@ namespace Bytecode
 
         case INST_SET_WISDOM:
         case INST_SET_AGILITY:
-          // Same as above...
+          // 像上面一样……
 
         case INST_PLAY_SOUND:
           playSound(pop());
@@ -259,7 +259,7 @@ namespace Bytecode
         //^interpret-literal
         case INST_LITERAL:
         {
-          // Read the next byte from the bytecode.
+          // 从字节码中读取下一个字节
           int value = bytecode[++i];
           push(value);
           break;
@@ -276,7 +276,7 @@ namespace Bytecode
 
         case INST_GET_WISDOM:
         case INST_GET_AGILITY:
-          // You get the idea...
+          // 你知道思路了吧……
         //^read-stats
 
         //^add
@@ -333,12 +333,12 @@ namespace Bytecode
       virtual ValueType type() = 0;
 
       virtual int asInt() {
-        // Can only call this on ints.
+        // 只能在int上调用
         assert(false);
         return 0;
       }
 
-      // Other conversion methods...
+      // 其他转换方法……
     };
     //^value-interface
 

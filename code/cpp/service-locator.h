@@ -12,10 +12,10 @@ void example()
   int VERY_LOUD_BANG = 0;
 
   //^15
-  // Use a static class?
+  // 使用静态类？
   AudioSystem::playSound(VERY_LOUD_BANG);
 
-  // Or maybe a singleton?
+  // 还是使用单例？
   AudioSystem::instance()->playSound(VERY_LOUD_BANG);
   //^15
 }
@@ -37,17 +37,17 @@ class ConsoleAudio : public Audio
 public:
   virtual void playSound(int soundID)
   {
-    // Play sound using console audio api...
+    // 使用主机音频API播放声音……
   }
 
   virtual void stopSound(int soundID)
   {
-    // Stop sound using console audio api...
+    // 使用主机音频API停止声音……
   }
 
   virtual void stopAllSounds()
   {
-    // Stop all sounds using console audio api...
+    // 使用主机音频API停止所有声音……
   }
 };
 //^10
@@ -81,7 +81,7 @@ public:
 private:
   void log(const char* message)
   {
-    // Code to log message...
+    // 记录日志的代码……
   }
 
   Audio &wrapped_;
@@ -133,9 +133,9 @@ namespace Version2
   class DebugAudio: public Audio
   {
   public:
-    virtual void playSound(int soundID) { /* Do nothing. */ }
-    virtual void stopSound(int soundID) { /* Do nothing. */ }
-    virtual void stopAllSounds()        { /* Do nothing. */ }
+    virtual void playSound(int soundID) { /* 什么也不做 */ }
+    virtual void stopSound(int soundID) { /* 什么也不做 */ }
+    virtual void stopAllSounds()        { /* 什么也不做 */ }
   };
   class ReleaseAudio: public DebugAudio {};
 
@@ -161,10 +161,10 @@ namespace Version3
   //^3
   class Base
   {
-    // Code to locate service and set service_...
+    // 定位和设置服务的代码……
 
   protected:
-    // Derived classes can use service
+    // 派生类可以使用服务
     static Audio& getAudio() { return *service_; }
 
   private:
@@ -198,9 +198,9 @@ namespace Version5
   class NullAudio: public Audio
   {
   public:
-    virtual void playSound(int soundID) { /* Do nothing. */ }
-    virtual void stopSound(int soundID) { /* Do nothing. */ }
-    virtual void stopAllSounds()        { /* Do nothing. */ }
+    virtual void playSound(int soundID) { /* 什么也不做 */ }
+    virtual void stopSound(int soundID) { /* 什么也不做 */ }
+    virtual void stopAllSounds()        { /* 什么也不做 */ }
   };
   //^7
 
@@ -216,7 +216,7 @@ namespace Version5
     {
       if (service == NULL)
       {
-        // Revert to null service.
+        // 退回空服务
         service_ = &nullService_;
       }
       else
@@ -237,10 +237,10 @@ namespace Version5
   //^13
   void enableAudioLogging()
   {
-    // Decorate the existing service.
+    // 装饰现有的服务
     Audio *service = new LoggedAudio(Locator::getAudio());
 
-    // Swap it in.
+    // 将它换进来
     Locator::provide(service);
   }
   //^13

@@ -44,7 +44,7 @@ namespace DirtyFlag
       : mesh_(mesh),
         local_(Transform::origin())
       {}
-      
+
     private:
       Transform local_;
       Mesh* mesh_;
@@ -58,7 +58,7 @@ namespace DirtyFlag
     {
       //^scene-graph
       GraphNode* graph_ = new GraphNode(NULL);
-      // Add children to root graph node...
+      // 向根图节点增加子节点……
       //^scene-graph
       use(graph_);
     }
@@ -72,11 +72,11 @@ namespace DirtyFlag
   {
 
   }
-  
+
   namespace RenderOnTheFly
   {
     static const int MAX_CHILDREN = 16;
-    
+
     class GraphNode
     {
     public:
@@ -86,7 +86,7 @@ namespace DirtyFlag
       {}
 
       void render(Transform parentWorld);
-      
+
     private:
       Transform local_;
       Mesh* mesh_;
@@ -134,12 +134,12 @@ namespace DirtyFlag
       void render(Transform parentWorld, bool dirty);
       //^omit
 
-      // Other methods...
+      // 其他方法……
 
     private:
       Transform world_;
       bool dirty_;
-      // Other fields...
+      // 其他字段……
       //^omit
       Transform local_;
       Mesh* mesh_;

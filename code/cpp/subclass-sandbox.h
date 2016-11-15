@@ -20,17 +20,17 @@ namespace SimpleExample
 
     void move(double x, double y, double z)
     {
-      // Code here...
+      // 实现代码……
     }
 
     void playSound(SoundId sound, double volume)
     {
-      // Code here...
+      // 实现代码……
     }
 
     void spawnParticles(ParticleType type, int count)
     {
-      // Code here...
+      // 实现代码……
     }
   };
   //^1
@@ -41,7 +41,7 @@ namespace SimpleExample
   protected:
     virtual void activate()
     {
-      // Spring into the air.
+      // 空中滑行
       playSound(SOUND_SPROING, 1.0f);
       spawnParticles(PARTICLE_DUST, 10);
       move(0, 0, 20);
@@ -64,7 +64,7 @@ namespace Elaborated
     //^omit
     double getHeroX()
     {
-      // Code here...
+      // 实现代码……
       //^omit
       return 0;
       //^omit
@@ -72,7 +72,7 @@ namespace Elaborated
 
     double getHeroY()
     {
-      // Code here...
+      // 实现代码……
       //^omit
       return 0;
       //^omit
@@ -80,13 +80,13 @@ namespace Elaborated
 
     double getHeroZ()
     {
-      // Code here...
+      // 实现代码……
       //^omit
       return 0;
       //^omit
     }
 
-    // Existing stuff...
+    // 退出之类的……
   };
   //^3
 
@@ -98,20 +98,20 @@ namespace Elaborated
     {
       if (getHeroZ() == 0)
       {
-        // On the ground, so spring into the air.
+        // 在地面上，冲向空中
         playSound(SOUND_SPROING, 1.0f);
         spawnParticles(PARTICLE_DUST, 10);
         move(0, 0, 20);
       }
       else if (getHeroZ() < 10.0f)
       {
-        // Near the ground, so do a double jump.
+        // 接近地面，再跳一次
         playSound(SOUND_SWOOP, 1.0f);
         move(0, 0, getHeroZ() + 20);
       }
       else
       {
-        // Way up in the air, so do a dive attack.
+        // 正在空中，跳劈攻击
         playSound(SOUND_DIVE, 0.7f);
         spawnParticles(PARTICLE_SPARKLES, 1);
         move(0, 0, -getHeroZ());
@@ -146,20 +146,20 @@ namespace HelperClassBefore
   protected:
     void playSound(SoundId sound, double volume)
     {
-      // Code here...
+      // 实现代码……
     }
 
     void stopSound(SoundId sound)
     {
-      // Code here...
+      // 实现代码……
     }
 
     void setVolume(SoundId sound)
     {
-      // Code here...
+      // 实现代码……
     }
 
-    // Sandbox method and other operations...
+    // 沙盒方法和其他操作……
   };
   //^6
 };
@@ -171,17 +171,17 @@ namespace HelperClassAfter
   {
     void playSound(SoundId sound, double volume)
     {
-      // Code here...
+      // 实现代码……
     }
 
     void stopSound(SoundId sound)
     {
-      // Code here...
+      // 实现代码……
     }
 
     void setVolume(SoundId sound)
     {
-      // Code here...
+      // 实现代码……
     }
   };
   //^7
@@ -195,7 +195,7 @@ namespace HelperClassAfter
       return soundPlayer_;
     }
 
-    // Sandbox method and other operations...
+    // 沙箱方法和其他操作……
 
   private:
     SoundPlayer soundPlayer_;
@@ -215,7 +215,7 @@ namespace PassToConstructor
     : particles_(particles)
     {}
 
-    // Sandbox method and other operations...
+    // 沙箱方法和其他操作……
 
   private:
     ParticleSystem* particles_;
@@ -291,7 +291,7 @@ namespace StaticState
       particles_ = particles;
     }
 
-    // Sandbox method and other operations...
+    // 沙箱方法和其他操作……
 
   private:
     static ParticleSystem* particles_;
@@ -324,7 +324,7 @@ namespace UseServiceLocator
       particles.spawn(type, count);
     }
 
-    // Sandbox method and other operations...
+    // 沙箱方法和其他操作……
   };
   //^12
 }

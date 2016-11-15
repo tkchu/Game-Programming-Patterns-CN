@@ -28,13 +28,13 @@ namespace UpdateMethod
       //^just-patrol
       while (true)
       {
-        // Patrol right.
+        // 向右巡逻
         for (double x = 0; x < 100; x++)
         {
           skeleton.setX(x);
         }
 
-        // Patrol left.
+        // 向左巡逻
         for (double x = 100; x > 0; x--)
         {
           skeleton.setX(x);
@@ -50,7 +50,7 @@ namespace UpdateMethod
       bool patrollingLeft = false;
       double x = 0;
 
-      // Main game loop:
+      // 游戏主循环
       while (true)
       {
         if (patrollingLeft)
@@ -66,7 +66,7 @@ namespace UpdateMethod
 
         skeleton.setX(x);
 
-        // Handle user input and render game...
+        // 处理用户输入并渲染游戏……
       }
       //^patrol-in-loop
     }
@@ -74,16 +74,16 @@ namespace UpdateMethod
     void statues()
     {
       //^statues
-      // Skeleton variables...
+      // 骷髅的变量……
       Entity leftStatue;
       Entity rightStatue;
       int leftStatueFrames = 0;
       int rightStatueFrames = 0;
 
-      // Main game loop:
+      // 游戏主循环：
       while (true)
       {
-        // Skeleton code...
+        // 骷髅的代码……
 
         if (++leftStatueFrames == 90)
         {
@@ -97,7 +97,7 @@ namespace UpdateMethod
           rightStatue.shootLightning();
         }
 
-        // Handle user input and render game...
+        // 处理用户输入，渲染游戏
       }
       //^statues
     }
@@ -191,9 +191,9 @@ namespace UpdateMethod
     {
       while (true)
       {
-        // Handle user input...
+        // 处理用户输入……
 
-        // Update each entity.
+        // 更新每个实体
         //^update-component-entities
         for (int i = 0; i < numEntities_; i++)
         {
@@ -201,7 +201,7 @@ namespace UpdateMethod
         }
         //^update-component-entities
 
-        // Physics and rendering...
+        // 物理和渲染……
       }
     }
     //^game-loop
@@ -248,7 +248,7 @@ namespace UpdateMethod
         {
           shootLightning();
 
-          // Reset the timer.
+          // 重置计时器
           frames_ = 0;
         }
       }
@@ -259,7 +259,7 @@ namespace UpdateMethod
 
       void shootLightning()
       {
-        // Shoot the lightning...
+        // 火光效果……
       }
     };
     //^statue
@@ -279,7 +279,7 @@ namespace UpdateMethod
     //^forward
     void Entity::update()
     {
-      // Forward to state object.
+      // 转发给状态对象
       state_->update();
     }
     //^forward

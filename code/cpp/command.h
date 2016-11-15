@@ -72,7 +72,7 @@ namespace CommandPattern
       virtual void execute() { fireGun(); }
     };
 
-    // You get the idea...
+    // 你知道思路了吧
     //^command-classes
 
     //^input-handler-class
@@ -81,7 +81,7 @@ namespace CommandPattern
     public:
       void handleInput();
 
-      // Methods to bind commands...
+      // 绑定命令的方法……
 
     private:
       Command* buttonX_;
@@ -149,7 +149,7 @@ namespace CommandPattern
       if (isPressed(BUTTON_A)) return buttonA_;
       if (isPressed(BUTTON_B)) return buttonB_;
 
-      // Nothing pressed, so do nothing.
+      // 没有按下任何按键，就什么也不做
       return NULL;
     }
     //^handle-input-return
@@ -217,18 +217,18 @@ namespace CommandPattern
         Unit* unit = getSelectedUnit();
 
         if (isPressed(BUTTON_UP)) {
-          // Move the unit up one.
+          // 向上移动单位
           int destY = unit->y() - 1;
           return new MoveUnitCommand(unit, unit->x(), destY);
         }
 
         if (isPressed(BUTTON_DOWN)) {
-          // Move the unit down one.
+          // 向下移动单位
           int destY = unit->y() + 1;
           return new MoveUnitCommand(unit, unit->x(), destY);
         }
 
-        // Other moves...
+        // 其他的移动……
 
         return NULL;
       }
@@ -261,8 +261,8 @@ namespace CommandPattern
 
         virtual void execute()
         {
-          // Remember the unit's position before the move
-          // so we can restore it.
+          // 保存移动之前的位置，这样之后可以复原。
+
           xBefore_ = unit_->x();
           yBefore_ = unit_->y();
 

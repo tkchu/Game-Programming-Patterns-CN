@@ -1,11 +1,10 @@
 #pragma once
 
-// Makes the argument appear to be used so that we don't get an unused
-// variable warning for it. Lets us leave that warning on to catch unintended
-// unused variables.
+// 让变量表现得像是有用，这样我们不会因为未使用变量而获得警告。
+// 把警告用于捕获真正疏忽没有使用的变量。
 template <class T>
 void use(const T& obj) {
-  // Do nothing.
+  // 啥也不做
 }
 
 #define ASSERT(condition) \

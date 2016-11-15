@@ -64,7 +64,7 @@ namespace Version1
                             double xVel, double yVel,
                             int lifetime)
   {
-    // Find an available particle.
+    // 找到一个可用粒子
     for (int i = 0; i < POOL_SIZE; i++)
     {
       if (!particles_[i].inUse())
@@ -107,14 +107,14 @@ namespace Temp1
 
     union
     {
-      // State when it's in use.
+      // 使用时的状态
       struct
       {
         double x, y;
         double xVel, yVel;
       } live;
 
-      // State when it's available.
+      // 可重用时的状态
       Particle* next;
     } state_;
   };
@@ -155,16 +155,16 @@ namespace Temp1
   //^6
   ParticlePool::ParticlePool()
   {
-    // The first one is available.
+    // 第一个可用的粒子
     firstAvailable_ = &particles_[0];
 
-    // Each particle points to the next.
+    // 每个粒子指向下一个
     for (int i = 0; i < POOL_SIZE - 1; i++)
     {
       particles_[i].setNext(&particles_[i + 1]);
     }
 
-    // The last one terminates the list.
+    // 最后一个终结的列表
     particles_[POOL_SIZE - 1].setNext(NULL);
   }
   //^6
@@ -174,10 +174,10 @@ namespace Temp1
                             double xVel, double yVel,
                             int lifetime)
   {
-    // Make sure the pool isn't full.
+    // 保证池没有满
     assert(firstAvailable_ != NULL);
 
-    // Remove it from the available list.
+    // 将它从可用粒子列表中移除
     Particle* newParticle = firstAvailable_;
     firstAvailable_ = newParticle->getNext();
 
@@ -192,7 +192,7 @@ namespace Temp1
     {
       if (particles_[i].animate())
       {
-        // Add this particle to the front of the list.
+        // 将粒子加到列表的前部
         particles_[i].setNext(firstAvailable_);
         firstAvailable_ = &particles_[i];
       }
@@ -245,7 +245,7 @@ namespace Temp4
   //^12
   class Particle
   {
-    // Multiple ways to initialize.
+    // 多种初始化方式……
     void init(double x, double y);
     void init(double x, double y, double angle);
     void init(double x, double y, double xVel, double yVel);
@@ -256,17 +256,17 @@ namespace Temp4
   public:
     void create(double x, double y)
     {
-      // Forward to Particle...
+      // 转发给粒子……
     }
 
     void create(double x, double y, double angle)
     {
-      // Forward to Particle...
+      // 转发给粒子……
     }
 
     void create(double x, double y, double xVel, double yVel)
     {
-      // Forward to Particle...
+      // 转发给粒子……
     }
   };
   //^12
@@ -278,7 +278,7 @@ namespace Temp5
   class Particle
   {
   public:
-    // Multiple ways to initialize.
+    // 多种初始化方法
     void init(double x, double y);
     void init(double x, double y, double angle);
     void init(double x, double y, double xVel, double yVel);
@@ -289,7 +289,7 @@ namespace Temp5
   public:
     Particle* create()
     {
-      // Return reference to available particle...
+      // 返回可用粒子的引用……
       //^omit
       return &pool_[0];
       //^omit

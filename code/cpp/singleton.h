@@ -8,7 +8,7 @@ namespace Singleton1
   public:
     static FileSystem& instance()
     {
-      // Lazy initialize.
+      // 惰性初始化
       if (instance_ == NULL) instance_ = new FileSystem();
       return *instance_;
     }
@@ -76,14 +76,14 @@ namespace Singleton2
     virtual void  writeFile(char* path, char* contents) = 0;
   };
   //^2
-  
+
   //^derived-file-systems
   class PS3FileSystem : public FileSystem
   {
   public:
     virtual char* readFile(char* path)
-    { 
-      // Use Sony file IO API...
+    {
+      // 使用索尼的文件读写API……
       //^omit
       return NULL;
       //^omit
@@ -91,7 +91,7 @@ namespace Singleton2
 
     virtual void writeFile(char* path, char* contents)
     {
-      // Use sony file IO API...
+      // 使用索尼的文件读写API……
     }
   };
 
@@ -99,16 +99,16 @@ namespace Singleton2
   {
   public:
     virtual char* readFile(char* path)
-    { 
-      // Use Nintendo file IO API...
+    {
+      // 使用任天堂的文件读写API……
       //^omit
       return NULL;
       //^omit
     }
-    
+
     virtual void writeFile(char* path, char* contents)
     {
-      // Use Nintendo file IO API...
+      // 使用任天堂的文件读写API……
     }
   };
   //^derived-file-systems
@@ -141,20 +141,20 @@ namespace Singleton3
   class PS3FileSystem : public FileSystem
   {
     virtual char* readFile(char* path)
-    { 
+    {
       return NULL;
     }
-    
+
     virtual void writeFile(char* path, char* contents) {}
   };
 
   class WiiFileSystem : public FileSystem
   {
     virtual char* readFile(char* path)
-    { 
+    {
       return NULL;
     }
-    
+
     virtual void writeFile(char* path, char* contents) {}
   };
 
@@ -326,7 +326,7 @@ namespace Singleton10
   public:
     static Game& instance() { return instance_; }
 
-    // Functions to set log_, et. al. ...
+    // 设置log_, et. al. ……
 
     Log&         getLog()         { return *log_; }
     FileSystem&  getFileSystem()  { return *fileSystem_; }

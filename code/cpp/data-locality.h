@@ -41,28 +41,28 @@ namespace DataLocality
   class AIComponent
   {
   public:
-    void update() { /* Work with and modify state... */ }
+    void update() { /* 处理并修改状态…… */ }
 
   private:
-    // Goals, mood, etc. ...
+    // 目标，情绪，等等……
   };
 
   class PhysicsComponent
   {
   public:
-    void update() { /* Work with and modify state... */ }
+    void update() { /* 处理并修改状态…… */ }
 
   private:
-    // Rigid body, velocity, mass, etc. ...
+    // 刚体，速度，质量，等等……
   };
 
   class RenderComponent
   {
   public:
-    void render() { /* Work with and modify state... */ }
+    void render() { /* 处理并修改状态…… */ }
 
   private:
-    // Mesh, textures, shaders, etc. ...
+    // 网格，纹理，着色器，等等……
   };
   //^components
 
@@ -96,25 +96,25 @@ namespace DataLocality
     //^game-loop
     while (!gameOver)
     {
-      // Process AI.
+      // 处理AI
       for (int i = 0; i < numEntities; i++)
       {
         entities[i]->ai()->update();
       }
 
-      // Update physics.
+      // 更新物理
       for (int i = 0; i < numEntities; i++)
       {
         entities[i]->physics()->update();
       }
 
-      // Draw to screen.
+      // 绘制屏幕
       for (int i = 0; i < numEntities; i++)
       {
         entities[i]->render()->render();
       }
 
-      // Other game loop machinery for timing...
+      // 其他和时间有关的游戏循环机制……
     }
     //^game-loop
   }
@@ -138,25 +138,25 @@ namespace DataLocality
     //^game-loop-arrays
     while (!gameOver)
     {
-      // Process AI.
+      // 处理AI
       for (int i = 0; i < numEntities; i++)
       {
         aiComponents[i].update();
       }
 
-      // Update physics.
+      // 更新物理
       for (int i = 0; i < numEntities; i++)
       {
         physicsComponents[i].update();
       }
 
-      // Draw to screen.
+      // 绘制屏幕
       for (int i = 0; i < numEntities; i++)
       {
         renderComponents[i].render();
       }
 
-      // Other game loop machinery for timing...
+      // 其他和时间有关的游戏循环机制……
     }
     //^game-loop-arrays
 
@@ -172,8 +172,8 @@ namespace DataLocality
     //^omit particle-system
     bool isActive() { return false; }
     //^omit particle-system
-    void update() { /* Gravity, etc. ... */ }
-    // Position, velocity, etc. ...
+    void update() { /* 重力，等等…… */ }
+    // 位置，速度，等等……
   };
 
   class ParticleSystem
@@ -236,16 +236,15 @@ namespace DataLocality
   //^activate-particle
   void ParticleSystem::activateParticle(int index)
   {
-    // Shouldn't already be active!
+    // 不应该已被激活！
     assert(index >= numActive_);
 
-    // Swap it with the first inactive particle
-    // right after the active ones.
+    // 将它和激活粒子后第一个未被激活的粒子交换
     Particle temp = particles_[numActive_];
     particles_[numActive_] = particles_[index];
     particles_[index] = temp;
 
-    // Now there's one more.
+    // 现在多了一个激活粒子
     numActive_++;
   }
   //^activate-particle
@@ -253,14 +252,13 @@ namespace DataLocality
   //^deactivate-particle
   void ParticleSystem::deactivateParticle(int index)
   {
-    // Shouldn't already be inactive!
+    // 不应该已被激活！
     assert(index < numActive_);
 
-    // There's one fewer.
+    // 现在少了一个激活粒子
     numActive_--;
 
-    // Swap it with the last active particle
-    // right before the inactive ones.
+    // 将它和最后一个激活粒子交换
     Particle temp = particles_[numActive_];
     particles_[numActive_] = particles_[index];
     particles_[index] = temp;
@@ -300,7 +298,7 @@ namespace DataLocality
       void update() { /* ... */ }
 
     private:
-      // Previous fields...
+      // 之前的字段……
       LootType drop_;
       int minDrops_;
       int maxDrops_;
@@ -317,7 +315,7 @@ namespace DataLocality
     class AIComponent
     {
     public:
-      // Methods...
+      // 方法……
     private:
       Animation* animation_;
       double energy_;

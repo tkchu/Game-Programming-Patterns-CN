@@ -78,14 +78,14 @@ namespace ObserverPattern
           }
           break;
 
-          // Handle other events, and update heroIsOnBridge_...
+          // 处理其他事件，更新heroIsOnBridge_变量……
         }
       }
 
     private:
       void unlock(Achievement achievement)
       {
-        // Unlock if not already unlocked...
+        // 如果还没有解锁，那就解锁成就……
       }
 
       bool heroIsOnBridge_;
@@ -104,7 +104,7 @@ namespace ObserverPattern
     public:
       void addObserver(Observer* observer)
       {
-        // Add to array...
+        // 添加到数组中……
         //^omit
         observers_[numObservers_++] = observer;
         //^omit
@@ -112,7 +112,7 @@ namespace ObserverPattern
 
       void removeObserver(Observer* observer)
       {
-        // Remove from array...
+        // 从数组中移除……
         //^omit
         int index;
         for (index = 0; index < MAX_OBSERVERS; index++)
@@ -122,7 +122,7 @@ namespace ObserverPattern
 
         if (index < numObservers_)
         {
-          // Shift the following ones up.
+          // 将下一个向前移动
           for (; index < numObservers_ - 1; index++)
           {
             observers_[index] = observers_[index + 1];
@@ -133,7 +133,7 @@ namespace ObserverPattern
         //^omit
       }
 
-      // Other stuff...
+      // 其他代码……
       //^omit subject-notify
       //^omit subject-register
     protected:
@@ -145,7 +145,7 @@ namespace ObserverPattern
         }
       }
 
-      // Other stuff...
+      // 其他代码…………
       //^omit subject-notify
 
       //^omit subject-list
@@ -198,7 +198,7 @@ namespace ObserverPattern
       : next_(NULL)
       {}
 
-      // Other stuff...
+      // 其他代码……
       //^omit
       virtual void onNotify(const Entity& entity, Event event) {}
       //^omit
@@ -214,7 +214,7 @@ namespace ObserverPattern
       : head_(NULL)
       {}
 
-      // Methods...
+      // 方法……
       //^omit
       void addObserver(Observer* observer);
       void removeObserver(Observer* observer);
@@ -299,11 +299,10 @@ namespace ObserverPattern
       virtual void onNotify(Observable& observable) = 0;
 
     private:
-      // The Observable this Observer is watching.
+      // 观察者正观察的对象
       Observable* observable_ = NULL;
 
-      // The next and previous nodes in the circular linked list
-      // observers of observable_.
+      // 被观察这的环形链表的下一个和上一个节点。
       Observer* prev_;
       Observer* next_;
     };
@@ -322,7 +321,7 @@ namespace ObserverPattern
 
       virtual ~Observable()
       {
-        // Detach all of the observers.
+        // 分发给所有的观察者
         while (observer_ != NULL) observer_->detach();
       }
 
@@ -339,24 +338,23 @@ namespace ObserverPattern
         while (observer != observer_);
       }
 
-      // The first in the linked list of observers of this.
+      // 观察者链表中的第一个
       Observer* observer_;
     };
 
     void Observer::observe(Observable& observable)
     {
-      // Stop observing what it was previously observing.
+      // 停止观察正在观察的事物
       detach();
 
       if (observable.observer_ == NULL)
       {
-        // The first observer.
+        // 第一个观察者
         observable.observer_ = this;
       }
       else
       {
-        // Already have other observers, so link it in at the end of the
-        // list.
+        // 已然有了其他观察者，将它连接到链表的尾部。
         prev_ = observable.observer_->prev_;
         next_ = observable.observer_;
 
@@ -371,22 +369,22 @@ namespace ObserverPattern
     {
       if (observable_ == NULL) return;
 
-      // Make sure the observable itself isn't pointing at this node.
+      // 保证被观察者的观察者指针没有指向这个节点。
       if (observable_->observer_ == this)
       {
         if (next_ == this)
         {
-          // This is the only observer, so just clear it.
+          // 这是唯一的观察者，清空它即可
           observable_->observer_ = NULL;
         }
         else
         {
-          // Advance the next node.
+          // 推进到下一个节点
           observable_->observer_ = next_;
         }
       }
 
-      // Unlink this observer from the list.
+      // 将这个观察者从列表中去除
       prev_->next_ = next_;
       next_->prev_ = prev_;
 
@@ -411,7 +409,7 @@ namespace ObserverPattern
     private:
       const char* name_;
     };
-    
+
     class Ear : public Observer
     {
     public:
@@ -535,7 +533,7 @@ namespace ObserverPattern
       boop.sound();
       ASSERT(ear.numObserved == 1);
 
-      // Should stop listening to beep.
+      // 不应再听着beep
       ear.observe(boop);
       beep.sound();
       ASSERT(ear.numObserved == 1);

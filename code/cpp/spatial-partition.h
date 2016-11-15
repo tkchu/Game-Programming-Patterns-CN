@@ -34,16 +34,16 @@ namespace SpatialPartition
   {
     return left == right.position;
   }
-  
+
   namespace NaiveCollision
   {
     std::vector<std::pair<Unit*, Unit*> > hits;
-    
+
     void handleAttack(Unit* a, Unit* b)
     {
       hits.push_back(std::make_pair(a, b));
     }
-    
+
     //^pairwise
     void handleMelee(Unit* units[], int numUnits)
     {
@@ -79,7 +79,7 @@ namespace SpatialPartition
   namespace SimpleUnit
   {
     class Grid;
-    
+
     //^unit-simple
     class Unit
     {
@@ -111,7 +111,7 @@ namespace SpatialPartition
     public:
       Grid()
       {
-        // Clear the grid.
+        // 清空网格
         for (int x = 0; x < NUM_CELLS; x++)
         {
           for (int y = 0; y < NUM_CELLS; y++)
@@ -134,7 +134,7 @@ namespace SpatialPartition
     //^unit-linked
     class Unit
     {
-      // Previous code...
+      // 之前的代码……
     private:
       Unit* prev_;
       Unit* next_;
@@ -152,7 +152,7 @@ namespace SpatialPartition
     public:
       void add(Unit* unit);
 
-      // Previous code...
+      // 之前的代码……
       //^omit
       static const int NUM_CELLS = 10;
       static const int CELL_SIZE = 20;
@@ -166,7 +166,7 @@ namespace SpatialPartition
     public:
       Unit(Grid* grid, double x, double y);
 
-      // Previous code...
+      // 之前的代码……
       //^omit
       friend class Grid;
 
@@ -195,11 +195,11 @@ namespace SpatialPartition
     //^add
     void Grid::add(Unit* unit)
     {
-      // Determine which grid cell it's in.
+      // 检测它在哪个网格中
       int cellX = (int)(unit->x_ / Grid::CELL_SIZE);
       int cellY = (int)(unit->y_ / Grid::CELL_SIZE);
 
-      // Add to the front of list for the cell it's in.
+      // 加到网格的对象列表前段
       unit->prev_ = NULL;
       unit->next_ = cells_[cellX][cellY];
       cells_[cellX][cellY] = unit;
@@ -220,13 +220,13 @@ namespace SpatialPartition
     {
 
     }
-    
+
     class Grid
     {
     public:
       Grid()
       {
-        // Clear the grid.
+        // 清空网格
         for (int x = 0; x < NUM_CELLS; x++)
         {
           for (int y = 0; y < NUM_CELLS; y++)
@@ -259,7 +259,7 @@ namespace SpatialPartition
     class Unit
     {
       friend class Grid;
-      
+
     public:
       //^omit
       const char* name;
@@ -283,7 +283,7 @@ namespace SpatialPartition
       double x_, y_;
 
       Grid* grid_;
-      
+
       Unit* prev_;
       Unit* next_;
     };
@@ -299,21 +299,21 @@ namespace SpatialPartition
     //^grid-move
     void Grid::move(Unit* unit, double x, double y)
     {
-      // See which cell it was in.
+      // 看看它现在在哪个网格中
       int oldCellX = (int)(unit->x_ / Grid::CELL_SIZE);
       int oldCellY = (int)(unit->y_ / Grid::CELL_SIZE);
 
-      // See which cell it's moving to.
+      // 看看它移动向哪个网格
       int cellX = (int)(x / Grid::CELL_SIZE);
       int cellY = (int)(y / Grid::CELL_SIZE);
 
       unit->x_ = x;
       unit->y_ = y;
-      
-      // If it didn't change cells, we're done.
+
+      // 如果它没有改变网格，就到此为止
       if (oldCellX == cellX && oldCellY == cellY) return;
 
-      // Unlink it from the list of its old cell.
+      // 将它从老网格的列表中移除
       if (unit->prev_ != NULL)
       {
         unit->prev_->next_ = unit->next_;
@@ -324,24 +324,24 @@ namespace SpatialPartition
         unit->next_->prev_ = unit->prev_;
       }
 
-      // If it's the head of a list, remove it.
+      // 如果它是列表的头，移除它
       if (cells_[oldCellX][oldCellY] == unit)
       {
         cells_[oldCellX][oldCellY] = unit->next_;
       }
 
-      // Add it back to the grid at its new cell.
+      // 加到新网格的对象列表末尾
       add(unit);
     }
     //^grid-move
 
     void Grid::add(Unit* unit)
     {
-      // Determine which grid cell it's in.
+      // 检测它在哪个网格中
       int cellX = (int)(unit->x_ / Grid::CELL_SIZE);
       int cellY = (int)(unit->y_ / Grid::CELL_SIZE);
-      
-      // Add to the front of list for the cell its in.
+
+      // 加到它所在网格的对象列表前部
       unit->prev_ = NULL;
       unit->next_ = cells_[cellX][cellY];
       cells_[cellX][cellY] = unit;
@@ -444,7 +444,7 @@ namespace SpatialPartition
   namespace AttackDistance
   {
     const int ATTACK_DISTANCE = 2;
-    
+
     class Unit;
 
     void handleAttack(Unit* unit, Unit* other)
@@ -530,11 +530,11 @@ namespace SpatialPartition
       Unit* unit = cells_[x][y];
       while (unit != NULL)
       {
-        // Handle other units in this cell.
+        // 处理同一网格中的其他单位
         handleUnit(unit, unit->next_);
         //^omit handle-cell-unit
-        
-        // Also try the neighboring cells.
+
+        // 同样检测近邻网格
         if (x > 0 && y > 0) handleUnit(unit, cells_[x - 1][y - 1]);
         if (x > 0) handleUnit(unit, cells_[x - 1][y]);
         if (y > 0) handleUnit(unit, cells_[x][y - 1]);

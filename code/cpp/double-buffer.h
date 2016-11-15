@@ -67,7 +67,7 @@ namespace Unbuffered
     //^3
     buffer_.draw(1, 1);
     buffer_.draw(4, 1);
-    // <- Video driver reads pixels here!
+    // <- 图形驱动从这里读取像素！
     buffer_.draw(1, 3);
     buffer_.draw(2, 4);
     buffer_.draw(3, 4);
@@ -103,7 +103,7 @@ namespace Buffered
   private:
     void swap()
     {
-      // Just switch the pointers.
+      // 只需交换指针
       Framebuffer* temp = current_;
       current_ = next_;
       next_ = temp;
@@ -268,10 +268,10 @@ namespace BufferedSlapstick
 
     void swap()
     {
-      // Swap the buffer.
+      // 交换缓冲区
       currentSlapped_ = nextSlapped_;
 
-      // Clear the new "next" buffer.
+      // 清空新的“下一个”缓冲区。.
       nextSlapped_ = false;
     }
 
@@ -302,7 +302,7 @@ namespace BufferedSlapstick
     {
       actors_[i]->update();
     }
-    
+
     for (int i = 0; i < NUM_ACTORS; i++)
     {
       actors_[i]->swap();

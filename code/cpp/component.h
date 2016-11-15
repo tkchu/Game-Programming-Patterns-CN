@@ -14,8 +14,7 @@ class Controller
 public:
   static Joystick getJoystickDirection()
   {
-    // Determine which direction the user is currently
-    // pressing on the joystick...
+    // 检测现在玩家在按下手柄的哪个方向键……
     return DIR_NONE;
   }
 };
@@ -29,7 +28,7 @@ class Graphics
 public:
   void draw(Sprite& sprite, int x, int y)
   {
-    // Draw the sprite at the given position...
+    // 在给定位置绘制图形……
   }
 };
 
@@ -42,8 +41,7 @@ class World
 public:
   void resolveCollision(Volume& volume, int& x, int& y, int& velocity)
   {
-    // Determine what the hero is colliding with and
-    // modify position and velocity if needed...
+    // 检测英雄碰到了什么，如果需要的话，更改位置和速度……
   }
 };
 
@@ -54,7 +52,7 @@ namespace Motivation
   int getRenderState() { return INVISIBLE; }
   void playSound(int sound) {}
   static const int HIT_FLOOR = 1;
-  
+
   void temp()
   {
     //^gordian
@@ -92,30 +90,30 @@ namespace Monolithic
     Sprite spriteWalkRight_;
   };
   //^1
-    
+
   //^monolithic-update
   void Bjorn::update(World& world, Graphics& graphics)
   {
-    // Apply user input to hero's velocity.
+    // 根据用户输入修改英雄的速度
     switch (Controller::getJoystickDirection())
     {
       case DIR_LEFT:
         velocity_ -= WALK_ACCELERATION;
         break;
-      
+
       case DIR_RIGHT:
         velocity_ += WALK_ACCELERATION;
         break;
       //^omit
-      case DIR_NONE: break; // Do nothing.
+      case DIR_NONE: break; // 啥也不做
       //^omit
     }
-    
-    // Modify position by velocity.
+
+    // 根据速度修改位置
     x_ += velocity_;
     world.resolveCollision(volume_, x_, y_, velocity_);
-    
-    // Draw the appropriate sprite.
+
+    // 绘制合适的图形
     Sprite* sprite = &spriteStand_;
     if (velocity_ < 0)
     {
@@ -125,7 +123,7 @@ namespace Monolithic
     {
       sprite = &spriteWalkRight_;
     }
-    
+
     graphics.draw(*sprite, x_, y_);
   }
   //^monolithic-update
@@ -151,12 +149,12 @@ namespace SplitInputComponent
         case DIR_LEFT:
           bjorn.velocity -= WALK_ACCELERATION;
           break;
-          
+
         case DIR_RIGHT:
           bjorn.velocity += WALK_ACCELERATION;
           break;
           //^omit
-        case DIR_NONE: break; // Do nothing.
+        case DIR_NONE: break; // 啥也不做
           //^omit
       }
     }
@@ -190,11 +188,11 @@ namespace SplitAIComponent
       input_.update(*this);
       //^4
 
-      // Modify position by velocity.
+      // 根据速度修改位置
       x += velocity;
       world.resolveCollision(volume_, x, y, velocity);
 
-      // Draw the appropriate sprite.
+      // 绘制合适的图形
       Sprite* sprite = &spriteStand_;
       if (velocity < 0)
       {
@@ -351,12 +349,12 @@ namespace AbstractInput
         case DIR_LEFT:
           bjorn.velocity -= WALK_ACCELERATION;
           break;
-          
+
         case DIR_RIGHT:
           bjorn.velocity += WALK_ACCELERATION;
           break;
           //^omit
-        case DIR_NONE: break; // Do nothing.
+        case DIR_NONE: break; // 啥也不做
           //^omit
       }
     }
@@ -428,7 +426,7 @@ namespace AbstractInputBjorn
   public:
     virtual void update(Bjorn& bjorn)
     {
-      // AI to automatically control Bjorn...
+      // 自动控制Bjorn的AI……
     }
   };
   //^12
@@ -521,7 +519,7 @@ namespace BaseGameObject
   public:
     virtual void update(GameObject& obj, World& world)
     {
-      // Physics code...
+      // 物理代码……
     }
   };
 
@@ -530,7 +528,7 @@ namespace BaseGameObject
   public:
     virtual void update(GameObject& obj, Graphics& graphics)
     {
-      // Graphics code...
+      // 图形代码……
     }
   };
   //^16
@@ -577,7 +575,7 @@ namespace DirectComponentRef
       }
       else
       {
-        // Existing graphics code...
+        // 现存的图形代码……
         //^omit
         sprite = NULL;
         //^omit

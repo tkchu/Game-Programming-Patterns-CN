@@ -32,7 +32,7 @@ namespace State
 
   static const int JUMP_VELOCITY = 1;
   static const int MAX_CHARGE = 10;
-  
+
   namespace Spaghetti1
   {
     class Heroine
@@ -74,7 +74,7 @@ namespace State
         if (!isJumping_)
         {
           isJumping_ = true;
-          // Jump...
+          // 跳跃……
         }
       }
     }
@@ -97,7 +97,7 @@ namespace State
     {
       if (input == PRESS_B)
       {
-        // Jump if not jumping...
+        // 如果没在跳跃，就跳起来……
       }
       else if (input == PRESS_DOWN)
       {
@@ -133,7 +133,7 @@ namespace State
       {
         if (!isJumping_ && !isDucking_)
         {
-          // Jump...
+          // 跳跃……
         }
       }
       else if (input == PRESS_DOWN)
@@ -175,7 +175,7 @@ namespace State
       {
         if (!isJumping_ && !isDucking_)
         {
-          // Jump...
+          // 跳跃……
         }
       }
       else if (input == PRESS_DOWN)
@@ -195,7 +195,7 @@ namespace State
       {
         if (isDucking_)
         {
-          // Stand...
+          // 站立……
         }
       }
     }
@@ -230,10 +230,10 @@ namespace State
         Input input = PRESS_DOWN;
 
         //^start-ducking
-        // In standing state:
+        // 在站立状态：
         if (input == PRESS_DOWN)
         {
-          // Change state...
+          // 改变状态……
           chargeTime_ = 0;
           setGraphics(IMAGE_DUCK);
         }
@@ -267,7 +267,7 @@ namespace State
             setGraphics(IMAGE_DIVE);
           }
           break;
-          
+
         case STATE_DUCKING:
           if (input == RELEASE_DOWN)
           {
@@ -334,10 +334,10 @@ namespace State
             chargeTime_ = 0;
             setGraphics(IMAGE_DUCK);
           }
-          // Handle other inputs...
+          // 处理其他输入……
           break;
 
-          // Other states...
+          // 其他状态……
           //^omit
         case STATE_JUMPING:
         case STATE_DUCKING:
@@ -348,7 +348,7 @@ namespace State
     }
     //^state-switch-reset
   }
-  
+
   namespace StatePattern
   {
     class Heroine;
@@ -368,7 +368,7 @@ namespace State
     //^heroine-state
 
     class JumpingState : public HeroineState {};
-    
+
     class StandingState;
 
     //^gof-heroine
@@ -383,13 +383,13 @@ namespace State
       {
         state_->handleInput(*this, input);
       }
-      
+
       virtual void update()
       {
         state_->update(*this);
       }
 
-      // Other methods...
+      // 其他方法……
       //^omit
       void setGraphics(Animate animate) {}
       void superBomb() {}
@@ -413,7 +413,7 @@ namespace State
       virtual void handleInput(Heroine& heroine, Input input) {
         if (input == RELEASE_DOWN)
         {
-          // Change to standing state...
+          // 改回站立状态……
           heroine.setGraphics(IMAGE_STAND);
         }
       }
@@ -482,11 +482,11 @@ namespace State
     {
       if (input == PRESS_DOWN)
       {
-        // Other code...
+        // 其他代码……
         return new DuckingState();
       }
 
-      // Stay in this state.
+      // 保持这个状态
       return NULL;
     }
     //^duck
@@ -508,7 +508,7 @@ namespace State
       static JumpingState jumping;
       static DivingState diving;
 
-      // Other code...
+      // 其他代码……
     };
     //^heroine-static-states
 
@@ -568,7 +568,7 @@ namespace State
         return new StandingState();
       }
 
-      // Other code...
+      // 其他代码……
       //^omit
       return NULL;
       //^omit
@@ -609,7 +609,7 @@ namespace State
         heroine.setGraphics(IMAGE_STAND);
       }
 
-      // Other code...
+      // 其他代码……
     };
     //^standing-with-enter
 
@@ -622,7 +622,7 @@ namespace State
         delete state_;
         state_ = state;
 
-        // Call the enter action on the new state.
+        // 调用新状态的入口行为
         state_->enter(*this);
       }
     }
@@ -643,7 +643,7 @@ namespace State
         return new StandingState();
       }
 
-      // Other code...
+      // 其他代码……
       //^omit
       return NULL;
       //^omit
@@ -654,7 +654,7 @@ namespace State
   namespace Concurrent
   {
     class Heroine;
-    
+
     class HeroineState {
     public:
       void handleInput(Heroine& heroine, Input input) {}
@@ -663,7 +663,7 @@ namespace State
     //^two-states
     class Heroine
     {
-      // Other code...
+      // 其他代码……
       //^omit
       virtual void handleInput(Input input);
       //^omit
@@ -709,11 +709,11 @@ namespace State
       {
         if (input == PRESS_B)
         {
-          // Jump...
+          // 跳跃……
         }
         else if (input == PRESS_DOWN)
         {
-          // Duck...
+          // 俯卧……
         }
       }
     };
@@ -727,11 +727,11 @@ namespace State
       {
         if (input == RELEASE_DOWN)
         {
-          // Stand up...
+          // 站起……
         }
         else
         {
-          // Didn't handle input, so walk up hierarchy.
+          // 没有处理输入，返回上一层
           OnGroundState::handleInput(heroine, input);
         }
       }

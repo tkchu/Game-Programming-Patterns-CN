@@ -25,7 +25,7 @@ namespace EventQueue
       while (running)
       {
         Event event = getNextEvent();
-        // Handle event...
+        // 处理事件……
         //^omit
         use(event);
         //^omit
@@ -61,7 +61,7 @@ namespace EventQueue
       void onSelect(int index)
       {
         Audio::playSound(SOUND_BLOOP, VOL_MAX);
-        // Other stuff...
+        // 其他代码……
       }
     };
     //^menu-bloop
@@ -86,7 +86,7 @@ namespace EventQueue
         numPending_ = 0;
       }
 
-      // Other stuff...
+      // 其他代码……
       //^omit
       static void playSound(SoundId id, int volume);
       //^omit
@@ -132,7 +132,7 @@ namespace EventQueue
         numPending_ = 0;
       }
 
-      // Other stuff...
+      // 其他代码……
       //^omit
     private:
       static const int MAX_PENDING = 16;
@@ -159,7 +159,7 @@ namespace EventQueue
         tail_ = 0;
       }
 
-      // Methods...
+      // 方法……
       //^omit
       static void playSound(SoundId id, int volume);
       static void update();
@@ -173,7 +173,7 @@ namespace EventQueue
       static int head_;
       static int tail_;
 
-      // Array...
+      // 数组……
     };
     //^head-tail
 
@@ -192,7 +192,7 @@ namespace EventQueue
     //^tail-update
     void Audio::update()
     {
-      // If there are no pending requests, do nothing.
+      // 如果这里没有待处理的请求，那就什么也不做。
       if (head_ == tail_) return;
 
       ResourceId resource = loadSound(pending_[head_].id);
@@ -235,7 +235,7 @@ namespace EventQueue
     {
       assert((tail_ + 1) % MAX_PENDING != head_);
 
-      // Add to the end of the list.
+      // 添加到列表的尾部
       pending_[tail_].id = id;
       pending_[tail_].volume = volume;
       tail_ = (tail_ + 1) % MAX_PENDING;
@@ -245,7 +245,7 @@ namespace EventQueue
     //^ring-update
     void Audio::update()
     {
-      // If there are no pending requests, do nothing.
+      // 如果没有待处理的请求，就啥也不做
       if (head_ == tail_) return;
 
       ResourceId resource = loadSound(pending_[head_].id);
@@ -288,28 +288,28 @@ namespace EventQueue
     //^drop-dupe-play
     void Audio::playSound(SoundId id, int volume)
     {
-      // Walk the pending requests.
+      // 遍历待处理的请求
       for (int i = head_; i != tail_;
            i = (i + 1) % MAX_PENDING)
       {
         if (pending_[i].id == id)
         {
-          // Use the larger of the two volumes.
+          // 使用较大的音量
           pending_[i].volume = max(volume, pending_[i].volume);
 
-          // Don't need to enqueue.
+          // 无需入队
           return;
         }
       }
 
-      // Previous code...
+      // 之前的代码……
     }
     //^drop-dupe-play
 
     //^ring-update
     void Audio::update()
     {
-      // If there are no pending requests, do nothing.
+      // 如果没有待处理的请求，就什么也不做
       if (head_ == tail_) return;
 
       ResourceId resource = loadSound(pending_[head_].id);
@@ -356,7 +356,7 @@ namespace EventQueue
 
       void update()
       {
-        
+
       }
 
     private:
@@ -366,7 +366,7 @@ namespace EventQueue
         SoundId id;
         int volume;
       };
-      
+
       static const int MAX_MESSAGES = 16;
 
       SoundMessage queue_[MAX_MESSAGES];
