@@ -41,7 +41,7 @@ delete the font style for english.
 <p>处理器和RAM发展速度从1980开始不同。如你所见，CPU飞跃式发展，RAM读取速度被远远甩到了后面。</p>
 <p>这个数据来自<em>Computer Architecture: A Quantitative Approach</em>
 由John L. Hennessy, David A. Patterson, Andrea C. Arpaci-Dusseau基于Tony
-Albrecht&#8217;s “<a href="http://seven-degrees-of-freedom.blogspot.com/2009/12/pitfalls-of-object-oriented-programming.html">Pitfalls of Object-Oriented Programming</a>”写就。</p>
+Albrecht的“<a href="http://seven-degrees-of-freedom.blogspot.com/2009/12/pitfalls-of-object-oriented-programming.html">Pitfalls of Object-Oriented Programming</a>”写就。</p>
 </aside>
 <p>为了让你超高速的CPU刮起指令风暴，
 它需要从内存获取数据加载到寄存器。
@@ -341,12 +341,6 @@ CPU读到<code>Thing</code>，也会读取<code>Another</code>和<code>Also</cod
 <aside name="lines">
 <p>每一帧，游戏循环得追踪这些指针来获取数据。</p>
 </aside>
-<p>If our goal was to take a whirlwind tour around the game&#8217;s address space like
-some &#8220;256MB of RAM in Four Nights!&#8221; cheap vacation package, this would be a
-fantastic deal. But our goal is to run the game quickly, and <span
-name="chase">traipsing</span> all over main memory is <em>not</em> the way to do that.
-Remember that <code>sleepFor500Cycles()</code> function? Well this code is effectively
-calling that <em>all the time</em>.</p>
 <p><span name="chase"></span></p>
 <p>如果我们目标是在游戏地址空间中四处乱转，完成“256MB内存四晚廉价游”，这也许是一个很好的决定。
 但是我们的目标是让游戏跑得尽可能快，而在主存四处乱逛<em>不是</em>一个好办法。
@@ -661,10 +655,6 @@ calling that <em>all the time</em>.</p>
 <p>Noel Llopis的<a href="http://gamesfromwithin.com/data-oriented-design">著名文章</a>让很多人围绕缓存设计游戏，他称之为“面向数据的设计”。</p>
 </aside>
 <h3><a href="#你如何处理多态？" name="你如何处理多态？">你如何处理多态？</a></h3>
-<p>Up to this point, we&#8217;ve avoided subclassing and virtual methods. We have assumed we
-have nice packed arrays of <em>homogenous</em> objects. That way, we know they&#8217;re all
-the exact same size. But polymorphism and dynamic dispatch are useful tools
-too. How do we reconcile this?</p>
 <p>到了现在，我们避开了子类和虚方法。
 我们假设有打包好的<em>同类</em>对象。
 这种情况下，我们知道它们有同样的大小。
