@@ -255,7 +255,7 @@ delete the font style for english.
 
 <p>这里我们唯一需要的操作就是<code>combine()</code>，
 这样可以将父节点链上所有的自身变换组合起来获得对象的世界变换。
-同样有办法来获得“原始”变换——通常是一个单位矩阵，表示没有平移，旋转，或者拉伸。</p>
+同样有办法来获得原点变换——通常使用一个单位矩阵，表示没有平移，旋转，或者拉伸。</p>
 <p>下面，我们勾勒出场景图中的对象类。这是在应用模式<em>之前</em>最低限度所需的东西：</p>
 <div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">GraphNode</span>
 <span class="p">{</span>
