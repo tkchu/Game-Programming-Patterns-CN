@@ -165,16 +165,17 @@ delete the font style for english.
 <ul>
 <li>从磁盘上加载它需要实例化并连接大量这种小对象。</li>
 </ul>
-<p><span name="vtable"></span>
-* 这些对象和之间的指针会占据大量的内存。在32位机上，那个小的算术表达式至少要占据68字节，这还没考虑内存对其呢。</p>
-<div class="codehilite"><pre><span></span><span class="nt">&lt;aside</span> <span class="na">markdown=</span><span class="s">&quot;1&quot;</span> <span class="na">name=</span><span class="s">&quot;vtable&quot;</span><span class="nt">&gt;</span>
+<p><span name="vtable"></span></p>
+<ul>
+<li>
+<p>这些对象和之间的指针会占据大量的内存。在32位机上，那个小的算术表达式至少要占据68字节，这还没考虑内存对其呢。</p>
+<aside name="vtable">
 
-如果你想自己算算，别忘了算上虚函数表指针。
+<p>如果你想自己算算，别忘了算上虚函数表指针。</p>
+</aside>
 
-<span class="nt">&lt;/aside&gt;</span>
-</pre></div>
-
-
+</li>
+</ul>
 <p><span name="cache"></span></p>
 <ul>
 <li>
@@ -186,7 +187,7 @@ delete the font style for english.
 
 </li>
 </ul>
-<p>将这些拼到一起，怎么念？M-A-N。
+<p>将这些拼到一起，怎么念？S-L-O-W。
 这就是为什么大多数广泛应用的编程语言不基于解释器模式。
 太慢了，也太消耗内存了。</p>
 <h3><a href="#虚拟的机器码" name="虚拟的机器码">虚拟的机器码</a></h3>
