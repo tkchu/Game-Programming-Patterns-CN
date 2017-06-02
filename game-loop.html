@@ -392,8 +392,7 @@ Fred的机器做了10倍的操作，所以他的误差要比George的更大。
 而现在的实现中，它还在左边。这意味着看上去移动发生了卡顿。</p>
 <p>方便的是，我们<em>实际</em>知道渲染时距离两次更新的时间：它被存储在<code>lag</code>中。
 我们在<code>lag</code>比更新时间间隔小时，而不是<code>lag</code>是<em>零</em>时，跳出循环进行渲染。
-<code>lag</code>的剩余量？那就是到下一帧的时间。
-n we go to render, we&#8217;ll pass that in:</p>
+<code>lag</code>的剩余量？那就是到下一帧的时间。</p>
 <p>当我们要渲染时，我们将它传入：</p>
 <p><span name="normal"></span></p>
 <div class="codehilite"><pre><span></span><span class="n">render</span><span class="p">(</span><span class="n">lag</span> <span class="o">/</span> <span class="n">MS_PER_UPDATE</span><span class="p">);</span>
