@@ -157,7 +157,7 @@
 《游戏设计模式》分为三大块。
 第一部分介绍并划分本书的框架。包含你现在阅读的这章和[下一章](architecture-performance-and-games.html)。
 
-第二部分，[重放设计模式](design-patterns-revisited.html)，复习了GoF书籍里的很多模式。
+第二部分，[重访设计模式](design-patterns-revisited.html)，复习了GoF书籍里的很多模式。
 在每一章中，我给出我对这个模式的看法，以及我认为它和游戏编程有什么关系。
 
 最后一部分是这本书最肥美的部分。
