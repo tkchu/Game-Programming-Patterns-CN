@@ -317,7 +317,7 @@ Eich充分利用了这一点，他在十天内创建了JavaScript的第一个版
 </aside>
 
 但除那以外，我相信在实践中，JavaScript更像是基于类的而不是基于原型的语言。
-一个要点是JavaScript移除了一些基
+JavaScript与Self有所偏离，其中一个要点是除去了基于原型语言的核心操作“克隆”。
 
 在JavaScript中没有方法来克隆一个对象。
 最接近的方法是`Object.create()`，允许你创建新对象作为现有对象的委托。
