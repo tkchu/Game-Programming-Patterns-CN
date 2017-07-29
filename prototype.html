@@ -368,7 +368,7 @@ A对象可以拥有B对象，B对象被称为A对象的“原型”，
 Eich充分利用了这一点，他在十天内创建了JavaScript的第一个版本。</p>
 </aside>
 <p>但除那以外，我相信在实践中，JavaScript更像是基于类的而不是基于原型的语言。
-一个要点是JavaScript移除了一些基</p>
+JavaScript与Self有所偏离，其中一个要点是除去了基于原型语言的核心操作“克隆”。</p>
 <p>在JavaScript中没有方法来克隆一个对象。
 最接近的方法是<code>Object.create()</code>，允许你创建新对象作为现有对象的委托。
 这个方法在ECMAScript5中才添加，而那已是JavaScript出现后的十四年了。
