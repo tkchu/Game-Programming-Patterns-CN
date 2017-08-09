@@ -40,3 +40,10 @@ function refreshAsides() {
     aside.offset({top: span.position().top - 3});
   });
 }
+
+function RedirectToEnglishPage(){
+  var pathname = window.location.pathname;
+  var htmlnames = pathname.split('/');
+  var htmlname = htmlnames[htmlnames.length-1];
+  window.location = "http://gameprogrammingpatterns.com/" + htmlname;
+}
