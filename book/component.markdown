@@ -540,8 +540,6 @@
 
 就像以前一样，我建议你从简单的开始，然后如果需要的话，加入其他的通信路径。
 
-## See Also
-
 ## 参见
 
 * [Unity](http://unity3d.com)核心架构中[`GameObject`](http://docs.unity3d.com/Documentation/Manual/GameObjects.html)类完全根据这样的原则设计[components](http://docs.unity3d.com/Manual/UsingComponents.html)。
