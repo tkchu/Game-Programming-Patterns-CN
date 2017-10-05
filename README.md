@@ -22,3 +22,21 @@ Bob Nystrom同时在Github上无私地提供原本：[munificent/game-programmin
     - 删除英文特殊字体（完成）。
     - 压缩图片（完成）。
     - 使用更适合中文的CSS设置（完成）。
+
+# 编译本书
+
+这本书使用Markdown写就(book/)。使用了一些Python脚本(script/format.py)、SASS文件(asset/style.scss)及HTML模板(asset/template.html)转换为最终的HTML文件(html/)。想要自行编译，需要安装Python 2.7，以及Python Markdown, Pygments,和SmartyPants:
+
+$ pip install markdown
+$ pip install pygments
+$ pip install smartypants
+
+可能需要使用sudo指令或者管理员权限。在此之后，使用：
+
+$ python script/format.py
+
+请从本项目的根目录运行该脚本，本脚本也可以以监视模式运行：
+
+$ python script/format.py --watch
+
+这会监视对markdown文件，SASS文件或HTML模板的修改，并生成必要的文件。
