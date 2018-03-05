@@ -22,8 +22,58 @@ delete the font style for english.
 </head>
 <body id="top">
 
-<span class="toc" onclick="RedirectToEnglishPage()">
-  <button style="position:fixed;bottom:10px;left:10px;color:#1481b8;">&equiv; 查看英文原文</button>
+<span class="toc">
+	<aside class="index noShowOnSmallScren" name="index">
+		<h2>目录</h2>
+		<ul>
+		  <li><a href="acknowledgements.html">致谢</a>
+		  <li><a href="introduction.html">序</a>
+		    <ul>
+		      <li><a href="architecture-performance-and-games.html">架构，性能和游戏</a></li>
+		    </ul>
+		  </li>
+		  <li><a href="design-patterns-revisited.html">重访设计模式</a>
+		    <ul>
+		      <li><a href="command.html">命令模式</a></li>
+		      <li><a href="flyweight.html">享元模式</a></li>
+		      <li><a href="observer.html">观察者模式</a></li>
+		      <li><a href="prototype.html">原型模式</a></li>
+		      <li><a href="singleton.html">单例模式</a></li>
+		      <li><a href="state.html">状态模式</a></li>
+		    </ul>
+		  </li>
+		  <li><a href="sequencing-patterns.html">序列模式</a>
+		    <ul>
+		      <li><a href="double-buffer.html">双缓冲模式</a></li>
+		      <li><a href="game-loop.html">游戏循环</a></li>
+		      <li><a href="update-method.html">更新方法</a></li>
+		    </ul>
+		  </li>
+		  <li><a href="behavioral-patterns.html">行为模式</a>
+		    <ul>
+		      <li><a href="bytecode.html">字节码</a></em></li>
+		      <li><a href="subclass-sandbox.html">子类沙箱</a></li>
+		      <li><a href="type-object.html">类型对象</a></li>
+		    </ul>
+		  </li>
+		  <li><a href="decoupling-patterns.html">解耦模式</a>
+		    <ul>
+		      <li><a href="component.html">组件模式</a></li>
+		      <li><a href="event-queue.html">事件队列</a></li>
+		      <li><a href="service-locator.html">服务定位器</a></li>
+		    </ul>
+		  </li>
+		  <li><a href="optimization-patterns.html">优化模式</a>
+		    <ul>
+		      <li><a href="data-locality.html">数据局部性</a></li>
+		      <li><a href="dirty-flag.html">脏标识模式</a></li>
+		      <li><a href="object-pool.html">对象池模式</a></li>
+		      <li><a href="spatial-partition.html">空间分区</a></li>
+		    </ul>
+		  </li>
+		</ul>
+	</aside>
+  <button style="position:fixed;bottom:10px;left:10px;color:#1481b8;" onclick="RedirectToEnglishPage()">&equiv; 查看英文原文</button>
 </span>
 
 <div class="page sidebar">
@@ -37,7 +87,7 @@ delete the font style for english.
 <h1 class="book"><a href="/">游戏设计模式</a><span class="section"><a href="design-patterns-revisited.html">Design Patterns Revisited</a></span></h1>
 <p><span name="original"></span>
 我第一次听到“原型”这个词是在<em>设计模式</em>中。
-如今，似乎每个人都在用这个词，但他们讨论的实际不是<a href="http://en.wikipedia.org/wiki/Prototype_pattern" class="gof-pattern">设计模式</a>。
+如今，似乎每个人都在用这个词，但他们讨论的实际上不是<a href="http://en.wikipedia.org/wiki/Prototype_pattern" class="gof-pattern">设计模式</a>。
 我们会讨论他们所说的原型，也会讨论术语“原型”的有趣之处，和其背后的理念。
 但首先，让我们重访传统的设计模式。</p>
 <aside name="original">
@@ -100,7 +150,7 @@ delete the font style for english.
 </pre></div>
 
 
-<p>除非你会根据代码数量来获得工资，
+<p>除非你会根据代码量来获得工资，
 否则将这些焊在一起很明显不是好方法。
 众多类，众多引用，众多冗余，众多副本，众多重复自我……</p>
 <p>原型模式提供了一个解决方案。
@@ -108,7 +158,7 @@ delete the font style for english.
 如果你有一个恶灵，你可以制造更多恶灵。
 如果你有一个恶魔，你可以制造其他恶魔。
 任何怪物都可以被视为<em>原型</em>怪物，产出其他版本的自己。</p>
-<p>为了实现这个功能，我们给基类<code>Monster</code>一个抽象方法<code>clone()</code>：</p>
+<p>为了实现这个功能，我们给基类<code>Monster</code>添加一个抽象方法<code>clone()</code>：</p>
 <div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">Monster</span>
 <span class="p">{</span>
 <span class="k">public</span><span class="o">:</span>
@@ -301,7 +351,7 @@ OOP的特性是它将状态和行为紧紧地绑在一起。</p>
 <p>没有人能与世隔绝，但这个对象是。</p>
 </aside>
 <p>如果这就是Self语言的全部，那它将很难使用。
-基于类的语言中的继承，不管有多少缺陷，给了有用的机制来重用代码，避免重复。
+基于类的语言中的继承，不管有多少缺陷，总归提供了有用的机制来重用代码，避免重复。
 为了不使用类而实现一些类似的功能，Self语言加入了<em>委托</em>。</p>
 <p><span name="parent"></span>
 如果要在对象中寻找字段或者调用方法，首先在对象内部查找。
@@ -320,7 +370,7 @@ OOP的特性是它将状态和行为紧紧地绑在一起。</p>
 当你需要新的某物，你可以直接<code>new Thingamabob()</code>，或者随便什么你喜欢的表达法。
 类是实例的生产工厂。</p>
 <p>不用类，我们怎样创建新的实例？
-特别的，我们如何创建一堆有共同点的新东西？
+特别地，我们如何创建一堆有共同点的新东西？
 就像这个设计模式，在Self中，达到这点的方式是使用<em>克隆</em>。</p>
 <p>在Self语言中，就好像<em>每个</em>对象都自动支持原型设计模式。
 任何对象都能被克隆。为了获得一堆相似的对象，你：</p>
@@ -352,7 +402,7 @@ Self非常的灵活，为此创造了很多虚拟机的机制来保持高速运�
 最终，在构建语言缺失的库概念时，我放弃了。</p>
 <p>鉴于我之前的经验都来自基于类的语言，因此我的头脑可能已经固定在它的范式上了。
 但是直觉上，我认为大部分人还是喜欢有清晰定义的“事物”。</p>
-<p>除去基于类语言自身的成功以外，看看有多少游戏用类建模描述玩家角色，以及不同的敌人、物品、技能。
+<p>除去基于类的语言自身的成功以外，看看有多少游戏用类建模描述玩家角色，以及不同的敌人、物品、技能。
 不是游戏中的每个怪物都与众不同，你不会看到“洞穴人和哥布林还有雪混合在一起”这样的怪物。</p>
 <p><span name="telling"></span>
 原型是非常酷的范式，我希望有更多人了解它，
@@ -377,7 +427,7 @@ Eich充分利用了这一点，他在十天内创建了JavaScript的第一个版
 JavaScript与Self有所偏离，其中一个要点是除去了基于原型语言的核心操作“克隆”。</p>
 <p>在JavaScript中没有方法来克隆一个对象。
 最接近的方法是<code>Object.create()</code>，允许你创建新对象作为现有对象的委托。
-这个方法在ECMAScript5中才添加，而那已是JavaScript出现后的十四年了。
+这个方法在ECMAScript5中才添加，而那已是JavaScript出现后的第十四年了。
 相对于克隆，让我带你参观一下JavaScript中定义类和创建对象的经典方法。
 我们从<em>构造器函数</em>开始：</p>
 <div class="codehilite"><pre><span></span><span class="kd">function</span> <span class="nx">Weapon</span><span class="p">(</span><span class="nx">range</span><span class="p">,</span> <span class="nx">damage</span><span class="p">)</span> <span class="p">{</span>
@@ -397,7 +447,7 @@ JavaScript与Self有所偏离，其中一个要点是除去了基于原型语言
 <p><code>new</code>也为你做了另外一件事。
 当它创建那个新的空对象时，它将空对象的委托和一个原型对象连接起来。
 你可以用<code>Weapon.prototype</code>来获得原型对象。</p>
-<p>在构造器中添加属性，而通常向原型对象添加方法来定义<em>行为</em>。就像这样：</p>
+<p>属性是添加到构造器中的，而定义<strong>行为</strong>通常是通过向原型对象添加方法。就像这样：</p>
 <div class="codehilite"><pre><span></span><span class="nx">Weapon</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">attack</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">target</span><span class="p">)</span> <span class="p">{</span>
   <span class="k">if</span> <span class="p">(</span><span class="nx">distanceTo</span><span class="p">(</span><span class="nx">target</span><span class="p">)</span> <span class="o">&gt;</span> <span class="k">this</span><span class="p">.</span><span class="nx">range</span><span class="p">)</span> <span class="p">{</span>
     <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">&quot;Out of range!&quot;</span><span class="p">);</span>
@@ -410,7 +460,7 @@ JavaScript与Self有所偏离，其中一个要点是除去了基于原型语言
 
 <p>这给武器原型添加了<code>attack</code>属性，其值是一个函数。
 由于<code>new Weapon()</code>返回的每一个对象都有给<code>Weapon.prototype</code>的委托，
-你现在可以调用<code>sword.attack()</code>，这样调用那个函数。
+你现在可以通过调用<code>sword.attack()</code> 来调用那个函数。
 看上去像是这样：</p>
 <p><img src="images/prototype-weapon.png" alt="一个武器原型包含一个 attack() 方法和其他方法。一个宝剑对象包含一个指向武器的委托和其他字段。" /></p>
 <p>让我们复习一下：</p>
@@ -421,19 +471,19 @@ JavaScript与Self有所偏离，其中一个要点是除去了基于原型语言
 </ul>
 <p>说我疯了吧，但这听起来很像是我之前描述的类。
 你<em>可以</em>在JavaScript中写原型风格的代码（<em>不用</em> 克隆），
-但是就语法和惯用法更推荐基于类的实现。</p>
+但是语言的语法和惯用法更鼓励基于类的实现。</p>
 <p><span name="good"></span>
 个人而言，我认为这是好事。
-就像我说的，我发现一切都使用原型，那么很难编写代码，
+就像我说的，我发现如果一切都使用原型，就很难编写代码，
 所以我喜欢JavaScript，它将整个核心语义包上了一层糖衣。</p>
 <h2><a href="#为数据模型构建原型" name="为数据模型构建原型">为数据模型构建原型</a></h2>
-<p>好吧，我之前不断的讨论我<em>不喜欢</em>原型的原因，这让这一章读起来令人沮丧。
-我认为这本书该更欢乐些，所以在最后，让我们讨论讨论原型<em>确实</em>有用，或者更加精确，<em>委托</em> 有用的地方。</p>
+<p>好吧，我之前不断地讨论我<em>不喜欢</em>原型的原因，这让这一章读起来令人沮丧。
+我认为这本书应该更欢乐些，所以在最后，让我们讨论讨论原型<em>确实</em>有用，或者更加精确，<em>委托</em> 有用的地方。</p>
 <p>随着编程的进行，如果你比较程序与数据的字节数，
 那么你会发现数据的占比稳定地增长。
 早期的游戏在程序中生成几乎所有东西，这样程序可以塞进磁盘和老式游戏卡带。
 在今日的游戏中，代码只是驱动游戏的“引擎”，游戏是完全由数据定义的。</p>
-<p>这很好，但是将内容推到数据文件中并不能魔术般解决组织大项目的挑战。
+<p>这很好，但是将内容推到数据文件中并不能魔术般地解决组织大项目的挑战。
 它只能把这挑战变得更难。
 我们使用编程语言就因为它们有办法管理复杂性。</p>
 <p>不再是将一堆代码拷来拷去，我们将其移入函数中，通过名字调用。
@@ -498,9 +548,9 @@ JavaScript与Self有所偏离，其中一个要点是除去了基于原型语言
 但是无能的JSON没法这么做。所以让我们把它做得更加巧妙些。</p>
 <p><span name="meta"></span></p>
 <p>我们可以为对象添加<code>"prototype"</code>字段，记录委托对象的名字。
-如果在此对象内没找到一个字段，那去委托对象中查找。</p>
+如果在此对象内没找到一个字段，那就去委托对象中查找。</p>
 <aside name="meta">
-<p>这让<code>"prototype"</code>不再是数据，成为了<em>元</em>数据。
+<p>这让<code>"prototype"</code>不再是数据，而成为了<em>元</em>数据。
 哥布林有绿色疣皮和黄色牙齿。
 它们没有原型。
 原型是<em>表示哥布林的数据模型</em>的属性，而不是哥布林本身的属性。</p>

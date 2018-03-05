@@ -22,8 +22,58 @@ delete the font style for english.
 </head>
 <body id="top">
 
-<span class="toc" onclick="RedirectToEnglishPage()">
-  <button style="position:fixed;bottom:10px;left:10px;color:#1481b8;">&equiv; 查看英文原文</button>
+<span class="toc">
+	<aside class="index noShowOnSmallScren" name="index">
+		<h2>目录</h2>
+		<ul>
+		  <li><a href="acknowledgements.html">致谢</a>
+		  <li><a href="introduction.html">序</a>
+		    <ul>
+		      <li><a href="architecture-performance-and-games.html">架构，性能和游戏</a></li>
+		    </ul>
+		  </li>
+		  <li><a href="design-patterns-revisited.html">重访设计模式</a>
+		    <ul>
+		      <li><a href="command.html">命令模式</a></li>
+		      <li><a href="flyweight.html">享元模式</a></li>
+		      <li><a href="observer.html">观察者模式</a></li>
+		      <li><a href="prototype.html">原型模式</a></li>
+		      <li><a href="singleton.html">单例模式</a></li>
+		      <li><a href="state.html">状态模式</a></li>
+		    </ul>
+		  </li>
+		  <li><a href="sequencing-patterns.html">序列模式</a>
+		    <ul>
+		      <li><a href="double-buffer.html">双缓冲模式</a></li>
+		      <li><a href="game-loop.html">游戏循环</a></li>
+		      <li><a href="update-method.html">更新方法</a></li>
+		    </ul>
+		  </li>
+		  <li><a href="behavioral-patterns.html">行为模式</a>
+		    <ul>
+		      <li><a href="bytecode.html">字节码</a></em></li>
+		      <li><a href="subclass-sandbox.html">子类沙箱</a></li>
+		      <li><a href="type-object.html">类型对象</a></li>
+		    </ul>
+		  </li>
+		  <li><a href="decoupling-patterns.html">解耦模式</a>
+		    <ul>
+		      <li><a href="component.html">组件模式</a></li>
+		      <li><a href="event-queue.html">事件队列</a></li>
+		      <li><a href="service-locator.html">服务定位器</a></li>
+		    </ul>
+		  </li>
+		  <li><a href="optimization-patterns.html">优化模式</a>
+		    <ul>
+		      <li><a href="data-locality.html">数据局部性</a></li>
+		      <li><a href="dirty-flag.html">脏标识模式</a></li>
+		      <li><a href="object-pool.html">对象池模式</a></li>
+		      <li><a href="spatial-partition.html">空间分区</a></li>
+		    </ul>
+		  </li>
+		</ul>
+	</aside>
+  <button style="position:fixed;bottom:10px;left:10px;color:#1481b8;" onclick="RedirectToEnglishPage()">&equiv; 查看英文原文</button>
 </span>
 
 <div class="page sidebar">
@@ -36,7 +86,7 @@ delete the font style for english.
 <h1>单例模式</h1>
 <h1 class="book"><a href="/">游戏设计模式</a><span class="section"><a href="design-patterns-revisited.html">Design Patterns Revisited</a></span></h1>
 <p>这个章节不同寻常。
-其他章节展示如何使用某个个设计模式。
+其他章节展示如何使用某个设计模式。
 这个章节展示如何<em>避免</em>使用某个设计模式。</p>
 <p><span name="instance"></span>
 尽管它的意图是好的，GoF描述的<a class="gof-pattern" href="http://c2.com/cgi/wiki?SingletonPattern">单例模式</a>通常弊大于利。
@@ -57,13 +107,13 @@ delete the font style for english.
 <p>我们从“并且”那里将句子分为两部分，分别进行考虑。</p>
 <h3><a href="#保证一个类只有一个实例" name="保证一个类只有一个实例">保证一个类只有一个实例</a></h3>
 <p>有时候，如果类存在多个实例就不能正确的运行。
-通常发生在类与保存全局状态的外部系统互动。</p>
+通常发生在类与保存全局状态的外部系统互动时。</p>
 <p>考虑封装文件系统的API类。
 因为文件操作需要一段时间完成，所以类使用异步操作。
 这就意味着可以同时运行多个操作，必须让它们相互协调。
 如果一个操作创建文件，另一个操作删除同一文件，封装器类需要同时考虑，保证它们没有相互妨碍。</p>
 <p>为了实现这点，对我们封装器类的调用必须接触之前的每个操作。
-如果用户可以自由的创建类的实例，这个实例就无法知道另一实例之前的操作。
+如果用户可以自由地创建类的实例，这个实例就无法知道另一实例之前的操作。
 而单例模式提供的构建类的方式，在编译时保证类只有单一实例。</p>
 <h3><a href="#提供了访问该实例的全局访问点" name="提供了访问该实例的全局访问点">提供了访问该实例的全局访问点</a></h3>
 <p>游戏中的不同系统都会使用文件系统封装类：日志，内容加载，游戏状态保存，等等。
@@ -114,7 +164,7 @@ delete the font style for english.
 哪怕是在多线程情况下，C++11标准也保证了本地静态变量只会初始化一次，
 因此，假设你有一个现代C++编译器，这段代码是线程安全的，而前面的那个例子不是。</p>
 <aside name="thread">
-<p>当然，你单例类本身的线程安全是个不同的问题！这里只保证了它的<em>初始化</em>没问题。</p>
+<p>当然，单例类本身的线程安全是个不同的问题！这里只保证了它的<em>初始化</em>没问题。</p>
 </aside>
 <h2><a href="#为什么我们使用它" name="为什么我们使用它">为什么我们使用它</a></h2>
 <p>看起来已有成效。
@@ -134,7 +184,7 @@ delete the font style for english.
     这就意味着不能使用在程序加载时才获取的信息（举个例子，从文件加载的配置）。
     这也意味着它们的相互依赖是不可靠的——编译器可不保证以什么样的顺序初始化静态变量。</p>
 <p>惰性初始化解决了以上两个问题。
-单例会尽可能晚的初始化，所以那时它需要的所有信息都应该可用了。
+单例会尽可能晚地初始化，所以那时它需要的所有信息都应该可用了。
 只要没有环状依赖，一个单例在初始化它自己的时甚至可以引用另一个单例。</p>
 </li>
 <li>
@@ -228,7 +278,7 @@ delete the font style for english.
 这里是一旦我们将一些不必要的单例写进代码，会给自己带来的麻烦：</p>
 <h3><a href="#它是一个全局变量" name="它是一个全局变量">它是一个全局变量</a></h3>
 <p>当游戏还是由几个家伙在车库中完成时，榨干硬件性能比象牙塔里的软件工程原则更重要。
-C语言和汇编程序员前辈能毫无问题的使用全局变量和静态变量，发布好游戏。
+C语言和汇编程序员前辈能毫无问题地使用全局变量和静态变量，发布好游戏。
 但随着游戏变得越来越大，越来越复杂，架构和管理开始变成瓶颈，
 阻碍我们发布游戏的，除了硬件限制，还有<em>生产力</em>限制。</p>
 <p>所以我们迁移到了像C++这样的语言，
@@ -253,7 +303,7 @@ C语言和汇编程序员前辈能毫无问题的使用全局变量和静态变�
 </li>
 <li>
 <p><strong>促进了耦合的发生。</strong>
-    新加入团队的程序员也许不熟悉你们完美，可维护，松散耦合的游戏架构，
+    新加入团队的程序员也许不熟悉你们完美、可维护、松散耦合的游戏架构，
     但还是刚刚获得了第一个任务：在岩石撞击地面时播放声音。
     你我都知道这不需要将物理和<em>音频</em>代码耦合，但是他只想着把任务完成。
     不幸的是，我们的<code>AudioPlayer</code>是全局可见的。
@@ -264,7 +314,7 @@ C语言和汇编程序员前辈能毫无问题的使用全局变量和静态变�
 <li>
 <p><strong>对并行不友好。</strong>
     那些在单核CPU上运行游戏的日子已经远去。
-    哪怕完全不需要并行的优势，现代的代码至少应考虑在多线程环境下<em>工作</em>。
+    哪怕完全不需要并行的优势，现代的代码至少也应考虑在多线程环境下<em>工作</em>。
     当我们将某些东西转为全局变量时，我们创建了一块每个线程都能看到并访问的内存，
     却不知道其他线程是否正在使用那块内存。
     这种方式带来了死锁，竞争状态，以及其他很难解决的线程同步问题。</p>
@@ -285,9 +335,9 @@ C语言和汇编程序员前辈能毫无问题的使用全局变量和静态变�
 <h3><a href="#它能在你只有一个问题的时候解决两个" name="它能在你只有一个问题的时候解决两个">它能在你只有一个问题的时候解决两个</a></h3>
 <p>在GoF对单例模式的描述中，“并且”这个词有点奇怪。
 这个模式解决了一个问题还是两个问题呢？如果我们只有其中一个问题呢？
-保证实例是唯一存在的很有用的，但是谁告诉我们要让<em>每个人</em>都能接触到它？
+保证实例是唯一存在的是很有用的，但是谁告诉我们要让<em>每个人</em>都能接触到它？
 同样，全局接触很方便，但是必须禁止存在多个实例吗？</p>
-<p>这两问题中的后者，便利的访问，是使用单例模式几乎全部的原因。
+<p>这两个问题中的后者，便利的访问，几乎是使用单例模式的全部原因。
 想想日志类。大部分模块都能从记录诊断日志中获益。
 但是，如果将<code>Log</code>类的实例传给每个需要这个方法的函数，那就混杂了产生的数据，模糊了代码的意图。</p>
 <p>明显的解决方案是让<code>Log</code>类成为单例。
@@ -301,11 +351,11 @@ C语言和汇编程序员前辈能毫无问题的使用全局变量和静态变�
 程序员需要翻过很多页代码来找到他关心的记录。</p>
 <p><span name="worse"></span>
 我们想将日志分散到多个文件中来解决这点。
-为了达到这点，我们得为游戏不同的领域创造单独的日志记录者：
+为了达到这点，我们得为游戏的不同领域创造单独的日志记录者：
 网络，UI，声音，游戏，玩法。
 但是我们做不到。
 <code>Log</code>类不再允许我们创建多个实例，而且调用的方式也保证了这一点：</p>
-<div class="codehilite"><pre><span></span><span class="nt">Log</span><span class="o">:</span><span class="nd">:instance</span><span class="o">()</span><span class="nc">.write</span><span class="o">(</span><span class="s2">&quot;Some event.&quot;</span><span class="o">);</span>
+<div class="codehilite"><pre><span></span><span class="nt">Log</span><span class="p">::</span><span class="nd">instance</span><span class="o">()</span><span class="p">.</span><span class="nc">write</span><span class="o">(</span><span class="s2">&quot;Some event.&quot;</span><span class="o">);</span>
 </pre></div>
 
 
@@ -318,13 +368,13 @@ C语言和汇编程序员前辈能毫无问题的使用全局变量和静态变�
 他们中的大多数既没有时间，也没有动机修复它。</p>
 </aside>
 <h3><a href="#惰性初始化从你那里剥夺了控制权" name="惰性初始化从你那里剥夺了控制权">惰性初始化从你那里剥夺了控制权</a></h3>
-<p>拥有虚拟内存和软性性能需求的PC里，惰性初始化是一个小技巧。
+<p>在拥有虚拟内存和软性性能需求的PC里，惰性初始化是一个小技巧。
 游戏则是另一种状况。初始化系统需要消耗时间：分配内存，加载资源，等等。
 如果初始化音频系统消耗了几百个毫秒，我们需要控制它何时发生。
-如果在第一次声音播放时惰性初始化它自己，这初始化有可能发生游戏的高潮，导致可见的掉帧和断续的游戏体验。</p>
+如果在第一次声音播放时惰性初始化它自己，这可能发生在游戏的高潮部分，导致可见的掉帧和断续的游戏体验。</p>
 <p><span name="fragment"></span>
 同样，游戏通常需要严格管理在堆上分配的内存来避免碎片。
-如果音频系统在初始化时分配到了堆上，我们需要知道<em>何时</em>初始化发生了，
+如果音频系统在初始化时分配到了堆上，我们需要知道初始化在<em>何时</em>发生，
 这样我们可以控制内存待在堆的<em>哪里</em>。</p>
 <aside name="fragment">
 <p><a class="pattern" href="object-pool.html">对象池模式</a>一节中有内存碎片的其他细节。</p>
@@ -446,7 +496,7 @@ C语言和汇编程序员前辈能毫无问题的使用全局变量和静态变�
 <p><span name="wrapper"></span>
 这是单例模式帮你解决的一个问题。
 就像在文件系统的例子中那样，保证类只有一个实例是很重要的。
-但是，这不意味着我们需要提供对实例的<em>公众</em><em>全局</em>访问。
+但是，这不意味着我们需要提供对实例的<em>公众</em>，<em>全局</em>访问。
 我们想要减少某部分代码的公众部分，甚至让它在类中是私有的。
 在这些情况下，提供一个全局接触点消弱了整体架构。</p>
 <aside name="wrapper">
@@ -485,14 +535,14 @@ C语言和汇编程序员前辈能毫无问题的使用全局变量和静态变�
 在debug build时，这通常会启动调试器，或至少打印失败断言所在的文件和行号。</p>
 <p><code>assert()</code>表示，
 “我断言这个总该是真的。如果不是，那就是漏洞，我想<em>立刻</em>停止并处理它。”
-这样你在代码区域之间定义约束。
+这使得你可以在代码区域之间定义约束。
 如果函数断言它的某个参数不能为<code>NULL</code>，那就是说，“我和调用者定下了协议：传入的参数不会<code>NULL</code>。”</p>
 <p>断言帮助我们在游戏发生预期以外的事时立刻追踪漏洞，
 而不是等到错误最终显现在用户可见的某些事物上。
 它们是代码中的栅栏，围住漏洞，这样漏洞就不能从制造它的代码边逃开。</p>
 </aside>
 <p>这个实现的缺点是只在<em>运行时</em>检查并阻止多重实例化。
-单例模式，正相反，通过类的自然结构，在编译时就能确定实例是单一的。</p>
+单例模式正相反，通过类的自然结构，在编译时就能确定实例是单一的。</p>
 <h3><a href="#为了给实例提供方便的访问方法" name="为了给实例提供方便的访问方法">为了给实例提供方便的访问方法</a></h3>
 <p>便利的访问是我们使用单例的一个主要原因。
 这让我们在不同地方获取需要的对象更加容易。
@@ -521,7 +571,7 @@ C语言和汇编程序员前辈能毫无问题的使用全局变量和静态变�
 看到<code>Log</code>出现在它的参数列表中是很奇怪的事情，像这样的情况，我们需要考虑其他的选项。</p>
 <aside name="aop">
 
-<p>像日志这样撒布在代码库各处的是“横切关注点”(cross-cutting concern)。
+<p>像日志这样散布在代码库各处的是“横切关注点”(cross-cutting concern)。
 小心地处理横切关注点是架构中的持久挑战，特别是在静态类型语言中。</p>
 <p><a href="http://en.wikipedia.org/wiki/Aspect-oriented_programming">面向切面编程</a>被设计出来应对它们。</p>
 </aside>
@@ -531,7 +581,7 @@ C语言和汇编程序员前辈能毫无问题的使用全局变量和静态变�
 <p><strong>从基类中获得。</strong>
     很多游戏架构有浅层但是宽泛的继承层次，通常只有一层深。
     举个例子，你也许有<code>GameObject</code>基类，每个游戏中的敌人或者对象都继承它。
-    使用这样的架构，很大一部分游戏代码会存在这些“子”推导类中。
+    使用这样的架构，很大一部分游戏代码会存在于这些“子”推导类中。
     这就意味着这些类已经有了对同样事物的相同获取方法：它们的<code>GameObject</code>基类。
     我们可以利用这点：</p>
 <p><span name="gameobject"></span></p>
@@ -554,7 +604,7 @@ C语言和汇编程序员前辈能毫无问题的使用全局变量和静态变�
 </pre></div>
 
 
-<p>这保证任何<code>GameObject</code>之外的代码都不能接触<code>Log</code>对象，但是每个派生的实体确实能使用<code>getLog()</code>。
+<p>这保证任何<code>GameObject</code>之外的代码都不能接触<code>Log</code>对象，但是每个派生的实体都确实能使用<code>getLog()</code>。
 这种使用protected函数，让派生对象使用的模式，
 被涵盖在<a class="pattern" href="subclass-sandbox.html">子类沙箱</a>这章中。</p>
 <aside name="gameobject">
@@ -622,7 +672,7 @@ C语言和汇编程序员前辈能毫无问题的使用全局变量和静态变�
 <h2><a href="#单例中还剩下什么" name="单例中还剩下什么">单例中还剩下什么</a></h2>
 <p>剩下的问题，何处我们<em>应该</em>使用真实的单例模式？
 说实话，我从来没有在游戏中使用全部的GoF模式。
-为了保证实例是单一的，我通常简单的使用静态类。
+为了保证实例是单一的，我通常简单地使用静态类。
 如果这无效，我使用静态标识位，在运行时检测是不是只有一个实例被创建了。</p>
 <p>书中还有一些其他章节也许能有所帮助。
 <a class="pattern" href="subclass-sandbox.html">子类沙箱</a>模式通过分享状态，

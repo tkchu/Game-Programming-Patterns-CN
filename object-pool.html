@@ -22,8 +22,58 @@ delete the font style for english.
 </head>
 <body id="top">
 
-<span class="toc" onclick="RedirectToEnglishPage()">
-  <button style="position:fixed;bottom:10px;left:10px;color:#1481b8;">&equiv; 查看英文原文</button>
+<span class="toc">
+	<aside class="index noShowOnSmallScren" name="index">
+		<h2>目录</h2>
+		<ul>
+		  <li><a href="acknowledgements.html">致谢</a>
+		  <li><a href="introduction.html">序</a>
+		    <ul>
+		      <li><a href="architecture-performance-and-games.html">架构，性能和游戏</a></li>
+		    </ul>
+		  </li>
+		  <li><a href="design-patterns-revisited.html">重访设计模式</a>
+		    <ul>
+		      <li><a href="command.html">命令模式</a></li>
+		      <li><a href="flyweight.html">享元模式</a></li>
+		      <li><a href="observer.html">观察者模式</a></li>
+		      <li><a href="prototype.html">原型模式</a></li>
+		      <li><a href="singleton.html">单例模式</a></li>
+		      <li><a href="state.html">状态模式</a></li>
+		    </ul>
+		  </li>
+		  <li><a href="sequencing-patterns.html">序列模式</a>
+		    <ul>
+		      <li><a href="double-buffer.html">双缓冲模式</a></li>
+		      <li><a href="game-loop.html">游戏循环</a></li>
+		      <li><a href="update-method.html">更新方法</a></li>
+		    </ul>
+		  </li>
+		  <li><a href="behavioral-patterns.html">行为模式</a>
+		    <ul>
+		      <li><a href="bytecode.html">字节码</a></em></li>
+		      <li><a href="subclass-sandbox.html">子类沙箱</a></li>
+		      <li><a href="type-object.html">类型对象</a></li>
+		    </ul>
+		  </li>
+		  <li><a href="decoupling-patterns.html">解耦模式</a>
+		    <ul>
+		      <li><a href="component.html">组件模式</a></li>
+		      <li><a href="event-queue.html">事件队列</a></li>
+		      <li><a href="service-locator.html">服务定位器</a></li>
+		    </ul>
+		  </li>
+		  <li><a href="optimization-patterns.html">优化模式</a>
+		    <ul>
+		      <li><a href="data-locality.html">数据局部性</a></li>
+		      <li><a href="dirty-flag.html">脏标识模式</a></li>
+		      <li><a href="object-pool.html">对象池模式</a></li>
+		      <li><a href="spatial-partition.html">空间分区</a></li>
+		    </ul>
+		  </li>
+		</ul>
+	</aside>
+  <button style="position:fixed;bottom:10px;left:10px;color:#1481b8;" onclick="RedirectToEnglishPage()">&equiv; 查看英文原文</button>
 </span>
 
 <div class="page sidebar">
@@ -36,25 +86,25 @@ delete the font style for english.
 <h1>对象池模式</h1>
 <h1 class="book"><a href="/">游戏设计模式</a><span class="section"><a href="optimization-patterns.html">Optimization Patterns</a></span></h1>
 <h2><a href="#意图" name="意图">意图</a></h2>
-<p><em>放弃单独地分配和释放对象，从固定的池子中重用对象，以提高性能和内存使用率</em></p>
+<p><em>放弃单独地分配和释放对象，从固定的池中重用对象，以提高性能和内存使用率</em></p>
 <h2><a href="#动机" name="动机">动机</a></h2>
 <p>我们在处理游戏的视觉效果。
 当英雄释放了法术，我们想要在屏幕上爆发闪光。
 这需要调用<em>粒子系统</em>，产生动态的闪烁图形，显示动画直到图形消失。</p>
-<p>由于一次简单的魔杖挥舞就能产生成百上千的粒子，系统需要能够快速生成它们。
+<p>由于一次简单的魔杖挥舞就能产生成百上千的粒子，系统需要能够快速地生成它们。
 更重要的是，我们需要保证创建和销毁这些粒子不会造成<em>内存碎片</em>。</p>
 <h3><a href="#碎片的诅咒" name="碎片的诅咒">碎片的诅咒</a></h3>
 <p>为游戏主机或者移动设备编程在许多方面比为普通的计算机编程更像是嵌入式编程。
-内存紧张，玩家希望游戏能如岩石般稳定运行，压缩内存的管理器很难有效。
+内存紧张，玩家希望游戏能如磐石般稳定运行，压缩内存的管理器很难有效。
 在这种环境下，内存碎片是致命的。</p>
 <p><span name="park"></span></p>
 <p>碎片意味着在堆中的空余空间被打碎成了很多小的内存碎片，而不是大的连续内存块。
-<em>总共的</em> 可用内存也许很大，但是最长的<em>连续</em>空间可能难以忍受的小。
+<em>总共的</em> 可用内存也许很大，但是最长的<em>连续</em>空间可能难以忍受地小。
 假设我们有十四个空余字节，但是被一块正在使用的内存分割成了两个七字节的碎片。
 而我们尝试分配十二字节的对象，那么就会失败。屏幕上不会有更多的闪烁火花了。</p>
 <aside name="park">
 <p>这有点像在已经停了很多车的繁忙街道上停车。
-如果它们挤在一起，那就有地方停，但空闲地带变成了车之间的<em>碎片</em>空间。</p>
+如果它们挤在一起，尽管空间还是有剩余的，但空闲地带变成了车之间的<em>碎片</em>空间。</p>
 </aside>
 <p><span name="heap"></span></p>
 <p><img src="images/object-pool-heap-fragment.png" alt="一系列导致碎片化的内存操作。" /></p>
@@ -62,7 +112,7 @@ delete the font style for english.
 <p>这里展现了堆是怎么碎片化的，以及即使在理论上有足够的可用内存，内存也会分配失败。</p>
 </aside>
 <p><span name="soak"></span></p>
-<p>哪怕碎片化发生得不频繁，它也仍会逐渐把堆变成了有空洞和裂隙的不可用泡沫，最终完全无法运行游戏。</p>
+<p>哪怕碎片化发生得不频繁，它也仍会逐渐把堆变成有空洞和裂隙的不可用泡沫，最终完全无法运行游戏。</p>
 <aside name="soak">
 <p>大多数主机游戏制作商要求游戏通过“浸泡测试”，即让游戏在demo模式运行上几天。
 如果游戏崩溃了，他们不允许游戏发售。
@@ -71,10 +121,10 @@ delete the font style for english.
 <h3><a href="#兼得鱼和熊掌" name="兼得鱼和熊掌">兼得鱼和熊掌</a></h3>
 <p>由于碎片化和可能很慢的内存分配，游戏中何时何处管理内存通常需要十分小心。
 一个简单又有效的办法是——游戏开始时取一大块内存，然后直到游戏结束才去释放它。
-但是这对要在游戏运行时创建和销毁事物的系统是痛苦的。</p>
+但是这对要在游戏运行时创建和销毁事物的系统来说是痛苦的。</p>
 <p>使用对象池能让我们兼得鱼和熊掌。
 对内存管理器，我们只需要将一大块内存分出来，保持在游戏运行时不释放它。
-对于池的使用者，我们可以简单的构造析构我们想要的内容对象。</p>
+对于池的使用者，我们可以简单地构造析构我们想要的内容对象。</p>
 <h2><a href="#模式" name="模式">模式</a></h2>
 <p>定义一个<strong>池</strong>对象，其包含了一组<strong>可重用对象</strong>。
 其中每个可重用对象都支持<strong>查询“使用中”状态</strong>，说明它是不是“正在使用”。
@@ -82,7 +132,7 @@ delete the font style for english.
 <p>当你需要新对象，向池子要一个。
 它找到一个可用对象，初始化为“使用中”然后返回。
 当对象不再被需要，它被设置回“不在使用中”。
-通过这种方式，可以轻易的创建和销毁对象而不必分配内存或其他资源。</p>
+通过这种方式，可以轻易地创建和销毁对象而不必分配内存或其他资源。</p>
 <h2><a href="#何时使用" name="何时使用">何时使用</a></h2>
 <p>这个模式广泛应用于可见的事物上，比如游戏实体和视觉效果，
 但是它也可在不那么视觉化的数据结构上使用，比如正在播放的声音。
@@ -108,19 +158,19 @@ delete the font style for english.
 <h3><a href="#池可能在不需要的对象上浪费内存" name="池可能在不需要的对象上浪费内存">池可能在不需要的对象上浪费内存</a></h3>
 <p>对象池的大小需要根据游戏的需求设置。
 当池子太<em>小</em>时，很明显需要调整（没有什么比崩溃更能获得你的注意力了）。
-但是小心池子没有太<em>大</em>。更小的池子提供了空余的内存做其他有趣的事情。</p>
+但是也要小心确保池子没有太<em>大</em>。更小的池子提供了空余的内存做其他有趣的事情。</p>
 <h3><a href="#同时只能激活固定数量的对象" name="同时只能激活固定数量的对象">同时只能激活固定数量的对象</a></h3>
 <p>在某种程度上这是好事。
-将内存按不同的对象类型划分单独池子保证了这点。
+将内存按不同的对象类型划分单独的池保证了这点。
 举个例子，一连串爆炸不会让粒子系统消耗掉<em>所有</em>可用内存，然后阻碍创建新敌人这样的关键事件。</p>
 <p>尽管如此，这也意味着试图从池子重用对象可能会失败，因为它们都在使用中。
 这里有几个常见对策：</p>
 <ul>
 <li>
 <p><em>完全阻止这点。</em>
-这是通常的“修复”：增加对象池的大小，这样无论用户做什么，它们都不会溢出。
-对于重要对象，比如敌人或游戏道具，这通常是正确的选择。
-也许没有“正确的”方法来处理玩家抵达关底时创建巨大Boss内存不足的问题，所以最聪明的办法就是保证这不发生。</p>
+  这是通常的“修复”：增加对象池的大小，这样无论用户做什么，它们都不会溢出。
+  对于重要对象，比如敌人或游戏道具，这通常是正确的选择。
+  也许没有“正确的”方法来处理玩家抵达关底时创建巨大Boss内存不足的问题，所以最聪明的办法就是保证这不发生。</p>
 <p>这个的副作用是强迫你为那些只在一两个罕见情况下需要的对象分配过多的内存。
 因此，固定大小的对象池也许不对所有的游戏状态都适用。
 举个例子，某些关卡也许需要更多的效果而其他的需要声音。
@@ -128,21 +178,21 @@ delete the font style for english.
 </li>
 <li>
 <p><em>就不要创建对象了。</em>
-这听起来很糟，但是对于像粒子系统这样的情况很有道理。
-如果所有的粒子都在使用，那么屏幕已经充满了闪动的图形。
-用户不会注意到下个爆炸不如现在的这个一样引人注目。</p>
+  这听起来很糟，但是对于像粒子系统这样的情况很有道理。
+  如果所有的粒子都在使用，那么屏幕已经充满了闪动的图形。
+  用户不会注意到下个爆炸不如现在的这个一样引人注目。</p>
 </li>
 <li>
 <p><em>强制干掉一个已有的对象。</em>
-想想正在播放声音的内存池，假设需要播放新声音而对象池满了。
-你<em>不想</em>简单地忽视新声音——用户会注意到魔法剑有时会发出戏剧般的声音，有时顽固的一声不吭。
-更好的解决方法是找到播放中最轻的声音，然后用新声音替代之。新声音会覆盖掉前一个声音。</p>
+  想想正在播放声音的内存池，假设需要播放新声音而对象池满了。
+  你<em>不想</em>简单地忽视新声音——用户会注意到魔法剑有时会发出戏剧般的声音，有时顽固地一声不吭。
+  更好的解决方法是找到播放中最轻的声音，然后用新声音替代之。新声音会覆盖掉前一个声音。</p>
 <p>大体上，如果已有对象的<em>消失</em>要比新对象的<em>出现</em>更不引人察觉，这也许是正确的选择。</p>
 </li>
 <li>
 <p><em>增加池的大小。</em>
-如果游戏允许你使用一点内存上的灵活性，我们也许会在运行时增加池子的大小或者创建新的溢出池。
-如果用这种方式获取内存，考虑下在增加的内存不再需要时，池子是否需要缩回原来的大小。</p>
+  如果游戏允许你使用一点内存上的灵活性，我们也许会在运行时增加池子的大小或者创建新的溢出池。
+  如果用这种方式获取内存，考虑下在增加的内存不再需要时，池是否需要缩回原来的大小。</p>
 </li>
 </ul>
 <h3><a href="#每个对象的内存大小是固定的" name="每个对象的内存大小是固定的">每个对象的内存大小是固定的</a></h3>
@@ -150,18 +200,18 @@ delete the font style for english.
 如果你所有的对象都是同样的类型，这很好。
 但是，如果你想要在同一个对象池中存储不同类型的对象，或者存储子类的实例，
 你需要保证池中的每个位置对<em>最大的</em>可能对象都有足够的内存。
-否则，超过预期大小对象会占据下一个对象的内存空间，导致内存崩坏。</p>
+否则，超过预期大小的对象会占据下一个对象的内存空间，导致内存崩坏。</p>
 <p>同时，如果对象大小是变化的，你是在浪费内存。
 每个槽都需要能存储最大的对象。
 如果对象很少那么大，每放进去一个小对象都是在浪费内存。
 这很像是通过机场安检时，使用最大允许尺寸的箱子，而里面只放了钥匙和钱包。</p>
 <p><span name="pools"></span></p>
-<p>当你发现在用这种方式浪费内存，思考将池根据对象的大小分割为分离的池子
-——大箱子给大行李，小箱子给口袋里东西。</p>
+<p>当你发现自己在用这种方式浪费内存，考虑将池根据对象的大小分割为分离的池
+——大箱子给大行李，小箱子给口袋里的东西。</p>
 <aside name="pools">
 <p>这是一种实现有效率的内存管理的常用模式。
-管理者拥有一系列池子，池子的块大小不相同。
-当你申请分配一块，它会从合适块大小的池子中取出一块，然后分配给你。</p>
+管理者拥有一系列池，池的块大小不相同。
+当你申请分配一块，它会从合适块大小的池中取出一块，然后分配给你。</p>
 </aside>
 <h3><a href="#重用对象不会自动清除。" name="重用对象不会自动清除。">重用对象不会自动清除。</a></h3>
 <p>很多内存管理系统拥有debug特性，会清除或释放所有内存成特定的值，比如<code>0xdeadbeef</code>。
@@ -169,7 +219,7 @@ delete the font style for english.
 <p>由于对象池重用对象不再经过内存管理系统，我们失去了这层安全网。
 更糟的是，为“新”对象使用的内存之前存储的是同样类型的对象。
 这使你很难分辨出创建新对象时的未初始化问题：
-那个存储新对象的内存已经保存了来自于上个生命周期中<em>几乎完全</em>正确的数据。</p>
+那个存储新对象的内存已经保存了来自于上个生命周期中的<em>几乎完全</em>正确的数据。</p>
 <p><span name="clear"></span></p>
 <p>由于这点，特别注意在池里初始化对象的代码，保证它<em>完全</em>地初始化了对象。
 甚至很值得加个在对象回收时清空对象槽的debug选项。</p>
@@ -180,11 +230,11 @@ delete the font style for english.
 <p>对象池在支持垃圾回收的系统中很少见，因为内存管理系统通常会为你处理这些碎片。
 但是对象池仍然是避免构建和析构的有用手段，特别是在有更慢CPU和更简陋垃圾回收系统的移动设备上。</p>
 <p>如果你使用有垃圾回收的对象池系统，注意潜在的冲突。
-由于池不会在对象不再使用时真正的析构它们，如果对象仍然保留任何对<em>其他</em>对象的引用，也会阻止垃圾回收器回收它。
+由于池不会在对象不再使用时真正地析构它们，如果对象仍然保留任何对<em>其他</em>对象的引用，也会阻止垃圾回收器回收它。
 为了避免这点，当池中对象不再使用，清除它对其他对象的所有引用。</p>
 <h2><a href="#示例代码" name="示例代码">示例代码</a></h2>
 <p>现实世界的粒子系统通常应用重力，风，摩擦，和其他物理效果。
-我们简陋的例子只在直线上特定帧移动粒子，然后销毁粒子。
+我们简陋的例子只在直线上移动粒子几帧，然后销毁粒子。
 这不是工业级的代码，但足够说明如何使用对象池。</p>
 <p>我们应该从最简单的可能实现开始。首先是小小的粒子类：</p>
 <div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">Particle</span>
@@ -280,7 +330,7 @@ delete the font style for english.
 我们现在可以创建对象池然后使用它创建粒子。当时间到了，粒子会自动失效。</p>
 <p><span name="create"></span></p>
 <p>这足够承载一个游戏了，但是敏锐的读者也许会注意到创建新粒子（可能）需要遍历整个集合，直到找到一个空闲槽。
-如果池子很大很满，这可能很慢。
+如果池很大很满，这可能很慢。
 让我们看看可以怎样改进这一点。</p>
 <aside name="create">
 <p>创建一个粒子的复杂度是<em>O(n)</em> ，上过算法课的人都知道。</p>
@@ -294,7 +344,7 @@ delete the font style for english.
 <p>如果<em>无需</em>牺牲任何内存就能修复性能问题那就好了。
 方便的是，这里已经有可以借用的内存了——那些未使用粒子自身的内存。</p>
 <p>当粒子未被使用时，它的大部分的状态都是无关紧要的。
-它的位置和速度没有被使用。唯一需要的表示自身是否激活的状态。
+它的位置和速度没有被使用。唯一需要的是表示自身是否激活的状态。
 在我们的例子中，那是<code>framesLeft_</code>成员。
 其他的所有位都可以被重用。这里是改进后的粒子：</p>
 <div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">Particle</span>
@@ -335,11 +385,11 @@ delete the font style for english.
 问问他们关于unions的事。
 他们知道所有有关union的事情，还有其他有趣的位压缩技巧。</p>
 </aside>
-<p>我们可以使用这些指针构建链表，将池中每个未使用粒子都连在一起。
+<p>我们可以使用这些指针构建链表，将池中每个未使用的粒子都连在一起。
 我们有可用粒子的列表，而且无需使用额外的内存。
 我们使用了死亡粒子本身的内存来存储列表。</p>
 <p>这种聪明的技术被称为<a href="http://en.wikipedia.org/wiki/Free_list"><em>freelist</em></a>。
-为了让其工作，我们需要保证指针正确的初始化，在粒子创建和销毁时好好被管理了。
+为了让其工作，我们需要保证指针正确地初始化，在粒子创建和销毁时好好被管理了。
 并且，当然，我们要追踪列表的头指针：</p>
 <div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">ParticlePool</span>
 <span class="p">{</span>
@@ -422,23 +472,23 @@ delete the font style for english.
 
 <p>这样就成了，一个小对象池，拥有常量时间的构造和删除。</p>
 <h2><a href="#设计决策" name="设计决策">设计决策</a></h2>
-<p>如你所见，对象池最简单实现非常平凡：创建对象数组，在需要它们时重新初始化。
+<p>如你所见，对象池最简单的实现非常平凡：创建对象数组，在需要它们时重新初始化。
 实际的代码很少会那么简单，这里还有很多方式让池更加的通用，安全，或容易管理。
 在游戏中实现对象池时，你需要回答以下问题：</p>
 <h3><a href="#对象和池耦合吗？" name="对象和池耦合吗？">对象和池耦合吗？</a></h3>
-<p>第一个写对象池时需要思考的问题：是否对象本身需要知道它们在池子中。
-大多数情况下它们需要，但是你不大可能写一个通用对象池类来保存任意对象。</p>
+<p>写对象池时第一个需要思考的问题：对象本身是否需要知道它们在池子中。
+大多数情况下它们需要，但是那样你就不大可能写一个通用对象池类来保存任意对象。</p>
 <ul>
 <li>
 <p><strong>如果对象与池耦合：</strong></p>
 <ul>
 <li>
 <p><em>实现更简单。</em>
-你可以在对象中简单地放个“在使用中”标识或者函数，就完成了。</p>
+  你可以在对象中简单地放个“在使用中”标识或者函数，就完成了。</p>
 </li>
 <li>
 <p><em>你可以保证对象只能被对象池创建。</em>
-在C++中，做这事最简单的方法是让池对象是对象类的友类，将对象的构造器设为私有。</p>
+  在C++中，做这事最简单的方法是让池对象是对象类的友类，将对象的构造器设为私有。</p>
 <div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">Particle</span>
 <span class="p">{</span>
   <span class="k">friend</span> <span class="k">class</span> <span class="nc">ParticlePool</span><span class="p">;</span>
@@ -462,10 +512,10 @@ delete the font style for english.
 </li>
 <li>
 <p><em>你也许可以避免显式存储“使用中”的标识。</em>
-很多对象已经保存了可以告诉外界它有没有在使用的状态。
-举个例子，粒子的位置如果不在屏幕上，也许它就可以被重用。
-如果对象类知道它在对象池中，那它可以提供一个<code>inUse()</code>来查询这个状态。
-这省下了对象池存储“在使用中”标识的多余内存。</p>
+  很多对象已经保存了可以告诉外界它有没有在使用的状态。
+  举个例子，粒子的位置如果不在屏幕上，也许它就可以被重用。
+  如果对象类知道它在对象池中，那它可以提供一个<code>inUse()</code>来查询这个状态。
+  这省下了对象池存储“在使用中”标识的多余内存。</p>
 </li>
 </ul>
 </li>
@@ -474,11 +524,11 @@ delete the font style for english.
 <ul>
 <li>
 <p><em>可以保存多种类型的对象。</em>
-这是最大的好处。通过解耦对象和对象池，你可以实现通用的、可重用的对象池类。</p>
+  这是最大的好处。通过解耦对象和对象池，你可以实现通用的、可重用的对象池类。</p>
 </li>
 <li>
 <p><em>必须在对象的外部追踪“使用中”状态。</em>
-做这点最简单的方式是创建分离的位字段：</p>
+  做这点最简单的方式是创建分离的位字段：</p>
 <div class="codehilite"><pre><span></span><span class="k">template</span> <span class="o">&lt;</span><span class="k">class</span> <span class="nc">TObject</span><span class="o">&gt;</span>
 <span class="k">class</span> <span class="nc">GenericPool</span>
 <span class="p">{</span>
@@ -504,13 +554,13 @@ delete the font style for english.
 <ul>
 <li>
 <p><em>对象池可以完全封装管理对象。</em>
-取决于对象需要的其他能力，你可以让它们完全处于池子的内部。
-这保证了其外部代码不会引用到已重用的对象。</p>
+  取决于对象需要的其他能力，你可以让它们完全处于池的内部。
+  这保证了其外部代码不会引用到已重用的对象。</p>
 </li>
 <li>
 <p><em>对象池与对象是如何初始化的相绑定。</em>
-池中对象也许提供了不同的初始化函数。
-如果对象池控制了初始化，它的接口需要支持所有的初始化函数，然后转发给对象。</p>
+  池中对象也许提供了不同的初始化函数。
+  如果对象池控制了初始化，它的接口需要支持所有的初始化函数，然后转发给对象。</p>
 <div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">Particle</span>
 <span class="p">{</span>
   <span class="c1">// 多种初始化方式……</span>
@@ -548,7 +598,7 @@ delete the font style for english.
 <ul>
 <li>
 <p><em>对象池的接口更简单。</em>
-无需提供覆盖每种对象初始化的多种函数，对象池只需要返回新对象的引用：</p>
+  无需提供覆盖每种对象初始化的多种函数，对象池只需要返回新对象的引用：</p>
 <div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">Particle</span>
 <span class="p">{</span>
 <span class="k">public</span><span class="o">:</span>
@@ -583,8 +633,8 @@ delete the font style for english.
 </li>
 <li>
 <p><em>外部代码需要处理无法创建新对象的失败。</em>
-前面的例子假设<code>create()</code>总能成功地返回一个指向对象的指针。
-但如果对象池已经满了，返回的会是<code>NULL</code>。安全起见，你需要在初始化之前检查这一点。</p>
+  前面的例子假设<code>create()</code>总能成功地返回一个指向对象的指针。
+  但如果对象池已经满了，返回的会是<code>NULL</code>。安全起见，你需要在初始化之前检查这一点。</p>
 <div class="codehilite"><pre><span></span><span class="n">Particle</span><span class="o">*</span> <span class="n">particle</span> <span class="o">=</span> <span class="n">pool</span><span class="p">.</span><span class="n">create</span><span class="p">();</span>
 <span class="k">if</span> <span class="p">(</span><span class="n">particle</span> <span class="o">!=</span> <span class="nb">NULL</span><span class="p">)</span> <span class="n">particle</span><span class="o">-&gt;</span><span class="n">init</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">);</span>
 </pre></div>
@@ -598,15 +648,15 @@ delete the font style for english.
 <ul>
 <li>
 <p>这看上去很像是<a class="gof-pattern" href="flyweight.html">享元</a>模式。
-两者都控制了一系列可重用的对象。不同在于“重用”的含义。
-享元对象分享实例间<em>同时</em>拥有的相同部分。享元模式在不同上下文中使用相同对象避免了<em>重复</em>内存使用。</p>
+  两者都控制了一系列可重用的对象。不同在于“重用”的含义。
+  享元对象分享实例间<em>同时</em>拥有的相同部分。享元模式在不同上下文中使用相同对象避免了<em>重复</em>内存使用。</p>
 <p>对象池中的对象也被重用了，但是是在不同的时间点上被重用的。
 “重用”在对象池中意味着对象在原先的对象用完<em>之后</em>分配内存。
 对象池没有期待对象会在它的生命周期中分享什么。</p>
 </li>
 <li>
 <p>将内存中同样类型的对象进行整合，能确保在遍历对象时CPU缓存总是满的。
-<a class="pattern" href="data-locality.html">数据局部性</a>模式介绍了这一点。</p>
+  <a class="pattern" href="data-locality.html">数据局部性</a>模式介绍了这一点。</p>
 </li>
 </ul>
 <nav>

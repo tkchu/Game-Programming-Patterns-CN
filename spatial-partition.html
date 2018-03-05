@@ -22,8 +22,58 @@ delete the font style for english.
 </head>
 <body id="top">
 
-<span class="toc" onclick="RedirectToEnglishPage()">
-  <button style="position:fixed;bottom:10px;left:10px;color:#1481b8;">&equiv; 查看英文原文</button>
+<span class="toc">
+	<aside class="index noShowOnSmallScren" name="index">
+		<h2>目录</h2>
+		<ul>
+		  <li><a href="acknowledgements.html">致谢</a>
+		  <li><a href="introduction.html">序</a>
+		    <ul>
+		      <li><a href="architecture-performance-and-games.html">架构，性能和游戏</a></li>
+		    </ul>
+		  </li>
+		  <li><a href="design-patterns-revisited.html">重访设计模式</a>
+		    <ul>
+		      <li><a href="command.html">命令模式</a></li>
+		      <li><a href="flyweight.html">享元模式</a></li>
+		      <li><a href="observer.html">观察者模式</a></li>
+		      <li><a href="prototype.html">原型模式</a></li>
+		      <li><a href="singleton.html">单例模式</a></li>
+		      <li><a href="state.html">状态模式</a></li>
+		    </ul>
+		  </li>
+		  <li><a href="sequencing-patterns.html">序列模式</a>
+		    <ul>
+		      <li><a href="double-buffer.html">双缓冲模式</a></li>
+		      <li><a href="game-loop.html">游戏循环</a></li>
+		      <li><a href="update-method.html">更新方法</a></li>
+		    </ul>
+		  </li>
+		  <li><a href="behavioral-patterns.html">行为模式</a>
+		    <ul>
+		      <li><a href="bytecode.html">字节码</a></em></li>
+		      <li><a href="subclass-sandbox.html">子类沙箱</a></li>
+		      <li><a href="type-object.html">类型对象</a></li>
+		    </ul>
+		  </li>
+		  <li><a href="decoupling-patterns.html">解耦模式</a>
+		    <ul>
+		      <li><a href="component.html">组件模式</a></li>
+		      <li><a href="event-queue.html">事件队列</a></li>
+		      <li><a href="service-locator.html">服务定位器</a></li>
+		    </ul>
+		  </li>
+		  <li><a href="optimization-patterns.html">优化模式</a>
+		    <ul>
+		      <li><a href="data-locality.html">数据局部性</a></li>
+		      <li><a href="dirty-flag.html">脏标识模式</a></li>
+		      <li><a href="object-pool.html">对象池模式</a></li>
+		      <li><a href="spatial-partition.html">空间分区</a></li>
+		    </ul>
+		  </li>
+		</ul>
+	</aside>
+  <button style="position:fixed;bottom:10px;left:10px;color:#1481b8;" onclick="RedirectToEnglishPage()">&equiv; 查看英文原文</button>
 </span>
 
 <div class="page sidebar">
@@ -92,14 +142,14 @@ delete the font style for english.
 <p>二分查找有<em>O(log n)</em> 的复杂度，意味着找所有战斗单位的复杂度从<em>O(n&sup2;)</em>降到<em>O(n log n)</em>。
 像<a href="http://en.wikipedia.org/wiki/Pigeonhole_sort">pigeonhole sort</a>可将其降至<em>O(n)</em> 。</p>
 </aside>
-<p>这里的经验很明显：如果我们根据位置存储对象在数据结构中，就可以更快的找到它们。
+<p>这里的经验很明显：如果我们根据位置在数据结构中存储对象，就可以更快地找到它们。
 这个模式便是将这个思路应用到多维空间上。</p>
 <h2><a href="#模式" name="模式">模式</a></h2>
 <p>对于一系列<strong>对象</strong>，每个对象都有<strong>空间上的位置</strong>。
 将它们存储在根据位置组织对象的<strong>空间数据结构</strong>中，让你<strong>有效查询在某处或者某处附近的对象</strong>。
 当对象的位置改变时，<strong>更新空间数据结构</strong>，这样它可以继续找到对象。</p>
 <h2><a href="#何时使用" name="何时使用">何时使用</a></h2>
-<p>这是存储活跃的，移动的游戏对象的常用模式，也可用于静态美术和世界地理。
+<p>这是存储活跃的、移动的游戏对象的常用模式，也可用于静态美术和世界地理。
 复杂的游戏中，不同的内容有不同的空间分区。</p>
 <p>这个模式的基本要求是一系列有位置的对象，而你做了太多的通过位置寻找对象的查询，导致性能下降。</p>
 <h2><a href="#记住" name="记住">记住</a></h2>
@@ -107,13 +157,13 @@ delete the font style for english.
 你拥有的对象<em>越多</em>，这就越重要。相反的，如果<em>n</em>足够小，也许不需要担心这个。</p>
 <p><span name="hash-change"></span></p>
 <p>由于这个模式需要通过位置组织对象，可以<em>改变</em>位置的对象更难处理。
-你需要重新组织数据结构来追踪在新位置的对象，这添加了更多的复杂性<em>并</em>消耗CPU循环。
-保证这种交易是值得的。</p>
+你需要重新组织数据结构来追踪在新位置的对象，这增加了更多的复杂性<em>并</em>消耗CPU循环。
+确保这种交易是值得的。</p>
 <aside name="hash-change">
 <p>想象一下哈希表，其中对象的键可以自动改变，那你就知道为什么这难以处理。</p>
 </aside>
 <p>空间分区也会因为记录划分的数据结构而使用额外的内存。
-就像很多优化一样，它用内存换速度。如果内存比时钟周期更短缺，这回是个错误的选择。</p>
+就像很多优化一样，它用内存换速度。如果内存比时钟周期更短缺，这会是个错误的选择。</p>
 <h2><a href="#示例代码" name="示例代码">示例代码</a></h2>
 <p><span name="variations"></span></p>
 <p>模式总会<em>变化</em>——每种实现都略有不同，空间分区也不例外。
@@ -129,9 +179,9 @@ delete the font style for english.
 每个格子存储一组单位，它们的位置在格子的边界内部。</p>
 <p><img src="images/spatial-partition-grid.png" alt="一个单位占据不同格子的网格。有些格子有多个单位。" /></p>
 <p>当我们处理战斗时，我们只需考虑在同一格子中的单位。
-不是将每个游戏中的单位与其他所有单位比较，我们将战场<em>划分</em>为多个小战场，每个格子中的单位都较少。</p>
+不是将游戏中的每个单位与其他所有单位比较，我们将战场<em>划分</em>为多个小战场，每个格子中的单位都较少。</p>
 <h3><a href="#一网格相邻单位" name="一网格相邻单位">一网格相邻单位</a></h3>
-<p>好了，让我们编码把。首先，一些准备工作。这是我们的基础<code>Unit</code>类。</p>
+<p>好了，让我们编码吧。首先，一些准备工作。这是我们的基础<code>Unit</code>类。</p>
 <div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">Unit</span>
 <span class="p">{</span>
   <span class="k">friend</span> <span class="k">class</span> <span class="nc">Grid</span><span class="p">;</span>
@@ -154,7 +204,7 @@ delete the font style for english.
 
 <p>每个单位都有位置（2D表示），以及一个指针指向它存在的<code>Grid</code>。
 我们让<code>Grid</code>成为一个<code>friend</code>类，
-因为，就像将要看到的，当单位的位置改变时，它需要和网格做复杂的交互，以确保所有事情都正确的更新了。</p>
+因为，就像将要看到的，当单位的位置改变时，它需要和网格做复杂的交互，以确保所有事情都正确地更新了。</p>
 <p>这里是网格的表示：</p>
 <div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">Grid</span>
 <span class="p">{</span>
@@ -199,11 +249,11 @@ delete the font style for english.
 我们很快会知道为什么要这么做。</p>
 <aside name="stl">
 <p>在这本书中，我避免使用任何C++标准库内建的集合类型。
-我想让理解例子的所需知识越小越好，然后，就像魔术师的“我的袖子里什么也没有”，
+我想让理解例子所需的知识越少越好，然后，就像魔术师的“我的袖子里什么也没有”，
 我想明晰代码中<em>确实</em>在发生什么。
 细节很重要，特别是那些与性能相关的模式。</p>
 <p>但这是我<em>解释</em>模式的方式。
-如果你在真实代码中<em>使用</em>它们，使用内建在几乎每种程序语言集合避免麻烦。
+如果你在真实代码中<em>使用</em>它们，使用内建在几乎每种程序语言中的集合避免麻烦。
 人生苦短，不要浪费在编写链表上。</p>
 </aside>
 <h3><a href="#进入战场" name="进入战场">进入战场</a></h3>
@@ -248,9 +298,9 @@ delete the font style for english.
 </aside>
 <p>除了链表带来的繁琐，基本思路是非常简单的。
 我们找到单位所在的网格，然后将它添加到列表前部。
-如果那已经存在有列表单位了，我们把新单位链接到旧单位的后面。</p>
+如果那儿已经存在列表单位了，我们把新单位链接到旧单位的后面。</p>
 <h3><a href="#刀剑碰撞" name="刀剑碰撞">刀剑碰撞</a></h3>
-<p>一旦所有的单位都放入网格中，我们可以让它们开始互相交互。
+<p>一旦所有的单位都放入网格中，我们就可以让它们开始交互。
 使用这个新网格，处理战斗的主要方法看上去是这样的：</p>
 <div class="codehilite"><pre><span></span><span class="kt">void</span> <span class="n">Grid</span><span class="o">::</span><span class="n">handleMelee</span><span class="p">()</span>
 <span class="p">{</span>
@@ -265,7 +315,7 @@ delete the font style for english.
 </pre></div>
 
 
-<p>它在每个网格它上面遍历并调用<code>handleCell()</code>。
+<p>它在每个网格上面遍历并调用<code>handleCell()</code>。
 就像你看到的那样，我们真的已经将战场分割为分离的小冲突。
 每个网格之后像这样处理它的战斗：</p>
 <div class="codehilite"><pre><span></span><span class="kt">void</span> <span class="n">Grid</span><span class="o">::</span><span class="n">handleCell</span><span class="p">(</span><span class="n">Unit</span><span class="o">*</span> <span class="n">unit</span><span class="p">)</span>
@@ -301,11 +351,11 @@ delete the font style for english.
 <p>但是，这依赖于我们格子的粒度。如果它们太小，外部循环确实会造成影响。</p>
 </aside>
 <h3><a href="#冲锋陷阵" name="冲锋陷阵">冲锋陷阵</a></h3>
-<p>我们解决了性能问题，但同时创建了新问题。
+<p>我们解决了性能问题，但同时制造了新问题。
 单位现在陷在它的格子中。
 如果将单位移出了包含它的格子，格子中的单位就再也看不到它了，但其他单位也看不到它。
 我们的战场有点<em>过度</em>划分了。</p>
-<p>为了解决这点，需要每次单位移动时都做些工作。
+<p>为了解决这点，需要在每次单位移动时都做些工作。
 如果它跨越了格子的边界，我们需要将它从原来的格子中删除，添加到新的格子中。
 首先，我们给<code>Unit</code>添加一个改变位置的方法：</p>
 <div class="codehilite"><pre><span></span><span class="kt">void</span> <span class="n">Unit</span><span class="o">::</span><span class="n">move</span><span class="p">(</span><span class="kt">double</span> <span class="n">x</span><span class="p">,</span> <span class="kt">double</span> <span class="n">y</span><span class="p">)</span>
@@ -377,7 +427,7 @@ delete the font style for english.
 
 
 <p>当范围被牵扯进来，需要考虑一个边界情况：
-在不同网格的单位也许仍然足够接近，可以相互交互。</p>
+在不同网格的单位也许仍然足够接近，可以交互。</p>
 <p><img src="images/spatial-partition-adjacent.png" alt="两个在相邻网格的对象近得足以相互交互。" /></p>
 <p>这里，B在A的攻击半径内，即使中心点在不同的网格。
 为了处理这种情况，我们不仅需要比较同一网格的单位，同时需要比较邻近网格的对象。
@@ -460,7 +510,7 @@ delete the font style for english.
 <h2><a href="#设计决策" name="设计决策">设计决策</a></h2>
 <p>空间划分的优秀数据结构相对较少，可以一一列举进行介绍。
 但是，我试图根据它们的本质特性来组织。
-我期望当你学习四叉树和二分空间查找（BSPs）之类的时，
+我期望当你学习四叉树和二分空间查找（BSPs）之类时，
 可以帮助你理解它们是<em>如何</em>工作，<em>为什么</em> 工作，以帮你选择。</p>
 <h3><a href="#划分是层次的还是平面的？" name="划分是层次的还是平面的？">划分是层次的还是平面的？</a></h3>
 <p><span name="couple"></span></p>
@@ -478,7 +528,7 @@ delete the font style for english.
 <ul>
 <li>
 <p><em>更简单。</em>
-平面数据结构更容易想到也更容易实现。</p>
+  平面数据结构更容易想到也更容易实现。</p>
 <aside name="simpler">
 
 <p>我在每章中都提到了这个设计要点，这是有理由的。尽可能使用简单的选项。
@@ -488,12 +538,12 @@ delete the font style for english.
 </li>
 <li>
 <p><em>内存使用量确定。</em>
-由于添加新对象不需要添加新划分，空间分区的内存使用量通常在之前就可以确定。</p>
+  由于添加新对象不需要添加新划分，空间分区的内存使用量通常在之前就可以确定。</p>
 </li>
 <li>
-<p><em>在对象改变位置时更新的更快。</em>
-当对象移动，数据结构需要更新，找到它的新位置。
-使用层次空间分区，可能需要在多层间调整层次结构。</p>
+<p><em>在对象改变位置时更新得更快。</em>
+  当对象移动，数据结构需要更新，找到它的新位置。
+  使用层次空间分区，可能需要在多层间调整层次结构。</p>
 </li>
 </ul>
 </li>
@@ -501,16 +551,16 @@ delete the font style for english.
 <p><strong>如果是层次性的：</strong></p>
 <ul>
 <li>
-<p><em>能更有效率的处理空的区域。</em>
-考虑之前的例子，如果战场的一边是空的。
-我们需要分配一堆空白格子，这些格子浪费内存，每帧还要遍历它们。</p>
+<p><em>能更有效率地处理空的区域。</em>
+  考虑之前的例子，如果战场的一边是空的。
+  我们需要分配一堆空白格子，这些格子浪费内存，每帧还要遍历它们。</p>
 <p>由于层次空间分区不再分割空区域，大的空区域保存在单个划分上。不需要遍历很多小空间，那里只有一个大的。</p>
 </li>
 <li>
 <p><em>它处理密集空间更有效率。</em>
-这是硬币的另一面：如果你有一堆对象堆在一起，无层次的划分很没有效率。
-你最终将所有对象都划分到了一起，就跟没有划分一样。
-层次空间分区会自适应地划成小块，让你同时只需考虑少数对象。</p>
+  这是硬币的另一面：如果你有一堆对象堆在一起，无层次的划分很没有效率。
+  你最终将所有对象都划分到了一起，就跟没有划分一样。
+  层次空间分区会自适应地划成小块，让你同时只需考虑少数对象。</p>
 </li>
 </ul>
 </li>
@@ -526,24 +576,24 @@ delete the font style for english.
 <p><strong>如果划分与对象无关：</strong></p>
 <ul>
 <li><em>对象可以增量添加。</em>
- 添加对象意味着找到正确的划分然后放入，这点可以一次性完成，没有任何性能问题。</li>
+   添加对象意味着找到正确的划分然后放入，这点可以一次性完成，没有任何性能问题。</li>
 </ul>
 <p><span name="sort"></span></p>
 <ul>
 <li>
-<p><em>对象移动的更快。</em>
-通过固定的划分，移动单位意味着从格子移除然后添加到另一个。
-如果划分它们的边界跟着集合而改变，那么移动对象会引起边界移动，导致很多其他对象也要移到其他划分。</p>
+<p><em>对象移动得更快。</em>
+   通过固定的划分，移动单位意味着从格子移除然后添加到另一个。
+   如果划分它们的边界跟着集合而改变，那么移动对象会引起边界移动，导致很多其他对象也要移到其他划分。</p>
 <aside name="sort">
 
 <p>这可与如红黑树或AVL树这样的二叉搜索树相类比：
-当你添加事物时，你也许最终需要重排树，并重排一堆节点。</p>
+ 当你添加事物时，你也许最终需要重排树，并重排一堆节点。</p>
 </aside>
 
 </li>
 <li>
 <p><em>划分也许不均匀。</em>
-当然，固定的缺点就是对划分缺少控制。如果对象挤在一起，你就在空区域上浪费了内存，这会造成更糟的性能。</p>
+   当然，固定的缺点就是对划分缺少控制。如果对象挤在一起，你就在空区域上浪费了内存，这会造成更糟的性能。</p>
 </li>
 </ul>
 </li>
@@ -555,14 +605,14 @@ delete the font style for english.
 <ul>
 <li>
 <p><em>你可以保证划分是平衡的。</em>
-这不仅提供了优良的性能表现，还提供了<em>稳定</em>的性能表现：
-如果每个区域的对象数量保持一致，你可以保证游戏世界中的所有查询都会消耗同样的时间。
-一旦你需要固定帧率，这种一致性也许比性能本身更重要。</p>
+  这不仅提供了优良的性能表现，还提供了<em>稳定</em>的性能表现：
+  如果每个区域的对象数量保持一致，你可以保证游戏世界中的所有查询都会消耗同样的时间。
+  一旦你需要固定帧率，这种一致性也许比性能本身更重要。</p>
 </li>
 <li>
 <p><em>一次性划分一组对象更加有效率。</em>
-当对象<em>集合</em>影响了边界的位置，最好在划分前都出现所有对象。
-这就是为什么美术和地理更多的使用这种划分。</p>
+  当对象<em>集合</em>影响了边界的位置，最好在划分前将所有对象放在前面。
+  这就是为什么美术和地理更多地使用这种划分。</p>
 </li>
 </ul>
 </li>
@@ -581,39 +631,39 @@ delete the font style for english.
 这些块的<em>边界</em>是确定的：它们总是将空间一切为二。</p>
 <p>然后，对于四个区域中的每一个，我们递归地做相同的事情，直到每个区域都有较少数目的对象在其中。
 由于我们递归地分割有较多对象的区域，这种划分适应了对象集合，但是划分本身没有<em>移动</em>。</p>
-<p>你可以从这里从左向右看到分区的过程：</p>
+<p>你可以在这里从左向右看到分区的过程：</p>
 <p><img src="images/spatial-partition-quadtree.png" alt="一个四叉树" /></p>
 <ul>
 <li>
 <p><em>对象可以增量增加。</em>
-添加新对象意味着找到并添加到正确的区域。
-如果区域中的对象数目超过了最大限度，就划分区域。
-区域中的其他对象也划分到新的小区域中。这需要一些小小的工作，但是工作总量是<em>固定的</em>：
-你需要移动的对象数目总是少于数目临界值。添加对象从来不会引发超过一次划分。</p>
+  添加新对象意味着找到并添加到正确的区域。
+  如果区域中的对象数目超过了最大限度，就划分区域。
+  区域中的其他对象也划分到新的小区域中。这需要一些小小的工作，但是工作总量是<em>固定的</em>：
+  你需要移动的对象数目总是少于数目临界值。添加对象从来不会引发超过一次划分。</p>
 <p>删除对象也同样简单。
 你从它的格子中移除对象，如果它的父格子中的计数少于临界值，你可以合并这些子分区。</p>
 </li>
 <li>
 <p><em>移动对象很快。</em>
-当然，如上所述，“移动”对象只是添加和移除，两者在四叉树中都很快。</p>
+  当然，如上所述，“移动”对象只是添加和移除，两者在四叉树中都很快。</p>
 </li>
 <li>
 <p><em>分区是平衡的。</em>
-由于任何给定的区域的对象数目都少于最大的对象数量，哪怕对象都堆在一起，你也不会有包含太多对象的分区。</p>
+  由于任何给定的区域的对象数目都少于最大的对象数量，哪怕对象都堆在一起，你也不会有包含太多对象的分区。</p>
 </li>
 </ul>
 </li>
 </ul>
 <h3><a href="#对象只存储在分区中吗？" name="对象只存储在分区中吗？">对象只存储在分区中吗？</a></h3>
-<p>你可将空间分区作为在游戏中对象存储的<em>唯一</em>地方，或者将其作为更快查找的二级缓存，使用另一个集合包含对象。</p>
+<p>你可将空间分区作为在游戏中存储对象的<em>唯一</em>地方，或者将其作为更快查找的二级缓存，使用另一个集合包含对象。</p>
 <ul>
 <li>
 <p><strong>如果它是对象唯一存储的地方：</strong></p>
 <ul>
 <li><em>这避免了内存开销和两个集合带来的复杂度。</em>
-当然，存储对象一遍总比存两遍来的轻松。
-同样，如果你有两个集合，你需要保证它们同步。
-每当添加或删除对象，都得从两者中添加或删除对象。</li>
+  当然，存储对象一遍总比存两遍来的轻松。
+  同样，如果你有两个集合，你需要保证它们同步。
+  每当添加或删除对象，都得从两者中添加或删除对象。</li>
 </ul>
 </li>
 <li>
@@ -621,8 +671,8 @@ delete the font style for english.
 <ul>
 <li>
 <p><em>遍历所有的对象更快。</em>
-如果所有对象都是“活的”，而且它们需要做些处理，也许会发现你需要频繁拜访每个对象而并不在乎它的位置。
-想想看，早先的例子中，大多数格子都是空的。访问那些空的格子是对时间的浪费。</p>
+  如果所有对象都是“活的”，而且它们需要做些处理，也许会发现你需要频繁拜访每个对象而并不在乎它的位置。
+  想想看，早先的例子中，大多数格子都是空的。访问那些空的格子是对时间的浪费。</p>
 <p>存储对象的第二集合给了你直接遍历对象的方法。
 你有两个数据结构，每种为各种的用况优化。</p>
 </li>
@@ -633,7 +683,7 @@ delete the font style for english.
 <ul>
 <li>
 <p>在这里，我试图不讨论特定的空间分区结构细节来保证这章的高层概况性（而且节约篇幅！），
-但你的下一步应该是学习一下常见的结构。尽管名字很恐怖，它们都令人惊讶的直观。常见的有：</p>
+  但你的下一步应该是学习一下常见的结构。尽管名字很恐怖，但它们都令人惊讶地直观。常见的有：</p>
 <ul>
 <li><a href="http://en.wikipedia.org/wiki/Grid_(spatial_index)">Grid</a></li>
 <li><a href="http://en.wikipedia.org/wiki/Quad_tree">Quadtree</a></li>
@@ -644,7 +694,7 @@ delete the font style for english.
 </li>
 <li>
 <p>每种空间分区数据结构基本上都是将一维数据结构扩展成更高维度的数据结构。
-知道它的相互关系有助于分辨它是不是问题的好解答：</p>
+  知道它的相互关系有助于分辨它是不是问题的好解答：</p>
 <ul>
 <li>网格是连续的<a href="http://en.wikipedia.org/wiki/Bucket_sort">桶排序</a>。</li>
 <li>BSPs，k-d trees和包围盒是<a href="http://en.wikipedia.org/wiki/Binary_search_tree">线性搜索树</a>。</li>

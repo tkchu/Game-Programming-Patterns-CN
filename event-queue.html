@@ -22,8 +22,58 @@ delete the font style for english.
 </head>
 <body id="top">
 
-<span class="toc" onclick="RedirectToEnglishPage()">
-  <button style="position:fixed;bottom:10px;left:10px;color:#1481b8;">&equiv; 查看英文原文</button>
+<span class="toc">
+	<aside class="index noShowOnSmallScren" name="index">
+		<h2>目录</h2>
+		<ul>
+		  <li><a href="acknowledgements.html">致谢</a>
+		  <li><a href="introduction.html">序</a>
+		    <ul>
+		      <li><a href="architecture-performance-and-games.html">架构，性能和游戏</a></li>
+		    </ul>
+		  </li>
+		  <li><a href="design-patterns-revisited.html">重访设计模式</a>
+		    <ul>
+		      <li><a href="command.html">命令模式</a></li>
+		      <li><a href="flyweight.html">享元模式</a></li>
+		      <li><a href="observer.html">观察者模式</a></li>
+		      <li><a href="prototype.html">原型模式</a></li>
+		      <li><a href="singleton.html">单例模式</a></li>
+		      <li><a href="state.html">状态模式</a></li>
+		    </ul>
+		  </li>
+		  <li><a href="sequencing-patterns.html">序列模式</a>
+		    <ul>
+		      <li><a href="double-buffer.html">双缓冲模式</a></li>
+		      <li><a href="game-loop.html">游戏循环</a></li>
+		      <li><a href="update-method.html">更新方法</a></li>
+		    </ul>
+		  </li>
+		  <li><a href="behavioral-patterns.html">行为模式</a>
+		    <ul>
+		      <li><a href="bytecode.html">字节码</a></em></li>
+		      <li><a href="subclass-sandbox.html">子类沙箱</a></li>
+		      <li><a href="type-object.html">类型对象</a></li>
+		    </ul>
+		  </li>
+		  <li><a href="decoupling-patterns.html">解耦模式</a>
+		    <ul>
+		      <li><a href="component.html">组件模式</a></li>
+		      <li><a href="event-queue.html">事件队列</a></li>
+		      <li><a href="service-locator.html">服务定位器</a></li>
+		    </ul>
+		  </li>
+		  <li><a href="optimization-patterns.html">优化模式</a>
+		    <ul>
+		      <li><a href="data-locality.html">数据局部性</a></li>
+		      <li><a href="dirty-flag.html">脏标识模式</a></li>
+		      <li><a href="object-pool.html">对象池模式</a></li>
+		      <li><a href="spatial-partition.html">空间分区</a></li>
+		    </ul>
+		  </li>
+		</ul>
+	</aside>
+  <button style="position:fixed;bottom:10px;left:10px;color:#1481b8;" onclick="RedirectToEnglishPage()">&equiv; 查看英文原文</button>
 </span>
 
 <div class="page sidebar">
@@ -64,7 +114,7 @@ delete the font style for english.
 
 
 <p><span name="interrupt"></span></p>
-<p>对<code>getNextEvent()</code>的调用将一堆未处理的用户输出传到应用程序中。
+<p>调用<code>getNextEvent()</code>将一堆未处理的用户输入传到应用程序中。
 你将它导向事件处理器，之后应用魔术般获得了生命。
 有趣的部分是应用在<em>它</em>想要的时候<em>获取</em>事件。
 操作系统在用户操作时不是直接跳转到你应用的某处代码。</p>
@@ -92,21 +142,21 @@ delete the font style for english.
 举个例子，当玩家第一次击败了邪恶野兽，你想要一个显示着“按X拿起战利品！”的小气泡。</p>
 <aside name="tutorial">
 <p>新手教程系统很难优雅地实现，大多数玩家很少使用游戏内的帮助，所以这感觉上吃力不讨好。
-但对那些<em>使用</em>教程的玩家，这是无价之物。</p>
+但对那些<em>使用</em>教程的玩家，这是无价之宝。</p>
 </aside>
 <p>游戏玩法和战斗代码也许像上面一样复杂。
 你最不想做的就是检查一堆教程的触发器。
 相反，你可以使用中心事件队列。
 任何游戏系统都可以发事件给队列，这样战斗代码可以在砍倒敌人时发出“敌人死亡”事件。</p>
 <p><span name="blackboard"></span></p>
-<p>类似的，任何游戏系统都能从队列<em>接受</em>事件。
+<p>类似地，任何游戏系统都能从队列<em>接受</em>事件。
 教程引擎在队列中注册自己，然后表明它想要收到“敌人死亡”事件。
 用这种方式，敌人死了的消息从战斗系统传到了教程引擎，而不需要这两个系统直接知道对方的存在。</p>
 <aside name="blackboard">
 <p>实体可以发送和收到消息的模型很像AI界的<a href="http://en.wikipedia.org/wiki/Blackboard_system">blackboard systems</a>。</p>
 </aside>
 <p><img src="images/event-queue-central.png" alt="一个战斗代码和教程代码都可以读写的中心事件队列。" /></p>
-<p>我本想将这个作为这章其他部分的例子，但是我真不喜欢这样巨大的全局系统。
+<p>我本想将这个作为这章其他部分的例子，但是我真的不喜欢这样巨大的全局系统。
 事件队列不需要在整个游戏引擎中沟通。在一个类或者领域中沟通就足够有用了。</p>
 <h3><a href="#你说什么？" name="你说什么？">你说什么？</a></h3>
 <p>所以说点别的，让我们给游戏添加一些声音。
@@ -155,7 +205,7 @@ delete the font style for english.
 </pre></div>
 
 
-<p>这样做了之后，注意到有时候你改变菜单项目，整个屏幕就会冻住几帧。
+<p>这样做了之后，我们注意到有时候你改变菜单项目，整个屏幕就会冻住几帧。
 我们遇到了第一个问题：</p>
 <ul>
 <li><strong>问题一：API在音频引擎完成对请求的处理前阻塞了调用者。</strong></li>
@@ -167,18 +217,18 @@ delete the font style for english.
 在AI代码中，我们增加了一个调用，在敌人承受玩家伤害时发出痛苦的低号。
 没有什么比在虚拟的生物身上施加痛苦更能温暖玩家心灵的了。</p>
 <p><span name="hatsworth"></span></p>
-<p>这能行，但是有时玩家打出暴击，他在同一帧可打到两个敌人。
+<p>这能行，但是有时玩家打出暴击，他在同一帧可以打到两个敌人。
 这让游戏同时要播放两遍哀嚎。
 如果你了解一些音频的知识，那么就知道要把两个不同的声音混合在一起，就要加和它们的波形。
 当这两个是<em>同一</em>波形时，它与<em>一个</em>声音播放<em>两倍响</em>是一样的。那会很刺耳。</p>
 <aside name="hatsworth">
-<p>我在完成<a href="http://en.wikipedia.org/wiki/Henry_Hatsworth_in_the_Puzzling_Adventure">Henry Hatsworth in the Puzzling Adventure</a>遇到了同样的问题。解决方法和这里的很相似。</p>
+<p>我在完成<a href="http://en.wikipedia.org/wiki/Henry_Hatsworth_in_the_Puzzling_Adventure">Henry Hatsworth in the Puzzling Adventure</a>时遇到了同样的问题。解决方法和这里的很相似。</p>
 </aside>
-<p>在Boss战中有个相关的问题，当有一堆小怪跑动制造伤害时。
+<p>在Boss战中有个相关的问题，当有一堆小怪跑动并制造伤害时。
 硬件只能同时播放一定数量的音频。当数量超过限度时，声音就被忽视或者切断了。</p>
 <p>为了处理这些问题，我们需要获得音频调用的整个<em>集合</em>，用来整合和排序。
 不幸的是，音频API独立处理每一个<code>playSound()</code>调用。
-看起来这些请求是从针眼穿过一样，一次只能有一个。</p>
+看起来这些请求像是从针眼穿过一样，一次只能有一个。</p>
 <ul>
 <li><strong>问题二：请求无法合并处理。</strong></li>
 </ul>
@@ -194,7 +244,7 @@ delete the font style for english.
 <ul>
 <li><strong>问题三：请求在错误的线程上执行。</strong></li>
 </ul>
-<p>音频引擎调用<code>playSound()</code>意味着，“放下任何东西，现在就播放声音！”<em>立即</em> 就是问题。
+<p>音频引擎调用<code>playSound()</code>意味着，“放下任何东西，现在就播放声音！”<em>立即</em>就是问题。
 游戏系统在<em>它们</em>方便时调用<code>playSound()</code>，但是音频引擎不一定能方便去处理这个请求。
 为了解决这点，我们需要将<em>接受</em>请求和<em>处理</em>请求解耦。</p>
 <h2><a href="#模式" name="模式">模式</a></h2>
@@ -215,17 +265,17 @@ delete the font style for english.
 有一块代码A需要另一块代码B去做些事情。
 对A自然的处理方式是将请求<em>推</em>给B。</p>
 <p>同时，对B自然的处理方式是在<em>B</em>方便时将请求<em>拉</em>入。
-当一端有推模型另一端有拉模型，你需要在它们间放缓存。
+当一端有推模型另一端有拉模型，你需要在它们之间设置缓存。
 这就是队列比简单的解耦模式多提供的部分。</p>
 <p>队列给了代码对拉取的控制权——接收者可以延迟处理，合并或者忽视请求。
 但队列做这些事是通过将控制权从发送者那里<em>拿走</em>完成的。
 发送者能做的就是向队列发送请求然后祈祷。
-当发送者需要回复时，队列不是好选择。</p>
+当发送者需要回复时，队列不是好的选择。</p>
 <h2><a href="#记住" name="记住">记住</a></h2>
-<p>不像这书中的其他模式，事件队列很复杂，会对游戏架构引起广泛影响。
-这就意味着你仔细考虑如何——或者要不要——使用它。</p>
+<p>不像本书中的其他模式，事件队列很复杂，会对游戏架构产生广泛影响。
+这就意味着你得仔细考虑如何——或者要不要——使用它。</p>
 <h3><a href="#中心事件队列是一个全局变量" name="中心事件队列是一个全局变量">中心事件队列是一个全局变量</a></h3>
-<p>这个模式的常用方法是一个大的交换站，游戏中的每个部分都能将消息送过这里。
+<p>这个模式的常用方法是一个大的交换站，游戏中的每个部分都能将消息送到这里。
 这是很有用的基础架构，但是<em>有用</em>并不代表<em>好用</em>。</p>
 <p>可能要走一些弯路，但是我们中的大多数最终学到了全局变量是不好的。
 当有一小片状态，程序的每部分都能接触到，会产生各种微妙的相关性。
@@ -254,7 +304,7 @@ delete the font style for english.
 </ol>
 <p><span name="log"></span></p>
 <p>当消息系统是<em>同步的</em>，你很快就能找到环路——它们造成了栈溢出并让游戏崩溃。
-使用队列，异步地使用栈，即使虚假事件晃来晃去时，游戏仍然可以继续运行。
+使用队列，它会异步地使用栈，即使虚假事件晃来晃去，游戏仍然可以继续运行。
 避免这个的通用方法就是避免在<em>处理</em>事件的代码中<em>发送</em>事件。</p>
 <aside name="log">
 <p>在你的事件系统中加一个小小的漏洞日志也是一个好主意。</p>
@@ -264,7 +314,7 @@ delete the font style for english.
 剩下需要做的就是修复它的问题。</p>
 <p>第一个问题是我们的API是<em>阻塞的</em>。
 当代码播放声音时，它不能做任何其他事情，直到<code>playSound()</code>加载完音频然后真正地开始播放。</p>
-<p>我们想要推迟这项工作，这样 <code>playSound()</code> 可以很快的返回。
+<p>我们想要推迟这项工作，这样 <code>playSound()</code> 可以很快地返回。
 为了达到这一点，我们需要<em>具体化</em>播放声音的请求。
 我们需要一个小结构存储发送请求时的细节，这样我们晚些时候可以使用：</p>
 <div class="codehilite"><pre><span></span><span class="k">struct</span> <span class="n">PlayMessage</span>
@@ -280,7 +330,7 @@ delete the font style for english.
 比如<a href="http://en.wikipedia.org/wiki/Fibonacci_heap">Fibonacci heap</a>或者<a href="http://en.wikipedia.org/wiki/Skip_list">skip list</a>或者最起码<em>链表</em>。
 但是在实践中，存储一堆同类事物最好的办法是使用一个平凡无奇的经典数组：</p>
 <aside name="prof">
-<p>算法研究者通过发表新奇数据结构的研究获得收入。
+<p>算法研究者通过发表对新奇数据结构的研究获得收入。
 他们不鼓励使用基本的结构。</p>
 </aside>
 <ul>
@@ -288,7 +338,7 @@ delete the font style for english.
 <p>没有动态分配。</p>
 </li>
 <li>
-<p>没有为记录信息造成额外的开销或者多余的指针。</p>
+<p>没有为记录信息造成的额外的开销或者多余的指针。</p>
 </li>
 </ul>
 <p><span name="locality"></span></p>
@@ -318,7 +368,7 @@ delete the font style for english.
 
 
 <p>我们可以将数组大小设置为最糟情况下的大小。
-为了播放声音，简单的将新消息插到最后：</p>
+为了播放声音，简单地将新消息插到最后：</p>
 <div class="codehilite"><pre><span></span><span class="kt">void</span> <span class="n">Audio</span><span class="o">::</span><span class="n">playSound</span><span class="p">(</span><span class="n">SoundId</span> <span class="n">id</span><span class="p">,</span> <span class="kt">int</span> <span class="n">volume</span><span class="p">)</span>
 <span class="p">{</span>
   <span class="n">assert</span><span class="p">(</span><span class="n">numPending_</span> <span class="o">&lt;</span> <span class="n">MAX_PENDING</span><span class="p">);</span>
@@ -357,9 +407,9 @@ delete the font style for english.
 <aside name="update">
 <p>就像名字暗示的，这是<a href="update-method.html" class="pattern">更新方法</a>模式。</p>
 </aside>
-<p>现在我们需要从方便时候调用。
+<p>现在我们需要在方便时候调用。
 这个“方便”取决于你的游戏。
-它也许要从主<a href="game-loop.html" class="pattern">游戏循环中</a>或者专注于音频的线程中调用。</p>
+它也许要从主<a href="game-loop.html" class="pattern">游戏循环</a>中或者专注于音频的线程中调用。</p>
 <p>这可行，但是这假定了我们在对<code>update()</code>的单一调用中可以处理<em>每个</em>声音请求。
 如果你做了像在声音资源加载后处理异步请求的事情，这就没法工作了。
 <code>update()</code>一次处理一个请求，它需要有完成一个请求后从缓存中再拉取一个请求的能力。
@@ -377,7 +427,7 @@ delete the font style for english.
 <p>队列的<strong>头部</strong>是<em>读取</em>请求的地方。头部存储最早发出的请求。</p>
 </li>
 <li>
-<p><strong>尾部</strong> 是另一端。它是数组中下个<em>写入</em>请求的地方。注意它指向队列终点的下一个。你可以将其理解为一个半开半闭区间，如果这有帮助的话。</p>
+<p><strong>尾部</strong>是另一端。它是数组中下个<em>写入</em>请求的地方。注意它指向队列终点的下一个位置。你可以将其理解为一个半开半闭区间，如果这有帮助的话。</p>
 </li>
 </ul>
 <p>由于 <code>playSound()</code> 向数组的末尾添加了新的请求，头部开始指向元素0而尾部向右增长。</p>
@@ -449,11 +499,11 @@ delete the font style for english.
 <p><img src="images/event-queue-crawl.png" alt="像之前一样的数组，但是现在头部在向右移动，在左侧留下空白格子。" /></p>
 <p>注意当尾部移动时，<em>头部</em> 也是如此。
 这就意味着在数组<em>开始</em>部分的元素不再被使用了。
-所以我们做的就是，当抵达末尾时，将尾部回折到数组的头部。
-这就是为什么它被称为<em>环状</em>缓存，它表现的像是一个环状的数组。</p>
+所以我们做的就是，当抵达末尾时，将尾部折回到数组的头部。
+这就是为什么它被称为<em>环状</em>缓存，它表现得像是一个环状的数组。</p>
 <p><img src="images/event-queue-ring.png" alt="数组绕了一圈，现在头部可以回到开始时指向的地方了。" /></p>
 <p>这个的实现非常简单。
-当我们入队一个事物时，只需要保证尾部在抵达结束的时候回折到数组的开头：</p>
+当我们入队一个事物时，只需要保证尾部在抵达末尾的时候折回到数组的开头：</p>
 <div class="codehilite"><pre><span></span><span class="kt">void</span> <span class="n">Audio</span><span class="o">::</span><span class="n">playSound</span><span class="p">(</span><span class="n">SoundId</span> <span class="n">id</span><span class="p">,</span> <span class="kt">int</span> <span class="n">volume</span><span class="p">)</span>
 <span class="p">{</span>
   <span class="n">assert</span><span class="p">((</span><span class="n">tail_</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">%</span> <span class="n">MAX_PENDING</span> <span class="o">!=</span> <span class="n">head_</span><span class="p">);</span>
@@ -469,9 +519,9 @@ delete the font style for english.
 <p>替代<code>tail++</code>，将增量设为数组长度的模，这样可将尾部回折回来。
 另一个改变是断言。我们得保证队列不会溢出。
 只要这里有少于<code>MAX_PENDING</code>的请求在队列中，在头部和尾部之间就有没有使用的间隔。
-如果队列满了，那就不会有了，就像古怪的衔尾蛇一样，尾部会遇到头部然后覆盖它。
+如果队列满了，那就不会有间隔了，就像古怪的衔尾蛇一样，尾部会遇到头部然后覆盖它。
 断言保证了这不会发生。</p>
-<p>在<code>update()</code>中，头部也回折了：</p>
+<p>在<code>update()</code>中，头部也折回了：</p>
 <div class="codehilite"><pre><span></span><span class="kt">void</span> <span class="n">Audio</span><span class="o">::</span><span class="n">update</span><span class="p">()</span>
 <span class="p">{</span>
   <span class="c1">// 如果没有待处理的请求，就啥也不做</span>
@@ -536,10 +586,10 @@ delete the font style for english.
 <p>这里有些要记住的要点。
 我们能够合并的“同步”请求窗口只有队列长度那么大。
 如果我们快速处理请求，队列长度就会保持较短，我们就有更少的机会合并东西。
-同样的，如果处理慢了，队列满了，我们能找到更多的东西合并。</p>
-<p>这个模式隔离了请求者和何时请求被处理，但如果你将整个队列交互视为与数组结构交互，
-那么发出请求和处理它之间的延迟会显式的影响行为。
-确认这么做之前保证这不会造成问题。</p>
+同样地，如果处理慢了，队列满了，我们能找到更多的东西合并。</p>
+<p>这个模式隔离了请求者和请求何时被处理，但如果你将整个队列交互视为与数组结构交互，
+那么发出请求和处理它之间的延迟会显式地影响行为。
+确认在这么做之前保证了这不会造成问题。</p>
 <h3><a href="#分离线程" name="分离线程">分离线程</a></h3>
 <p>最终，最险恶的问题。
 使用同步的音频API，调用<code>playSound()</code>的线程就是处理请求的线程。
@@ -549,7 +599,7 @@ delete the font style for english.
 有无数的编程范式在线程间分散代码，但是最通用的策略是将每个独立的领域分散到一个线程——音频，渲染，AI等等。</p>
 <aside name="multicore">
 <p>单线程代码同时只在一个核心上运行。
-如果你不使用线程，哪怕做了流行的异步风格编程，能做的极限就是让一个核心繁忙，那也只发挥CPU能力的一小部分。</p>
+如果你不使用线程，哪怕做了流行的异步风格编程，能做的极限就是让一个核心繁忙，那也只发挥了CPU能力的一小部分。</p>
 <p>服务器程序员将他们的程序分割成多个独立<em>进程</em>作为弥补。
 这让系统在不同的核上同时运行它们。
 游戏几乎总是单进程的，所以增加线程真的有用。</p>
@@ -563,11 +613,11 @@ delete the font style for english.
 <p>剩下要做的事情就是写修改队列的方法——<code>playSound()</code>和<code>update()</code>——使之线程安全。
 通常，我会写一写具体代码完成之，但是由于这是一本关于架构的书，我不想着眼于一些特定的API或者锁机制。</p>
 <p>从高层看来，我们只需保证队列不是同时被修改的。
-由于<code>playSound()</code>只做了一点点事情——基本上就是声明字段。——不会阻塞线程太长时间。
+由于<code>playSound()</code>只做了一点点事情——基本上就是声明字段——不会阻塞线程太长时间。
 在<code>update()</code>中，我们等待条件变量之类的东西，直到有请求需要处理时才会消耗CPU循环。</p>
 <h2><a href="#设计决策" name="设计决策">设计决策</a></h2>
 <p>很多游戏使用事件队列作为交流结构的关键部分，你可以花很多时间设计各种复杂的路径和消息过滤器。
-但是在构建洛杉矶电话交换机之类的东西之前，我推荐你从简单开始。这里是几个需要在开始时思考的问题：</p>
+但是在构建洛杉矶电话交换机之类的东西之前，我推荐你从简单的开始。这里是几个需要在开始时思考的问题：</p>
 <h3><a href="#队列中存储了什么？" name="队列中存储了什么？">队列中存储了什么？</a></h3>
 <p>到目前为止，我交替使用“事件”和“消息”，因为大多时候两者的区别并不重要。
 无论你在队列中塞了什么都可以获得解耦和合并的能力，但是还是有几个地方不同。</p>
@@ -579,12 +629,12 @@ delete the font style for english.
 <ul>
 <li>
 <p><em>很可能允许多个监听者。</em>
-由于队列包含的是已经发生的事情，发送者可能不关心谁接受它。
-从这个层面来说，事件发生在过去，早已被遗忘。</p>
+  由于队列包含的是已经发生的事情，发送者可能不关心谁接受它。
+  从这个层面来说，事件发生在过去，早已被遗忘。</p>
 </li>
 <li>
 <p><em>访问队列的模块更广。</em>
-事件队列通常<em>广播</em>事件到任何感兴趣的部分。为了最大程度允许哪些部分能兴趣，队列一般是全局可见的。</p>
+  事件队列通常<em>广播</em>事件到任何感兴趣的部分。为了尽可能允许所有感兴趣的部分访问，队列一般是全局可见的。</p>
 </li>
 </ul>
 </li>
@@ -601,7 +651,7 @@ delete the font style for english.
 <ul>
 <li>
 <p><em>更可能只有一个监听者。</em>
- 在这个例子中，存储的消息只请求<em>音频API</em>播放声音。如果引擎的随便什么部分都能从队列中拿走消息，那可不好。</p>
+    在这个例子中，存储的消息只请求<em>音频API</em>播放声音。如果引擎的随便什么部分都能从队列中拿走消息，那可不好。</p>
 <aside name="locator">
 
 <p>我在这里说“更可能”，因为只要像期望的<em>那样</em>处理消息，消息入队时可以不必担心哪块代码处理它。
@@ -619,8 +669,8 @@ delete the font style for english.
 <ul>
 <li>
 <p><strong>单播队列：</strong></p>
-<p>在队列是类API的一部分时是，单播很自然的。
-就像我们的音频例子，从调用者的角度，它们只能看到可以调用的<code>playSound()</code>方法。</p>
+<p>在队列是类API的一部分时，单播是很自然的。
+就像我们的音频例子，从调用者的角度来说，它们只能看到可以调用的<code>playSound()</code>方法。</p>
 <ul>
 <li>
 <p><em>队列变成了读取者的实现细节。</em> 发送者知道的所有事就是发条消息。</p>
@@ -630,8 +680,8 @@ delete the font style for english.
 </li>
 <li>
 <p><em>无须担心监听者之间的竞争。</em>
-使用多个监听者，你需要决定每个队列中的事物<em>一对多</em>分给全部的监听者（广播）
-还是<em>每个</em>队列中的事物<em>一对一</em>分给单独的监听者（更加像工作队列）。</p>
+  使用多个监听者，你需要决定队列中的每个事物<em>一对多</em>分给全部的监听者（广播）
+  还是队列中的<em>每个</em>事物<em>一对一</em>分给单独的监听者（更加像工作队列）。</p>
 <p>在两种情况下，监听者最终要么做了多余的事情要么在相互干扰，你得谨慎考虑想要的行为。
 使用单一的监听者，这种复杂性消失了。</p>
 </li>
@@ -642,14 +692,14 @@ delete the font style for english.
 <p>这是大多数“事件”系统工作的方法。如果你有十个监听者，一个事件进来，所有监听者都能看到这个事件。</p>
 <ul>
 <li>
-<p>事件可能无人接收。<em>
-前面那点的必然推论就是如果有</em>零个*监听者，没有谁能看到这个事件。
-在大多数广播系统中，如果处理事件时没有监听者，事件就消失了。</p>
+<p><em>事件可能无人接收。</em>
+  前面那点的必然推论就是如果有<em>零个</em>监听者，没有谁能看到这个事件。
+  在大多数广播系统中，如果处理事件时没有监听者，事件就消失了。</p>
 </li>
 <li>
 <p><em>也许需要过滤事件。</em>
-广播队列经常对程序的所有部分可见，最终你会获得一系列监听者。
-很多事件乘以很多监听者，你会获取一大堆事件处理器。</p>
+  广播队列经常对程序的所有部分可见，最终你会获得一系列监听者。
+  很多事件乘以很多监听者，你会获取一大堆事件处理器。</p>
 <p>为了削减大小，大多数广播事件系统让监听者筛出其需要接受的事件。
 比如，可能它们只想要接受鼠标事件或者在某一UI区域内的事件。</p>
 </li>
@@ -657,12 +707,12 @@ delete the font style for english.
 </li>
 <li>
 <p><strong>工作队列：</strong></p>
-<p>类似广播队列，有多个监听器。不同之处在于每个队列中的东西只会投到监听器<em>其中的一个</em>。
+<p>类似广播队列，有多个监听器。不同之处在于队列中的每个东西只会投到监听器<em>其中的一个</em>。
 常应用于将工作打包给同时运行的线程池。</p>
 <ul>
 <li><em>你得规划。</em>
-由于一个事物只有一个监听器，队列逻辑需要指出最好的选项。
-这也许像round robin算法或者乱序选择一样简单，或者可以使用更加复杂的优先度系统。</li>
+  由于一个事物只有一个监听器，队列逻辑需要指出最好的选项。
+  这也许像round robin算法或者乱序选择一样简单，或者可以使用更加复杂的优先度系统。</li>
 </ul>
 </li>
 </ul>
@@ -675,17 +725,17 @@ delete the font style for english.
 </aside>
 <ul>
 <li>
-<p><strong> 使用单个写入器：</strong></p>
+<p><strong>使用单个写入器：</strong></p>
 <p>这种风格和同步的<a href="observer.html" class="gof-pattern">观察者</a>模式很像。
 有特定对象收集所有可接受的事件。</p>
 <ul>
 <li>
 <p><em>你隐式知道事件是从哪里来的。</em>
-由于这里只有一个对象可向队列添加事件，任何监听器都可以安全的假设那就是发送者。</p>
+  由于这里只有一个对象可向队列添加事件，任何监听器都可以安全地假设那就是发送者。</p>
 </li>
 <li>
 <p><em>通常允许多个读取者。</em>
-你可以使用单发送者对单接收者的队列，但是这样沟通系统更像纯粹的队列数据结构。</p>
+  你可以使用单发送者对单接收者的队列，但是这样沟通系统更像纯粹的队列数据结构。</p>
 </li>
 </ul>
 </li>
@@ -696,24 +746,24 @@ delete the font style for english.
 <ul>
 <li>
 <p><em>得更小心环路。</em>
-由于任何东西都有可能向队列中添加东西，这更容易意外地在处理事件时添加事件。
-如果你不小心，那可能会触发反馈循环。</p>
+  由于任何东西都有可能向队列中添加东西，这更容易意外地在处理事件时添加事件。
+  如果你不小心，那可能会触发反馈循环。</p>
 </li>
 <li>
 <p><em>很可能需要在事件中添加对发送者的引用。</em>
- 当监听者接到事件时，它不知道是谁发送的，因为可能是任何人。
- 如果它确实需要知道发送者，你得将发送者打包到事件对象中去，这样监听者才可以使用它。</p>
+    当监听者接到事件时，它不知道是谁发送的，因为可能是任何人。
+     如果它确实需要知道发送者，你得将发送者打包到事件对象中去，这样监听者才可以使用它。</p>
 </li>
 </ul>
 </li>
 </ul>
 <h3><a href="#对象在队列中的生命周期如何？" name="对象在队列中的生命周期如何？">对象在队列中的生命周期如何？</a></h3>
 <p>使用同步的通知，当所有的接收者完成了消息处理才会返回发送者。
-这意味着消息本身可以安全的存在栈的局部变量中。
+这意味着消息本身可以安全地存在栈的局部变量中。
 使用队列，消息比让它入队的调用活得更久。</p>
-<p>如果你是用有垃圾回收的语言，你无需过度担心这个。
-消息存到队列中，会一直存到需要它的时候。
-而在C或C++中，得由你来保证对象活的足够长。</p>
+<p>如果你使用有垃圾回收的语言，你无需过度担心这个。
+消息存到队列中，会在需要它的时候一直存在。
+而在C或C++中，得由你来保证对象活得足够长。</p>
 <ul>
 <li>
 <p><strong>传递所有权：</strong></p>
@@ -752,17 +802,17 @@ delete the font style for english.
 <ul>
 <li>
 <p>我在之前提到了几次，很大程度上，
-这个模式是广为人知的<a href="observer.html" class="gof-pattern">观察者</a>模式的异步实现。</p>
+  这个模式是广为人知的<a href="observer.html" class="gof-pattern">观察者</a>模式的异步实现。</p>
 </li>
 <li>
 <p>就像其他很多模式一样，事件队列有很多别名。
-其中一个是“消息队列”。这通常指代一个更高层次的实现。
-事件队列在应用<em>中</em>，消息队列通常在应用<em>间</em>交流。</p>
+  其中一个是“消息队列”。这通常指代一个更高层次的实现。
+  事件队列在应用<em>中</em>，消息队列通常在应用<em>间</em>交流。</p>
 <p>另一个术语是“发布/提交”，有时被缩写为“pubsub”。
 就像“消息队列”一样，这通常指代更大的分布式系统，而不是现在关注的这个模式。</p>
 </li>
 <li>
-<p><a href="http://en.wikipedia.org/wiki/Finite-state_machine">确定状态机</a>，很像GoF的<a href="state.html" class="gof-pattern">状态模式</a>，需要一个输入流。如果想要异步响应，可以考虑队列存储它们。</p>
+<p><a href="http://en.wikipedia.org/wiki/Finite-state_machine">确定状态机</a>，很像GoF的<a href="state.html" class="gof-pattern">状态模式</a>，需要一个输入流。如果想要异步响应，可以考虑用队列存储它们。</p>
 <p>当你有一对状态机相互发送消息时，每个状态机都有一个小小的未处理队列（被称为一个<em>信箱</em>），
 然后你需要重新发明<a href="http://en.wikipedia.org/wiki/Actor_model">actor model</a>。</p>
 </li>

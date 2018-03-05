@@ -22,8 +22,58 @@ delete the font style for english.
 </head>
 <body id="top">
 
-<span class="toc" onclick="RedirectToEnglishPage()">
-  <button style="position:fixed;bottom:10px;left:10px;color:#1481b8;">&equiv; 查看英文原文</button>
+<span class="toc">
+	<aside class="index noShowOnSmallScren" name="index">
+		<h2>目录</h2>
+		<ul>
+		  <li><a href="acknowledgements.html">致谢</a>
+		  <li><a href="introduction.html">序</a>
+		    <ul>
+		      <li><a href="architecture-performance-and-games.html">架构，性能和游戏</a></li>
+		    </ul>
+		  </li>
+		  <li><a href="design-patterns-revisited.html">重访设计模式</a>
+		    <ul>
+		      <li><a href="command.html">命令模式</a></li>
+		      <li><a href="flyweight.html">享元模式</a></li>
+		      <li><a href="observer.html">观察者模式</a></li>
+		      <li><a href="prototype.html">原型模式</a></li>
+		      <li><a href="singleton.html">单例模式</a></li>
+		      <li><a href="state.html">状态模式</a></li>
+		    </ul>
+		  </li>
+		  <li><a href="sequencing-patterns.html">序列模式</a>
+		    <ul>
+		      <li><a href="double-buffer.html">双缓冲模式</a></li>
+		      <li><a href="game-loop.html">游戏循环</a></li>
+		      <li><a href="update-method.html">更新方法</a></li>
+		    </ul>
+		  </li>
+		  <li><a href="behavioral-patterns.html">行为模式</a>
+		    <ul>
+		      <li><a href="bytecode.html">字节码</a></em></li>
+		      <li><a href="subclass-sandbox.html">子类沙箱</a></li>
+		      <li><a href="type-object.html">类型对象</a></li>
+		    </ul>
+		  </li>
+		  <li><a href="decoupling-patterns.html">解耦模式</a>
+		    <ul>
+		      <li><a href="component.html">组件模式</a></li>
+		      <li><a href="event-queue.html">事件队列</a></li>
+		      <li><a href="service-locator.html">服务定位器</a></li>
+		    </ul>
+		  </li>
+		  <li><a href="optimization-patterns.html">优化模式</a>
+		    <ul>
+		      <li><a href="data-locality.html">数据局部性</a></li>
+		      <li><a href="dirty-flag.html">脏标识模式</a></li>
+		      <li><a href="object-pool.html">对象池模式</a></li>
+		      <li><a href="spatial-partition.html">空间分区</a></li>
+		    </ul>
+		  </li>
+		</ul>
+	</aside>
+  <button style="position:fixed;bottom:10px;left:10px;color:#1481b8;" onclick="RedirectToEnglishPage()">&equiv; 查看英文原文</button>
 </span>
 
 <div class="page sidebar">
@@ -105,10 +155,10 @@ delete the font style for english.
 <p>在这里前后两个版本展示了代码是如何变得复杂的。
 左右巡逻需要两个简单的<code>for</code>循环。
 通过指定哪个循环在执行，我们追踪了骷髅在移向哪个方向。
-现在我们每帧跳出到外层的游戏循环，然后在跳回继续我们之前所做的，我们使用<code>patrollingLeft</code>显式地追踪了方向。</p>
+现在我们每帧跳出到外层的游戏循环，然后再跳回继续我们之前所做的，我们使用<code>patrollingLeft</code>显式地追踪了方向。</p>
 <p>但或多或少这能行，所以我们继续。
 一堆无脑的骨头不会对你的女武神提出太多挑战，
-下一个我们添加的是魔法雕像。它们一直会向她发射闪电球，这样可让她保持移动。</p>
+我们下一个添加的是魔法雕像。它们一直会向她发射闪电球，这样可让她保持移动。</p>
 <p>继续我们的“用最简单的方式编码”的风格，我们得到了：</p>
 <div class="codehilite"><pre><span></span><span class="c1">// 骷髅的变量……</span>
 <span class="n">Entity</span> <span class="n">leftStatue</span><span class="p">;</span>
@@ -159,10 +209,10 @@ delete the font style for english.
 <aside name="simultaneously">
 <p>死抠细节的人会在这点上揪着我不放，是的，它们没有<em>真的同步</em>。
 当一个对象更新时，其他的都不在更新中。
-我们等会再说这点。</p>
+我们等会儿再说这点。</p>
 </aside>
 <p>游戏循环维护动态的对象集合，所以从关卡添加和移除对象是很容易的——只需要将它们从集合中添加和移除。
-不必再用硬编码，我们甚至可以用数据文件构成这个关卡，那正是我们关卡设计者需要的。</p>
+不必再用硬编码，我们甚至可以用数据文件构成这个关卡，那正是我们的关卡设计者需要的。</p>
 <h2><a href="#模式" name="模式">模式</a></h2>
 <p><strong>游戏世界</strong>管理<strong>对象集合</strong>。
 每个对象实现一个<strong>更新方法</strong>模拟对象在<strong>一帧</strong>内的行为。每一帧，游戏循环更新集合中的每一个对象。</p>
@@ -229,7 +279,7 @@ delete the font style for english.
 哪怕按照玩家的视角，所有对象都是同时运转的，游戏的核心还是回合制的。
 只是完整的“回合”只有一帧那么长。</p>
 <aside name="double-buffer">
-<p>如果，由于某些原因，你决定<em>不</em>让游戏像这样顺序更新，你需要<a href="double-buffer.html" class="pattern">双缓冲</a>模式。
+<p>如果，由于某些原因，你决定<em>不</em>让游戏按这样的顺序更新，你需要<a href="double-buffer.html" class="pattern">双缓冲</a>模式。
 那么AB更新的顺序就没有关系了，因为<em>双方</em>都会看对方之前那帧的状态。</p>
 </aside>
 <p>当关注游戏逻辑时，这通常是件好事。
@@ -260,7 +310,7 @@ delete the font style for english.
 <p>这里，<code>objects_</code>是可更新游戏对象的数组，而<code>numObjects_</code>是数组的长度。
 当添加新对象时，这个数组长度变量就增加。
 在循环的一开始，我们在<code>numObjectsThisTurn</code>中存储数组的长度，
-这样在这帧的遍历循环会停在新添加的对象之前。</p>
+这样这帧的遍历循环会停在新添加的对象之前。</p>
 <p>一个更麻烦的问题是在遍历时<em>移除</em>对象。
 你击败了邪恶的野兽，现在它需要被移出对象列表。
 如果它正好位于你当前更新对象之前，你会意外地跳过一个对象：</p>
@@ -293,7 +343,7 @@ delete the font style for english.
 <p>如果在更新循环中有多个线程处理对象，
 那么你可能更喜欢推迟任何修改，避免更新时同步线程的开销。</p>
 </aside>
-<h2><a href="#示例代码。" name="示例代码。">示例代码。</a></h2>
+<h2><a href="#示例代码" name="示例代码">示例代码</a></h2>
 <p>这个模式太直观了，代码几乎只是在重复说明要点。
 这不意味着这个模式没<em>有用</em>。它<em>因为</em>简单而有用：这是一个无需装饰的干净解决方案。</p>
 <p>但是为了让事情更具体些，让我们看看一个基础的实现。
@@ -343,7 +393,7 @@ delete the font style for english.
 
 
 <aside name="array">
-<p>在真实世界程序中，你可能真的要使用集合类，我在这里使用数组来保持简单</p>
+<p>在真实的世界程序中，你可能真的要使用集合类，我在这里使用数组来保持简单</p>
 </aside>
 <p>现在，万事俱备，游戏通过每帧更新每个实体来实现模式：</p>
 <p><span name="game-loop"></span></p>
@@ -477,7 +527,6 @@ delete the font style for english.
 <aside name="uml">
 <p>还有人关心UML吗？如果还有，那就是我们刚刚建的。</p>
 </aside>
-<h3><a href="#passing-time" name="passing-time">Passing time</a></h3>
 <h3><a href="#传递时间" name="传递时间">传递时间</a></h3>
 <p>这是模式的关键，但是我只对常用的部分进行了细化。
 到目前为止，我们假设每次对<code>update()</code>的调用都推动游戏世界前进一个固定的时间。</p>
@@ -543,7 +592,7 @@ delete the font style for english.
 <a href="state.html" class="pattern">状态</a>模式可以这样做，你可以通过改变它委托的对象来改变它的行为。
 <a href="type-object.html" class="pattern">类型对象</a>模式也这样做了，这样你可以在同“种”实体间分享行为。</p>
 <p>如果你使用了这些模式，将<code>update()</code>放在委托类中是很自然的。
-在那种情况下，也许主类中仍有<code>update()</code>方法，但是它不是虚方法，可以简单的委托给委托对象。就像这样：</p>
+在那种情况下，也许主类中仍有<code>update()</code>方法，但是它不是虚方法，可以简单地委托给委托对象。就像这样：</p>
 <div class="codehilite"><pre><span></span><span class="kt">void</span> <span class="n">Entity</span><span class="o">::</span><span class="n">update</span><span class="p">()</span>
 <span class="p">{</span>
   <span class="c1">// 转发给状态对象</span>
@@ -552,15 +601,15 @@ delete the font style for english.
 </pre></div>
 
 
-<p>这样做让你改变委托对象来定义新行为。就像使用组件，这给了你无须定义全新的子类就能改变行为的灵活性。</p>
+<p>这样做允许你改变委托对象来定义新行为。就像使用组件，这给了你无须定义全新的子类就能改变行为的灵活性。</p>
 </li>
 </ul>
 <h3><a href="#如何处理隐藏对象？" name="如何处理隐藏对象？">如何处理隐藏对象？</a></h3>
 <p>游戏中的对象，不管什么原因，可能暂时无需更新。
 它们可能是停用了，或者超出了屏幕，或者还没有解锁。
 如果状态中的这种对象很多，每帧遍历它们却什么都不做是在浪费CPU循环。</p>
-<p>一种方法是管理单独的“活动”对象集合，那些存储真正需要更新的对象。
-当一个对象停用时，从那个集合中移除它。当它启用时，再把它添回来。
+<p>一种方法是管理单独的“活动”对象集合，它存储真正需要更新的对象。
+当一个对象停用时，从那个集合中移除它。当它启用时，再把它添加回来。
 用这种方式，你只需要迭代那些真正需要更新的东西：</p>
 <ul>
 <li>
@@ -573,7 +622,7 @@ delete the font style for english.
 
 <p>检查对象启用与否然后跳过它，不但消耗了CPU循环，还报销了你的数据缓存。
 CPU通过从RAM上读取数据到缓存上来优化读取。
-这样做是基于刚刚读取内存之后的内存部分很可能等会也会被读取到这个假设。</p>
+这样做是基于刚刚读取内存之后的内存部分很可能等会儿也会被读取到这个假设。</p>
 <p>当你跳过对象，你可能越过了缓存的尾部，强迫它从缓慢的主存中再取一块。</p>
 </aside>
 
@@ -582,18 +631,18 @@ CPU通过从RAM上读取数据到缓存上来优化读取。
 <p><strong>如果你使用单独的集合保存活动对象：</strong></p>
 <ul>
 <li><em>使用了额外的内存管理第二个集合。</em>
-当你需要所有实体时，通常又需要一个巨大的集合。在那种情况下，这集合是多余的。
-在速度比内存要求更高的时候（通常如此），这取舍仍是值得的。</li>
+  当你需要所有实体时，通常又需要一个巨大的集合。在那种情况下，这集合是多余的。
+  在速度比内存要求更高的时候（通常如此），这取舍仍是值得的。</li>
 </ul>
 <p>另一个权衡后的选择是使用两个集合，除了活动对象集合的另一个集合只包含<em>不活跃</em>实体而不是全部实体。</p>
 <ul>
 <li><em>得保持集合同步。</em>
- 当对象创建或完全销毁时（不是暂时停用），你得修改全部对象集合和活跃对象集合。</li>
+    当对象创建或完全销毁时（不是暂时停用），你得修改全部对象集合和活跃对象集合。</li>
 </ul>
 </li>
 </ul>
 <p>方法选择的度量标准是不活跃对象的可能数量。
-数量越多，用分离的集合，避免在核心游戏循环中用到它们就更有用。</p>
+数量越多，用分离的集合避免在核心游戏循环中用到它们就更有用。</p>
 <h2><a href="#参见" name="参见">参见</a></h2>
 <ul>
 <li>
@@ -604,14 +653,14 @@ CPU通过从RAM上读取数据到缓存上来优化读取。
 </li>
 <li>
 <p><a href="http://unity3d.com">Unity</a>框架在多个类中使用了这个模式，包括
-<a href="http://docs.unity3d.com/Documentation/ScriptReference/MonoBehaviour.Update.html"><code>MonoBehaviour</code></a>。</p>
+  <a href="http://docs.unity3d.com/Documentation/ScriptReference/MonoBehaviour.Update.html"><code>MonoBehaviour</code></a>。</p>
 </li>
 <li>
 <p>微软的<a href="http://creators.xna.com/en-US/">XNA</a>平台在
-<a href="http://msdn.microsoft.com/en-us/library/microsoft.xna.framework.game.update.aspx"><code>Game</code></a>
-和
-<a href="http://msdn.microsoft.com/en-us/library/microsoft.xna.framework.gamecomponent.update.aspx"><code>GameComponent</code></a>
-类中使用了这个模式。</p>
+  <a href="http://msdn.microsoft.com/en-us/library/microsoft.xna.framework.game.update.aspx"><code>Game</code></a>
+  和
+  <a href="http://msdn.microsoft.com/en-us/library/microsoft.xna.framework.gamecomponent.update.aspx"><code>GameComponent</code></a>
+  类中使用了这个模式。</p>
 </li>
 <li>
 <p><a href="http://html5quintus.com/">Quintus</a>，一个JavaScript游戏引擎在它的主<a href="http://html5quintus.com/guide/sprites.md"><code>Sprite</code></a>类中使用了这个模式。</p>

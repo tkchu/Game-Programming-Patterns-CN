@@ -22,8 +22,58 @@ delete the font style for english.
 </head>
 <body id="top">
 
-<span class="toc" onclick="RedirectToEnglishPage()">
-  <button style="position:fixed;bottom:10px;left:10px;color:#1481b8;">&equiv; 查看英文原文</button>
+<span class="toc">
+	<aside class="index noShowOnSmallScren" name="index">
+		<h2>目录</h2>
+		<ul>
+		  <li><a href="acknowledgements.html">致谢</a>
+		  <li><a href="introduction.html">序</a>
+		    <ul>
+		      <li><a href="architecture-performance-and-games.html">架构，性能和游戏</a></li>
+		    </ul>
+		  </li>
+		  <li><a href="design-patterns-revisited.html">重访设计模式</a>
+		    <ul>
+		      <li><a href="command.html">命令模式</a></li>
+		      <li><a href="flyweight.html">享元模式</a></li>
+		      <li><a href="observer.html">观察者模式</a></li>
+		      <li><a href="prototype.html">原型模式</a></li>
+		      <li><a href="singleton.html">单例模式</a></li>
+		      <li><a href="state.html">状态模式</a></li>
+		    </ul>
+		  </li>
+		  <li><a href="sequencing-patterns.html">序列模式</a>
+		    <ul>
+		      <li><a href="double-buffer.html">双缓冲模式</a></li>
+		      <li><a href="game-loop.html">游戏循环</a></li>
+		      <li><a href="update-method.html">更新方法</a></li>
+		    </ul>
+		  </li>
+		  <li><a href="behavioral-patterns.html">行为模式</a>
+		    <ul>
+		      <li><a href="bytecode.html">字节码</a></em></li>
+		      <li><a href="subclass-sandbox.html">子类沙箱</a></li>
+		      <li><a href="type-object.html">类型对象</a></li>
+		    </ul>
+		  </li>
+		  <li><a href="decoupling-patterns.html">解耦模式</a>
+		    <ul>
+		      <li><a href="component.html">组件模式</a></li>
+		      <li><a href="event-queue.html">事件队列</a></li>
+		      <li><a href="service-locator.html">服务定位器</a></li>
+		    </ul>
+		  </li>
+		  <li><a href="optimization-patterns.html">优化模式</a>
+		    <ul>
+		      <li><a href="data-locality.html">数据局部性</a></li>
+		      <li><a href="dirty-flag.html">脏标识模式</a></li>
+		      <li><a href="object-pool.html">对象池模式</a></li>
+		      <li><a href="spatial-partition.html">空间分区</a></li>
+		    </ul>
+		  </li>
+		</ul>
+	</aside>
+  <button style="position:fixed;bottom:10px;left:10px;color:#1481b8;" onclick="RedirectToEnglishPage()">&equiv; 查看英文原文</button>
 </span>
 
 <div class="page sidebar">
@@ -35,16 +85,16 @@ delete the font style for english.
 </nav>
 <h1>行为模式</h1>
 <h1 class="book"><a href="/">游戏设计模式</a></h1>
-<p>一旦做好游戏设定，挂满了角色和道具，剩下的就是启动场景。
+<p>一旦做好游戏设定，在里面装满了角色和道具，剩下的就是启动场景。
 为了完成这点，你需要行为——告诉游戏中每个实体做什么的剧本。</p>
-<p>当然，所有代码都是“行为”，并且所有软件都是定义行为，
+<p>当然，所有代码都是“行为”，并且所有软件都是定义行为的，
 但在游戏中有所不同的是，行为通常很<em>多</em>。
 文字处理器也许有很长的特性清单，
 但特性的数量与角色扮演游戏中的居民，物品和任务数量相比，那就相形见绌了。</p>
-<p>本章的模式帮助快速定义和完善大量的行为。
+<p>本章的模式有助于快速定义和完善大量的行为。
 <a href="type-object.html">类型对象</a>定义行为的类别而无需完成真正的类。
 <a href="subclass-sandbox.html">子类沙盒</a>定义各种行为的安全原语。
-最先进的是<a href="bytecode.html">字节码</a>，将行为从代码中拖出，放入数据文件中。</p>
+最先进的是<a href="bytecode.html">字节码</a>，将行为从代码中分离，放入数据文件中。</p>
 <h2><a href="#模式" name="模式">模式</a></h2>
 <ul>
 <li><a href="bytecode.html">字节码</a></li>

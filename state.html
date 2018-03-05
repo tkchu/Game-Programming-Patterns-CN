@@ -22,8 +22,58 @@ delete the font style for english.
 </head>
 <body id="top">
 
-<span class="toc" onclick="RedirectToEnglishPage()">
-  <button style="position:fixed;bottom:10px;left:10px;color:#1481b8;">&equiv; 查看英文原文</button>
+<span class="toc">
+	<aside class="index noShowOnSmallScren" name="index">
+		<h2>目录</h2>
+		<ul>
+		  <li><a href="acknowledgements.html">致谢</a>
+		  <li><a href="introduction.html">序</a>
+		    <ul>
+		      <li><a href="architecture-performance-and-games.html">架构，性能和游戏</a></li>
+		    </ul>
+		  </li>
+		  <li><a href="design-patterns-revisited.html">重访设计模式</a>
+		    <ul>
+		      <li><a href="command.html">命令模式</a></li>
+		      <li><a href="flyweight.html">享元模式</a></li>
+		      <li><a href="observer.html">观察者模式</a></li>
+		      <li><a href="prototype.html">原型模式</a></li>
+		      <li><a href="singleton.html">单例模式</a></li>
+		      <li><a href="state.html">状态模式</a></li>
+		    </ul>
+		  </li>
+		  <li><a href="sequencing-patterns.html">序列模式</a>
+		    <ul>
+		      <li><a href="double-buffer.html">双缓冲模式</a></li>
+		      <li><a href="game-loop.html">游戏循环</a></li>
+		      <li><a href="update-method.html">更新方法</a></li>
+		    </ul>
+		  </li>
+		  <li><a href="behavioral-patterns.html">行为模式</a>
+		    <ul>
+		      <li><a href="bytecode.html">字节码</a></em></li>
+		      <li><a href="subclass-sandbox.html">子类沙箱</a></li>
+		      <li><a href="type-object.html">类型对象</a></li>
+		    </ul>
+		  </li>
+		  <li><a href="decoupling-patterns.html">解耦模式</a>
+		    <ul>
+		      <li><a href="component.html">组件模式</a></li>
+		      <li><a href="event-queue.html">事件队列</a></li>
+		      <li><a href="service-locator.html">服务定位器</a></li>
+		    </ul>
+		  </li>
+		  <li><a href="optimization-patterns.html">优化模式</a>
+		    <ul>
+		      <li><a href="data-locality.html">数据局部性</a></li>
+		      <li><a href="dirty-flag.html">脏标识模式</a></li>
+		      <li><a href="object-pool.html">对象池模式</a></li>
+		      <li><a href="spatial-partition.html">空间分区</a></li>
+		    </ul>
+		  </li>
+		</ul>
+	</aside>
+  <button style="position:fixed;bottom:10px;left:10px;color:#1481b8;" onclick="RedirectToEnglishPage()">&equiv; 查看英文原文</button>
 </span>
 
 <div class="page sidebar">
@@ -43,7 +93,7 @@ delete the font style for english.
 我希望它们仍然足够清晰，能让你获取一份全景图。</p>
 <p><span name="two-camps"></span>
 如果你从来没有听说过状态机，不要难过。
-虽然在AI和编译器程序很出名，但它在其他编程圈就没那么知名了。
+虽然在AI和编译器程序方面很出名，但它在其他编程圈就没那么知名了。
 我认为应该有更多人知道它，所以在这里我将其运用在不同的问题上。</p>
 <aside name="two-camps">
 <p>这些状态机术语来自人工智能的早期时代。
@@ -208,7 +258,7 @@ FSMs是其中最简单的成员。</p>
 </li>
 <li>
 <p><strong>状态机同时只能在<em>一个</em>状态。</strong>
-    英雄不可能同时处于跳跃和站立。事实上，防止这点是使用FSM的理由之一。</p>
+    英雄不可能同时处于跳跃和站立状态。事实上，防止这点是使用FSM的理由之一。</p>
 </li>
 <li>
 <p><strong>一连串的<em>输入</em>或<em>事件</em>被发送给状态机。</strong>
@@ -228,7 +278,7 @@ FSMs是其中最简单的成员。</p>
 GoF的状态模式是一个方法——我们会谈到的——但先从简单的开始。</p>
 <aside name="adventure">
 <p>对FSMs我最喜欢的类比是那种老式文字冒险游戏，比如Zork。
-你有世界由屋子组成，屋子彼此通过出口相连。你输入像“去北方”的导航指令探索屋子。</p>
+你有个由屋子组成的世界，屋子彼此通过出口相连。你输入像“去北方”的导航指令探索屋子。</p>
 <p>这其实就是状态机：每个屋子都是一个状态。
 你现在在的屋子是当前状态。每个屋子的出口是它的转移。
 导航指令是输入。</p>
@@ -236,7 +286,7 @@ GoF的状态模式是一个方法——我们会谈到的——但先从简单�
 <h2><a href="#枚举和分支" name="枚举和分支">枚举和分支</a></h2>
 <p><code>Heroine</code>类的问题在于它不合法地捆绑了一堆布尔量：
 <code>isJumping_</code>和<code>isDucking_</code>不会同时为真。
-但有些标识同时只能有一个是<code>true</code>，这提示是你真正需要的其实是<code>enum</code>（枚举）。</p>
+但有些标识同时只能有一个是<code>true</code>，这提示你真正需要的其实是<code>enum</code>（枚举）。</p>
 <p>在这个例子中的<code>enum</code>就是FSM的状态的集合，所以让我们这样定义它：</p>
 <div class="codehilite"><pre><span></span><span class="k">enum</span> <span class="n">State</span>
 <span class="p">{</span>
@@ -249,7 +299,7 @@ GoF的状态模式是一个方法——我们会谈到的——但先从简单�
 
 
 <p>不需要一堆标识，<code>Heroine</code>只有一个<code>state_</code>状态。
-这里我们同时改变了分支顺序。在前面的代码中，我们先在判断输入，<em>然后</em> 判断状态。
+这里我们同时改变了分支顺序。在前面的代码中，我们先判断输入，<em>然后</em> 判断状态。
 这让处理某个按键的代码集中到了一处，但处理某个状态的代码分散到了各处。
 我们想让处理状态的代码聚在一起，所以先对状态做分支。这样的话：</p>
 <div class="codehilite"><pre><span></span><span class="kt">void</span> <span class="n">Heroine</span><span class="o">::</span><span class="n">handleInput</span><span class="p">(</span><span class="n">Input</span> <span class="n">input</span><span class="p">)</span>
@@ -354,12 +404,12 @@ GoF的状态模式是一个方法——我们会谈到的——但先从简单�
 <aside name="branch">
 <p>这里有个历史遗留问题。
 原先的面向对象传教徒，比如写《设计模式》的GoF和写《重构》的Martin Fowler都使用Smalltalk。
-那里，<code>ifThen:</code>是你只是使用条件的方法，该方法在<code>true</code>和<code>false</code>对象中以不同的方式实现。</p>
+那里，<code>ifThen:</code>只是个由你在一定情况下使用的方法，该方法在<code>true</code>和<code>false</code>对象中以不同的方式实现。</p>
 </aside>
 <p>但是在我们的例子中，面向对象确实是一个更好的方案。
-这带领我们走向状态模式。在GoF中这样描述状态模式：</p>
+这带领我们走向状态模式。GoF这样描述状态模式：</p>
 <blockquote>
-<p>允许一个对象在其内部状态 发生变化时改变自己的行为，该对象看起来好像修改了它的类型</p>
+<p>允许一个对象在其内部状态发生变化时改变自己的行为，该对象看起来好像修改了它的类型</p>
 </blockquote>
 <p>这可没太多帮助。我们的<code>switch</code>也完成了这一点。
 它们描述的东西应用在英雄的身上实际是：</p>
@@ -437,8 +487,7 @@ GoF的状态模式是一个方法——我们会谈到的——但先从简单�
 <p>为了“改变状态”，我们只需要将<code>state_</code>声明指向不同的<code>HeroineState</code>对象。
 这就是状态模式的全部了。</p>
 <aside name="delegate">
-<p>这看上去有些像<a href="http://en.wikipedia.org/wiki/Strategy_pattern" class="gof-pattern">策略</a>模式和<a href="type-object.html"
-class="pattern">类型对象</a>模式。
+<p>这看上去有些像<a href="http://en.wikipedia.org/wiki/Strategy_pattern" class="gof-pattern">策略</a>模式和<a href="type-object.html"class="pattern">类型对象</a>模式。
 在三者中，你都有一个主对象委托给下属。区别在于<em>意图</em>。</p>
 <ul>
 <li>在策略模式中，目标是解耦主类和它的部分行为。</li>
@@ -532,7 +581,7 @@ class="pattern">类型对象</a>模式。
 
 
 <p>如果可以，我倾向于使用静态状态，因为它们不会在状态转换时消耗太多的内存和CPU。
-但是，对于更，额，<em>多状态的事物</em>，需要耗费一些精力来实现。</p>
+但是，对于更<em>多状态的事物</em>，需要耗费一些精力来实现。</p>
 <aside name="fragment">
 <p>当你为状态动态分配内存时，你也许会担心碎片。
 <a href="object-pool.html" class="pattern">对象池</a>模式可以帮上忙。</p>
@@ -612,7 +661,7 @@ class="pattern">类型对象</a>模式。
 这是在我们<em>离开</em>现有状态，转换到新状态之前调用的方法。</p>
 <h2><a href="#有什么收获？" name="有什么收获？">有什么收获？</a></h2>
 <p>我花了这么长时间向您推销FSMs，现在我们来捋一捋。
-我到现在讲的都是真的，FSM能很好解决一些问题。但它们最大的优点也是它们最大的缺点。</p>
+我到现在讲的都是真的，FSM能很好地解决一些问题。但它们最大的优点也是它们最大的缺点。</p>
 <p><span name="turing"></span>
 状态机通过使用有约束的结构来理清杂乱的代码。
 你只需一个固定状态的集合，单一的当前状态，和一些硬编码的转换。</p>
@@ -625,19 +674,19 @@ class="pattern">类型对象</a>模式。
 FSMs不够灵活，并不在其中。</p>
 </aside>
 <p>如果你需要为更复杂的东西使用状态机，比如游戏AI，你会撞到这个模型的限制上。
-感谢上天，我们的前辈找到了一些方法来闪避这些限制。我会在这一章的最后简单地浏览一下它们。</p>
+感谢上天，我们的前辈找到了一些方法来避免这些限制。我会在这一章的最后简单地浏览一下它们。</p>
 <h2><a href="#并发状态机" name="并发状态机">并发状态机</a></h2>
-<p>我们决定给英雄拿枪的能力。
+<p>我们决定赋予英雄拿枪的能力。
 当她拿着枪的时候，她还是能做她之前的任何事情：跑动，跳跃，跳斩，等等。
 但是她在做这些的同时也要能开火。</p>
 <p>如果我们执着于FSM，我们需要<em>翻倍</em>现有状态。
 对于每个现有状态，我们需要另一个她持枪状态：站立，持枪站立，跳跃，持枪跳跃，
 你知道我的意思了吧。</p>
 <p>多加几种武器，状态就会指数爆炸。
-不但增加了大量的状态，这也增加了大量的冗余：
+不但增加了大量的状态，也增加了大量的冗余：
 持枪和不持枪的状态是完全一样的，只是多了一点负责射击的代码。</p>
 <p><span name="combination"></span>
-问题在于我们将两种状态绑定——她<em>做的</em>和她<em>携带的</em>——到了一个状态机上。
+问题在于我们将两种状态绑定到了一个状态机上——她<em>做的</em>和她<em>携带的</em>。
 为了处理所有可能的组合，我们需要为每一<em>对</em>组合写一个状态。
 修复方法很明显：使用两个单独的状态机。</p>
 <aside name="combination">
@@ -685,13 +734,13 @@ FSMs不够灵活，并不在其中。</p>
 这不是最优雅的解决方案，但这可以搞定工作。</p>
 <h2><a href="#分层状态机" name="分层状态机">分层状态机</a></h2>
 <p>再充实一下英雄的行为，她可能会有更多相似的状态。
-举个例子，她也许有站立，行走，奔跑，和滑铲状态。在这些状态中，按B跳，按下蹲。</p>
+举个例子，她也许有站立、行走、奔跑和滑铲状态。在这些状态中，按B跳，按下蹲。</p>
 <p>如果使用简单的状态机实现，我们在每个状态中的都重复了代码。
 如果我们能够实现一次，在多个状态间重用就好了。</p>
 <p><span name="inheritance"></span>
 如果这是面向对象的代码而不是状态机的，在状态间分享代码的方式是通过继承。
 我们可以为“在地面上”定义一个类处理跳跃和速降。
-站立，行走，奔跑和滑铲都从它继承，然后增加各自的附加行为。</p>
+站立、行走、奔跑和滑铲都从它继承，然后增加各自的附加行为。</p>
 <aside name="inheritance">
 <p>它的影响有好有坏。
 继承是一种有力的代码重用工具，但也在两块代码间建立了非常强的耦合。
@@ -741,7 +790,7 @@ FSMs不够灵活，并不在其中。</p>
 </pre></div>
 
 
-<p>这当然不是唯一实现层次的方法。
+<p>这当然不是唯一的实现层次的方法。
 如果你没有使用GoF的状态模式，这可能不会有用。
 相反，你可以显式的使用状态<em>栈</em>而不是单一状态来表示当前状态的父状态链。</p>
 <p>栈顶的状态是当前状态，在他下面是它的直接父状态，
@@ -750,7 +799,7 @@ FSMs不够灵活，并不在其中。</p>
 然后向下寻找，直到某一个状态处理了它。（如果到底也没找到，就无视它。）</p>
 <h2><a href="#下推自动机" name="下推自动机">下推自动机</a></h2>
 <p>还有一种有限状态机的扩展也用了状态栈。
-容易混淆的是，这里的栈表示的是完全不同的事物，被用作解决不同的问题。</p>
+容易混淆的是，这里的栈表示的是完全不同的事物，被用于解决不同的问题。</p>
 <p>要解决的问题是有限状态机没有任何<em>历史</em>的概念。
 你记得<em>正在</em>什么状态中，但是不记得<em>曾在</em>什么状态。
 没有简单的办法重回上一状态。</p>
@@ -762,7 +811,7 @@ FSMs不够灵活，并不在其中。</p>
 <p>这个行为在多个状态间重复，也许是用层次状态机重用代码的好地方。</p>
 </aside>
 <p>问题在于她射击<em>后</em>转换到的状态。
-她可以在站立，奔跑，跳跃，跳斩时射击。
+她可以在站立、奔跑、跳跃、跳斩时射击。
 当射击结束，应该转换为她之前的状态。</p>
 <p>如果我们固执于纯粹的FSM，我们就已经忘了她之前所处的状态。
 为了追踪之前的状态，我们定义了很多几乎完全一样的类——站立开火，跑步开火，跳跃开火，诸如此类——
@@ -775,7 +824,7 @@ FSMs不够灵活，并不在其中。</p>
 <ol>
 <li>
 <p>你可以将新状态<em>压入</em>栈中。“当前的”状态总是在栈顶，所以你能转到新状态。
-但它让之前的状态待在栈中而不是销毁它。</p>
+  但它让之前的状态待在栈中而不是销毁它。</p>
 </li>
 <li>
 <p>你可以<em>弹出</em>最上面的状态。这个状态会被销毁，它下面的状态成为新状态。</p>
@@ -794,7 +843,7 @@ FSMs不够灵活，并不在其中。</p>
 它们是特定问题的好工具。有限状态机在以下情况有用：</p>
 <ul>
 <li>你有个实体，它的行为基于一些内在状态。</li>
-<li>状态可以被严格的分割为相对较少的不相干项目。</li>
+<li>状态可以被严格地分割为相对较少的不相干项目。</li>
 <li>实体响应一系列输入或事件。</li>
 </ul>
 <p>在游戏中，状态机因在AI中使用而闻名，但是它也常用于其他领域，
