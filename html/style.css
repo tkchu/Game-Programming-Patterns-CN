@@ -388,6 +388,10 @@ footer {
   color: #1481b8; }
 
 @media only screen and (max-width: 479px) {
+  .noShowOnSmallScren{
+    display: none;
+  }
+
   .content {
     padding: 0 20px 2px 20px; }
 
