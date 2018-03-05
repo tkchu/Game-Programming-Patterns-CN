@@ -1,10 +1,11 @@
-#!/usr/bin/python3
+#!/usr/bin/python2.7
 # -*- coding: utf-8 -*-
 
 # Converts from the source markup format to HTML for the web version.
 
-import codecs
-import string
+import sys
+reload(sys)
+sys.setdefaultencoding('utf8')
 
 import glob
 import os
@@ -162,7 +163,7 @@ def format_file(path, nav, skip_up_to_date):
 
   # Read the markdown file and preprocess it.
   contents = ''
-  with open(path, 'r', encoding="utf8") as input:
+  with open(path, 'r') as input:
     # Read each line, preprocessing the special codes.
     for line in input:
       stripped = line.lstrip()
@@ -185,7 +186,7 @@ def format_file(path, nav, skip_up_to_date):
         elif command == 'outline':
           isoutline = True
         else:
-          print("UNKNOWN COMMAND:", command, args)
+          print "UNKNOWN COMMAND:", command, args
 
       elif extension != "xml" and stripped.startswith('#'):
         # Build the page navigation from the headers.
@@ -193,8 +194,7 @@ def format_file(path, nav, skip_up_to_date):
         headertype = stripped[:index]
         header = pretty(stripped[index:].strip())
         anchor = header.lower().replace(' ', '-')
-        translator = str.maketrans('', '', '.?!:/"')
-        anchor = anchor.translate(translator)
+        anchor = anchor.translate(None, '.?!:/"')
 
         # Add an anchor to the header.
         contents += indentation + headertype
@@ -210,11 +210,11 @@ def format_file(path, nav, skip_up_to_date):
   modified = datetime.fromtimestamp(os.path.getmtime(path))
   mod_str = modified.strftime('%B %d, %Y')
 
-  with open("asset/template." + extension, encoding="utf8") as f:
+  with open("asset/template." + extension) as f:
     template = f.read()
 
   # Write the output.
-  with open(output_path(basename), 'w', encoding="utf8") as out:
+  with open(output_path(basename), 'w') as out:
     title_text = title
     section_header = ""
 
@@ -257,19 +257,19 @@ def format_file(path, nav, skip_up_to_date):
     num_chapters += 1
     if word_count < 50:
       empty_chapters += 1
-      print("  {}".format(basename))
+      print "  {}".format(basename)
     elif word_count < 2000:
       empty_chapters += 1
-      print("{}-{} {} ({} words)".format(
-        YELLOW, DEFAULT, basename, word_count))
+      print "{}-{} {} ({} words)".format(
+        YELLOW, DEFAULT, basename, word_count)
     else:
       total_words += word_count
-      print("{}✓{} {} ({} words)".format(
-        GREEN, DEFAULT, basename, word_count))
+      print "{}✓{} {} ({} words)".format(
+        GREEN, DEFAULT, basename, word_count)
   else:
     # Section header chapters aren't counted like regular chapters.
-    print("{}•{} {} ({} words)".format(
-      GREEN, DEFAULT, basename, word_count))
+    print "{}•{} {} ({} words)".format(
+      GREEN, DEFAULT, basename, word_count)
 
 
 def clean_up_xml(output):
@@ -411,7 +411,7 @@ def navigation_to_html(chapter, headers):
 
 
 def include_code(pattern, index, indentation):
-  with open(cpp_path(pattern), 'r', encoding="utf8") as source:
+  with open(cpp_path(pattern), 'r') as source:
     lines = source.readlines()
 
   code = indentation + '    :::cpp\n'
@@ -450,8 +450,8 @@ def include_code(pattern, index, indentation):
         else:
           code_line = line[blockindent:]
           if len(code_line) > 64:
-            print("Warning long source line ({} chars):\n{}".format(
-                len(code_line), code_line))
+            print "Warning long source line ({} chars):\n{}".format(
+                len(code_line), code_line)
           code += indentation + '    ' + code_line
 
     else:
@@ -467,7 +467,7 @@ def buildnav(searchpath):
   nav = nav + '<h1><a href="/">目录</a></h1>\n'
 
   # Read the chapter outline from the index page.
-  with open('html/index.html', 'r', encoding="utf8") as source:
+  with open('html/index.html', 'r') as source:
     innav = False
 
     for line in source:
@@ -499,7 +499,7 @@ def check_sass():
     return
 
   subprocess.call(['sass', 'asset/style.scss', 'html/style.css'])
-  print("{}✓{} style.css".format(GREEN, DEFAULT))
+  print "{}✓{} style.css".format(GREEN, DEFAULT)
 
 
 searchpath = ('book/*.markdown')
