@@ -154,7 +154,7 @@
 
 ## 如何阅读这本书
 
-《游戏设计模式》分为三大块。
+《游戏编程模式》分为三大块。
 第一部分介绍并划分本书的框架。包含你现在阅读的这章和[下一章](architecture-performance-and-games.html)。
 
 第二部分，[重访设计模式](design-patterns-revisited.html)，复习了GoF书籍里的很多模式。
