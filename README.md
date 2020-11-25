@@ -1,4 +1,4 @@
-# [游戏编程模式中文版](http://tkchu.github.io/Game-Programming-Patterns-CN/)
+# [游戏编程模式中文版](https://gpp.tkchu.me/)
 ###### 点击上面标题在线阅读
 
 《游戏编程模式》是由曾在EA工作八年的Bob Nystrom写就，讲述在游戏开发中各种常见的编程模式。
