@@ -300,7 +300,7 @@ CPU读到`Thing`，也会读取`Another`和`Also`（取决于数据的大小和c
 
 让我们从处理一系列游戏实体的<a href="game-loop.html" class="pattern">游戏循环</a>开始。
 实体使用了<a href="component.html" class="pattern">组件</a>模式，被分解到不同的领域——AI，物理，渲染。
-这里是`GmaeEntity`类。
+这里是`GameEntity`类。
 
 ^code game-entity
 
