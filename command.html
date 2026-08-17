@@ -86,438 +86,422 @@ delete the font style for english.
 <h1>命令模式</h1>
 <h1 class="book"><a href="/">游戏设计模式</a><span class="section"><a href="design-patterns-revisited.html">Design Patterns Revisited</a></span></h1>
 <p>命令模式是我最喜欢的模式之一。
-大多数我写的游戏或者别的什么之类的大型程序，都会在某处用到它。
-当在正确的地方使用时，它可以将复杂的代码清理干净。
+我写过的大多数大型程序，无论是游戏还是别的什么，最终都会在某个地方用到它。
+当用在正确的地方时，它能利落地解开一些缠成一团乱麻的代码。
 对于这样一个了不起的模式，不出所料地，GoF有个深奥的定义：</p>
 <blockquote>
 <p>将一个请求封装为一个对象，从而使你可用不同的请求对客户进行参数化；
 对请求排队或记录请求日志，以及支持可撤销的操作。</p>
 </blockquote>
-<p>我想你也会觉得这个句子晦涩难懂。
-第一，它的比喻难以理解。
-在词语可以指代任何事物的狂野软件世界之外，“客户”是一个<em>人</em>——那些和你做生意的人。
-据我查证，人类不能被“参数化”。</p>
-<p>然后，句子余下的部分介绍了可能会使用这个模式的场景。
-如果你的场景不在这个列表中，那么这对你就没什么用处。
+<p>我想我们都会同意，这句话糟透了。
+首先，它把想要建立的比喻搅得一团糟。
+在词语可以指代任何事物的怪异软件世界之外，“客户”是一个<em>人</em>——那些和你做生意的人。
+据我上次查看，人类可没法被“参数化”。</p>
+<p>然后，这句话的其余部分只是一份清单，列出你也许、可能用得上这个模式的各种场景。
+除非你的用例恰好在那份清单里，否则它没什么启发性。
 <em>我的</em>命令模式精简定义为：</p>
 <p><span name="latin"></span>
 <strong>命令是<em>具现化的方法调用</em>。</strong></p>
 <aside name="latin">
-<p>“Reify（具现化）”来自于拉丁语“res”，意为“thing”（事物），加上英语后缀“&ndash;fy”。
-所以它意为“thingify”，没准用“thingify”更合适。</p>
+<p>“Reify（具现化）”源自拉丁语“res”，意为“thing”（事物），再加上英语后缀“&ndash;fy”。
+所以它基本上就是“thingify（事物化）”，老实说，这个词用起来可有趣多了。</p>
 </aside>
-<p>当然，“精简”往往意味着着“缺少必要信息”，所以这可能没有太大的改善。
-让我扩展一下。如果你没有听说过“具现化”的话，它的意思是“实例化，对象化”。
-具现化的另外一种解释方式是将某事物作为“第一公民”对待。</p>
+<p>当然，“精简”往往意味着“简短到费解”，所以这也许没改善多少。
+让我稍微展开一下。如果你没听说过“具现化”，它的意思是“让……成为真实的东西”。
+具现化的另一种说法，是让某事物成为“第一公民”。</p>
 <aside name="reflection">
-<p>在某些语言中的<em>反射</em>允许你在程序运行时命令式地和类型交互。
-你可以获得类的类型对象，可以与其交互看看这个类型能做什么。换言之，反射是<em>具现化类型的系统</em>。</p>
+<p>某些语言中的<em>反射系统</em>让你可以在运行时命令式地操作程序中的类型。
+你可以获得一个对象，它代表另一个对象所属的类，并摆弄它看看这个类型能做什么。换言之，反射是一种<em>具现化的类型系统</em>。</p>
 </aside>
-<p><span name="reflection"></span>两种术语都意味着将<em>概念</em>变成<em>数据</em>
-——一个对象——可以存储在变量中，传给函数。
-所以称命令模式为“具现化方法调用”，意思是方法调用被存储在对象中。</p>
-<p>这听起来有些像“回调”，“第一公民函数”，“函数指针”，“闭包”，“偏函数”，
-取决于你在学哪种语言，事实上大致上是同一个东西。GoF随后说：</p>
+<p><span name="reflection"></span>两种说法都意味着将某个<em>概念</em>变成一块<em>数据</em>
+——一个对象——你可以把它放进变量、传给函数，等等。
+所以说命令模式是“具现化的方法调用”，我的意思是：它是一次被包装在对象里的方法调用。</p>
+<p>这听起来很像“回调”、“第一公民函数”、“函数指针”、“闭包”或“部分应用函数”，
+取决于你用的是哪种语言，而事实上它们都大同小异。GoF随后说：</p>
 <blockquote>
-<p>命令模式是一种回调的面向对象实现。</p>
+<p>命令是回调的面向对象替代品。</p>
 </blockquote>
-<p>这是一种对命令模式更好的解释。</p>
-<p>但这些都既抽象又模糊。我喜欢用实际的东西作为章节的开始，不好意思，搞砸了。
-作为弥补，从这里开始都是命令模式能出色应用的例子。</p>
+<p>这比他们选的那句更适合作为这个模式的简介。</p>
+<p>不过这些都既抽象又飘忽。我本来习惯用具体的东西来开篇，这次却搞砸了。
+作为弥补，从这里开始，全都是命令模式大放异彩的例子。</p>
 <h2><a href="#配置输入" name="配置输入">配置输入</a></h2>
-<p>在每个游戏中都有一块代码读取用户的输入——按钮按下，键盘敲击，鼠标点击，诸如此类。
-这块代码会获取用户的输入，然后将其变为游戏中有意义的行为：</p>
+<p>每个游戏里都有一块代码读取原始的用户输入——按键、键盘事件、鼠标点击，诸如此类。
+它接收每个输入，并将其转换为游戏中有意义的动作：</p>
 <p><img src="images/command-buttons-one.png" alt="一个手柄, A键调用swapWeapon()，B键调用lurch()，X键调用jump()，Y键调用fireGun()。" /></p>
-<p>下面是一种简单的实现：</p>
+<p>一个简单得要命的实现看起来像这样：</p>
 <p><span name="lurch"></span></p>
-<div class="codehilite"><pre><span></span><span class="kt">void</span> <span class="n">InputHandler</span><span class="o">::</span><span class="n">handleInput</span><span class="p">()</span>
+<div class="codehilite"><pre><span></span><code><span class="kt">void</span><span class="w"> </span><span class="nf">InputHandler::handleInput</span><span class="p">()</span>
 <span class="p">{</span>
-  <span class="k">if</span> <span class="p">(</span><span class="n">isPressed</span><span class="p">(</span><span class="n">BUTTON_X</span><span class="p">))</span> <span class="n">jump</span><span class="p">();</span>
-  <span class="k">else</span> <span class="nf">if</span> <span class="p">(</span><span class="n">isPressed</span><span class="p">(</span><span class="n">BUTTON_Y</span><span class="p">))</span> <span class="n">fireGun</span><span class="p">();</span>
-  <span class="k">else</span> <span class="nf">if</span> <span class="p">(</span><span class="n">isPressed</span><span class="p">(</span><span class="n">BUTTON_A</span><span class="p">))</span> <span class="n">swapWeapon</span><span class="p">();</span>
-  <span class="k">else</span> <span class="nf">if</span> <span class="p">(</span><span class="n">isPressed</span><span class="p">(</span><span class="n">BUTTON_B</span><span class="p">))</span> <span class="n">lurchIneffectively</span><span class="p">();</span>
+<span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">isPressed</span><span class="p">(</span><span class="n">BUTTON_X</span><span class="p">))</span><span class="w"> </span><span class="n">jump</span><span class="p">();</span>
+<span class="w">  </span><span class="k">else</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">isPressed</span><span class="p">(</span><span class="n">BUTTON_Y</span><span class="p">))</span><span class="w"> </span><span class="n">fireGun</span><span class="p">();</span>
+<span class="w">  </span><span class="k">else</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">isPressed</span><span class="p">(</span><span class="n">BUTTON_A</span><span class="p">))</span><span class="w"> </span><span class="n">swapWeapon</span><span class="p">();</span>
+<span class="w">  </span><span class="k">else</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">isPressed</span><span class="p">(</span><span class="n">BUTTON_B</span><span class="p">))</span><span class="w"> </span><span class="n">lurchIneffectively</span><span class="p">();</span>
 <span class="p">}</span>
-</pre></div>
-
+</code></pre></div>
 
 <aside name="lurch">
-<p>专家建议：不要太经常地按B。</p>
+<p>行家提示：别老按B键。</p>
 </aside>
-<p>这个函数通常在<a class="pattern" href="game-loop.html">游戏循环</a>中每帧调用一次，我确信你可以理解它做了什么。
-在我们想将用户的输入和程序行为硬编码在一起时，这段代码可以正常工作，但是许多游戏允许玩家<em>配置</em>按键的功能。</p>
-<p>为了支持这点，需要将这些对<code>jump()</code>和<code>fireGun()</code>的直接调用转化为可以变换的东西。
-“变换”听起来有点像变量干的事，因此我们需要表示游戏行为的<em>对象</em>。进入：命令模式。</p>
-<p>我们定义了一个基类代表可触发的游戏行为：</p>
+<p>这个函数通常由<a class="pattern" href="game-loop.html">游戏循环</a>每帧调用一次，我确信你能看懂它在做什么。
+如果我们愿意把用户输入硬编码到游戏动作上，这段代码可以正常工作，但许多游戏允许玩家<em>配置</em>按键如何映射。</p>
+<p>为了支持这一点，我们需要把对<code>jump()</code>和<code>fireGun()</code>的直接调用变成可以替换掉的东西。
+“替换掉”听起来很像给变量赋值，因此我们需要一个用来表示游戏动作的<em>对象</em>。于是，命令模式登场了。</p>
+<p>我们定义一个基类，代表可触发的游戏命令：</p>
 <p><span name="one-method"></span></p>
-<div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">Command</span>
+<div class="codehilite"><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Command</span>
 <span class="p">{</span>
 <span class="k">public</span><span class="o">:</span>
-  <span class="k">virtual</span> <span class="o">~</span><span class="n">Command</span><span class="p">()</span> <span class="p">{}</span>
-  <span class="k">virtual</span> <span class="kt">void</span> <span class="n">execute</span><span class="p">()</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+<span class="w">  </span><span class="k">virtual</span><span class="w"> </span><span class="o">~</span><span class="n">Command</span><span class="p">()</span><span class="w"> </span><span class="p">{}</span>
+<span class="w">  </span><span class="k">virtual</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="n">execute</span><span class="p">()</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
 <span class="p">};</span>
-</pre></div>
-
+</code></pre></div>
 
 <aside name="one-method">
-<p>当你有接口只包含一个没有返回值的方法时，很可能你可以使用命令模式。</p>
+<p>当你有一个接口，它只有一个不返回任何东西的方法时，它很可能是命令模式。</p>
 </aside>
-<p>然后我们为不同的游戏行为定义相应的子类：</p>
-<div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">JumpCommand</span> <span class="o">:</span> <span class="k">public</span> <span class="n">Command</span>
+<p>然后，我们为每一种不同的游戏动作创建子类：</p>
+<div class="codehilite"><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">JumpCommand</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="k">public</span><span class="w"> </span><span class="n">Command</span>
 <span class="p">{</span>
 <span class="k">public</span><span class="o">:</span>
-  <span class="k">virtual</span> <span class="kt">void</span> <span class="n">execute</span><span class="p">()</span> <span class="p">{</span> <span class="n">jump</span><span class="p">();</span> <span class="p">}</span>
+<span class="w">  </span><span class="k">virtual</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="n">execute</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">jump</span><span class="p">();</span><span class="w"> </span><span class="p">}</span>
 <span class="p">};</span>
 
-<span class="k">class</span> <span class="nc">FireCommand</span> <span class="o">:</span> <span class="k">public</span> <span class="n">Command</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">FireCommand</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="k">public</span><span class="w"> </span><span class="n">Command</span>
 <span class="p">{</span>
 <span class="k">public</span><span class="o">:</span>
-  <span class="k">virtual</span> <span class="kt">void</span> <span class="n">execute</span><span class="p">()</span> <span class="p">{</span> <span class="n">fireGun</span><span class="p">();</span> <span class="p">}</span>
+<span class="w">  </span><span class="k">virtual</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="n">execute</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">fireGun</span><span class="p">();</span><span class="w"> </span><span class="p">}</span>
 <span class="p">};</span>
 
 <span class="c1">// 你知道思路了吧</span>
-</pre></div>
+</code></pre></div>
 
-
-<p>在代码的输入处理部分，为每个按键存储一个指向命令的指针。</p>
-<div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">InputHandler</span>
+<p>在我们的输入处理器中，为每个按键存储一个指向命令的指针。</p>
+<div class="codehilite"><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">InputHandler</span>
 <span class="p">{</span>
 <span class="k">public</span><span class="o">:</span>
-  <span class="kt">void</span> <span class="n">handleInput</span><span class="p">();</span>
+<span class="w">  </span><span class="kt">void</span><span class="w"> </span><span class="n">handleInput</span><span class="p">();</span>
 
-  <span class="c1">// 绑定命令的方法……</span>
+<span class="w">  </span><span class="c1">// 绑定命令的方法……</span>
 
 <span class="k">private</span><span class="o">:</span>
-  <span class="n">Command</span><span class="o">*</span> <span class="n">buttonX_</span><span class="p">;</span>
-  <span class="n">Command</span><span class="o">*</span> <span class="n">buttonY_</span><span class="p">;</span>
-  <span class="n">Command</span><span class="o">*</span> <span class="n">buttonA_</span><span class="p">;</span>
-  <span class="n">Command</span><span class="o">*</span> <span class="n">buttonB_</span><span class="p">;</span>
+<span class="w">  </span><span class="n">Command</span><span class="o">*</span><span class="w"> </span><span class="n">buttonX_</span><span class="p">;</span>
+<span class="w">  </span><span class="n">Command</span><span class="o">*</span><span class="w"> </span><span class="n">buttonY_</span><span class="p">;</span>
+<span class="w">  </span><span class="n">Command</span><span class="o">*</span><span class="w"> </span><span class="n">buttonA_</span><span class="p">;</span>
+<span class="w">  </span><span class="n">Command</span><span class="o">*</span><span class="w"> </span><span class="n">buttonB_</span><span class="p">;</span>
 <span class="p">};</span>
-</pre></div>
+</code></pre></div>
 
-
-<p>现在输入处理部分这样处理：</p>
+<p>现在输入处理只需委托给这些命令：</p>
 <p><span name="null"></span></p>
-<div class="codehilite"><pre><span></span><span class="kt">void</span> <span class="n">InputHandler</span><span class="o">::</span><span class="n">handleInput</span><span class="p">()</span>
+<div class="codehilite"><pre><span></span><code><span class="kt">void</span><span class="w"> </span><span class="nf">InputHandler::handleInput</span><span class="p">()</span>
 <span class="p">{</span>
-  <span class="k">if</span> <span class="p">(</span><span class="n">isPressed</span><span class="p">(</span><span class="n">BUTTON_X</span><span class="p">))</span> <span class="n">buttonX_</span><span class="o">-&gt;</span><span class="n">execute</span><span class="p">();</span>
-  <span class="k">else</span> <span class="nf">if</span> <span class="p">(</span><span class="n">isPressed</span><span class="p">(</span><span class="n">BUTTON_Y</span><span class="p">))</span> <span class="n">buttonY_</span><span class="o">-&gt;</span><span class="n">execute</span><span class="p">();</span>
-  <span class="k">else</span> <span class="nf">if</span> <span class="p">(</span><span class="n">isPressed</span><span class="p">(</span><span class="n">BUTTON_A</span><span class="p">))</span> <span class="n">buttonA_</span><span class="o">-&gt;</span><span class="n">execute</span><span class="p">();</span>
-  <span class="k">else</span> <span class="nf">if</span> <span class="p">(</span><span class="n">isPressed</span><span class="p">(</span><span class="n">BUTTON_B</span><span class="p">))</span> <span class="n">buttonB_</span><span class="o">-&gt;</span><span class="n">execute</span><span class="p">();</span>
+<span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">isPressed</span><span class="p">(</span><span class="n">BUTTON_X</span><span class="p">))</span><span class="w"> </span><span class="n">buttonX_</span><span class="o">-&gt;</span><span class="n">execute</span><span class="p">();</span>
+<span class="w">  </span><span class="k">else</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">isPressed</span><span class="p">(</span><span class="n">BUTTON_Y</span><span class="p">))</span><span class="w"> </span><span class="n">buttonY_</span><span class="o">-&gt;</span><span class="n">execute</span><span class="p">();</span>
+<span class="w">  </span><span class="k">else</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">isPressed</span><span class="p">(</span><span class="n">BUTTON_A</span><span class="p">))</span><span class="w"> </span><span class="n">buttonA_</span><span class="o">-&gt;</span><span class="n">execute</span><span class="p">();</span>
+<span class="w">  </span><span class="k">else</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">isPressed</span><span class="p">(</span><span class="n">BUTTON_B</span><span class="p">))</span><span class="w"> </span><span class="n">buttonB_</span><span class="o">-&gt;</span><span class="n">execute</span><span class="p">();</span>
 <span class="p">}</span>
-</pre></div>
-
+</code></pre></div>
 
 <aside name="null">
-<p>注意在这里没有检测<code>NULL</code>了吗？这假设每个按键都与<em>某些</em>命令相连。</p>
-<p>如果想支持不做任何事情的按键又不想显式检测<code>NULL</code>，我们可以定义一个命令类，它的<code>execute()</code>什么也不做。
-这样，某些按键处理器不必设为<code>NULL</code>，只需指向这个类。这种模式被称为<a href="http://en.wikipedia.org/wiki/Null_Object_pattern">空对象</a>。</p>
+<p>注意到这里没有检查<code>NULL</code>了吗？这是假设每个按键都会连接<em>某个</em>命令。</p>
+<p>如果想支持什么也不做的按键，又不想显式检查<code>NULL</code>，我们可以定义一个命令类，让它的<code>execute()</code>方法什么也不做。
+然后，与其把按键处理器设为<code>NULL</code>，不如让它指向那个对象。这种模式被称为<a href="http://en.wikipedia.org/wiki/Null_Object_pattern">空对象</a>。</p>
 </aside>
-<p>以前每个输入直接调用函数，现在会有一层间接寻址：</p>
+<p>以前每个输入都直接调用函数，现在多了一层间接性：</p>
 <p><img src="images/command-buttons-two.png" alt="一个手柄，每个按键都与一个特定的'button_'变量相关联，这个变量再与函数关联。" /></p>
-<p>这是命令模式的简短介绍。如果你能够看出它的好处，就把这章剩下的部分作为奖励吧。</p>
-<h2><a href="#角色说明" name="角色说明">角色说明</a></h2>
+<p>以上就是命令模式的全部精髓。如果你已经看出它的好处，那么本章剩下的内容就权当是额外奖励了。</p>
+<h2><a href="#给角色的指令" name="给角色的指令">给角色的指令</a></h2>
 <p>我们刚才定义的类可以在之前的例子上正常工作，但有很大的局限。
-问题在于假设了顶层的<code>jump()</code>, <code>fireGun()</code>之类的函数可以找到玩家角色，然后像木偶一样操纵它。</p>
-<p>这些假定的耦合限制了这些命令的用处。<code>JumpCommand</code><em>只能</em> 让玩家的角色跳跃。让我们放松这个限制。
-不让函数去找它们控制的角色，我们将函数控制的角色对象<em>传进去</em>：</p>
-<div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">Command</span>
+问题在于，它假设存在顶层的<code>jump()</code>、<code>fireGun()</code>之类的函数，这些函数暗地里知道怎么找到玩家的角色，然后像扯线木偶一样让它跳舞。</p>
+<p>这些假定的耦合限制了这些命令的用处。<code>JumpCommand</code><em>只能</em>让玩家角色跳跃。让我们放宽这个限制。
+不再调用那些自己去寻找被指挥对象的函数，而是把想要指挥的对象<em>传进去</em>：</p>
+<div class="codehilite"><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Command</span>
 <span class="p">{</span>
 <span class="k">public</span><span class="o">:</span>
-  <span class="k">virtual</span> <span class="o">~</span><span class="n">Command</span><span class="p">()</span> <span class="p">{}</span>
-  <span class="k">virtual</span> <span class="kt">void</span> <span class="n">execute</span><span class="p">(</span><span class="n">GameActor</span><span class="o">&amp;</span> <span class="n">actor</span><span class="p">)</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+<span class="w">  </span><span class="k">virtual</span><span class="w"> </span><span class="o">~</span><span class="n">Command</span><span class="p">()</span><span class="w"> </span><span class="p">{}</span>
+<span class="w">  </span><span class="k">virtual</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="n">execute</span><span class="p">(</span><span class="n">GameActor</span><span class="o">&amp;</span><span class="w"> </span><span class="n">actor</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
 <span class="p">};</span>
-</pre></div>
-
+</code></pre></div>
 
 <p>这里的<code>GameActor</code>是代表游戏世界中角色的“游戏对象”类。
 我们将其传给<code>execute()</code>，这样命令类的子类就可以调用所选游戏对象上的方法，就像这样：</p>
-<div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">JumpCommand</span> <span class="o">:</span> <span class="k">public</span> <span class="n">Command</span>
+<div class="codehilite"><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">JumpCommand</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="k">public</span><span class="w"> </span><span class="n">Command</span>
 <span class="p">{</span>
 <span class="k">public</span><span class="o">:</span>
-  <span class="k">virtual</span> <span class="kt">void</span> <span class="n">execute</span><span class="p">(</span><span class="n">GameActor</span><span class="o">&amp;</span> <span class="n">actor</span><span class="p">)</span>
-  <span class="p">{</span>
-    <span class="n">actor</span><span class="p">.</span><span class="n">jump</span><span class="p">();</span>
-  <span class="p">}</span>
+<span class="w">  </span><span class="k">virtual</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="n">execute</span><span class="p">(</span><span class="n">GameActor</span><span class="o">&amp;</span><span class="w"> </span><span class="n">actor</span><span class="p">)</span>
+<span class="w">  </span><span class="p">{</span>
+<span class="w">    </span><span class="n">actor</span><span class="p">.</span><span class="n">jump</span><span class="p">();</span>
+<span class="w">  </span><span class="p">}</span>
 <span class="p">};</span>
-</pre></div>
-
+</code></pre></div>
 
 <p>现在，我们可以使用这个类让游戏中的任何角色跳来跳去了。
-在输入控制部分和在对象上调用命令部分之间，我们还缺了一块代码。
-第一，我们修改<code>handleInput()</code>，让它可以<em>返回</em>命令：</p>
-<div class="codehilite"><pre><span></span><span class="n">Command</span><span class="o">*</span> <span class="n">InputHandler</span><span class="o">::</span><span class="n">handleInput</span><span class="p">()</span>
+我们只是还缺一段代码：它在输入处理器和命令之间，接收命令并在正确的对象上调用它。
+首先，我们修改<code>handleInput()</code>，让它<em>返回</em>命令：</p>
+<div class="codehilite"><pre><span></span><code><span class="n">Command</span><span class="o">*</span><span class="w"> </span><span class="nf">InputHandler::handleInput</span><span class="p">()</span>
 <span class="p">{</span>
-  <span class="k">if</span> <span class="p">(</span><span class="n">isPressed</span><span class="p">(</span><span class="n">BUTTON_X</span><span class="p">))</span> <span class="k">return</span> <span class="n">buttonX_</span><span class="p">;</span>
-  <span class="k">if</span> <span class="p">(</span><span class="n">isPressed</span><span class="p">(</span><span class="n">BUTTON_Y</span><span class="p">))</span> <span class="k">return</span> <span class="n">buttonY_</span><span class="p">;</span>
-  <span class="k">if</span> <span class="p">(</span><span class="n">isPressed</span><span class="p">(</span><span class="n">BUTTON_A</span><span class="p">))</span> <span class="k">return</span> <span class="n">buttonA_</span><span class="p">;</span>
-  <span class="k">if</span> <span class="p">(</span><span class="n">isPressed</span><span class="p">(</span><span class="n">BUTTON_B</span><span class="p">))</span> <span class="k">return</span> <span class="n">buttonB_</span><span class="p">;</span>
+<span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">isPressed</span><span class="p">(</span><span class="n">BUTTON_X</span><span class="p">))</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="n">buttonX_</span><span class="p">;</span>
+<span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">isPressed</span><span class="p">(</span><span class="n">BUTTON_Y</span><span class="p">))</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="n">buttonY_</span><span class="p">;</span>
+<span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">isPressed</span><span class="p">(</span><span class="n">BUTTON_A</span><span class="p">))</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="n">buttonA_</span><span class="p">;</span>
+<span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">isPressed</span><span class="p">(</span><span class="n">BUTTON_B</span><span class="p">))</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="n">buttonB_</span><span class="p">;</span>
 
-  <span class="c1">// 没有按下任何按键，就什么也不做</span>
-  <span class="k">return</span> <span class="nb">NULL</span><span class="p">;</span>
+<span class="w">  </span><span class="c1">// 没有按下任何按键，就什么也不做</span>
+<span class="w">  </span><span class="k">return</span><span class="w"> </span><span class="nb">NULL</span><span class="p">;</span>
 <span class="p">}</span>
-</pre></div>
+</code></pre></div>
 
-
-<p>这里不能立即执行，因为还不知道哪个角色会传进来。
-这里我们享受了命令是具体调用的好处——<code>延迟</code>到调用执行时再知道。</p>
-<p>然后，需要一些接受命令的代码，作用在玩家角色上。像这样：</p>
-<div class="codehilite"><pre><span></span><span class="n">Command</span><span class="o">*</span> <span class="n">command</span> <span class="o">=</span> <span class="n">inputHandler</span><span class="p">.</span><span class="n">handleInput</span><span class="p">();</span>
-<span class="k">if</span> <span class="p">(</span><span class="n">command</span><span class="p">)</span>
+<p>它不能立即执行命令，因为还不知道要传入哪个角色。
+这里正是利用命令是具现化调用这一点的好机会——我们可以<em>延迟</em>调用的执行时机。</p>
+<p>然后，我们需要一些代码来接收该命令，并在代表玩家的角色上运行它。比如：</p>
+<div class="codehilite"><pre><span></span><code><span class="n">Command</span><span class="o">*</span><span class="w"> </span><span class="n">command</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">inputHandler</span><span class="p">.</span><span class="n">handleInput</span><span class="p">();</span>
+<span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">command</span><span class="p">)</span>
 <span class="p">{</span>
-  <span class="n">command</span><span class="o">-&gt;</span><span class="n">execute</span><span class="p">(</span><span class="n">actor</span><span class="p">);</span>
+<span class="w">  </span><span class="n">command</span><span class="o">-&gt;</span><span class="n">execute</span><span class="p">(</span><span class="n">actor</span><span class="p">);</span>
 <span class="p">}</span>
-</pre></div>
+</code></pre></div>
 
-
-<p>将<code>actor</code>视为玩家角色的引用，它会正确地按着玩家的输入移动，
-所以我们赋予了角色和前面例子中相同的行为。
-通过在命令和角色间增加了一层重定向，
-我们获得了一个灵巧的功能：<em>我们可以让玩家控制游戏中的任何角色，只需向命令传入不同的角色。</em></p>
+<p>假设<code>actor</code>是对玩家角色的引用，它就会根据用户输入正确地驱动他，
+所以我们又回到了与第一个例子相同的行为。
+通过在命令和执行命令的角色之间增加一层间接性，
+我们获得了一个小巧的能力：<em>现在，只需改变执行命令时所作用的角色，就能让玩家控制游戏中的任何角色。</em></p>
 <p>在实践中，这个特性并不经常使用，但是<em>经常</em>会有类似的用例跳出来。
 到目前为止，我们只考虑了玩家控制的角色，但是游戏中的其他角色呢？
-它们被游戏AI控制。我们可以在AI和角色之间使用相同的命令模式；AI代码只需生成<code>Command</code>对象。</p>
-<p>在选择命令的AI和展现命令的游戏角色间解耦给了我们很大的灵活度。
-我们可以对不同的角色使用不同的AI，或者为了不同的行为而混合AI。
-想要一个更加有攻击性的对手？插入一个更加有攻击性的AI为其生成命令。
-事实上，我们甚至可以为<em>玩家角色</em>加上AI，
-在展示阶段，游戏需要自动演示时，这是很有用的。</p>
-<p><span name="queue"></span>把控制角色的命令变为第一公民对象，去除直接方法调用中严厉的束缚。
-将其视为命令队列，或者是命令流：</p>
+它们由游戏AI驱动。我们可以把同样的命令模式用作AI引擎和角色之间的接口；AI代码只需生成<code>Command</code>对象。</p>
+<p>选择命令的AI与执行命令的角色代码之间的这种解耦，给了我们很大的灵活性。
+我们可以对不同的角色使用不同的AI模块，也可以为不同种类的行为混搭AI。
+想要更有攻击性的对手？只需接入一个更有攻击性的AI来为它生成命令。
+事实上，我们甚至可以把AI安到<em>玩家</em>角色上，这在演示模式等游戏需要自动驾驶运行的情况下很有用。</p>
+<p><span name="queue"></span>把控制角色的命令变成第一公民对象，我们就去掉了直接方法调用带来的紧密耦合。
+把它看作命令队列，或者是命令流：</p>
 <aside name="queue">
-<p>队列能为你做的更多事情，请看<a href="event-queue.html" class="pattern">事件队列</a>。</p>
+<p>关于排队还能为你做什么，参见<a href="event-queue.html" class="pattern">事件队列</a>。</p>
 </aside>
 <p><span name="stream"></span></p>
 <p><img src="images/command-stream.png" alt="一条连接AI到角色的管道。" /></p>
 <aside name="stream">
-<p>为什么我觉得需要为你画一幅“流”的图像？又是为什么它看上去像是管道？</p>
+<p>为什么我觉得有必要为你画一幅“流”的图？它为什么又长得像根管子？</p>
 </aside>
-<p><span name="network"></span>一些代码（输入控制器或者AI）产生一系列命令放入流中。
-另一些代码（调度器或者角色自身）调用并消耗命令。
-通过在中间加入队列，我们解耦了消费者和生产者。</p>
+<p><span name="network"></span>一些代码（输入处理器或AI）<em>生产</em>命令，并把它们放进流中。
+另一些代码（调度器或角色自身）<em>消费</em>并调用命令。
+通过在中间放上这个队列，我们把一端的生产者与另一端的消费者解耦了。</p>
 <aside name="network">
-<p>如果将这些指令<em>序列化</em>，我们可以通过网络流传输它们。
-我们可以接受玩家的输入，将其通过网络发送到另外一台机器上，然后重现之。这是网络多人游戏的基础。</p>
+<p>如果我们让这些命令<em>可序列化</em>，就可以把命令流通过网络发送出去。
+我们可以拿到玩家的输入，通过网络推送到另一台机器上，然后重放它。这是制作网络多人游戏的一个重要组成部分。</p>
 </aside>
 <h2><a href="#撤销和重做" name="撤销和重做">撤销和重做</a></h2>
 <p><span name="hate"></span>
-最后的这个例子是这种模式最广为人知的使用情况。
-如果一个命令对象可以<em>做</em>一件事，那么它亦可以<em>撤销</em>这件事。
-在一些策略游戏中使用撤销，这样你就可以回滚那些你不喜欢的操作。
-它是<em>创造</em>游戏时<em>必不可少的</em>工具。
-一个不能撤销误操作导致的错误的编辑器，肯定会让游戏设计师恨你。</p>
+最后一个例子是这种模式最广为人知的用途。
+如果一个命令对象能<em>做</em>事情，那么让它能<em>撤销</em>这些事情，也就只差一小步了。
+一些策略游戏会使用撤销，让你回滚那些不喜欢的操作。
+在人们用来<em>制作</em>游戏的工具里，撤销是<em>必不可少的</em>。
+让游戏设计师恨你的最稳办法，就是给他们一个无法撤销手滑错误的关卡编辑器。</p>
 <aside name="hate">
-<p>这是经验之谈。</p>
+<p>这大概是我的切身体会。</p>
 </aside>
-<p>没有了命令模式，实现撤销非常困难，有了它，就是小菜一碟。
-假设我们在制作单人回合制游戏，想让玩家能撤销移动，这样他们就可以集中注意力在策略上而不是猜测上。</p>
-<p>我们已经使用了命令来抽象输入控制，所以每个玩家的举动都已经被封装其中。
+<p>没有命令模式时，实现撤销难得出奇；有了它，就是小菜一碟。
+假设我们在制作单人回合制游戏，想让玩家能撤销移动，这样他们就能把心思更多地放在策略上，而不是靠猜。</p>
+<p>我们碰巧已经在用命令来抽象输入处理，所以玩家的每一步行动都已经封装在命令里了。
 举个例子，移动一个单位的代码可能如下：</p>
-<div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">MoveUnitCommand</span> <span class="o">:</span> <span class="k">public</span> <span class="n">Command</span>
+<div class="codehilite"><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">MoveUnitCommand</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="k">public</span><span class="w"> </span><span class="n">Command</span>
 <span class="p">{</span>
 <span class="k">public</span><span class="o">:</span>
-  <span class="n">MoveUnitCommand</span><span class="p">(</span><span class="n">Unit</span><span class="o">*</span> <span class="n">unit</span><span class="p">,</span> <span class="kt">int</span> <span class="n">x</span><span class="p">,</span> <span class="kt">int</span> <span class="n">y</span><span class="p">)</span>
-  <span class="o">:</span> <span class="n">unit_</span><span class="p">(</span><span class="n">unit</span><span class="p">),</span>
-    <span class="n">x_</span><span class="p">(</span><span class="n">x</span><span class="p">),</span>
-    <span class="n">y_</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
-  <span class="p">{}</span>
+<span class="w">  </span><span class="n">MoveUnitCommand</span><span class="p">(</span><span class="n">Unit</span><span class="o">*</span><span class="w"> </span><span class="n">unit</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">x</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">y</span><span class="p">)</span>
+<span class="w">  </span><span class="o">:</span><span class="w"> </span><span class="n">unit_</span><span class="p">(</span><span class="n">unit</span><span class="p">),</span>
+<span class="w">    </span><span class="n">x_</span><span class="p">(</span><span class="n">x</span><span class="p">),</span>
+<span class="w">    </span><span class="n">y_</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
+<span class="w">  </span><span class="p">{}</span>
 
-  <span class="k">virtual</span> <span class="kt">void</span> <span class="n">execute</span><span class="p">()</span>
-  <span class="p">{</span>
-    <span class="n">unit_</span><span class="o">-&gt;</span><span class="n">moveTo</span><span class="p">(</span><span class="n">x_</span><span class="p">,</span> <span class="n">y_</span><span class="p">);</span>
-  <span class="p">}</span>
+<span class="w">  </span><span class="k">virtual</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="n">execute</span><span class="p">()</span>
+<span class="w">  </span><span class="p">{</span>
+<span class="w">    </span><span class="n">unit_</span><span class="o">-&gt;</span><span class="n">moveTo</span><span class="p">(</span><span class="n">x_</span><span class="p">,</span><span class="w"> </span><span class="n">y_</span><span class="p">);</span>
+<span class="w">  </span><span class="p">}</span>
 
 <span class="k">private</span><span class="o">:</span>
-  <span class="n">Unit</span><span class="o">*</span> <span class="n">unit_</span><span class="p">;</span>
-  <span class="kt">int</span> <span class="n">x_</span><span class="p">,</span> <span class="n">y_</span><span class="p">;</span>
+<span class="w">  </span><span class="n">Unit</span><span class="o">*</span><span class="w"> </span><span class="n">unit_</span><span class="p">;</span>
+<span class="w">  </span><span class="kt">int</span><span class="w"> </span><span class="n">x_</span><span class="p">,</span><span class="w"> </span><span class="n">y_</span><span class="p">;</span>
 <span class="p">};</span>
-</pre></div>
-
+</code></pre></div>
 
 <p>注意这和前面的命令有些许不同。
-在前面的例子中，我们需要从修改的角色那里<em>抽象</em>命令。
+在上一个例子中，我们想把命令与它所修改的角色<em>解耦</em>。
 在这个例子中，我们将命令<em>绑定</em>到要移动的单位上。
-这条命令的实例不是通用的“移动某物”命令；而是游戏回合中特殊的一次移动。</p>
-<p>这展现了命令模式应用时的一种情形。
-就像之前的例子，指令在某些情形中是可重用的对象，代表了<em>可执行的事件</em>。
-我们早期的输入控制器将其实现为一个命令对象，然后在按键按下时调用其<code>execute()</code>方法。</p>
-<p><span name="free"></span>这里的命令更加特殊。它们代表了特定时间点能做的特定事件。
-这意味着输入控制代码可以在玩家下决定时<em>创造</em>一个实例。就像这样：</p>
-<div class="codehilite"><pre><span></span><span class="n">Command</span><span class="o">*</span> <span class="nf">handleInput</span><span class="p">()</span>
+这条命令的实例不是那种可以在许多情境里使用的通用“移动某物”操作；它是游戏回合序列中的一次具体移动。</p>
+<p>这凸显了命令模式实现方式的一种变化。
+在某些情况下，比如我们前面的几个例子，命令是一个可重用的对象，代表<em>一件可以完成的事</em>。
+我们之前的输入处理器持有单个命令对象，每当对应按钮被按下时，就调用它的<code>execute()</code>方法。</p>
+<p><span name="free"></span>这里的命令更加具体。它们代表的是在特定时间点可以完成的事情。
+这意味着输入处理代码每次在玩家选择一步行动时，都会<em>创建</em>一个实例。比如：</p>
+<div class="codehilite"><pre><span></span><code><span class="n">Command</span><span class="o">*</span><span class="w"> </span><span class="nf">handleInput</span><span class="p">()</span>
 <span class="p">{</span>
-  <span class="n">Unit</span><span class="o">*</span> <span class="n">unit</span> <span class="o">=</span> <span class="n">getSelectedUnit</span><span class="p">();</span>
+<span class="w">  </span><span class="n">Unit</span><span class="o">*</span><span class="w"> </span><span class="n">unit</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">getSelectedUnit</span><span class="p">();</span>
 
-  <span class="k">if</span> <span class="p">(</span><span class="n">isPressed</span><span class="p">(</span><span class="n">BUTTON_UP</span><span class="p">))</span> <span class="p">{</span>
-    <span class="c1">// 向上移动单位</span>
-    <span class="kt">int</span> <span class="n">destY</span> <span class="o">=</span> <span class="n">unit</span><span class="o">-&gt;</span><span class="n">y</span><span class="p">()</span> <span class="o">-</span> <span class="mi">1</span><span class="p">;</span>
-    <span class="k">return</span> <span class="k">new</span> <span class="n">MoveUnitCommand</span><span class="p">(</span><span class="n">unit</span><span class="p">,</span> <span class="n">unit</span><span class="o">-&gt;</span><span class="n">x</span><span class="p">(),</span> <span class="n">destY</span><span class="p">);</span>
-  <span class="p">}</span>
+<span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">isPressed</span><span class="p">(</span><span class="n">BUTTON_UP</span><span class="p">))</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="c1">// 向上移动单位</span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">destY</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">unit</span><span class="o">-&gt;</span><span class="n">y</span><span class="p">()</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">MoveUnitCommand</span><span class="p">(</span><span class="n">unit</span><span class="p">,</span><span class="w"> </span><span class="n">unit</span><span class="o">-&gt;</span><span class="n">x</span><span class="p">(),</span><span class="w"> </span><span class="n">destY</span><span class="p">);</span>
+<span class="w">  </span><span class="p">}</span>
 
-  <span class="k">if</span> <span class="p">(</span><span class="n">isPressed</span><span class="p">(</span><span class="n">BUTTON_DOWN</span><span class="p">))</span> <span class="p">{</span>
-    <span class="c1">// 向下移动单位</span>
-    <span class="kt">int</span> <span class="n">destY</span> <span class="o">=</span> <span class="n">unit</span><span class="o">-&gt;</span><span class="n">y</span><span class="p">()</span> <span class="o">+</span> <span class="mi">1</span><span class="p">;</span>
-    <span class="k">return</span> <span class="k">new</span> <span class="n">MoveUnitCommand</span><span class="p">(</span><span class="n">unit</span><span class="p">,</span> <span class="n">unit</span><span class="o">-&gt;</span><span class="n">x</span><span class="p">(),</span> <span class="n">destY</span><span class="p">);</span>
-  <span class="p">}</span>
+<span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">isPressed</span><span class="p">(</span><span class="n">BUTTON_DOWN</span><span class="p">))</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="c1">// 向下移动单位</span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">destY</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">unit</span><span class="o">-&gt;</span><span class="n">y</span><span class="p">()</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">MoveUnitCommand</span><span class="p">(</span><span class="n">unit</span><span class="p">,</span><span class="w"> </span><span class="n">unit</span><span class="o">-&gt;</span><span class="n">x</span><span class="p">(),</span><span class="w"> </span><span class="n">destY</span><span class="p">);</span>
+<span class="w">  </span><span class="p">}</span>
 
-  <span class="c1">// 其他的移动……</span>
+<span class="w">  </span><span class="c1">// 其他的移动……</span>
 
-  <span class="k">return</span> <span class="nb">NULL</span><span class="p">;</span>
+<span class="w">  </span><span class="k">return</span><span class="w"> </span><span class="nb">NULL</span><span class="p">;</span>
 <span class="p">}</span>
-</pre></div>
-
+</code></pre></div>
 
 <aside name="free">
 <p>当然，在像C++这样没有垃圾回收的语言中，这意味着执行命令的代码也要负责释放内存。</p>
 </aside>
-<p>命令的一次性为我们很快地赢得了一个优点。
-为了让指令可被取消，我们为每个类定义另一个需要实现的方法：</p>
-<div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">Command</span>
+<p>命令只能用一次这一点，马上就会变成我们的优势。
+为了让命令可撤销，我们为每个命令类再定义另一个需要实现的操作：</p>
+<div class="codehilite"><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Command</span>
 <span class="p">{</span>
 <span class="k">public</span><span class="o">:</span>
-  <span class="k">virtual</span> <span class="o">~</span><span class="n">Command</span><span class="p">()</span> <span class="p">{}</span>
-  <span class="k">virtual</span> <span class="kt">void</span> <span class="n">execute</span><span class="p">()</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
-  <span class="k">virtual</span> <span class="kt">void</span> <span class="nf">undo</span><span class="p">()</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+<span class="w">  </span><span class="k">virtual</span><span class="w"> </span><span class="o">~</span><span class="n">Command</span><span class="p">()</span><span class="w"> </span><span class="p">{}</span>
+<span class="w">  </span><span class="k">virtual</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="n">execute</span><span class="p">()</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">  </span><span class="k">virtual</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">undo</span><span class="p">()</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
 <span class="p">};</span>
-</pre></div>
+</code></pre></div>
 
-
-<p><code>undo()</code>方法回滚了<code>execute()</code>方法造成的游戏状态改变。
+<p><code>undo()</code>方法会逆转对应的<code>execute()</code>方法所改变的游戏状态。
 这里是添加了撤销功能后的移动命令：</p>
-<div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">MoveUnitCommand</span> <span class="o">:</span> <span class="k">public</span> <span class="n">Command</span>
+<div class="codehilite"><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">MoveUnitCommand</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="k">public</span><span class="w"> </span><span class="n">Command</span>
 <span class="p">{</span>
 <span class="k">public</span><span class="o">:</span>
-  <span class="n">MoveUnitCommand</span><span class="p">(</span><span class="n">Unit</span><span class="o">*</span> <span class="n">unit</span><span class="p">,</span> <span class="kt">int</span> <span class="n">x</span><span class="p">,</span> <span class="kt">int</span> <span class="n">y</span><span class="p">)</span>
-  <span class="o">:</span> <span class="n">unit_</span><span class="p">(</span><span class="n">unit</span><span class="p">),</span>
-    <span class="n">xBefore_</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span>
-    <span class="n">yBefore_</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span>
-    <span class="n">x_</span><span class="p">(</span><span class="n">x</span><span class="p">),</span>
-    <span class="n">y_</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
-  <span class="p">{}</span>
+<span class="w">  </span><span class="n">MoveUnitCommand</span><span class="p">(</span><span class="n">Unit</span><span class="o">*</span><span class="w"> </span><span class="n">unit</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">x</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">y</span><span class="p">)</span>
+<span class="w">  </span><span class="o">:</span><span class="w"> </span><span class="n">unit_</span><span class="p">(</span><span class="n">unit</span><span class="p">),</span>
+<span class="w">    </span><span class="n">xBefore_</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span>
+<span class="w">    </span><span class="n">yBefore_</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span>
+<span class="w">    </span><span class="n">x_</span><span class="p">(</span><span class="n">x</span><span class="p">),</span>
+<span class="w">    </span><span class="n">y_</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
+<span class="w">  </span><span class="p">{}</span>
 
-  <span class="k">virtual</span> <span class="kt">void</span> <span class="n">execute</span><span class="p">()</span>
-  <span class="p">{</span>
-    <span class="c1">// 保存移动之前的位置</span>
-    <span class="c1">// 这样之后可以复原。</span>
+<span class="w">  </span><span class="k">virtual</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="n">execute</span><span class="p">()</span>
+<span class="w">  </span><span class="p">{</span>
+<span class="w">    </span><span class="c1">// 保存移动之前的位置</span>
+<span class="w">    </span><span class="c1">// 这样之后可以复原。</span>
 
-    <span class="n">xBefore_</span> <span class="o">=</span> <span class="n">unit_</span><span class="o">-&gt;</span><span class="n">x</span><span class="p">();</span>
-    <span class="n">yBefore_</span> <span class="o">=</span> <span class="n">unit_</span><span class="o">-&gt;</span><span class="n">y</span><span class="p">();</span>
+<span class="w">    </span><span class="n">xBefore_</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">unit_</span><span class="o">-&gt;</span><span class="n">x</span><span class="p">();</span>
+<span class="w">    </span><span class="n">yBefore_</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">unit_</span><span class="o">-&gt;</span><span class="n">y</span><span class="p">();</span>
 
-    <span class="n">unit_</span><span class="o">-&gt;</span><span class="n">moveTo</span><span class="p">(</span><span class="n">x_</span><span class="p">,</span> <span class="n">y_</span><span class="p">);</span>
-  <span class="p">}</span>
+<span class="w">    </span><span class="n">unit_</span><span class="o">-&gt;</span><span class="n">moveTo</span><span class="p">(</span><span class="n">x_</span><span class="p">,</span><span class="w"> </span><span class="n">y_</span><span class="p">);</span>
+<span class="w">  </span><span class="p">}</span>
 
-  <span class="k">virtual</span> <span class="kt">void</span> <span class="n">undo</span><span class="p">()</span>
-  <span class="p">{</span>
-    <span class="n">unit_</span><span class="o">-&gt;</span><span class="n">moveTo</span><span class="p">(</span><span class="n">xBefore_</span><span class="p">,</span> <span class="n">yBefore_</span><span class="p">);</span>
-  <span class="p">}</span>
+<span class="w">  </span><span class="k">virtual</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="n">undo</span><span class="p">()</span>
+<span class="w">  </span><span class="p">{</span>
+<span class="w">    </span><span class="n">unit_</span><span class="o">-&gt;</span><span class="n">moveTo</span><span class="p">(</span><span class="n">xBefore_</span><span class="p">,</span><span class="w"> </span><span class="n">yBefore_</span><span class="p">);</span>
+<span class="w">  </span><span class="p">}</span>
 
 <span class="k">private</span><span class="o">:</span>
-  <span class="n">Unit</span><span class="o">*</span> <span class="n">unit_</span><span class="p">;</span>
-  <span class="kt">int</span> <span class="n">xBefore_</span><span class="p">,</span> <span class="n">yBefore_</span><span class="p">;</span>
-  <span class="kt">int</span> <span class="n">x_</span><span class="p">,</span> <span class="n">y_</span><span class="p">;</span>
+<span class="w">  </span><span class="n">Unit</span><span class="o">*</span><span class="w"> </span><span class="n">unit_</span><span class="p">;</span>
+<span class="w">  </span><span class="kt">int</span><span class="w"> </span><span class="n">xBefore_</span><span class="p">,</span><span class="w"> </span><span class="n">yBefore_</span><span class="p">;</span>
+<span class="w">  </span><span class="kt">int</span><span class="w"> </span><span class="n">x_</span><span class="p">,</span><span class="w"> </span><span class="n">y_</span><span class="p">;</span>
 <span class="p">};</span>
-</pre></div>
-
+</code></pre></div>
 
 <p><span name="memento"></span>注意我们为类添加了更多的状态。
-当单位移动时，它忘记了它之前是什么样的。
-如果我们想要撤销这个移动，我们需要记得单位之前的状态，也就是<code>xBefore_</code>和<code>yBefore_</code>的作用。</p>
+当单位移动时，它会忘记自己之前在哪里。
+如果我们想撤销这次移动，就得自己记住单位之前的位置，这正是<code>xBefore_</code>和<code>yBefore_</code>的作用。</p>
 <aside name="memento">
-<p>这看上去是<a href="http://en.wikipedia.org/wiki/Memento_pattern"
-class="gof-pattern">备忘录</a>模式使用的地方，它从来没有有效地工作过。
-由于命令趋向于修改对象状态的一小部分，对数据其他部分的快照就是浪费内存。手动内存管理的消耗更小。</p>
+<p>这看起来像是使用<a href="http://en.wikipedia.org/wiki/Memento_pattern"
+class="gof-pattern">备忘录</a>模式的地方，但我发现它效果并不好。
+由于命令往往只修改对象状态的一小部分，对其余数据做快照就是浪费内存。手动只存储你修改的那部分数据更节省。</p>
 <p><em><a href="http://en.wikipedia.org/wiki/Persistent_data_structure">持久化数据结构</a></em>是另一个选项。
-使用它，每次修改对象都返回一个新对象，保持原来的对象不变。巧妙的实现下，这些新对象与之前的对象共享数据，所以比克隆整个对象开销更小。</p>
+使用它，每次修改对象都返回一个新对象，保持原来的对象不变。通过巧妙的实现，这些新对象与之前的对象共享数据，所以比克隆整个对象开销更小。</p>
 <p>使用持久化数据结构，每条命令都存储了命令执行之前对象的引用，而撤销只是切换回之前的对象。</p>
 </aside>
-<p>为了让玩家撤销移动，我们记录了执行的最后命令。当他们按下<code>control+z</code>时，我们调用命令的<code>undo()</code>方法。
-（如果他们已经撤销了，那么就变成了“重做”，我们会再一次执行命令。）</p>
-<p>支持多重的撤销也不太难。
-我们不单单记录最后一条指令，还要记录指令列表，然后用一个引用指向“当前”的那个。
-当玩家执行一条命令，我们将其添加到列表，然后将代表“当前”的指针指向它。</p>
+<p>为了让玩家撤销一步行动，我们保留他们执行过的最后一条命令。当他们狂按 Ctrl-Z 时，我们调用那条命令的<code>undo()</code>方法。
+（如果他们已经撤销过了，那就变成“重做”，我们会再次执行该命令。）</p>
+<p>支持多层撤销也不太难。
+与其只记住最后一条命令，我们保留一个命令列表和一个指向“当前”命令的引用。
+当玩家执行一条命令时，我们把它追加到列表里，并让“当前”指向它。</p>
 <p><img src="images/command-undo.png" alt="从旧到新排列的命令栈。
 一个当前箭头指向一条命令，一个“撤销”箭头指向之前的命令，一个“重做”指向之后的命令" /></p>
 <p><span name="replay"></span>
-当玩家选择“撤销”，我们撤销现在的命令，将代表当前的指针往后退。
-当他们选择“重做”，我们将代表当前的指针往前进，执行该指令。
-如果在撤销后选择了新命令，那么清除命令列表中当前的指针所指命令之后的全部命令。</p>
-<p>第一次在关卡编辑器中实现这点时，我觉得自己简直就是个天才。
-我惊讶于它如此的简明有效。
-你需要约束自己，保证每个数据修改都通过命令完成，一旦你做到了，余下的都很简单。</p>
+当玩家选择“撤销”，我们撤销当前命令，并把当前指针往回移。
+当他们选择“重做”，我们把指针向前移，然后执行那条命令。
+如果在撤销一些命令后又选择了新命令，列表中当前命令之后的所有内容都会被丢弃。</p>
+<p>第一次在关卡编辑器里实现这个功能时，我觉得自己简直就是个天才。
+我惊讶于它竟然如此直白、又如此好用。
+你需要的只是约束自己，保证每一处数据修改都经由命令完成；一旦做到这一点，剩下的就轻松了。</p>
 <aside name="replay">
 <p>重做在游戏中并不常见，但重<em>放</em>常见。
-一种简单的重放实现是记录游戏每帧的状态，这样它可以回放，但那会消耗太多的内存。</p>
-<p>相反，很多游戏记录每个实体每帧运行的命令。
-为了重放游戏，引擎只需要正常运行游戏，执行之前存储的命令。</p>
+一种朴素的重放实现会记录每一帧的整个游戏状态以便重放，但那会消耗太多内存。</p>
+<p>相反，很多游戏记录每个实体在每一帧执行的命令集合。
+为了重放游戏，引擎只需运行正常的游戏模拟，执行预先记录的命令。</p>
 </aside>
-<h2><a href="#用类还是用函数？" name="用类还是用函数？">用类还是用函数？</a></h2>
+<h2><a href="#有类无函数？" name="有类无函数？">有类无函数？</a></h2>
 <p>早些时候，我说过命令与第一公民函数或者闭包类似，
 但是在这里展现的每个例子都是通过类完成的。
-如果你更熟悉函数式编程，你也许会疑惑函数都在哪里。</p>
-<p>我用这种方式写例子是因为C++对第一公民函数支持非常有限。
-函数指针没有状态，函子很奇怪而且仍然需要定义类，
-在C++11中的lambda演算需要大量的人工记忆辅助才能使用。</p>
+如果你更熟悉函数式编程，你也许会疑惑：函数都跑哪儿去了？</p>
+<p>我用这种方式写例子，是因为C++对第一公民函数的支持相当有限。
+函数指针没有状态，函数对象很奇怪，而且仍然需要定义类，
+C++11的lambda因为需要手动管理内存，用起来很棘手。</p>
 <p><span name="some"></span>
-这并<em>不是</em>说你在其他语言中不可以用函数来完成命令模式。
-如果你使用的语言支持闭包，不管怎样，快去用它！
+这并<em>不是</em>说你在其他语言中就不该用函数来实现命令模式。
+如果你有幸使用一门拥有真正闭包的语言，请尽管用它们！
 在某种程度上说，命令模式是为一些没有闭包的语言模拟闭包。</p>
 <aside name="some">
-<p>(我说<em>某种程度上</em>是因为，即使是那些支持闭包的语言，
-为命令建立真正的类或者结构也是很有用的。
-如果你的命令拥有多重操作（比如可撤销的命令），
-将其全部映射到同一函数中并不优雅。)</p>
-<p>定义一个有字段的真实类能帮助读者理解命令包含了什么数据。
-闭包是自动包装状态的完美解决方案，但它们过于自动化而很难看清包装的真正状态有哪些。</p>
+<p>我说<em>某种程度上</em>，是因为即使在有闭包的语言里，
+为命令建立真正的类或结构也仍然有用。
+如果你的命令有多个操作（比如可撤销的命令），
+把它们映射到单个函数上会很别扭。</p>
+<p>定义一个带字段的真实类，还能帮助读者轻松看出命令包含哪些数据。
+闭包能极简洁地自动包装一些状态，但它们可能太过自动，以至于很难看清它们实际持有的是什么状态。</p>
 </aside>
-<p>举个例子，如果我们使用javascript来写游戏，那么我们可以用这种方式来写让单位移动的命令：</p>
-<div class="codehilite"><pre><span></span><span class="kd">function</span> <span class="nx">makeMoveUnitCommand</span><span class="p">(</span><span class="nx">unit</span><span class="p">,</span> <span class="nx">x</span><span class="p">,</span> <span class="nx">y</span><span class="p">)</span> <span class="p">{</span>
-  <span class="c1">// 这个函数就是命令对象:</span>
-  <span class="k">return</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
-    <span class="nx">unit</span><span class="p">.</span><span class="nx">moveTo</span><span class="p">(</span><span class="nx">x</span><span class="p">,</span> <span class="nx">y</span><span class="p">);</span>
-  <span class="p">}</span>
+<p>举个例子，如果我们用 JavaScript 来写游戏，就可以像这样创建移动单位的命令：</p>
+<div class="codehilite"><pre><span></span><code><span class="kd">function</span><span class="w"> </span><span class="nx">makeMoveUnitCommand</span><span class="p">(</span><span class="nx">unit</span><span class="p">,</span><span class="w"> </span><span class="nx">x</span><span class="p">,</span><span class="w"> </span><span class="nx">y</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="c1">// 这个函数就是命令对象:</span>
+<span class="w">  </span><span class="k">return</span><span class="w"> </span><span class="kd">function</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">unit</span><span class="p">.</span><span class="nx">moveTo</span><span class="p">(</span><span class="nx">x</span><span class="p">,</span><span class="w"> </span><span class="nx">y</span><span class="p">);</span>
+<span class="w">  </span><span class="p">}</span>
 <span class="p">}</span>
-</pre></div>
-
+</code></pre></div>
 
 <p>我们可以通过一对闭包来为撤销提供支持：</p>
-<div class="codehilite"><pre><span></span><span class="kd">function</span> <span class="nx">makeMoveUnitCommand</span><span class="p">(</span><span class="nx">unit</span><span class="p">,</span> <span class="nx">x</span><span class="p">,</span> <span class="nx">y</span><span class="p">)</span> <span class="p">{</span>
-  <span class="kd">var</span> <span class="nx">xBefore</span><span class="p">,</span> <span class="nx">yBefore</span><span class="p">;</span>
-  <span class="k">return</span> <span class="p">{</span>
-    <span class="nx">execute</span><span class="o">:</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
-      <span class="nx">xBefore</span> <span class="o">=</span> <span class="nx">unit</span><span class="p">.</span><span class="nx">x</span><span class="p">();</span>
-      <span class="nx">yBefore</span> <span class="o">=</span> <span class="nx">unit</span><span class="p">.</span><span class="nx">y</span><span class="p">();</span>
-      <span class="nx">unit</span><span class="p">.</span><span class="nx">moveTo</span><span class="p">(</span><span class="nx">x</span><span class="p">,</span> <span class="nx">y</span><span class="p">);</span>
-    <span class="p">},</span>
-    <span class="nx">undo</span><span class="o">:</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
-      <span class="nx">unit</span><span class="p">.</span><span class="nx">moveTo</span><span class="p">(</span><span class="nx">xBefore</span><span class="p">,</span> <span class="nx">yBefore</span><span class="p">);</span>
-    <span class="p">}</span>
-  <span class="p">};</span>
+<div class="codehilite"><pre><span></span><code><span class="kd">function</span><span class="w"> </span><span class="nx">makeMoveUnitCommand</span><span class="p">(</span><span class="nx">unit</span><span class="p">,</span><span class="w"> </span><span class="nx">x</span><span class="p">,</span><span class="w"> </span><span class="nx">y</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="kd">var</span><span class="w"> </span><span class="nx">xBefore</span><span class="p">,</span><span class="w"> </span><span class="nx">yBefore</span><span class="p">;</span>
+<span class="w">  </span><span class="k">return</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">execute</span><span class="o">:</span><span class="w"> </span><span class="kd">function</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nx">xBefore</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">unit</span><span class="p">.</span><span class="nx">x</span><span class="p">();</span>
+<span class="w">      </span><span class="nx">yBefore</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">unit</span><span class="p">.</span><span class="nx">y</span><span class="p">();</span>
+<span class="w">      </span><span class="nx">unit</span><span class="p">.</span><span class="nx">moveTo</span><span class="p">(</span><span class="nx">x</span><span class="p">,</span><span class="w"> </span><span class="nx">y</span><span class="p">);</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="nx">undo</span><span class="o">:</span><span class="w"> </span><span class="kd">function</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nx">unit</span><span class="p">.</span><span class="nx">moveTo</span><span class="p">(</span><span class="nx">xBefore</span><span class="p">,</span><span class="w"> </span><span class="nx">yBefore</span><span class="p">);</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">};</span>
 <span class="p">}</span>
-</pre></div>
+</code></pre></div>
 
-
-<p>如果你习惯了函数式编程风格，这种做法是很自然的。
-如果你没有，我希望这章可以帮你了解一些。
-对于我而言，命令模式展现了函数式范式在很多问题上的高效性。</p>
+<p>如果你熟悉函数式风格，这种写法就很自然。
+如果不熟悉，希望这一章能多少帮你入门。
+对我来说，命令模式的实用性真正说明了函数式范式对许多问题有多么有效。</p>
 <h2><a href="#参见" name="参见">参见</a></h2>
 <ul>
 <li>
 <p>你最终可能会得到很多不同的命令类。
-  为了更容易实现这些类，定义一个具体的基类，包含一些能定义行为的高层方法，往往会有帮助。
-  这将命令的主体<code>execute()</code>转到<a href="subclass-sandbox.html" class="pattern">子类沙箱</a>中。</p>
+为了让这些类更容易实现，定义一个具体的基类，带上一些便捷的高层方法，让派生命令可以组合这些方法来定义自身行为，往往会有帮助。
+这把命令的主要<code>execute()</code>方法变成了<a href="subclass-sandbox.html" class="pattern">子类沙箱</a>。</p>
 </li>
 <li>
 <p>在上面的例子中，我们明确地指定哪个角色会处理命令。
-  在某些情况下，特别是当对象模型分层时，也可以不这么简单粗暴。
-  对象可以响应命令，或者将命令交给它的从属对象。
-  如果你这样做，你就完成了一个<a class="gof-pattern" href="http://en.wikipedia.org/wiki/Chain-of-responsibility_pattern">职责链模式</a>。</p>
+在某些情况下，尤其是当对象模型是分层的时候，事情可能就没那么清晰明了。
+对象可以响应命令，也可以决定把它甩给某个下级对象。
+如果你这样做，你就得到了一个<a class="gof-pattern" href="http://en.wikipedia.org/wiki/Chain-of-responsibility_pattern">职责链模式</a>。</p>
 </li>
 <li>
 <p><span name="singleton"></span>有些命令是无状态的纯粹行为，比如第一个例子中的<code>JumpCommand</code>。
-  在这种情况下，有多个实例是在浪费内存，因为所有的实例是等价的。
+  在这种情况下，为该类保留多个实例是在浪费内存，因为所有实例都是等价的。
   可以用<a class="gof-pattern" href="flyweight.html">享元模式</a>解决。</p>
 </li>
 </ul>
 <aside name="singleton">
-<p>你可以将其实现为<a href="singleton.html" class="gof-pattern">单例</a>，但真朋友不会让你用单例。</p>
+<p>你也可以把它做成<a href="singleton.html" class="gof-pattern">单例</a>，但真朋友不会让朋友创建单例。</p>
 </aside>
 <nav>
   <span class="prev">&larr; <a href="design-patterns-revisited.html">上一章</a></span>

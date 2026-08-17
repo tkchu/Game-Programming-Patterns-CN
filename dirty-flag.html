@@ -90,110 +90,110 @@ delete the font style for english.
 <h2><a href="#动机" name="动机">动机</a></h2>
 <p>很多游戏有<em>场景图</em>。
 那是一个巨大的数据结构，包含了游戏世界中所有的对象。
-渲染引擎使用它决定在屏幕的哪里画东西。</p>
+渲染引擎用它来决定在屏幕上画什么、画在哪里。</p>
 <p><span name="transform"></span></p>
-<p>最简单的实现中，场景图只是对象列表。
-每个对象都有模型，或者其他的原始图形，以及<em>变换</em>。
-变换描述了对象在世界中的位置，方向，拉伸。
+<p>在最简单的实现中，场景图只是一个扁平的对象列表。
+每个对象都有模型，或者其他图形图元，以及<em>变换</em>。
+变换描述了对象在世界中的位置、旋转和缩放。
 为了移动或者旋转对象，只需简单地改变它的变换。</p>
 <aside name="transform">
-<p><em>如何</em> 存储和操作变换的内容很不幸超出了本书讨论范围。
-简单地总结下，是个4x4的矩阵。
-你可以通过矩阵相乘来组合两个变换，获得单一变换——举个例子，平移之后旋转对象。</p>
+<p><em>如何</em>存储和操作变换的机制，很不幸超出了本书的讨论范围。
+简略得有点好笑地说，它就是个4x4矩阵。
+你可以把两个变换组合成一个变换——例如先平移再旋转对象——方法就是把两个矩阵相乘。</p>
 <p>它如何工作，以及为什么那样工作是留给读者的练习。</p>
 </aside>
-<p>当渲染系统描绘对象，它取出对象的模型，对其应用变换，然后将其渲染到游戏世界中。
-如果我们有场景<em>包</em>而不是场景<em>图</em>，那就是这样了，生活很简单。</p>
+<p>当渲染器绘制对象时，它会取出对象的模型，对模型应用变换，然后将其渲染到世界中的那个位置。
+如果我们有的是场景<em>包</em>而不是场景<em>图</em>，那事情就到此为止，生活也会简单很多。</p>
 <p><span name="hierarchical"></span></p>
 <p>但是，大多数场景图都是<em>分层的</em>。
-场景图中的对象也许拥有锚定的父对象。
-这种情况下，它的变换依赖于<em>父对象</em>的位置，而不是游戏世界上的绝对位置。</p>
+场景图中的对象可能有一个它所锚定的父对象。
+这种情况下，它的变换是相对于<em>父对象</em>的位置，而不是世界中的绝对位置。</p>
 <p>举个例子，想象游戏世界中有一艘海上的海盗船。
-桅杆的顶端有瞭望塔，瞭望塔中有海盗，海盗肩上有鹦鹉。
-船本身的变换定位船在海上的位置。瞭望塔的变换定位它在船上的位置，诸如此类。</p>
+桅杆的顶端有瞭望塔，瞭望塔里蜷缩着一个海盗，海盗肩上紧抓着一只鹦鹉。
+船的自身变换定位船在海上的位置。瞭望塔的变换定位它在船上的位置，诸如此类。</p>
 <p><span name="pirate"></span></p>
 <p><img src="images/dirty-flag-pirate.png" alt="一艘有瞭望塔的海盗船，瞭望塔上上有海盗，海盗肩头有鹦鹉。" /></p>
 <aside name="pirate">
-<p>编程艺术！</p>
+<p>程序员的画风！</p>
 </aside>
 <p><span name="slide"></span></p>
-<p>这样的话，当父对象移动时，子节点也自动地跟着移动。
-如果改变了船的自身变换，瞭望塔，海盗和鹦鹉都会随之变动。
-如果当船移动时，就得手动调整每个对象的变换来防止滑动，那可相当令人头疼。</p>
+<p>这样的话，当父对象移动时，它的子节点也会自动跟着移动。
+如果我们改变了船的自身变换，瞭望塔、海盗和鹦鹉都会随之一起移动。
+如果船移动时，我们还得手动调整船上所有对象的变换来防止它们滑出去，那可真是让人头疼。</p>
 <aside name="slide">
-<p>老实说，当你在海上，你<em>确实</em>需要手动调整姿势来防止滑动。
-也许我应该选一个不会滑动的例子。</p>
+<p>老实说，当你在海上时，你<em>确实</em>得不断手动调整位置，才不至于从船上滑下去。
+也许我该选个更“干燥”点的例子——没那么湿，也没那么有趣。</p>
 </aside>
-<p>但是为了在屏幕上真正地描绘鹦鹉，我需要知道它在世界上的绝对位置。
-我会调用父节点相关的变换对对象的<em>自身变换</em>进行变换。
-为了渲染对象，我需要知道对象的<em>世界变换</em>。</p>
+<p>但是为了在屏幕上真正画出鹦鹉，我们需要知道它在世界中的绝对位置。
+我把相对父对象的变换称为对象的<em>自身变换</em>。
+为了渲染对象，我们需要知道它的<em>世界变换</em>。</p>
 <h3><a href="#自身变换和世界变换" name="自身变换和世界变换">自身变换和世界变换</a></h3>
-<p>计算对象的世界变换很直接——从根节点开始通过父节点链一直追踪到对象，将经过的所有变换绑在一起。
+<p>计算对象的世界变换非常直接——从根节点开始，沿着它的父节点链一路向下走到该对象，边走边把沿途的变换组合起来。
 换言之，鹦鹉的世界变换如下：</p>
 <p><span name="degenerate"></span></p>
 <p><img src="images/dirty-flag-multiply.png" alt="鹦鹉的世界变换来自船，瞭望塔，海盗和鹦鹉的自身变换的乘积。" /></p>
 <aside name="degenerate">
 <p>如果对象没有父对象，它的自身变换和世界变换是一样的。</p>
 </aside>
-<p>我们每帧需要为游戏世界的每个对象计算世界变换，因此哪怕每个模型只有一部分矩阵乘法，
-它也处于代码影响性能的关键位置上。
-保持它们及时更新是有技巧的，因为当父对象移动时，它影响自己的世界变换，并递归影响所有子节点。</p>
-<p>最简单的方法是在渲染时计算变换。
-每一帧，我们从最高层递归遍历整个场景图。
-我们计算每个对象的世界变换然后立刻绘制它。</p>
-<p>但这完全是在浪费CPU！
-很多游戏世界的对象<em>不是</em>每帧都在移动。
-想想那些构成关卡的静态几何图形。
-在没有改变的情况下每帧计算它们的世界变换是一种浪费。</p>
+<p>我们每帧都需要为世界中的每个对象计算世界变换，所以哪怕每个模型只有少量矩阵乘法，
+它也是性能关键的热代码路径。
+让它们保持最新是件棘手的事，因为当父对象移动时，不仅影响它自己的世界变换，还会递归地影响所有子节点。</p>
+<p>最简单的方法是在渲染时即时计算变换。
+每一帧，我们都从层次结构的顶端开始递归遍历整个场景图。
+对每个对象，我们当场计算它的世界变换并绘制它。</p>
+<p>但这简直是在挥霍宝贵的CPU算力！
+世界中的很多对象<em>并不是</em>每帧都在移动。
+想想那些构成关卡的静态几何体。
+在它们没有变化的情况下还每帧重新计算世界变换，是一种浪费。</p>
 <h3><a href="#缓存世界变换" name="缓存世界变换">缓存世界变换</a></h3>
-<p>明显的解决方案是<em>缓存</em>它。
-在每个对象中，我们存储它的自身变换和世界变换。
-当我们渲染时使用预计算的世界变换。
-如果对象从未移动，缓存的变换永远是最新的变换，每个人都很开心。</p>
-<p>当一个对象<em>确实</em>移动了，简单的解决方式是之后就更新世界变换。
-但是不要忘记层次性！当父节点移动时，我们得计算它的世界变换并<em>递归计算它所有的子对象</em>。</p>
-<p>想象游戏中忙碌的时刻。
-在一帧中，船在海上颠簸，瞭望塔在风中摇晃，海盗被甩到了边缘，而鹦鹉撞上了他的脑袋。
-我们改变了四个自身变换。如果每次自身变换都立即更新世界变换，会发生什么？</p>
+<p>显而易见的答案是<em>缓存</em>它。
+在每个对象中，我们存储它的自身变换和由它推导出的世界变换。
+渲染时我们只使用预先计算好的世界变换。
+如果对象从未移动，缓存的变换就永远是最新的，一切都很美好。</p>
+<p>当一个对象<em>确实</em>移动了，简单的做法是立即刷新它的世界变换。
+但别忘了层次结构！当父节点移动时，我们得重新计算它的世界变换，<em>以及它所有子节点的世界变换，递归进行</em>。</p>
+<p>想象一段忙碌的游戏过程。
+在短短一帧里，船在海上颠簸，瞭望塔在风中摇晃，海盗探身到船舷边，鹦鹉跳到了他的头上。
+我们改变了四个自身变换。如果每当一个自身变换改变时，我们都急切地重新计算世界变换，最终会发生什么？</p>
 <p><span name="stars"></span></p>
 <p><img src="images/dirty-flag-update-bad.png" alt="当对象移动的任何时候，立即重新计算世界坐标。" /></p>
 <aside name="stars">
 <p>你可以看到在标记了&#x2605;的行上，我们重复计算了四次鹦鹉的世界变换，但我们只需要最后的那次。</p>
 </aside>
-<p>我只移动四个对象，但我们做了<em>十次</em>世界变换计算。
-那就有六次在被渲染器使用前浪费了。
-我们计算了鹦鹉的世界变换<em>四</em>次，但它只需渲染一次。</p>
-<p>问题在于世界变换也许会依赖于多个自身变换。
-由于我们<em>每次</em>变化就立即重新计算，当自身变换依赖的多个世界变换在同一帧发生变化时，
-我们就对同一变换做了多次重新计算。</p>
-<h3><a href="#延期重计算" name="延期重计算">延期重计算</a></h3>
+<p>我们只移动了四个对象，却做了<em>十次</em>世界变换计算。
+其中有六次是无用计算，还没等到渲染器使用就被丢弃了。
+我们计算了鹦鹉的世界变换<em>四</em>次，但它只被渲染一次。</p>
+<p>问题在于，一个世界变换可能依赖于多个自身变换。
+由于每当<em>其中一个</em>变换改变时我们就立即重新计算，当它依赖的多个自身变换在同一帧里发生变化时，
+我们就会对同一个变换重复计算多次。</p>
+<h3><a href="#延迟重计算" name="延迟重计算">延迟重计算</a></h3>
 <p><span name="decoupling"></span></p>
-<p>我们会通过解耦自身变换和世界变换的更新来解决这个问题。
-这让我们先在一次批处理中改变自身变换，在这些改变完成<em>之后</em>，在渲染它之前，重新计算它们世界变换。</p>
+<p>我们会通过把“改变自身变换”与“更新世界变换”解耦来解决这个问题。
+这样，我们可以一次性批量改变多个自身变换，等这些修改全部完成<em>之后</em>、渲染需要用到它之前，再只重新计算一次受影响的世界变换。</p>
 <aside name="decoupling">
-<p>有趣的是，不少软件架构是故意稍微偏离了一点。</p>
+<p>有趣的是，软件架构中有相当一部分是在有意制造一点“松弛”。</p>
 </aside>
-<p>为了做到这点，我们为图中的每个对象添加<em>标识</em>。
-“标识”和“位”在编程中密切相关——都代表处在两种状态之一的一小块数据。
-我们称之为“真”和“假”，或者有时称为“设置”和“清除”。
-我之后会交替使用它们。</p>
+<p>为了做到这点，我们为图中的每个对象添加一个<em>标识</em>。
+“标识”和“位”在编程中是同义词——都表示一丁点儿只处于两种状态之一的数据。
+我们称这两种状态为“真”和“假”，有时也叫“设置”和“清除”。
+我之后会交替使用这些叫法。</p>
 <p><span name="specific"></span></p>
-<p>当自身变换改变了，我们设置它。
-当我们需要对象的世界变换时，我们检查这个位。
-如果它被设置了，计算世界变换然后清除标识。
-那个标识代表着，“世界变换过时了吗？”
-由于它们没有被清除，这种“过时的杂乱”被称为“脏”。
-也就是<em>脏标识</em>。“脏位”也是这个模式通常使用的名字，但是我决定使用不那么下流的称呼。</p>
+<p>当自身变换改变时，我们设置它。
+当我们需要对象的世界变换时，就检查这个标识。
+如果它被设置了，就先计算世界变换，然后清除标识。
+这个标识代表的是：“世界变换是否过时了？”
+出于一些不太明确的原因，这种“过时状态”的传统叫法就是“脏”。
+于是就有了<em>脏标识</em>。“脏位”也是这个模式同样常见的名字，不过我决定坚持用那个听起来没那么容易让人想歪的。</p>
 <aside name="specific">
-<p>维基百科的编辑者没有我这样的自制力，使用了<a href="http://en.wikipedia.org/wiki/Dirty_bit">dirty bit</a>.</p>
+<p>维基百科的编辑者没有我这样的自制力，使用了<a href="http://en.wikipedia.org/wiki/Dirty_bit">dirty bit</a>。</p>
 </aside>
 <p>如果我们运用这个模式，然后移动之前例子中所有对象，那么游戏最终是这样的：</p>
 <p><img src="images/dirty-flag-update-good.png" alt="通过将计算推迟到所有移动结束，我们只需重新计算一次。" /></p>
-<p>这就是你能希望得到的最好结果了——每个受影响对象的世界变换只被计算一次。
-使用仅仅一位数据，这个模式为我们做了以下事情：</p>
+<p>这就是你能期望的最好结果了——每个受影响对象的世界变换都恰好只被计算一次。
+仅用一位数据，这个模式就为我们做了以下几件事：</p>
 <ul>
 <li>
-<p>它将对象的父节点链上的众多的自身变换变化归并成对象上的一次计算。</p>
+<p>它把对象父节点链上多个自身变换的修改，归并成该对象上的一次重新计算。</p>
 </li>
 <li>
 <p>它避免了在没有移动的对象上重新计算。</p>
@@ -203,336 +203,325 @@ delete the font style for english.
 </li>
 </ul>
 <h2><a href="#模式" name="模式">模式</a></h2>
-<p>一组<strong>原始数据</strong>随着时间变化而改变。
-使用<strong>代价昂贵的过程</strong>推定一组<strong>导出数据</strong>。
-用一个<strong>“脏”标识</strong>追踪导出数据是否与原始数据保持一致。
-它在<strong>原始数据改变时被设置。</strong> 如果导出数据被请求时，该标识被设置了，那么<strong>重新计算并清除标识</strong>
-否则的话，使用之前<strong>缓存的导出数据</strong>。</p>
+<p>一组<strong>原始数据</strong>会随着时间变化。
+由这些原始数据通过某个<strong>代价昂贵的过程</strong>推导出一组<strong>导出数据</strong>。
+用一个<strong>“脏”标识</strong>来追踪导出数据是否与原始数据失去同步。
+它在<strong>原始数据改变时被设置。</strong> 当需要导出数据时，如果该标识处于设置状态，那么就<strong>重新处理并清除该标识</strong>，
+否则就使用之前<strong>缓存的导出数据</strong>。</p>
 <h2><a href="#何时使用" name="何时使用">何时使用</a></h2>
-<p>与这本书中的其他模式相比，这个模式解决了一个非常特殊的问题。
-同时，就像其他优化一样，只在性能问题足够大时，再使用这一模式增加代码的复杂度。</p>
-<p>脏标识在两种任务上应用：“计算”和“同步”。
-在两种情况下，从原始数据变换到导出数据消耗很多时间，或者有很多其他方面的消耗。</p>
-<p>在我们的场景图例子中，这个过程非常缓慢是因为需要执行很多数学运算。
-在同步上使用这个模式是另一个应用场景，
-导出数据在<em>别的地方</em>——在磁盘上或者在网络另一头的终端机上——从点A传输到点B消耗很大。</p>
-<p>这里是一些其他的应用场景：</p>
+<p>与本书中的其他一些模式相比，这个模式解决的问题相当具体。
+同时，就像大多数优化一样，只有当你遇到的性能问题大到足以证明值得增加代码复杂度时，才应该使用它。</p>
+<p>脏标识适用于两类工作：<em>计算</em>和<em>同步</em>。
+在这两种情况下，从原始数据得到导出数据的过程都很耗时，或在其他方面代价高昂。</p>
+<p>在我们的场景图例子中，这个过程慢是因为要执行大量数学运算。
+而当用这个模式做同步时，更常见的情况是，
+导出数据在<em>别的地方</em>——要么在磁盘上，要么在网络上另一台机器上——把它从A点送到B点本身就是昂贵的。</p>
+<p>此外还有几个前提条件：</p>
 <ul>
 <li>
-<p><strong>原始数据的变化速度远高于导出数据的使用速度。</strong>
-  避免在导出数据使用前原始数据多次变化带来的不必要计算。
-  如果你总在原始数据变化后立即使用导出数据，这个模式无法帮忙。</p>
+<p><strong>原始数据的变化频率必须远高于导出数据的使用频率。</strong>
+  这个模式的原理是：如果一次后续的原始数据变化会在导出数据被使用之前就使其失效，那就避免去处理它。
+  如果你发现自己每次修改原始数据之后总是立刻需要导出数据，那这个模式就帮不上忙了。</p>
 </li>
 <li>
-<p><strong>增量更新十分困难。</strong>
-  假设海盗船只能携带特定数量的战利品。我们需要获取携带事物的总重量。
-  我们<em>可以</em>使用这个模式，然后为总重量设立脏标识。每次添加或者移除一些战利品，我们设置这个标识。
-  当我们需要总量时，将所有战利品的重量加起来，然后清除标识。</p>
-<p>但是更简单的解决方法是<em>保存计算总量</em>。
-当我们添加或删除事物，直接从现在的总重量添加或者删除它的重量。
-如果我们可以<em>承担得起消耗</em>，保持导出数据的更新，那么更好的选择是不用这个模式，
-每次需要时重新计算导出数据。</p>
+<p><strong>增量更新应该很困难。</strong>
+  假设我们的海盗船只能装下有限的战利品，而我们需要知道船舱里所有东西的总重量。
+  我们<em>可以</em>使用这个模式，为总重量设一个脏标识。每次添加或移除战利品时，我们就设置这个标识。
+  当需要总量时，把所有战利品的重量加在一起，然后清除标识。</p>
+<p>但更简单的做法是<em>维护一个不断更新的累计总量</em>。
+当我们添加或移除一个物品时，只需在当前总重量上加上或减去它的重量。
+如果我们能这样“随改随算”，让导出数据保持最新，那通常比使用这个模式、
+在需要时从头重新计算导出数据更好。</p>
 </li>
 </ul>
 <p><span name="hacks"></span></p>
-<p>这听起来脏标识很少有能使用的时候，但你总会找到一两个部分它能帮得上忙。
-直接在你的游戏代码库中搜索“dirty”，通常会发现这个模式的使用之处。</p>
+<p>这让人感觉脏标识很少有用武之地，但你总会在这里或那里找到它们能帮上忙的地方。
+在普通的游戏代码库中搜索“dirty”这个词，通常就能发现这个模式的使用痕迹。</p>
 <aside name="hacks">
-<p>根据我的研究，也能找到很多对“dirty”黑魔法的抱怨注释。</p>
+<p>根据我的研究，搜索“dirty”还会找到很多为“dirty”黑客手段道歉的注释。</p>
 </aside>
 <h2><a href="#记住" name="记住">记住</a></h2>
-<p>哪怕是在说服自己这个模式在这里很恰当之后，这里还有一些瑕疵可能会让你不爽。</p>
+<p>哪怕是在说服自己这个模式在这里很恰当之后，这里还有几处小褶皱，可能会让你有点不舒服。</p>
 <h3><a href="#延期太久是有代价的" name="延期太久是有代价的">延期太久是有代价的</a></h3>
-<p>这个模式将某些耗时的工作延期到真正需要结果的时候，但是当它要的时候，通常是<em>现在就要</em>。
-但是我们使用这个模式的原因是计算很耗时！</p>
+<p>这个模式把某些慢工作推迟到真正需要结果的时候，但当需要它时，往往<em>立刻</em>就要。
+可我们当初使用这个模式，正是因为计算结果很慢！</p>
 <p><span name="gc"></span></p>
-<p>在例子中，这不是问题，因为我们还是可以在一帧之内计算世界坐标，但是可以想象其他情况下，工作需要消耗可观时间。
-如果玩家想要结果时才<em>开始</em>计算，这会引起不愉快的卡顿。</p>
-<p>延期的另一个问题是，如果有东西出错了，你可能根本无法弥补。
-当你使用这个模式将状态持久化时，问题更加突出。</p>
-<p>举个例子，文本编辑器知道文档有“没保存的修改”。
-在文件标题栏的小点或者星号就是可见的脏标识。
-原始数据是在内存中打开的文档，推导数据是在磁盘上的文件。</p>
+<p>在我们的例子中，这不是问题，因为我们计算世界坐标的速度仍足以在一帧内完成；但你可以想象，在其他情况下，你要做的工作是一大块，需要花费明显的时间才能啃完。
+如果游戏直到玩家期望看到结果的那一刻才<em>开始</em>啃这块硬骨头，就可能造成令人不快的可见卡顿。</p>
+<p>延期的另一个问题是，如果出了什么岔子，你可能根本没做这项工作。
+当你用这个模式把某些状态保存成更持久的形式时，这一点尤其成问题。</p>
+<p>例如，文本编辑器知道你的文档有“未保存的修改”。
+文件标题栏里的那个小圆点或星号，简直就是脏标识的可视化。
+原始数据是内存中打开的文档，导出数据是磁盘上的文件。</p>
 <p><img src="images/dirty-flag-title-bar.png" alt="一个窗口的标题栏有个代表未保存修改的小标志。" /></p>
-<p>很多程序直到文档关闭或者应用退出才保存到磁盘上。
-在大多数情况下这很好，但是如果一不小心踢到了插线板，你的主要工作也就随风而逝了。</p>
-<p>在后台自动保存备份的编辑器弥补了这一失误。
-自动保存的频率保持在崩溃时不丢失太多数据和频繁保存文件之间。</p>
+<p>很多程序直到文档关闭或应用退出时才保存到磁盘。
+大多数情况下这没什么，但如果你不小心踢掉了电源线，你的杰作也就随之消失了。</p>
+<p>在后台自动保存备份的编辑器正是为了弥补这一缺陷。
+自动保存的频率是在两点之间的权衡：既要让崩溃时不丢失太多工作，又不要因为时刻保存而让文件系统不堪重负。</p>
 <aside name="gc">
-<p>这反映了自动内存管理系统的不同垃圾回收策略。
-引用计数在不需要内存时立即释放它，但每次引用改变时都会更新引用计数，那消耗了大量CPU时间。</p>
-<p>简单的垃圾回收器将回收内存拖延到需要内存时，但是代价是可怕的，
-“垃圾回收过程”会冻住整个游戏，直到回收器完成了对堆的处理。</p>
-<p>在两者之间是更复杂的系统，像延时引用计数和增量的垃圾回收，
-比纯粹的引用计数回收要消极，但比冻住游戏的回收系统更积极。</p>
+<p>这对应了自动内存管理系统中不同的垃圾回收策略。
+引用计数会在内存不再需要的那一刻立即释放它，但每次引用改变时都要急切地更新引用计数，这会耗费大量CPU时间。</p>
+<p>简单的垃圾回收器把内存回收推迟到确实需要时，但代价是可怕的
+“垃圾回收暂停”，它会冻住整个游戏，直到回收器清扫完整个堆。</p>
+<p>介于两者之间的是更复杂的系统，如延迟引用计数和增量式垃圾回收，
+它们回收内存不如纯引用计数急切，但比“暂停整个世界”的收集器更急切。</p>
 </aside>
-<h3><a href="#*每次*状态改变你都得保证设置标识。" name="*每次*状态改变你都得保证设置标识。"><em>每次</em>状态改变你都得保证设置标识。</a></h3>
+<h3><a href="#*每次*状态改变时，你都得确保设置该标识。" name="*每次*状态改变时，你都得确保设置该标识。"><em>每次</em>状态改变时，你都得确保设置该标识。</a></h3>
 <p><span name="cache"></span></p>
-<p>由于推导数据是从原始数据推导而来的，它本质上是缓存。
-无论何时缓存了数据，都是需要保证<em>缓存一致性</em>的——在缓存与原始数据不同步时通知之。
-在这个模式上，这意味着在<em>任何</em>原始数据变化时设置脏标识。</p>
+<p>由于导出数据是从原始数据计算而来的，它本质上是一种缓存。
+无论何时你有了缓存数据，其中最棘手的部分就是<em>缓存失效</em>——在缓存与其源数据不同步时正确地察觉出来。
+在这个模式中，这意味着只要<em>任何</em>原始数据变化，就要设置脏标识。</p>
 <aside name="cache">
-<p>Phil Karlton有句名言：“计算机科学中只有两件难事：缓存一致性和命名。”</p>
+<p>Phil Karlton有句名言：“计算机科学中只有两件难事：缓存失效和给事物命名。”</p>
 </aside>
-<p>一处遗漏，你的程序就使用了错误的推导数据。
-这引起了玩家的困惑和非常难以追踪的漏洞。
-当使用这个模式时，你也得注意，任何修改了原始数据的代码都得设置脏标识。</p>
-<p>一种解决它的方法是将原始数据的修改隐藏在接口之后。
-任何想要改变状态的代码都要通过API，你可以在API那里设置脏标识来保证不会遗漏。</p>
-<h3><a href="#得将之前的推导数据保存在内存中。" name="得将之前的推导数据保存在内存中。">得将之前的推导数据保存在内存中。</a></h3>
+<p>只要有一处遗漏，你的程序就会错误地使用过时的导出数据。
+这会导致玩家困惑，以及非常难以追踪的缺陷。
+使用这个模式时，你还得注意，任何修改原始状态的代码都必须设置脏标识。</p>
+<p>缓解这一问题的一种方法，是把对原始数据的修改封装在某个接口之后。
+任何能改变状态的代码都只经由同一个狭窄的API，你在那里设置脏标识，就可以放心它不会被漏掉。</p>
+<h3><a href="#得将之前的导出数据保存在内存中。" name="得将之前的导出数据保存在内存中。">得将之前的导出数据保存在内存中。</a></h3>
 <p><span name="sync"></span></p>
-<p>当推导数据被请求而脏标识<em>没有</em>设置时，就使用之前计算出的数据。
-这很明显，但这需要在内存中保存推导数据，以防之后再次使用。</p>
+<p>当需要导出数据而脏标识<em>没有</em>设置时，就使用之前计算出的数据。
+这显而易见，但这确实意味着你得把导出数据保留在内存中，以防之后还需要它。</p>
 <aside name="sync">
 <p>如果你用这个模式将原始状态同步到其他地方，这不是问题。
-那样的话，推导数据通常不在内存里。</p>
+那样的话，导出数据通常不在内存里。</p>
 </aside>
-<p>如果你没有使用这个模式，可在需要时计算推导数据，使用完后释放。
-这避免将其存储回内存的开销，而代价是每次使用都需要重新计算。</p>
+<p>如果你不使用这个模式，就可以在每次需要时即时计算导出数据，用完就丢弃。
+这样避免了把它缓存在内存中的开销，代价是每次需要结果时都得重新计算。</p>
 <p><span name="trade"></span></p>
-<p>就像很多优化一样，这种模式以内存换速度。
-通过在内存中保存之前计算的结果，避免了在它没有改变的情况下重新计算。
-这种交易在内存便宜而计算昂贵时是划算的。
-当你手头有更多空闲的时间而不是内存的时候，最好在需求时重新计算。</p>
+<p>因此，就像很多优化一样，这种模式用内存换速度。
+通过在内存中保留之前计算的结果，避免了在它没有变化时重新计算。
+当计算缓慢而内存便宜时，这种权衡是划算的。
+当你手头的时间比内存更充裕时，最好按需计算。</p>
 <aside name="trade">
-<p>相反，压缩算法做了反向的交易：
-它们优化<em>空间</em>，代价是解压时额外的处理时间。</p>
+<p>相反，压缩算法做的是相反的权衡：
+它们优化<em>空间</em>，代价是解压所需的处理时间。</p>
 </aside>
 <h2><a href="#示例代码" name="示例代码">示例代码</a></h2>
-<p>假设我们满足了超长的需求列表，看看在代码中是如何应用这个模式的。
-就像我之前提到的那样，矩阵运算背后的数学知识超出了本书的范围，因此我将其封装在类中，假设在某处已经实现了：</p>
-<div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">Transform</span>
+<p>假设我们已经满足了这份长得惊人的需求列表，来看看这个模式在代码中是什么样子。
+就像我之前提到的，变换矩阵背后的具体数学超出了本书的微薄目标，所以我把它封装进一个类里，你可以假定其实现存在于某处虚空之中：</p>
+<div class="codehilite"><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Transform</span>
 <span class="p">{</span>
 <span class="k">public</span><span class="o">:</span>
-  <span class="k">static</span> <span class="n">Transform</span> <span class="n">origin</span><span class="p">();</span>
+<span class="w">  </span><span class="k">static</span><span class="w"> </span><span class="n">Transform</span><span class="w"> </span><span class="n">origin</span><span class="p">();</span>
 
-  <span class="n">Transform</span> <span class="nf">combine</span><span class="p">(</span><span class="n">Transform</span><span class="o">&amp;</span> <span class="n">other</span><span class="p">);</span>
+<span class="w">  </span><span class="n">Transform</span><span class="w"> </span><span class="nf">combine</span><span class="p">(</span><span class="n">Transform</span><span class="o">&amp;</span><span class="w"> </span><span class="n">other</span><span class="p">);</span>
 <span class="p">};</span>
-</pre></div>
-
+</code></pre></div>
 
 <p>这里我们唯一需要的操作就是<code>combine()</code>，
-这样可以将父节点链上所有的自身变换组合起来获得对象的世界变换。
-同样有办法来获得原点变换——通常使用一个单位矩阵，表示没有平移，旋转，或者拉伸。</p>
+这样把父节点链上所有的自身变换组合起来，就能得到对象的世界变换。
+它还有一个方法可以获取“原点”变换——基本上就是一个单位矩阵，表示没有任何平移、旋转或缩放。</p>
 <p>下面，我们勾勒出场景图中的对象类。这是在应用模式<em>之前</em>所需的最低限度的东西：</p>
-<div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">GraphNode</span>
+<div class="codehilite"><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">GraphNode</span>
 <span class="p">{</span>
 <span class="k">public</span><span class="o">:</span>
-  <span class="n">GraphNode</span><span class="p">(</span><span class="n">Mesh</span><span class="o">*</span> <span class="n">mesh</span><span class="p">)</span>
-  <span class="o">:</span> <span class="n">mesh_</span><span class="p">(</span><span class="n">mesh</span><span class="p">),</span>
-    <span class="n">local_</span><span class="p">(</span><span class="n">Transform</span><span class="o">::</span><span class="n">origin</span><span class="p">())</span>
-  <span class="p">{}</span>
+<span class="w">  </span><span class="n">GraphNode</span><span class="p">(</span><span class="n">Mesh</span><span class="o">*</span><span class="w"> </span><span class="n">mesh</span><span class="p">)</span>
+<span class="w">  </span><span class="o">:</span><span class="w"> </span><span class="n">mesh_</span><span class="p">(</span><span class="n">mesh</span><span class="p">),</span>
+<span class="w">    </span><span class="n">local_</span><span class="p">(</span><span class="n">Transform</span><span class="o">::</span><span class="n">origin</span><span class="p">())</span>
+<span class="w">  </span><span class="p">{}</span>
 
 <span class="k">private</span><span class="o">:</span>
-  <span class="n">Transform</span> <span class="n">local_</span><span class="p">;</span>
-  <span class="n">Mesh</span><span class="o">*</span> <span class="n">mesh_</span><span class="p">;</span>
+<span class="w">  </span><span class="n">Transform</span><span class="w"> </span><span class="n">local_</span><span class="p">;</span>
+<span class="w">  </span><span class="n">Mesh</span><span class="o">*</span><span class="w"> </span><span class="n">mesh_</span><span class="p">;</span>
 
-  <span class="n">GraphNode</span><span class="o">*</span> <span class="n">children_</span><span class="p">[</span><span class="n">MAX_CHILDREN</span><span class="p">];</span>
-  <span class="kt">int</span> <span class="n">numChildren_</span><span class="p">;</span>
+<span class="w">  </span><span class="n">GraphNode</span><span class="o">*</span><span class="w"> </span><span class="n">children_</span><span class="p">[</span><span class="n">MAX_CHILDREN</span><span class="p">];</span>
+<span class="w">  </span><span class="kt">int</span><span class="w"> </span><span class="n">numChildren_</span><span class="p">;</span>
 <span class="p">};</span>
-</pre></div>
+</code></pre></div>
 
-
-<p>每个节点都有自身变换描述了它和父节点之间的关系。
-它有代表对象图形的真实网格。（将<code>mesh_</code>置为<code>NULL</code>来处理子节点的不可见节点。）
-最终，每个节点都包含一个有可能为空的子节点集合。</p>
-<p>通过这样，“场景图”只是简单的<code>GraphNode</code>，它是所有的子节点（以及孙子节点）的根。</p>
-<div class="codehilite"><pre><span></span><span class="n">GraphNode</span><span class="o">*</span> <span class="n">graph_</span> <span class="o">=</span> <span class="k">new</span> <span class="n">GraphNode</span><span class="p">(</span><span class="nb">NULL</span><span class="p">);</span>
+<p>每个节点都有一个自身变换，描述它相对于父节点的位置。
+它有一个网格，也就是对象的实际图形。（我们也允许<code>mesh_</code>为<code>NULL</code>，以便处理那些仅用来组合子节点的非可视节点。）
+最后，每个节点都有一个可能为空的子节点集合。</p>
+<p>有了这些，一个“场景图”实际上只是一个根<code>GraphNode</code>，它的子节点（以及孙节点等）就是世界中的所有对象：</p>
+<div class="codehilite"><pre><span></span><code><span class="n">GraphNode</span><span class="o">*</span><span class="w"> </span><span class="n">graph_</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">GraphNode</span><span class="p">(</span><span class="nb">NULL</span><span class="p">);</span>
 <span class="c1">// 向根图节点增加子节点……</span>
-</pre></div>
-
+</code></pre></div>
 
 <p>为了渲染场景图，我们需要的就是从根节点开始遍历节点树，然后使用正确的世界变换为每个节点的网格调用函数：</p>
-<div class="codehilite"><pre><span></span><span class="kt">void</span> <span class="nf">renderMesh</span><span class="p">(</span><span class="n">Mesh</span><span class="o">*</span> <span class="n">mesh</span><span class="p">,</span> <span class="n">Transform</span> <span class="n">transform</span><span class="p">);</span>
-</pre></div>
+<div class="codehilite"><pre><span></span><code><span class="kt">void</span><span class="w"> </span><span class="nf">renderMesh</span><span class="p">(</span><span class="n">Mesh</span><span class="o">*</span><span class="w"> </span><span class="n">mesh</span><span class="p">,</span><span class="w"> </span><span class="n">Transform</span><span class="w"> </span><span class="n">transform</span><span class="p">);</span>
+</code></pre></div>
 
-
-<p>我们不会直接在这里实现，但在真正的实现中它会做渲染器为了将网格绘制在世界上给定的位置所需要的一切。
-如果对场景图中的每个节点都正确有效地调用，这就愉快地完成了。</p>
+<p>我们不会在这里实现它，但如果实现了，它就会施展渲染器所需的魔法，把网格绘制在世界中的给定位置。
+如果我们能在场景图的每个节点上都正确且高效地调用它，我们就心满意足了。</p>
 <h3><a href="#尚未优化的遍历" name="尚未优化的遍历">尚未优化的遍历</a></h3>
-<p>让我们开始吧，我们做一个简单的遍历，在渲染需要时去计算所有的世界位置。
-这没有优化，但它很简单。我们添加一个新方法给<code>GraphNode</code>：</p>
-<div class="codehilite"><pre><span></span><span class="kt">void</span> <span class="n">GraphNode</span><span class="o">::</span><span class="n">render</span><span class="p">(</span><span class="n">Transform</span> <span class="n">parentWorld</span><span class="p">)</span>
+<p>为了先“弄脏”双手，让我们拼凑一个用于渲染场景图的基础遍历，在渲染时即时计算世界位置。
+它不是最优的，但很简单。我们给<code>GraphNode</code>添加一个新方法：</p>
+<div class="codehilite"><pre><span></span><code><span class="kt">void</span><span class="w"> </span><span class="nf">GraphNode::render</span><span class="p">(</span><span class="n">Transform</span><span class="w"> </span><span class="n">parentWorld</span><span class="p">)</span>
 <span class="p">{</span>
-  <span class="n">Transform</span> <span class="n">world</span> <span class="o">=</span> <span class="n">local_</span><span class="p">.</span><span class="n">combine</span><span class="p">(</span><span class="n">parentWorld</span><span class="p">);</span>
+<span class="w">  </span><span class="n">Transform</span><span class="w"> </span><span class="n">world</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">local_</span><span class="p">.</span><span class="n">combine</span><span class="p">(</span><span class="n">parentWorld</span><span class="p">);</span>
 
-  <span class="k">if</span> <span class="p">(</span><span class="n">mesh_</span><span class="p">)</span> <span class="n">renderMesh</span><span class="p">(</span><span class="n">mesh_</span><span class="p">,</span> <span class="n">world</span><span class="p">);</span>
+<span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">mesh_</span><span class="p">)</span><span class="w"> </span><span class="n">renderMesh</span><span class="p">(</span><span class="n">mesh_</span><span class="p">,</span><span class="w"> </span><span class="n">world</span><span class="p">);</span>
 
-  <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">numChildren_</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span>
-  <span class="p">{</span>
-    <span class="n">children_</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">-&gt;</span><span class="n">render</span><span class="p">(</span><span class="n">world</span><span class="p">);</span>
-  <span class="p">}</span>
+<span class="w">  </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">numChildren_</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span>
+<span class="w">  </span><span class="p">{</span>
+<span class="w">    </span><span class="n">children_</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">-&gt;</span><span class="n">render</span><span class="p">(</span><span class="n">world</span><span class="p">);</span>
+<span class="w">  </span><span class="p">}</span>
 <span class="p">}</span>
-</pre></div>
+</code></pre></div>
 
-
-<p>使用<code>parentWorld</code>将父节点的世界变换传入节点。
-这样，需要获得<em>这个</em>节点的世界变换只需要将其和节点的自身变换相结合。
-不需要<em>向上</em>遍历父节点去计算世界变换，因为我们可以在<em>向下</em>遍历时计算。</p>
-<p>我们计算了节点的世界变换，将其存储到<code>world</code>，如果有网格，渲染它。
-最后我们遍历进入子节点，传入<em>这个</em>节点的世界变换。
-无论如何，这是一个紧密的，简单的遍历方法。</p>
+<p>我们通过<code>parentWorld</code>把节点父对象的世界变换传进来。
+有了它，要得到<em>这个</em>节点正确的世界变换，剩下的就只是把它与节点自己的自身变换组合起来。
+我们不必<em>向上</em>遍历父链来计算世界变换，因为在<em>向下</em>遍历时我们已经在边算边走了。</p>
+<p>我们计算节点的世界变换并存入<code>world</code>，然后如果有网格就渲染它。
+最后，我们递归进入子节点，传入<em>这个</em>节点的世界变换。
+总的来说，这是一个紧凑、简单的递归方法。</p>
 <p>为了绘制整个场景图，我们从根节点开始整个过程。</p>
-<div class="codehilite"><pre><span></span><span class="n">graph_</span><span class="o">-&gt;</span><span class="n">render</span><span class="p">(</span><span class="n">Transform</span><span class="o">::</span><span class="n">origin</span><span class="p">());</span>
-</pre></div>
+<div class="codehilite"><pre><span></span><code><span class="n">graph_</span><span class="o">-&gt;</span><span class="n">render</span><span class="p">(</span><span class="n">Transform</span><span class="o">::</span><span class="n">origin</span><span class="p">());</span>
+</code></pre></div>
 
-
-<h3><a href="#让我们变脏" name="让我们变脏">让我们变脏</a></h3>
-<p>所以代码做了正确的事情——它在正确的地方渲染正确的网格——但是它没有高效地完成。
-它每帧在图中的每个节点上调用<code>local_.combine(parentWorld)</code>。
-让我们看看这个模式是如何修复这一点的。首先，我们给<code>GraphNode</code>添加两个字段：</p>
-<div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">GraphNode</span>
+<h3><a href="#让我们弄脏双手" name="让我们弄脏双手">让我们弄脏双手</a></h3>
+<p>所以这段代码做的是正确的事——它在正确的位置渲染了所有网格——但做得并不高效。
+它每一帧都在图中的每个节点上调用<code>local_.combine(parentWorld)</code>。
+让我们看看这个模式如何修复这一点。首先，我们需要给<code>GraphNode</code>添加两个字段：</p>
+<div class="codehilite"><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">GraphNode</span>
 <span class="p">{</span>
 <span class="k">public</span><span class="o">:</span>
-  <span class="n">GraphNode</span><span class="p">(</span><span class="n">Mesh</span><span class="o">*</span> <span class="n">mesh</span><span class="p">)</span>
-  <span class="o">:</span> <span class="n">mesh_</span><span class="p">(</span><span class="n">mesh</span><span class="p">),</span>
-    <span class="n">local_</span><span class="p">(</span><span class="n">Transform</span><span class="o">::</span><span class="n">origin</span><span class="p">()),</span>
-    <span class="n">dirty_</span><span class="p">(</span><span class="nb">true</span><span class="p">)</span>
-  <span class="p">{}</span>
+<span class="w">  </span><span class="n">GraphNode</span><span class="p">(</span><span class="n">Mesh</span><span class="o">*</span><span class="w"> </span><span class="n">mesh</span><span class="p">)</span>
+<span class="w">  </span><span class="o">:</span><span class="w"> </span><span class="n">mesh_</span><span class="p">(</span><span class="n">mesh</span><span class="p">),</span>
+<span class="w">    </span><span class="n">local_</span><span class="p">(</span><span class="n">Transform</span><span class="o">::</span><span class="n">origin</span><span class="p">()),</span>
+<span class="w">    </span><span class="n">dirty_</span><span class="p">(</span><span class="nb">true</span><span class="p">)</span>
+<span class="w">  </span><span class="p">{}</span>
 
-  <span class="c1">// 其他方法……</span>
+<span class="w">  </span><span class="c1">// 其他方法……</span>
 
 <span class="k">private</span><span class="o">:</span>
-  <span class="n">Transform</span> <span class="n">world_</span><span class="p">;</span>
-  <span class="kt">bool</span> <span class="n">dirty_</span><span class="p">;</span>
-  <span class="c1">// 其他字段……</span>
+<span class="w">  </span><span class="n">Transform</span><span class="w"> </span><span class="n">world_</span><span class="p">;</span>
+<span class="w">  </span><span class="kt">bool</span><span class="w"> </span><span class="n">dirty_</span><span class="p">;</span>
+<span class="w">  </span><span class="c1">// 其他字段……</span>
 <span class="p">};</span>
-</pre></div>
+</code></pre></div>
 
-
-<p><code>world_</code>字段缓存了上一次计算出来的世界变换，<code>dirty_</code>当然就是脏标识字段。
-注意标识初始为<code>true</code>。当我们创建新节点时，我们还没有计算它的世界变换。
-初始时，它与自身变换不是同步的。</p>
+<p><code>world_</code>字段缓存了上一次计算出的世界变换，<code>dirty_</code>当然就是脏标识。
+注意这个标识初始为<code>true</code>。当我们创建新节点时，还没有计算过它的世界变换。
+从一出生起，它就已经与自身变换不同步了。</p>
 <p>我们需要这个模式的唯一原因是对象可以<em>移动</em>，因此让我们添加对这点的支持：</p>
-<div class="codehilite"><pre><span></span><span class="kt">void</span> <span class="n">GraphNode</span><span class="o">::</span><span class="n">setTransform</span><span class="p">(</span><span class="n">Transform</span> <span class="n">local</span><span class="p">)</span>
+<div class="codehilite"><pre><span></span><code><span class="kt">void</span><span class="w"> </span><span class="nf">GraphNode::setTransform</span><span class="p">(</span><span class="n">Transform</span><span class="w"> </span><span class="n">local</span><span class="p">)</span>
 <span class="p">{</span>
-  <span class="n">local_</span> <span class="o">=</span> <span class="n">local</span><span class="p">;</span>
-  <span class="n">dirty_</span> <span class="o">=</span> <span class="nb">true</span><span class="p">;</span>
+<span class="w">  </span><span class="n">local_</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">local</span><span class="p">;</span>
+<span class="w">  </span><span class="n">dirty_</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">true</span><span class="p">;</span>
 <span class="p">}</span>
-</pre></div>
-
+</code></pre></div>
 
 <p>这里重要的部分是同时设置脏标识。我们忘了什么吗？是的——子节点！</p>
-<p>当父节点移动时，它所有子节点的世界坐标也改变了。
-但是这里，我们不设置它们的脏标识。
-我们<em>可以</em>那样做，但是那要递归，很缓慢。我们可以在渲染时做点更聪明的事。让我们看看：</p>
+<p>当父节点移动时，它所有子节点的世界坐标也都失效了。
+但这里我们不设置它们的脏标识。
+我们<em>可以</em>那样做，但那要递归，而且很慢。改为在渲染时做点更聪明的事。让我们看看：</p>
 <p><span name="branch"></span></p>
-<div class="codehilite"><pre><span></span><span class="kt">void</span> <span class="n">GraphNode</span><span class="o">::</span><span class="n">render</span><span class="p">(</span><span class="n">Transform</span> <span class="n">parentWorld</span><span class="p">,</span> <span class="kt">bool</span> <span class="n">dirty</span><span class="p">)</span>
+<div class="codehilite"><pre><span></span><code><span class="kt">void</span><span class="w"> </span><span class="nf">GraphNode::render</span><span class="p">(</span><span class="n">Transform</span><span class="w"> </span><span class="n">parentWorld</span><span class="p">,</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="n">dirty</span><span class="p">)</span>
 <span class="p">{</span>
-  <span class="n">dirty</span> <span class="o">|=</span> <span class="n">dirty_</span><span class="p">;</span>
-  <span class="k">if</span> <span class="p">(</span><span class="n">dirty</span><span class="p">)</span>
-  <span class="p">{</span>
-    <span class="n">world_</span> <span class="o">=</span> <span class="n">local_</span><span class="p">.</span><span class="n">combine</span><span class="p">(</span><span class="n">parentWorld</span><span class="p">);</span>
-    <span class="n">dirty_</span> <span class="o">=</span> <span class="nb">false</span><span class="p">;</span>
-  <span class="p">}</span>
+<span class="w">  </span><span class="n">dirty</span><span class="w"> </span><span class="o">|=</span><span class="w"> </span><span class="n">dirty_</span><span class="p">;</span>
+<span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">dirty</span><span class="p">)</span>
+<span class="w">  </span><span class="p">{</span>
+<span class="w">    </span><span class="n">world_</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">local_</span><span class="p">.</span><span class="n">combine</span><span class="p">(</span><span class="n">parentWorld</span><span class="p">);</span>
+<span class="w">    </span><span class="n">dirty_</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">false</span><span class="p">;</span>
+<span class="w">  </span><span class="p">}</span>
 
-  <span class="k">if</span> <span class="p">(</span><span class="n">mesh_</span><span class="p">)</span> <span class="n">renderMesh</span><span class="p">(</span><span class="n">mesh_</span><span class="p">,</span> <span class="n">world_</span><span class="p">);</span>
+<span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">mesh_</span><span class="p">)</span><span class="w"> </span><span class="n">renderMesh</span><span class="p">(</span><span class="n">mesh_</span><span class="p">,</span><span class="w"> </span><span class="n">world_</span><span class="p">);</span>
 
-  <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">numChildren_</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span>
-  <span class="p">{</span>
-    <span class="n">children_</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">-&gt;</span><span class="n">render</span><span class="p">(</span><span class="n">world_</span><span class="p">,</span> <span class="n">dirty</span><span class="p">);</span>
-  <span class="p">}</span>
+<span class="w">  </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">numChildren_</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span>
+<span class="w">  </span><span class="p">{</span>
+<span class="w">    </span><span class="n">children_</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">-&gt;</span><span class="n">render</span><span class="p">(</span><span class="n">world_</span><span class="p">,</span><span class="w"> </span><span class="n">dirty</span><span class="p">);</span>
+<span class="w">  </span><span class="p">}</span>
 <span class="p">}</span>
-</pre></div>
-
+</code></pre></div>
 
 <aside name="branch">
-<p>这里有一个微妙的假设：<code>if</code>检查比矩阵乘法快。直观上，你当然会这么想，检测一位当然比一堆浮点计算要快。</p>
-<p>但是，现代CPU超级复杂。它们严重依赖于<em>流水线</em>——入队的一系列连续指令。
-像我们这里的<code>if</code>造成的分支会引发<em>分支预测失败</em>，强迫CPU消耗周期在填满流水线上。</p>
-<p><a href="data-locality.html" class="pattern">数据局部性</a>一章有更多现代CPU是如何试图加快运行的细节，
-以及如何避免这样颠簸它们。</p>
+<p>这里有一个微妙的假设：<code>if</code>检查比矩阵乘法快。直觉上你会这么想；测试单个位当然比一堆浮点运算要快。</p>
+<p>然而，现代CPU极其复杂。它们严重依赖<em>流水线</em>——把一系列顺序指令排成队列。
+像我们这里的<code>if</code>这样的分支可能会引发<em>分支预测失败</em>，迫使CPU损失周期去重新填充流水线。</p>
+<p><a href="data-locality.html" class="pattern">数据局部性</a>一章有更多关于现代CPU如何尝试跑得更快、
+以及如何避免让它们这样栽跟头的内容。</p>
 </aside>
-<p>这与原先的原始实现很相似。
-关键改变是我们在计算世界变换之前去检查节点是不是脏的，然后将结果存在字段中而不是本地变量中。
-如果节点是干净的，我们完全跳过了<code>combine()</code>，使用老的但是正确的<code>world_</code>值。</p>
+<p>这与原来那个朴素的实现很相似。
+关键变化在于：我们在计算世界变换之前先检查节点是否是脏的，并把结果存到字段而不是局部变量里。
+当节点是干净的，我们就完全跳过<code>combine()</code>，直接使用旧的但仍然正确的<code>world_</code>值。</p>
 <p><span name="clever"></span></p>
-<p>这里的技巧是<code>dirty</code>参数。
-如果父节点链上有任何节点是脏的，那么就是<code>true</code>。
-当我们顺着层次遍历下来时，<code>parentWorld</code>用同样的方式更新它的世界变换，<code>dirty</code>追踪父节点链是否有脏。</p>
-<p>这让我们避免递归地调用<code>setTransform()</code>标注每个子节点的<code>dirty_</code>标识。
-相反，我们在渲染时将父节点的脏标识传递给子节点，然后看看是否需要重新计算它的世界变换。</p>
-<p>这里的结果正是我们需要的：
-改变节点的自身变换只是一些声明，渲染世界时只计算从上一帧以来所需的最小数量的世界变换。</p>
+<p>巧妙之处在于那个<code>dirty</code>参数。
+如果父链中位于本节点之上的任何节点是脏的，它就会是<code>true</code>。
+正如<code>parentWorld</code>在我们顺着层次向下遍历时增量地更新世界变换一样，<code>dirty</code>追踪的是父链的脏状态。</p>
+<p>这让我们不必在<code>setTransform()</code>里递归地标记每个子节点的<code>dirty_</code>标识。
+相反，渲染时我们把父节点的脏标识向下传给它的子节点，并同时检查它，以判断是否需要重新计算世界变换。</p>
+<p>这里的结果正是我们想要的：
+改变节点的自身变换只是几次赋值，而渲染世界时，只计算自上一帧以来发生变化的世界变换，而且数量恰好最少。</p>
 <aside name="clever">
-<p>注意这个技巧能有用是因为<code>render()</code>是<code>GraphNode</code>中<em>唯一</em>需要最新世界变换的东西。
-如果其他东西也要获取，我们就得做点不同的事。</p>
+<p>注意，这个巧妙技巧之所以有效，是因为<code>render()</code>是<code>GraphNode</code>中<em>唯一</em>需要最新世界变换的东西。
+如果还有其他东西访问它，我们就得另想办法。</p>
 </aside>
 <h2><a href="#设计决策" name="设计决策">设计决策</a></h2>
-<p>这种模式非常具体，所以只需注意几点：</p>
+<p>这个模式相当具体，所以能拧的旋钮只有那么几个：</p>
 <h3><a href="#什么时候清空脏标识？" name="什么时候清空脏标识？">什么时候清空脏标识？</a></h3>
 <ul>
 <li>
 <p><strong>当结果被请求时：</strong></p>
 <ul>
 <li>
-<p><em>如果不需要结果，可以完全避免计算。</em>
-  如果原始数据变化的速度比推导数据获取的速度快得多，这效果很明显。</p>
+<p><em>如果结果永远不会被用到，就能完全避免计算。</em>
+  如果原始数据的变化频率远高于导出数据的访问频率，这会是一个很大的胜利。</p>
 </li>
 <li>
-<p><em>如果计算消耗大量时间，这会造成可察觉的卡顿。</em>
-  将工作推迟到玩家想要结果的时候会严重影响游戏体验。
-  这部分工作一般足够快，不会构成问题，但是如果构成问题，你就需要提前做这些工作。</p>
+<p><em>如果计算很耗时，可能造成可察觉的卡顿。</em>
+  把工作推迟到玩家期待看到结果的时候，会影响他们的游戏体验。
+  它通常足够快，不会成为问题，但如果确实成了问题，你就得提前完成这些工作。</p>
 </li>
 </ul>
 </li>
 <li>
 <p><strong>在精心设计的检查点处：</strong></p>
-<p>有时候，会有某个时间点适合这么做，或在游戏过程中某个自然适合处理推迟计算的时机去做。
-例如，只有海盗船驶入港口才会去保存游戏。
-如果同步点不是游戏的机制，我们会将这些工作隐藏在加载画面或者过场动画之后。</p>
+<p>有时候，在时间上或在游戏进程中，会有一个天然的时机适合做这些延迟处理。
+例如，我们可能只想在海盗船驶入港口时才保存游戏。
+或者，同步点可能并不属于游戏机制本身，我们只是想把这些工作隐藏在加载画面或过场动画之后。</p>
 <ul>
 <li>
-<p><em>这种工作不会影响到玩家体验。</em>
-  不像前一个选项，你总会在游戏紧张运行时打断玩家的注意力。</p>
+<p><em>做这些工作不会影响用户体验。</em>
+  与上一个选项不同，你通常可以在游戏忙于处理时给玩家一些东西来分散其注意力。</p>
 </li>
 <li>
-<p><em>在工作时丧失了控制权。</em>
-  这和前一个选项相反。你在处理时能进行微观控制，确保有效且优雅地处理它。</p>
-<p>你<em>不能</em>保证玩家真的到了检查点或者满足了定义的条件。
+<p><em>你会失去对工作何时进行的控制。</em>
+  这多少和前面那一点相反。你可以对何时处理进行细粒度的控制，并确保游戏优雅地处理它。</p>
+<p>你<em>不能</em>保证玩家真的抵达了检查点，或者满足了你定义的任何条件。
 如果他们在游戏中迷失了，或者游戏进入了奇怪的状态，最终工作会推迟得超乎预料的晚。</p>
 </li>
 </ul>
 </li>
 <li>
-<p><em>在后台处理：</em></p>
+<p><strong>在后台处理：</strong></p>
 <p><span name="hysteresis"></span></p>
 <p>通常情况下，你在第一次更改时启动固定时长的计时器，然后在计时器到时间后处理之间的所有变化。</p>
 <aside name="hysteresis">
-
-<p>在人机交互界，用术语<a href="http://en.wikipedia.org/wiki/Hysteresis"><em>hysteresis</em></a>描述程序接受用户的输入和响应之间的故意延迟。</p>
+<p>在人机交互领域，程序接收用户输入到作出响应之间这种有意为之的延迟，术语叫<a href="http://en.wikipedia.org/wiki/Hysteresis"><em>hysteresis</em></a>。</p>
 </aside>
-
 <ul>
 <li>
 <p><em>可以控制工作进行的频率。</em>
   通过调节计时器，可以保证它发生得像预期一样频繁（或者不频繁）。</p>
 </li>
 <li>
-<p><em>更多的冗余工作。</em>
-  如果原始状态在计时器运行之间只改变了很少的部分，最终处理的大部分都是没有改变的数据。</p>
+<p><em>可能做更多冗余工作。</em>
+  如果原始状态在计时器运行期间只改变了很少一点，最终你可能会处理一大块大部分都未改变的数据。</p>
 </li>
 <li>
 <p><em>需要支持异步工作。</em>
-  在“后台”处理数据意味着玩家可以同时继续做事。
-  这就意味着你将会需要线程或者其他并行支持，这样游戏在处理数据的同时仍然可以继续游玩。</p>
-<p>由于玩家很可能与处理中的状态交互，你也需要考虑保持并行修改的安全性。</p>
+  在“后台”处理数据意味着玩家可以同时继续做他们正在做的事。
+  这意味着你很可能会需要线程或其他并发支持，好让游戏在数据被处理的同时仍然可以继续游玩。</p>
+<p>由于玩家很可能正在与你处理的同一个原始状态交互，你还需要考虑让并发修改变得安全。</p>
 </li>
 </ul>
 </li>
 </ul>
 <h3><a href="#脏追踪的粒度有多细？" name="脏追踪的粒度有多细？">脏追踪的粒度有多细？</a></h3>
-<p>假设我们的海盗游戏允许玩家建造并个性化自己的船。
-船在线时会自动保存，这样玩家可以在离线后重新恢复。
-我们使用脏标识记录船的哪块甲板被修改了并需要发送到服务器。
-每一块发送给服务器的数据都包括了修改的数据和一些描述改动发生在何处的元数据。</p>
+<p>想象我们的海盗游戏允许玩家建造并定制自己的海盗船。
+船会自动在线保存，这样玩家就能从上次停下的地方继续游戏。
+我们使用脏标识来判断船的哪些甲板经过改装、需要发送到服务器。
+我们发送给服务器的每一块数据，都包含一些修改过的船只数据，以及一小段描述这次改动发生在船上哪个位置的元数据。</p>
 <ul>
 <li>
 <p><strong>如果粒度更细：</strong></p>
-<p>假设你为甲板上的每个小木板都拍上一个脏标识。</p>
+<p>假设你在每块甲板的每一小块木板上都随手贴一个脏标识。</p>
 <ul>
 <li><em>你只需处理真正改变的数据。</em>
-  你只将船上修改了的数据发送到服务器。</li>
+  你只把船上被修改过的那些部分发送到服务器。</li>
 </ul>
 </li>
 <li>
@@ -540,24 +529,22 @@ delete the font style for english.
 <p><span name="swab"></span></p>
 <p>或者，我们可以为每层甲板关联一个脏标识。改变它上面的任何东西都会让整个甲板变脏。</p>
 <aside name="swab">
-
-<p>我可以说些这里不合时宜的糟糕笑话，但我克制住了。</p>
+<p>我本可以在这里开一个关于甲板需要擦洗的烂笑话，但我忍住了。</p>
 </aside>
-
 <ul>
 <li>
-<p><em>最终需要处理没有变化的数据。</em>
-  在甲板上添加一个桶，就要将整层甲板发送到服务器。</p>
+<p><em>最终会处理未变化的数据。</em>
+  在甲板上添加一个桶，就得把整层甲板发送到服务器。</p>
 </li>
 <li>
-<p><em>用在存储脏标识上的内存更少。</em>
-  为甲板上添加十个桶只需要一位来追踪。</p>
+<p><em>存储脏标识所用的内存更少。</em>
+  往甲板上添加十个桶，也只需要一位来追踪它们全部。</p>
 </li>
 <li>
-<p><em>固定开销花费的时间更少。</em>
-  当处理某些修改后的数据时，通常处理数据之前有些固定的工作要做。
-  在这个例子中，是确认船上改动在哪里的元数据。
-  处理的块越大，那么要处理的数量就越少，这就意味着有更小的开销。</p>
+<p><em>花在固定开销上的时间更少。</em>
+  处理某些修改过的数据时，除了处理数据本身，通常还要做一点固定的工作。
+  在这个例子里，就是用来标识改动发生在船上哪个位置的元数据。
+  你处理的块越大，块的数量就越少，也就意味着开销越小。</p>
 </li>
 </ul>
 </li>
@@ -565,13 +552,13 @@ delete the font style for english.
 <h2><a href="#参见" name="参见">参见</a></h2>
 <ul>
 <li>
-<p>在游戏之外，这个模式在像<a href="http://angularjs.org/">Angular</a>的浏览器方向框架中是很常见的。
-  它们使用脏标识来追踪哪个数据在浏览器中被改变了，需要将其推向服务器。</p>
+<p>在游戏之外，这个模式在像<a href="http://angularjs.org/">Angular</a>这样的浏览器端Web框架中也很常见。
+  它们使用脏标识来追踪浏览器中哪些数据被修改过、需要推送到服务器。</p>
 </li>
 <li>
-<p>物理引擎追踪哪些对象在运动中哪些在休息。
-  由于休息的骨骼直到有力施加在上面才会移动，在被碰到时才会需要处理。
-  “正在移动”就是一个脏标识，标注哪个对象上面有力施加并需要物理解析。</p>
+<p>物理引擎追踪哪些对象在运动、哪些在静止。
+  由于静止的刚体在受到冲量之前不会移动，所以它们在被碰到之前不需要处理。
+  这个“正在移动”位就是一个脏标识，用来标记哪些对象受到了力并需要求解其物理状态。</p>
 </li>
 </ul>
 <nav>

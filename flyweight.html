@@ -85,356 +85,345 @@ delete the font style for english.
 </nav>
 <h1>享元模式</h1>
 <h1 class="book"><a href="/">游戏设计模式</a><span class="section"><a href="design-patterns-revisited.html">Design Patterns Revisited</a></span></h1>
-<p>迷雾散尽，露出了古朴庄严的森林。古老的铁杉，在头顶编成绿色穹顶。
-阳光在树叶间破碎成金色顶棚。从树干间远眺，远处的森林渐渐隐去。</p>
-<p>这是我们游戏开发者梦想的超凡场景，这样的场景通常由一个模式支撑着，它的名字低调至极：享元模式。</p>
-<h2><a href="#森林" name="森林">森林</a></h2>
-<p>用几句话就能描述一片巨大的森林，但是在实时游戏中做这件事就完全是另外一件事了。
-当屏幕上需要显示一整个森林时，图形程序员看到的是每秒需要送到GPU六十次的百万多边形。</p>
-<p>我们讨论的是成千上万的树，每棵都由上千的多边形组成。
-就算有足够的<em>内存</em>描述森林，渲染的过程中，CPU到GPU的部分也太过繁忙了。</p>
-<p>每棵树都有一系列与之相关的位：</p>
+<p>迷雾散尽，露出了一片壮丽的原始森林。数不清的古老铁杉高耸在头顶，
+交织成一座绿色的大教堂。树叶如同彩色玻璃般的天篷，把阳光打碎成一缕缕金色的雾中光柱。
+透过巨大的树干，你能辨认出广袤的森林一直延伸到远方。</p>
+<p>这是我们作为游戏开发者所梦想的那种超脱尘世的场景，而这样的场景往往离不开一个名字再朴素不过的模式：低调的享元模式。</p>
+<h2><a href="#见树又见林" name="见树又见林">见树又见林</a></h2>
+<p>我用几句话就能描述一片绵延的林地，但在实时游戏中真正<em>实现</em>它就是另一回事了。
+当屏幕上要填满一整片由独立树木组成的森林时，图形程序员看到的只有数百万个多边形——
+他们得想办法每六十分之一秒就把它们铲进GPU。</p>
+<p>我们说的可是成千上万棵树，每棵树都有包含上千个多边形的精细几何体。
+就算你有足够的<em>内存</em>来描述这片森林，要渲染它，这些数据还得通过总线从CPU传到GPU。</p>
+<p>每棵树都关联着一堆数据：</p>
 <ul>
-<li>定义树干，树枝和树叶形状的多边形网格。</li>
+<li>定义树干、树枝和树叶形状的多边形网格。</li>
 <li>树皮和树叶的纹理。</li>
-<li>在森林中树的位置和朝向。</li>
-<li>大小和色彩之类的调节参数，让每棵树都看起来与众不同。</li>
+<li>它在森林中的位置和朝向。</li>
+<li>大小和色彩之类的调节参数，让每棵树看起来都与众不同。</li>
 </ul>
 <p>如果用代码表示，那么会得到这样的东西：</p>
-<div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">Tree</span>
+<div class="codehilite"><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Tree</span>
 <span class="p">{</span>
 <span class="k">private</span><span class="o">:</span>
-  <span class="n">Mesh</span> <span class="n">mesh_</span><span class="p">;</span>
-  <span class="n">Texture</span> <span class="n">bark_</span><span class="p">;</span>
-  <span class="n">Texture</span> <span class="n">leaves_</span><span class="p">;</span>
-  <span class="n">Vector</span> <span class="n">position_</span><span class="p">;</span>
-  <span class="kt">double</span> <span class="n">height_</span><span class="p">;</span>
-  <span class="kt">double</span> <span class="n">thickness_</span><span class="p">;</span>
-  <span class="n">Color</span> <span class="n">barkTint_</span><span class="p">;</span>
-  <span class="n">Color</span> <span class="n">leafTint_</span><span class="p">;</span>
+<span class="w">  </span><span class="n">Mesh</span><span class="w"> </span><span class="n">mesh_</span><span class="p">;</span>
+<span class="w">  </span><span class="n">Texture</span><span class="w"> </span><span class="n">bark_</span><span class="p">;</span>
+<span class="w">  </span><span class="n">Texture</span><span class="w"> </span><span class="n">leaves_</span><span class="p">;</span>
+<span class="w">  </span><span class="n">Vector</span><span class="w"> </span><span class="n">position_</span><span class="p">;</span>
+<span class="w">  </span><span class="kt">double</span><span class="w"> </span><span class="n">height_</span><span class="p">;</span>
+<span class="w">  </span><span class="kt">double</span><span class="w"> </span><span class="n">thickness_</span><span class="p">;</span>
+<span class="w">  </span><span class="n">Color</span><span class="w"> </span><span class="n">barkTint_</span><span class="p">;</span>
+<span class="w">  </span><span class="n">Color</span><span class="w"> </span><span class="n">leafTint_</span><span class="p">;</span>
 <span class="p">};</span>
-</pre></div>
+</code></pre></div>
 
-
-<p>这是一大堆数据，多边形网格和纹理体积非常大。
-描述整个森林的对象在一帧的时间就交给GPU实在是太过了。
-幸运的是，有一种老办法来处理它。</p>
-<p>关键点在于，哪怕森林里有千千万万的树，它们大多数长得一模一样。
-它们使用了<span name="same">相同的</span>网格和纹理。
-这意味着这些树的实例的大部分字段是<em>一样的</em>。</p>
+<p>这是很大的一堆数据，网格和纹理尤其大。
+要把由这些对象构成的一整片森林在一帧之内丢给GPU，实在太多了。
+幸运的是，有一个久经考验的诀窍来处理它。</p>
+<p>关键在于，尽管森林里可能有成千上万棵树，它们大多看上去很相似。
+它们很可能都使用<span name="same">相同的</span>网格和纹理。
+这意味着这些对象的大部分字段在所有实例之间都是<em>相同的</em>。</p>
 <aside name="same">
-<p>你要么是疯了，要么是亿万富翁，才能让美术给森林里每棵树建立独立模型。</p>
+<p>除非你是疯子或亿万富翁，才会让美术为整片森林里的每棵树都单独建模。</p>
 </aside>
 <p><span name="trees"></span></p>
 <p><img src="images/flyweight-trees.png" alt="一行树，每棵都有自己的网格、纹理、树叶，调节参数和位置朝向。" /></p>
 <aside name="trees">
-<p>注意每一棵树的小盒子中的东西都是一样的。</p>
+<p>注意，每棵树小盒子里的东西都是一样的。</p>
 </aside>
 <p><span name="type"></span>
-我们可以通过显式地将对象切为两部分来更加明确地模拟。
-第一，将树共有的数据拿出来分离到另一个类中：</p>
-<div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">TreeModel</span>
+我们可以把对象一分为二，从而显式地表达出这种共享。
+首先，把所有树木共有的数据抽出来，放进一个单独的类中：</p>
+<div class="codehilite"><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">TreeModel</span>
 <span class="p">{</span>
 <span class="k">private</span><span class="o">:</span>
-  <span class="n">Mesh</span> <span class="n">mesh_</span><span class="p">;</span>
-  <span class="n">Texture</span> <span class="n">bark_</span><span class="p">;</span>
-  <span class="n">Texture</span> <span class="n">leaves_</span><span class="p">;</span>
+<span class="w">  </span><span class="n">Mesh</span><span class="w"> </span><span class="n">mesh_</span><span class="p">;</span>
+<span class="w">  </span><span class="n">Texture</span><span class="w"> </span><span class="n">bark_</span><span class="p">;</span>
+<span class="w">  </span><span class="n">Texture</span><span class="w"> </span><span class="n">leaves_</span><span class="p">;</span>
 <span class="p">};</span>
-</pre></div>
+</code></pre></div>
 
-
-<p>游戏只需要一个这种类，
+<p>这种对象游戏里只需要一个，
 因为没有必要在内存中把相同的网格和纹理重复一千遍。
-游戏世界中每个树的实例只需有一个对这个共享<code>TreeModel</code>的<em>引用</em>。
-留在<code>Tree</code>中的是那些实例相关的数据：</p>
-<div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">Tree</span>
+游戏世界中每棵树的实例只需有一个指向这个共享<code>TreeModel</code>的<em>引用</em>。
+留在<code>Tree</code>中的是那些与实例相关的状态：</p>
+<div class="codehilite"><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Tree</span>
 <span class="p">{</span>
 <span class="k">private</span><span class="o">:</span>
-  <span class="n">TreeModel</span><span class="o">*</span> <span class="n">model_</span><span class="p">;</span>
+<span class="w">  </span><span class="n">TreeModel</span><span class="o">*</span><span class="w"> </span><span class="n">model_</span><span class="p">;</span>
 
-  <span class="n">Vector</span> <span class="n">position_</span><span class="p">;</span>
-  <span class="kt">double</span> <span class="n">height_</span><span class="p">;</span>
-  <span class="kt">double</span> <span class="n">thickness_</span><span class="p">;</span>
-  <span class="n">Color</span> <span class="n">barkTint_</span><span class="p">;</span>
-  <span class="n">Color</span> <span class="n">leafTint_</span><span class="p">;</span>
+<span class="w">  </span><span class="n">Vector</span><span class="w"> </span><span class="n">position_</span><span class="p">;</span>
+<span class="w">  </span><span class="kt">double</span><span class="w"> </span><span class="n">height_</span><span class="p">;</span>
+<span class="w">  </span><span class="kt">double</span><span class="w"> </span><span class="n">thickness_</span><span class="p">;</span>
+<span class="w">  </span><span class="n">Color</span><span class="w"> </span><span class="n">barkTint_</span><span class="p">;</span>
+<span class="w">  </span><span class="n">Color</span><span class="w"> </span><span class="n">leafTint_</span><span class="p">;</span>
 <span class="p">};</span>
-</pre></div>
-
+</code></pre></div>
 
 <p>你可以将其想象成这样：</p>
 <p><img src="images/flyweight-tree-model.png" alt="一行树，每个都有自己的参数和位置朝向，指向另一个有网格、纹理、树叶的树模型。" /></p>
 <aside name="type">
-<p>这有点像<a href="type-object.html" class="pattern">类型对象</a>模式。
-两者都涉及将一个类中的状态委托给另外的类，来达到在不同实例间分享状态的目的。
+<p>这很像<a href="type-object.html" class="pattern">类型对象</a>模式。
+两者都涉及把对象的一部分状态委托给另一个对象，从而在多个实例之间共享这部分状态。
 但是，这两种模式背后的意图不同。</p>
-<p>使用类型对象，目标是通过将类型引入对象模型，减少需要定义的类。
-伴随而来的内容分享是额外的好处。享元模式则是纯粹的为了效率。</p>
+<p>使用类型对象时，目标是通过把“类型”提升到自己的对象模型中，来尽量减少需要定义的类。
+随之而来的内存共享只是额外的好处。享元模式则纯粹是为了效率。</p>
 </aside>
-<p>把所有的东西都存在主存里没什么问题，但是这对渲染也毫无帮助。
-在森林到屏幕上之前，它得先到GPU。我们需要用显卡可以识别的方式共享数据。</p>
+<p>这一切对于把数据存进主内存来说固然很好，但对渲染毫无帮助。
+在森林出现在屏幕之前，它得先到达GPU。我们需要以显卡能理解的方式来表达这种资源共享。</p>
 <h2><a href="#一千个实例" name="一千个实例">一千个实例</a></h2>
-<p>为了减少需要推送到GPU的数据量，我们想把共享的数据——<code>TreeModel</code>——只发送<em>一次</em>。
-然后，我们分别发送每个树独特的数据——位置，颜色，大小。
-最后，我们告诉GPU，“使用同一模型渲染每个实例”。</p>
+<p>为了尽量减少推送到GPU的数据量，我们希望共享的数据——<code>TreeModel</code>——只需要发送<em>一次</em>。
+然后，再分别发送每个树实例独有的数据——它的位置、颜色和缩放。
+最后，告诉GPU：“用那一个模型渲染这些实例中的每一个。”</p>
 <p><span name="hardware"></span>
-幸运的是，今日的图形接口和显卡正好支持这一点。
-这些细节很繁琐且超出了这部书的范围，但是Direct3D和OpenGL都可以做<a href="http://en.wikipedia.org/wiki/Geometry_instancing"><em>实例渲染</em></a>。</p>
-<p>在这些API中，你需要提供两部分数据流。
-第一部分是一块需要渲染多次的共同数据——在例子中是树的网格和纹理。
-第二部分是实例的列表以及绘制第一部分时需要使用的参数。
-然后调用一次渲染，绘制整个森林。</p>
+幸运的是，如今的图形API和显卡正好支持这一点。
+细节很琐碎，也超出了本书的范围，但Direct3D和OpenGL都支持一种叫做<a href="http://en.wikipedia.org/wiki/Geometry_instancing"><em>实例渲染</em></a>的技术。</p>
+<p>在这两种API中，你都要提供两路数据流。
+第一路是要被渲染多次的公共数据块——在我们这个关于树的例子中就是网格和纹理。
+第二路是实例及其参数的列表，每次绘制时用它们来让第一块数据产生变化。
+只需一次绘制调用，整片森林就长出来了。</p>
 <aside name="hardware">
-<p>这个API是由显卡直接实现的，意味着享元模式也许是唯一的有硬件支持的GoF设计模式。</p>
+<p>这个API由显卡直接实现，这意味着享元模式可能是唯一拥有实际硬件支持的GoF设计模式。</p>
 </aside>
 <h2><a href="#享元模式" name="享元模式">享元模式</a></h2>
-<p>好了，我们已经看了一个具体的例子，下面我介绍模式的通用部分。
-享元，就像它的名字暗示的那样，
-当你需要共享类时使用，通常是因为你有太多这种类了。</p>
-<p>实例渲染时，每棵树通过总线送到GPU消耗的更多是<em>时间</em>而非内存，但是基本要点是一样的。</p>
-<p>这个模式通过将对象的数据分为两种来解决这个问题。
-第一种数据没有特定指明是哪个对象的<em>实例</em>，因此可以在它们间分享。
-Gof称之为<em>固有</em>状态，但是我更喜欢将其视为“上下文无关”部分。
-在这里的例子中，是树的网格和纹理。</p>
-<p>数据的剩余部分是<em>变化</em>状态，那些每个实例独一无二的东西。
-在这个例子中，是每棵树的位置，拉伸和颜色。
-就像这里的示例代码块一样，这种模式通过在每个对象出现时共享一份固有状态来节约内存。</p>
-<p>就目前而言，这看上去像是基础的资源共享，很难被称为一种模式。
-部分原因是在这个例子中，我们可以为共享状态划出一个清晰的<em>身份</em>：<code>TreeModel</code>。</p>
-<p>我发现，当共享对象没有有效定义的实体时，使用这种模式就不那么明显（使用它也就越发显得精明）。
-在那些情况下，这看上去是一个对象被魔术般地同时分配到了多个地方。
-让我展示给你另外一个例子。</p>
+<p>好，我们已经掌握了一个具体例子，下面带你过一遍这个模式的一般形式。
+享元，顾名思义，会在对象需要变得更轻量时派上用场——
+通常是因为对象数量太多了。</p>
+<p>在使用实例渲染时，问题与其说是它们占用了太多内存，不如说是把每棵独立的树通过总线送到GPU花了太多<em>时间</em>，但基本思路是一样的。</p>
+<p>这个模式通过把对象的数据分成两类来解决这个问题。
+第一类数据并不专属于对象的某一个<em>实例</em>，可以在所有实例之间共享。
+GoF把它叫做<em>内在</em>状态，不过我更喜欢把它想成“与上下文无关”的东西。
+在这个例子里，就是树的几何体和纹理。</p>
+<p>剩下的数据是<em>外在</em>状态，即每个实例所独有的东西。
+在这个例子里，就是每棵树的位置、缩放和颜色。
+正如上面的示例代码块那样，这种模式通过在对象出现的每个地方共享同一份内在状态来节省内存。</p>
+<p>就我们目前所见，这看上去像是基本的资源共享，几乎不配被称为一种模式。
+部分原因在于，这个例子里我们可以为共享状态找出一个清晰独立的<em>身份</em>：<code>TreeModel</code>。</p>
+<p>我发现，当共享对象没有一个定义清晰的身份时，这个模式就没那么显而易见（因而也就更巧妙）。
+在那些情况下，感觉更像是一个对象神奇地同时存在于多个地方。
+让我再给你看一个例子。</p>
 <h2><a href="#扎根之所" name="扎根之所">扎根之所</a></h2>
-<p>这些树长出来的地方也需要在游戏中表示。
-这里可能有草，泥土，丘陵，湖泊，河流，以及其它任何你可以想到的地形。
+<p>这些树所生长的地面也需要在我们的游戏中表示出来。
+这里可能有草、泥土、丘陵、湖泊、河流，以及其它任何你能想到的地形。
 我们<em>基于区块</em>建立地表：世界的表面被划分为由微小区块组成的巨大网格。
 每个区块都由一种地形覆盖。</p>
 <p>每种地形类型都有一系列特性会影响游戏玩法：</p>
 <ul>
-<li>决定了玩家能够多快地穿过它的移动开销。</li>
-<li>表明能否用船穿过的水域标识。</li>
+<li>决定玩家能以多快的速度穿过它的移动开销。</li>
+<li>一个标志，表明它是否是船只可以通过的水域地形。</li>
 <li>用来渲染它的纹理。</li>
 </ul>
 <p><span name="learned"></span>
-因为我们游戏程序员偏执于效率，我们不会在每个区块中保存这些状态。
-相反，一个通用的方式是为每种地形使用一个枚举。</p>
+因为我们游戏程序员对效率偏执到不行，我们绝不会把所有这些状态存进世界里的每一个区块中。
+相反，一种常见的做法是为每种地形类型使用一个枚举。</p>
 <aside name="learned">
-<p>再怎么样，我们也已经从树的例子吸取教训了。</p>
+<p>毕竟，我们已经从那些树那里吸取教训了。</p>
 </aside>
-<div class="codehilite"><pre><span></span><span class="k">enum</span> <span class="n">Terrain</span>
+<div class="codehilite"><pre><span></span><code><span class="k">enum</span><span class="w"> </span><span class="nc">Terrain</span>
 <span class="p">{</span>
-  <span class="n">TERRAIN_GRASS</span><span class="p">,</span>
-  <span class="n">TERRAIN_HILL</span><span class="p">,</span>
-  <span class="n">TERRAIN_RIVER</span>
-  <span class="c1">// 其他地形</span>
+<span class="w">  </span><span class="n">TERRAIN_GRASS</span><span class="p">,</span>
+<span class="w">  </span><span class="n">TERRAIN_HILL</span><span class="p">,</span>
+<span class="w">  </span><span class="n">TERRAIN_RIVER</span>
+<span class="w">  </span><span class="c1">// 其他地形</span>
 <span class="p">};</span>
-</pre></div>
+</code></pre></div>
 
-
-<p>然后，世界管理巨大的网格：</p>
+<p>然后，世界维护一个由它们组成的巨大网格：</p>
 <p><span name="grid"></span></p>
-<div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">World</span>
+<div class="codehilite"><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">World</span>
 <span class="p">{</span>
 <span class="k">private</span><span class="o">:</span>
-  <span class="n">Terrain</span> <span class="n">tiles_</span><span class="p">[</span><span class="n">WIDTH</span><span class="p">][</span><span class="n">HEIGHT</span><span class="p">];</span>
+<span class="w">  </span><span class="n">Terrain</span><span class="w"> </span><span class="n">tiles_</span><span class="p">[</span><span class="n">WIDTH</span><span class="p">][</span><span class="n">HEIGHT</span><span class="p">];</span>
 <span class="p">};</span>
-</pre></div>
-
+</code></pre></div>
 
 <aside name="grid">
-<p>这里我使用嵌套数组存储2D网格。
-在C/C++中这样是很有效率的，因为它会将所有元素打包在一起。
-在Java或者其他内存管理语言中，那样做会实际给你一个数组，其中每个元素都是对数组的列的<em>引用</em>，那就不像你想要的那样内存友好了。</p>
-<p>反正，隐藏2D网格数据结构背后的实现细节，能使代码更好地工作。
-我这里这样做只是为了让其保持简单。</p>
+<p>这里我用嵌套数组来存储2D网格。
+这在C/C++中很高效，因为它会把所有元素打包在一起。
+在Java或其他内存管理语言中，那样做实际上会给你一个行数组，其中每个元素都是一个指向列数组的<em>引用</em>，那样可能就不像你期望的那么内存友好了。</p>
+<p>无论哪种情况，真正的代码最好用一个良好的2D网格数据结构把这一实现细节隐藏起来。
+我在这里这么做只是为了保持简单。</p>
 </aside>
-<p>为了获得区块的实际有用的数据，我们做了一些这样的事情：</p>
-<div class="codehilite"><pre><span></span><span class="kt">int</span> <span class="n">World</span><span class="o">::</span><span class="n">getMovementCost</span><span class="p">(</span><span class="kt">int</span> <span class="n">x</span><span class="p">,</span> <span class="kt">int</span> <span class="n">y</span><span class="p">)</span>
+<p>为了真正拿到某个区块的有用数据，我们会做类似这样的事：</p>
+<div class="codehilite"><pre><span></span><code><span class="kt">int</span><span class="w"> </span><span class="nf">World::getMovementCost</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">x</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">y</span><span class="p">)</span>
 <span class="p">{</span>
-  <span class="k">switch</span> <span class="p">(</span><span class="n">tiles_</span><span class="p">[</span><span class="n">x</span><span class="p">][</span><span class="n">y</span><span class="p">])</span>
-  <span class="p">{</span>
-    <span class="k">case</span> <span class="nl">TERRAIN_GRASS</span><span class="p">:</span> <span class="k">return</span> <span class="mi">1</span><span class="p">;</span>
-    <span class="k">case</span> <span class="nl">TERRAIN_HILL</span><span class="p">:</span>  <span class="k">return</span> <span class="mi">3</span><span class="p">;</span>
-    <span class="k">case</span> <span class="nl">TERRAIN_RIVER</span><span class="p">:</span> <span class="k">return</span> <span class="mi">2</span><span class="p">;</span>
-      <span class="c1">// 其他地形……</span>
-  <span class="p">}</span>
+<span class="w">  </span><span class="k">switch</span><span class="w"> </span><span class="p">(</span><span class="n">tiles_</span><span class="p">[</span><span class="n">x</span><span class="p">][</span><span class="n">y</span><span class="p">])</span>
+<span class="w">  </span><span class="p">{</span>
+<span class="w">    </span><span class="k">case</span><span class="w"> </span><span class="no">TERRAIN_GRASS</span><span class="p">:</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span>
+<span class="w">    </span><span class="k">case</span><span class="w"> </span><span class="no">TERRAIN_HILL</span><span class="p">:</span><span class="w">  </span><span class="k">return</span><span class="w"> </span><span class="mi">3</span><span class="p">;</span>
+<span class="w">    </span><span class="k">case</span><span class="w"> </span><span class="no">TERRAIN_RIVER</span><span class="p">:</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="mi">2</span><span class="p">;</span>
+<span class="w">      </span><span class="c1">// 其他地形……</span>
+<span class="w">  </span><span class="p">}</span>
 <span class="p">}</span>
 
-<span class="kt">bool</span> <span class="n">World</span><span class="o">::</span><span class="n">isWater</span><span class="p">(</span><span class="kt">int</span> <span class="n">x</span><span class="p">,</span> <span class="kt">int</span> <span class="n">y</span><span class="p">)</span>
+<span class="kt">bool</span><span class="w"> </span><span class="nf">World::isWater</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">x</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">y</span><span class="p">)</span>
 <span class="p">{</span>
-  <span class="k">switch</span> <span class="p">(</span><span class="n">tiles_</span><span class="p">[</span><span class="n">x</span><span class="p">][</span><span class="n">y</span><span class="p">])</span>
-  <span class="p">{</span>
-    <span class="k">case</span> <span class="nl">TERRAIN_GRASS</span><span class="p">:</span> <span class="k">return</span> <span class="nb">false</span><span class="p">;</span>
-    <span class="k">case</span> <span class="nl">TERRAIN_HILL</span><span class="p">:</span>  <span class="k">return</span> <span class="nb">false</span><span class="p">;</span>
-    <span class="k">case</span> <span class="nl">TERRAIN_RIVER</span><span class="p">:</span> <span class="k">return</span> <span class="nb">true</span><span class="p">;</span>
-      <span class="c1">// 其他地形……</span>
-  <span class="p">}</span>
+<span class="w">  </span><span class="k">switch</span><span class="w"> </span><span class="p">(</span><span class="n">tiles_</span><span class="p">[</span><span class="n">x</span><span class="p">][</span><span class="n">y</span><span class="p">])</span>
+<span class="w">  </span><span class="p">{</span>
+<span class="w">    </span><span class="k">case</span><span class="w"> </span><span class="no">TERRAIN_GRASS</span><span class="p">:</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="nb">false</span><span class="p">;</span>
+<span class="w">    </span><span class="k">case</span><span class="w"> </span><span class="no">TERRAIN_HILL</span><span class="p">:</span><span class="w">  </span><span class="k">return</span><span class="w"> </span><span class="nb">false</span><span class="p">;</span>
+<span class="w">    </span><span class="k">case</span><span class="w"> </span><span class="no">TERRAIN_RIVER</span><span class="p">:</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="nb">true</span><span class="p">;</span>
+<span class="w">      </span><span class="c1">// 其他地形……</span>
+<span class="w">  </span><span class="p">}</span>
 <span class="p">}</span>
-</pre></div>
+</code></pre></div>
 
-
-<p>你知道我的意思了。这可行，但是我觉得很丑。
-移动开销和水域标识是区块的<em>数据</em>，但在这里它们散布在代码中。
-更糟的是，简单地形的数据被众多方法拆开了。
-如果能够将这些包裹起来就好了。毕竟，那是我们设计对象的目的。</p>
-<p>如果我们有实际的地形<em>类</em>就好了，像这样：</p>
+<p>你明白我的意思了。这能行，但我觉得它很丑。
+我把移动开销和湿润度看作是关于地形的<em>数据</em>，但在这里它们被硬编码在了代码中。
+更糟的是，单一地形类型的数据散落在一堆方法里。
+如果能把所有这些封装在一起就好了。毕竟，对象正是为此而设计的。</p>
+<p>如果我们能有一个真正的地形<em>类</em>就好了，像这样：</p>
 <p><span name="const"></span></p>
-<div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">Terrain</span>
+<div class="codehilite"><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Terrain</span>
 <span class="p">{</span>
 <span class="k">public</span><span class="o">:</span>
-  <span class="n">Terrain</span><span class="p">(</span><span class="kt">int</span> <span class="n">movementCost</span><span class="p">,</span>
-          <span class="kt">bool</span> <span class="n">isWater</span><span class="p">,</span>
-          <span class="n">Texture</span> <span class="n">texture</span><span class="p">)</span>
-  <span class="o">:</span> <span class="n">movementCost_</span><span class="p">(</span><span class="n">movementCost</span><span class="p">),</span>
-    <span class="n">isWater_</span><span class="p">(</span><span class="n">isWater</span><span class="p">),</span>
-    <span class="n">texture_</span><span class="p">(</span><span class="n">texture</span><span class="p">)</span>
-  <span class="p">{}</span>
+<span class="w">  </span><span class="n">Terrain</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">movementCost</span><span class="p">,</span>
+<span class="w">          </span><span class="kt">bool</span><span class="w"> </span><span class="n">isWater</span><span class="p">,</span>
+<span class="w">          </span><span class="n">Texture</span><span class="w"> </span><span class="n">texture</span><span class="p">)</span>
+<span class="w">  </span><span class="o">:</span><span class="w"> </span><span class="n">movementCost_</span><span class="p">(</span><span class="n">movementCost</span><span class="p">),</span>
+<span class="w">    </span><span class="n">isWater_</span><span class="p">(</span><span class="n">isWater</span><span class="p">),</span>
+<span class="w">    </span><span class="n">texture_</span><span class="p">(</span><span class="n">texture</span><span class="p">)</span>
+<span class="w">  </span><span class="p">{}</span>
 
-  <span class="kt">int</span> <span class="n">getMovementCost</span><span class="p">()</span> <span class="k">const</span> <span class="p">{</span> <span class="k">return</span> <span class="n">movementCost_</span><span class="p">;</span> <span class="p">}</span>
-  <span class="kt">bool</span> <span class="n">isWater</span><span class="p">()</span> <span class="k">const</span> <span class="p">{</span> <span class="k">return</span> <span class="n">isWater_</span><span class="p">;</span> <span class="p">}</span>
-  <span class="k">const</span> <span class="n">Texture</span><span class="o">&amp;</span> <span class="n">getTexture</span><span class="p">()</span> <span class="k">const</span> <span class="p">{</span> <span class="k">return</span> <span class="n">texture_</span><span class="p">;</span> <span class="p">}</span>
+<span class="w">  </span><span class="kt">int</span><span class="w"> </span><span class="n">getMovementCost</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="n">movementCost_</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
+<span class="w">  </span><span class="kt">bool</span><span class="w"> </span><span class="n">isWater</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="n">isWater_</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
+<span class="w">  </span><span class="k">const</span><span class="w"> </span><span class="n">Texture</span><span class="o">&amp;</span><span class="w"> </span><span class="n">getTexture</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="n">texture_</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
 
 <span class="k">private</span><span class="o">:</span>
-  <span class="kt">int</span> <span class="n">movementCost_</span><span class="p">;</span>
-  <span class="kt">bool</span> <span class="n">isWater_</span><span class="p">;</span>
-  <span class="n">Texture</span> <span class="n">texture_</span><span class="p">;</span>
+<span class="w">  </span><span class="kt">int</span><span class="w"> </span><span class="n">movementCost_</span><span class="p">;</span>
+<span class="w">  </span><span class="kt">bool</span><span class="w"> </span><span class="n">isWater_</span><span class="p">;</span>
+<span class="w">  </span><span class="n">Texture</span><span class="w"> </span><span class="n">texture_</span><span class="p">;</span>
 <span class="p">};</span>
-</pre></div>
-
+</code></pre></div>
 
 <aside name="const">
-<p>你会注意这里所有的方法都是<code>const</code>。这不是巧合。
-由于同一对象在多处引用，如果你修改了它，
-改变会同时在多个地方出现。</p>
-<p>这也许不是你想要的。
-通过分享对象来节约内存的这种优化，不应该影响到应用的显性行为。
+<p>你会注意到这里所有的方法都是<code>const</code>。这不是巧合。
+由于同一个对象被用在多个上下文中，如果你修改它，
+改动会同时出现在多个地方。</p>
+<p>这多半不是你想要的。
+通过共享对象来节省内存应该是一种优化，而不应该影响应用的可见行为。
 因此，享元对象几乎总是不可变的。</p>
 </aside>
-<p>但是我们不想为每个区块都保存一个实例。
-如果你看看这个类内部，你会发现里面实际上<em>什么也没有</em>，
-唯一特别的是区块在<em>哪里</em>。
-用享元的术语讲，区块的<em>所有</em>状态都是“固有的”或者说“上下文无关的”。</p>
-<p>鉴于此，我们没有必要保存多个同种地形类型。
-地面上的草区块两两无异。
-我们不用地形区块对象枚举构成世界网格，而是用<code>Terrain</code>对象<em>指针</em>组成网格：</p>
-<div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">World</span>
+<p>但我们不想为世界里的每个区块都负担一个实例的开销。
+如果你看看这个类的内部，会发现里面实际上<em>没有任何</em>与区块在<em>哪里</em>有关的东西。
+用享元的术语来说，地形的<em>所有</em>状态都是“内在的”，或者说“与上下文无关的”。</p>
+<p>既然如此，每种地形类型都没有理由存在多于一个实例。
+地面上每个草区块都与其它草区块完全相同。
+世界不再是由枚举或<code>Terrain</code>对象组成的网格，而是由指向<code>Terrain</code>对象的<em>指针</em>组成的网格：</p>
+<div class="codehilite"><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">World</span>
 <span class="p">{</span>
 <span class="k">private</span><span class="o">:</span>
-  <span class="n">Terrain</span><span class="o">*</span> <span class="n">tiles_</span><span class="p">[</span><span class="n">WIDTH</span><span class="p">][</span><span class="n">HEIGHT</span><span class="p">];</span>
+<span class="w">  </span><span class="n">Terrain</span><span class="o">*</span><span class="w"> </span><span class="n">tiles_</span><span class="p">[</span><span class="n">WIDTH</span><span class="p">][</span><span class="n">HEIGHT</span><span class="p">];</span>
 
-  <span class="c1">// 其他代码……</span>
+<span class="w">  </span><span class="c1">// 其他代码……</span>
 <span class="p">};</span>
-</pre></div>
+</code></pre></div>
 
-
-<p>每个相同地形的区块会指向相同的地形实例。</p>
+<p>使用相同地形的每个区块都会指向同一个地形实例。</p>
 <p><img src="images/flyweight-tiles.png" alt="一行区块，每个区块指向共享的草、河、山丘对象。" /></p>
-<p>由于地形实例在很多地方使用，如果你想要动态分配，它们的生命周期会有点复杂。
-因此，我们直接在游戏世界中存储它们。</p>
-<div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">World</span>
+<p>由于地形实例被用在很多地方，如果动态分配它们，管理它们的生命周期会有点复杂。
+因此，我们直接把它们存储在<code>World</code>中。</p>
+<div class="codehilite"><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">World</span>
 <span class="p">{</span>
 <span class="k">public</span><span class="o">:</span>
-  <span class="n">World</span><span class="p">()</span>
-  <span class="o">:</span> <span class="n">grassTerrain_</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">false</span><span class="p">,</span> <span class="n">GRASS_TEXTURE</span><span class="p">),</span>
-    <span class="n">hillTerrain_</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="nb">false</span><span class="p">,</span> <span class="n">HILL_TEXTURE</span><span class="p">),</span>
-    <span class="n">riverTerrain_</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="nb">true</span><span class="p">,</span> <span class="n">RIVER_TEXTURE</span><span class="p">)</span>
-  <span class="p">{}</span>
+<span class="w">  </span><span class="n">World</span><span class="p">()</span>
+<span class="w">  </span><span class="o">:</span><span class="w"> </span><span class="n">grassTerrain_</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="nb">false</span><span class="p">,</span><span class="w"> </span><span class="n">GRASS_TEXTURE</span><span class="p">),</span>
+<span class="w">    </span><span class="n">hillTerrain_</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span><span class="w"> </span><span class="nb">false</span><span class="p">,</span><span class="w"> </span><span class="n">HILL_TEXTURE</span><span class="p">),</span>
+<span class="w">    </span><span class="n">riverTerrain_</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="nb">true</span><span class="p">,</span><span class="w"> </span><span class="n">RIVER_TEXTURE</span><span class="p">)</span>
+<span class="w">  </span><span class="p">{}</span>
 
 <span class="k">private</span><span class="o">:</span>
-  <span class="n">Terrain</span> <span class="n">grassTerrain_</span><span class="p">;</span>
-  <span class="n">Terrain</span> <span class="n">hillTerrain_</span><span class="p">;</span>
-  <span class="n">Terrain</span> <span class="n">riverTerrain_</span><span class="p">;</span>
+<span class="w">  </span><span class="n">Terrain</span><span class="w"> </span><span class="n">grassTerrain_</span><span class="p">;</span>
+<span class="w">  </span><span class="n">Terrain</span><span class="w"> </span><span class="n">hillTerrain_</span><span class="p">;</span>
+<span class="w">  </span><span class="n">Terrain</span><span class="w"> </span><span class="n">riverTerrain_</span><span class="p">;</span>
 
-  <span class="c1">// 其他代码……</span>
+<span class="w">  </span><span class="c1">// 其他代码……</span>
 <span class="p">};</span>
-</pre></div>
+</code></pre></div>
 
-
-<p>然后我们可以像这样来描绘地面：</p>
+<p>然后我们可以像这样用它们来绘制地面：</p>
 <p><span name="generate"></span></p>
-<div class="codehilite"><pre><span></span><span class="kt">void</span> <span class="n">World</span><span class="o">::</span><span class="n">generateTerrain</span><span class="p">()</span>
+<div class="codehilite"><pre><span></span><code><span class="kt">void</span><span class="w"> </span><span class="nf">World::generateTerrain</span><span class="p">()</span>
 <span class="p">{</span>
-  <span class="c1">// 将地面填满草皮.</span>
-  <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">x</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">x</span> <span class="o">&lt;</span> <span class="n">WIDTH</span><span class="p">;</span> <span class="n">x</span><span class="o">++</span><span class="p">)</span>
-  <span class="p">{</span>
-    <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">y</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">y</span> <span class="o">&lt;</span> <span class="n">HEIGHT</span><span class="p">;</span> <span class="n">y</span><span class="o">++</span><span class="p">)</span>
-    <span class="p">{</span>
-      <span class="c1">// 加入一些丘陵</span>
-      <span class="k">if</span> <span class="p">(</span><span class="n">random</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span>
-      <span class="p">{</span>
-        <span class="n">tiles_</span><span class="p">[</span><span class="n">x</span><span class="p">][</span><span class="n">y</span><span class="p">]</span> <span class="o">=</span> <span class="o">&amp;</span><span class="n">hillTerrain_</span><span class="p">;</span>
-      <span class="p">}</span>
-      <span class="k">else</span>
-      <span class="p">{</span>
-        <span class="n">tiles_</span><span class="p">[</span><span class="n">x</span><span class="p">][</span><span class="n">y</span><span class="p">]</span> <span class="o">=</span> <span class="o">&amp;</span><span class="n">grassTerrain_</span><span class="p">;</span>
-      <span class="p">}</span>
-    <span class="p">}</span>
-  <span class="p">}</span>
+<span class="w">  </span><span class="c1">// 将地面填满草皮.</span>
+<span class="w">  </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">WIDTH</span><span class="p">;</span><span class="w"> </span><span class="n">x</span><span class="o">++</span><span class="p">)</span>
+<span class="w">  </span><span class="p">{</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">y</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">y</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">HEIGHT</span><span class="p">;</span><span class="w"> </span><span class="n">y</span><span class="o">++</span><span class="p">)</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">      </span><span class="c1">// 加入一些丘陵</span>
+<span class="w">      </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">random</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span>
+<span class="w">      </span><span class="p">{</span>
+<span class="w">        </span><span class="n">tiles_</span><span class="p">[</span><span class="n">x</span><span class="p">][</span><span class="n">y</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">&amp;</span><span class="n">hillTerrain_</span><span class="p">;</span>
+<span class="w">      </span><span class="p">}</span>
+<span class="w">      </span><span class="k">else</span>
+<span class="w">      </span><span class="p">{</span>
+<span class="w">        </span><span class="n">tiles_</span><span class="p">[</span><span class="n">x</span><span class="p">][</span><span class="n">y</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">&amp;</span><span class="n">grassTerrain_</span><span class="p">;</span>
+<span class="w">      </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">}</span>
 
-  <span class="c1">// 放置河流</span>
-  <span class="kt">int</span> <span class="n">x</span> <span class="o">=</span> <span class="n">random</span><span class="p">(</span><span class="n">WIDTH</span><span class="p">);</span>
-  <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">y</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">y</span> <span class="o">&lt;</span> <span class="n">HEIGHT</span><span class="p">;</span> <span class="n">y</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
-    <span class="n">tiles_</span><span class="p">[</span><span class="n">x</span><span class="p">][</span><span class="n">y</span><span class="p">]</span> <span class="o">=</span> <span class="o">&amp;</span><span class="n">riverTerrain_</span><span class="p">;</span>
-  <span class="p">}</span>
+<span class="w">  </span><span class="c1">// 放置河流</span>
+<span class="w">  </span><span class="kt">int</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">random</span><span class="p">(</span><span class="n">WIDTH</span><span class="p">);</span>
+<span class="w">  </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">y</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">y</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">HEIGHT</span><span class="p">;</span><span class="w"> </span><span class="n">y</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">tiles_</span><span class="p">[</span><span class="n">x</span><span class="p">][</span><span class="n">y</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">&amp;</span><span class="n">riverTerrain_</span><span class="p">;</span>
+<span class="w">  </span><span class="p">}</span>
 <span class="p">}</span>
-</pre></div>
-
+</code></pre></div>
 
 <aside name="generate">
-<p>我承认这不是世界上最好的地形生成算法。</p>
+<p>我承认，这算不上世界上最棒的程序化地形生成算法。</p>
 </aside>
-<p>现在不需要<code>World</code>中的方法来接触地形属性，我们可以直接暴露出<code>Terrain</code>对象。</p>
-<div class="codehilite"><pre><span></span><span class="k">const</span> <span class="n">Terrain</span><span class="o">&amp;</span> <span class="n">World</span><span class="o">::</span><span class="n">getTile</span><span class="p">(</span><span class="kt">int</span> <span class="n">x</span><span class="p">,</span> <span class="kt">int</span> <span class="n">y</span><span class="p">)</span> <span class="k">const</span>
+<p>现在，我们不再需要<code>World</code>中用来访问地形属性的方法，可以直接暴露<code>Terrain</code>对象：</p>
+<div class="codehilite"><pre><span></span><code><span class="k">const</span><span class="w"> </span><span class="n">Terrain</span><span class="o">&amp;</span><span class="w"> </span><span class="nf">World::getTile</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">x</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">y</span><span class="p">)</span><span class="w"> </span><span class="k">const</span>
 <span class="p">{</span>
-  <span class="k">return</span> <span class="o">*</span><span class="n">tiles_</span><span class="p">[</span><span class="n">x</span><span class="p">][</span><span class="n">y</span><span class="p">];</span>
+<span class="w">  </span><span class="k">return</span><span class="w"> </span><span class="o">*</span><span class="n">tiles_</span><span class="p">[</span><span class="n">x</span><span class="p">][</span><span class="n">y</span><span class="p">];</span>
 <span class="p">}</span>
-</pre></div>
-
+</code></pre></div>
 
 <p>用这种方式，<code>World</code>不再与各种地形的细节耦合。
 如果你想要某一区块的属性，可直接从那个对象获得：</p>
-<div class="codehilite"><pre><span></span><span class="kt">int</span> <span class="n">cost</span> <span class="o">=</span> <span class="n">world</span><span class="p">.</span><span class="n">getTile</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">).</span><span class="n">getMovementCost</span><span class="p">();</span>
-</pre></div>
+<div class="codehilite"><pre><span></span><code><span class="kt">int</span><span class="w"> </span><span class="n">cost</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">world</span><span class="p">.</span><span class="n">getTile</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="mi">3</span><span class="p">).</span><span class="n">getMovementCost</span><span class="p">();</span>
+</code></pre></div>
 
-
-<p>我们回到了操作实体对象的API，几乎没有额外开销——指针通常不比枚举大。</p>
+<p>我们回到了与真实对象打交道的那种宜人的API，而且几乎没有额外开销——指针通常并不比枚举大。</p>
 <h2><a href="#性能如何？" name="性能如何？">性能如何？</a></h2>
 <p><span name="cache"></span>
-我在这里说几乎，是因为性能偏执狂肯定会想要知道它和枚举比起来如何。
-通过解引用指针获取地形需要一次间接跳转。
-为了获得移动开销这样的地形数据，你首先需要跟着网格中的指针找到地形对象，
-然后再找到移动开销。跟踪这样的指针会导致缓存不命中，降低运行速度。</p>
+我在这里说“几乎”，是因为那些对性能锱铢必较的人理所当然地想知道它和使用枚举相比如何。
+通过指针引用地形意味着一次间接查找。
+要拿到移动开销这样的地形数据，你得先顺着网格里的指针找到地形对象，
+再在那里找到移动开销。这样追逐指针可能会导致缓存未命中，从而拖慢速度。</p>
 <aside name="cache">
-<p>需要更多指针追逐和缓存不命中的相关信息，看看<a href ="data-locality.html" class="pattern">数据局部性</a>这章。</p>
+<p>关于指针追逐和缓存未命中的更多内容，请参阅<a href ="data-locality.html" class="pattern">数据局部性</a>一章。</p>
 </aside>
-<p>就像往常一样，优化的金科玉律是<em>需求优先</em>。
-现代计算机硬件过于复杂，性能只是游戏的一个考虑方面。
-在我这章做的测试中，享元较枚举没有什么性能上的损失。
-享元实际上明显更快。但是这完全取决于内存中的事物是如何排列的。</p>
-<p>我<em>可以</em>自信地说使用享元对象不会搞到不可收拾。
-它给了你面向对象的优势，而且没有产生一堆对象。
-如果你创建了一个枚举，又在它上面做了很多分支跳转，考虑一下这个模式吧。
-如果你担心性能，那么至少在把代码编程为难以维护的风格之前先做些性能分析。</p>
+<p>和往常一样，优化的金科玉律是<em>先做性能分析</em>。
+现代计算机硬件太复杂，性能已经不再是一个纯靠推理就能搞定的游戏。
+在我为本章所做的测试中，使用享元相比枚举没有任何性能损失。
+享元实际上还明显更快。但这完全取决于内存中其它数据是如何布局的。</p>
+<p>我能<em>肯定</em>的是，使用享元对象不应被轻易否定。
+它让你获得面向对象风格的优势，却不必付出大量对象的开销。
+如果你发现自己创建了一个枚举，又在它上面写了很多switch分支，不妨改用这个模式。
+如果你担心性能，那么至少在把代码改成更难维护的风格之前，先做性能分析。</p>
 <h2><a href="#参见" name="参见">参见</a></h2>
 <ul>
 <li>
-<p>在区块的例子中，我们只是为每种地形创建一个实例然后存储在<code>World</code>中。
-    这也许能更好找到和重用这些实例。
-    但是在多数情况下，你不会在一开始就创建<em>所有</em>享元。</p>
-<p>如果你不能预料哪些是实际上需要的，最好在需要时才创建。
-为了保持共享的优势，当你需要一个时，首先看看是否已经创建了一个相同的实例。
-如果确实如此，那么只需返回那个实例。</p>
-<p>这通常意味需要将构造函数封装在查询对象是否存在的接口之后。
-像这样隐藏构造指令是<a href="http://en.wikipedia.org/wiki/Factory_method_pattern" class="gof-pattern">工厂方法</a>的一个例子。</p>
+<p>在区块的例子中，我们只是为每种地形事先创建一个实例，并存储在<code>World</code>中。
+    这样更容易找到并重用这些共享实例。
+    但在多数情况下，你不会想一开始就创建<em>所有</em>享元。</p>
+<p>如果你无法预料自己实际需要哪些，最好按需创建它们。
+为了获得共享的优势，当你请求一个实例时，先看看是否已经创建过一个相同的实例。
+如果是，就只需返回那个实例。</p>
+<p>这通常意味着你得把构造过程封装在某个能先查找现有对象的接口之后。
+像这样隐藏构造函数就是<a href="http://en.wikipedia.org/wiki/Factory_method_pattern" class="gof-pattern">工厂方法</a>模式的一个例子。</p>
 </li>
 <li>
-<p>为了返回一个早先创建的享元，需要追踪那些已经实例化的对象池。
-    正如其名，这意味着<a href="object-pool.html" class="pattern">对象池</a>是存储它们的好地方。</p>
+<p>为了返回一个先前创建的享元，你需要追踪已经实例化的那些享元所组成的池子。
+    顾名思义，<a href="object-pool.html" class="pattern">对象池</a>可能是存储它们的好地方。</p>
 </li>
 <li>
-<p>当使用<a class="pattern" href="state.html">状态</a>模式时，
-    经常会出现一些没有任何特定字段的“状态对象”。
-    这个状态的标识和方法都很有用。
-    在这种情况下，你可以使用这个模式，然后在不同的状态机上使用相同的对象实例。</p>
+<p>当你使用<a class="pattern" href="state.html">状态</a>模式时，
+    经常会遇到一些“状态对象”，它们没有任何专属于使用该状态的那台状态机的字段。
+    状态的标识和方法就足以派上用场了。
+    在这种情况下，你可以应用享元模式，同时在多个状态机中重用同一个状态实例而不会有任何问题。</p>
 </li>
 </ul>
 <nav>

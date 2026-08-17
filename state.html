@@ -85,179 +85,174 @@ delete the font style for english.
 </nav>
 <h1>状态模式</h1>
 <h1 class="book"><a href="/">游戏设计模式</a><span class="section"><a href="design-patterns-revisited.html">Design Patterns Revisited</a></span></h1>
-<p>忏悔时间：我有些越界，将太多的东西打包到了这章中。
-它表面上关于<a href="http://en.wikipedia.org/wiki/State_pattern" class="gof-pattern">状态模式</a>，
-但我无法只讨论它和游戏，而不涉及更加基础的<em>有限状态机</em>（FSMs）。
-但是一旦讲了那个，我发现也想要介绍<em>层次状态机</em>和<em>下推自动机</em>。</p>
-<p>有很多要讲，我会尽可能简短，这里的示例代码留下了一些你需要自己填补的细节。
-我希望它们仍然足够清晰，能让你获取一份全景图。</p>
+<p>忏悔时间：我有点没收住，往这一章里塞了太多东西。
+这一章名义上是关于<a href="http://en.wikipedia.org/wiki/State_pattern" class="gof-pattern">状态模式</a>，
+但要聊它和游戏，就绕不开更基础的概念——<em>有限状态机</em>（FSMs）。
+不过既然都讲到这儿了，我想不如顺带介绍一下<em>层次状态机</em>和<em>下推自动机</em>。</p>
+<p>要讲的内容很多，我会尽量简短，这里的示例代码省略了一些需要你自己补上的细节。
+希望它们仍然足够清晰，能让你掌握全貌。</p>
 <p><span name="two-camps"></span>
 如果你从来没有听说过状态机，不要难过。
-虽然在AI和编译器程序方面很出名，但它在其他编程圈就没那么知名了。
-我认为应该有更多人知道它，所以在这里我将其运用在不同的问题上。</p>
+虽然AI和编译器圈子里的高手对它很熟悉，但在其他编程圈子里它就没那么出名了。
+我认为应该有更多人了解它们，所以在这里我要把它们扔给另一类问题去解决。</p>
 <aside name="two-camps">
-<p>这些状态机术语来自人工智能的早期时代。
-在五十年代到六十年代，很多AI研究关注于语言处理。
-很多现在用于分析程序语言的技术在当时是发明出来分析人类语言的。</p>
+<p>这种搭配呼应了人工智能的早期岁月。
+五六十年代，很多AI研究都聚焦于语言处理。
+如今编译器用于解析编程语言的许多技术，最初是为解析人类语言而发明的。</p>
 </aside>
-<h2><a href="#感同身受" name="感同身受">感同身受</a></h2>
-<p>假设我们在完成一个卷轴平台游戏。
-现在的工作是实现玩家在游戏世界中操作的女英雄。
+<h2><a href="#我们都遇到过" name="我们都遇到过">我们都遇到过</a></h2>
+<p>我们正在做一个小小的横版卷轴平台游戏。
+现在的任务是实现玩家在游戏世界里操控的女英雄。
 这就意味着她需要对玩家的输入做出响应。按B键她应该跳跃。简单实现如下：</p>
-<div class="codehilite"><pre><span></span><span class="kt">void</span> <span class="n">Heroine</span><span class="o">::</span><span class="n">handleInput</span><span class="p">(</span><span class="n">Input</span> <span class="n">input</span><span class="p">)</span>
+<div class="codehilite"><pre><span></span><code><span class="kt">void</span><span class="w"> </span><span class="nf">Heroine::handleInput</span><span class="p">(</span><span class="n">Input</span><span class="w"> </span><span class="n">input</span><span class="p">)</span>
 <span class="p">{</span>
-  <span class="k">if</span> <span class="p">(</span><span class="n">input</span> <span class="o">==</span> <span class="n">PRESS_B</span><span class="p">)</span>
-  <span class="p">{</span>
-    <span class="n">yVelocity_</span> <span class="o">=</span> <span class="n">JUMP_VELOCITY</span><span class="p">;</span>
-    <span class="n">setGraphics</span><span class="p">(</span><span class="n">IMAGE_JUMP</span><span class="p">);</span>
-  <span class="p">}</span>
+<span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">input</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">PRESS_B</span><span class="p">)</span>
+<span class="w">  </span><span class="p">{</span>
+<span class="w">    </span><span class="n">yVelocity_</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">JUMP_VELOCITY</span><span class="p">;</span>
+<span class="w">    </span><span class="n">setGraphics</span><span class="p">(</span><span class="n">IMAGE_JUMP</span><span class="p">);</span>
+<span class="w">  </span><span class="p">}</span>
 <span class="p">}</span>
-</pre></div>
-
+</code></pre></div>
 
 <p>看到漏洞了吗？</p>
 <p><span name="landing"></span>
-没有东西阻止“空中跳跃”——当角色在空中时狂按B，她就会浮空。
-简单的修复方法是给<code>Heroine</code>增加<code>isJumping_</code>布尔字段，追踪它跳跃的状态。然后这样做：</p>
-<div class="codehilite"><pre><span></span><span class="kt">void</span> <span class="n">Heroine</span><span class="o">::</span><span class="n">handleInput</span><span class="p">(</span><span class="n">Input</span> <span class="n">input</span><span class="p">)</span>
+没有什么能阻止“空中跳跃”——只要在空中狂按B键，她就能一直飘着。
+简单的修复是给<code>Heroine</code>加一个<code>isJumping_</code>布尔字段，用来追踪她是否正在跳跃。然后这样做：</p>
+<div class="codehilite"><pre><span></span><code><span class="kt">void</span><span class="w"> </span><span class="nf">Heroine::handleInput</span><span class="p">(</span><span class="n">Input</span><span class="w"> </span><span class="n">input</span><span class="p">)</span>
 <span class="p">{</span>
-  <span class="k">if</span> <span class="p">(</span><span class="n">input</span> <span class="o">==</span> <span class="n">PRESS_B</span><span class="p">)</span>
-  <span class="p">{</span>
-    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">isJumping_</span><span class="p">)</span>
-    <span class="p">{</span>
-      <span class="n">isJumping_</span> <span class="o">=</span> <span class="nb">true</span><span class="p">;</span>
-      <span class="c1">// 跳跃……</span>
-    <span class="p">}</span>
-  <span class="p">}</span>
+<span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">input</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">PRESS_B</span><span class="p">)</span>
+<span class="w">  </span><span class="p">{</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">isJumping_</span><span class="p">)</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">      </span><span class="n">isJumping_</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">true</span><span class="p">;</span>
+<span class="w">      </span><span class="c1">// 跳跃……</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">}</span>
 <span class="p">}</span>
-</pre></div>
-
+</code></pre></div>
 
 <aside name="landing">
 <p>这里也应该有在英雄接触到地面时将<code>isJumping_</code>设回<code>false</code>的代码。
-我在这里为了简明没有写。</p>
+为了简洁，我在这里省略了。</p>
 </aside>
-<p>接下来，当玩家按下下方向键时，如果角色在地上，我们想要她卧倒，而松开按键时站起来：</p>
-<div class="codehilite"><pre><span></span><span class="kt">void</span> <span class="n">Heroine</span><span class="o">::</span><span class="n">handleInput</span><span class="p">(</span><span class="n">Input</span> <span class="n">input</span><span class="p">)</span>
+<p>接下来，当玩家按下下方向键时，如果角色在地上，我们想要她下蹲，而松开按键时站起来：</p>
+<div class="codehilite"><pre><span></span><code><span class="kt">void</span><span class="w"> </span><span class="nf">Heroine::handleInput</span><span class="p">(</span><span class="n">Input</span><span class="w"> </span><span class="n">input</span><span class="p">)</span>
 <span class="p">{</span>
-  <span class="k">if</span> <span class="p">(</span><span class="n">input</span> <span class="o">==</span> <span class="n">PRESS_B</span><span class="p">)</span>
-  <span class="p">{</span>
-    <span class="c1">// 如果没在跳跃，就跳起来……</span>
-  <span class="p">}</span>
-  <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">input</span> <span class="o">==</span> <span class="n">PRESS_DOWN</span><span class="p">)</span>
-  <span class="p">{</span>
-    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">isJumping_</span><span class="p">)</span>
-    <span class="p">{</span>
-      <span class="n">setGraphics</span><span class="p">(</span><span class="n">IMAGE_DUCK</span><span class="p">);</span>
-    <span class="p">}</span>
-  <span class="p">}</span>
-  <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">input</span> <span class="o">==</span> <span class="n">RELEASE_DOWN</span><span class="p">)</span>
-  <span class="p">{</span>
-    <span class="n">setGraphics</span><span class="p">(</span><span class="n">IMAGE_STAND</span><span class="p">);</span>
-  <span class="p">}</span>
+<span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">input</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">PRESS_B</span><span class="p">)</span>
+<span class="w">  </span><span class="p">{</span>
+<span class="w">    </span><span class="c1">// 如果没在跳跃，就跳起来……</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="w">  </span><span class="k">else</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">input</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">PRESS_DOWN</span><span class="p">)</span>
+<span class="w">  </span><span class="p">{</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">isJumping_</span><span class="p">)</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">      </span><span class="n">setGraphics</span><span class="p">(</span><span class="n">IMAGE_DUCK</span><span class="p">);</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="w">  </span><span class="k">else</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">input</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">RELEASE_DOWN</span><span class="p">)</span>
+<span class="w">  </span><span class="p">{</span>
+<span class="w">    </span><span class="n">setGraphics</span><span class="p">(</span><span class="n">IMAGE_STAND</span><span class="p">);</span>
+<span class="w">  </span><span class="p">}</span>
 <span class="p">}</span>
-</pre></div>
-
+</code></pre></div>
 
 <p>这次看到漏洞了吗？</p>
-<p>通过这个代码，玩家可以：</p>
+<p>有了这段代码，玩家可以：</p>
 <ol>
-<li>按下键卧倒。</li>
-<li>按B从卧倒状态跳起。</li>
+<li>按下键下蹲。</li>
+<li>按B从下蹲状态跳起。</li>
 <li>在空中放开下键。</li>
 </ol>
-<p>英雄跳一半贴图变成了站立时的贴图。是时候增加另一个标识了……</p>
-<div class="codehilite"><pre><span></span><span class="kt">void</span> <span class="n">Heroine</span><span class="o">::</span><span class="n">handleInput</span><span class="p">(</span><span class="n">Input</span> <span class="n">input</span><span class="p">)</span>
+<p>英雄会在跳到一半时切换成站立贴图。是时候增加另一个标识了……</p>
+<div class="codehilite"><pre><span></span><code><span class="kt">void</span><span class="w"> </span><span class="nf">Heroine::handleInput</span><span class="p">(</span><span class="n">Input</span><span class="w"> </span><span class="n">input</span><span class="p">)</span>
 <span class="p">{</span>
-  <span class="k">if</span> <span class="p">(</span><span class="n">input</span> <span class="o">==</span> <span class="n">PRESS_B</span><span class="p">)</span>
-  <span class="p">{</span>
-    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">isJumping_</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="n">isDucking_</span><span class="p">)</span>
-    <span class="p">{</span>
-      <span class="c1">// 跳跃……</span>
-    <span class="p">}</span>
-  <span class="p">}</span>
-  <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">input</span> <span class="o">==</span> <span class="n">PRESS_DOWN</span><span class="p">)</span>
-  <span class="p">{</span>
-    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">isJumping_</span><span class="p">)</span>
-    <span class="p">{</span>
-      <span class="n">isDucking_</span> <span class="o">=</span> <span class="nb">true</span><span class="p">;</span>
-      <span class="n">setGraphics</span><span class="p">(</span><span class="n">IMAGE_DUCK</span><span class="p">);</span>
-    <span class="p">}</span>
-  <span class="p">}</span>
-  <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">input</span> <span class="o">==</span> <span class="n">RELEASE_DOWN</span><span class="p">)</span>
-  <span class="p">{</span>
-    <span class="k">if</span> <span class="p">(</span><span class="n">isDucking_</span><span class="p">)</span>
-    <span class="p">{</span>
-      <span class="n">isDucking_</span> <span class="o">=</span> <span class="nb">false</span><span class="p">;</span>
-      <span class="n">setGraphics</span><span class="p">(</span><span class="n">IMAGE_STAND</span><span class="p">);</span>
-    <span class="p">}</span>
-  <span class="p">}</span>
+<span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">input</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">PRESS_B</span><span class="p">)</span>
+<span class="w">  </span><span class="p">{</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">isJumping_</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="o">!</span><span class="n">isDucking_</span><span class="p">)</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">      </span><span class="c1">// 跳跃……</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="w">  </span><span class="k">else</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">input</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">PRESS_DOWN</span><span class="p">)</span>
+<span class="w">  </span><span class="p">{</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">isJumping_</span><span class="p">)</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">      </span><span class="n">isDucking_</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">true</span><span class="p">;</span>
+<span class="w">      </span><span class="n">setGraphics</span><span class="p">(</span><span class="n">IMAGE_DUCK</span><span class="p">);</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="w">  </span><span class="k">else</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">input</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">RELEASE_DOWN</span><span class="p">)</span>
+<span class="w">  </span><span class="p">{</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">isDucking_</span><span class="p">)</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">      </span><span class="n">isDucking_</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">false</span><span class="p">;</span>
+<span class="w">      </span><span class="n">setGraphics</span><span class="p">(</span><span class="n">IMAGE_STAND</span><span class="p">);</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">}</span>
 <span class="p">}</span>
-</pre></div>
-
+</code></pre></div>
 
 <p>下面，如果玩家在跳跃途中按下下方向键，英雄能够做跳斩攻击就太酷了：</p>
-<div class="codehilite"><pre><span></span><span class="kt">void</span> <span class="n">Heroine</span><span class="o">::</span><span class="n">handleInput</span><span class="p">(</span><span class="n">Input</span> <span class="n">input</span><span class="p">)</span>
+<div class="codehilite"><pre><span></span><code><span class="kt">void</span><span class="w"> </span><span class="nf">Heroine::handleInput</span><span class="p">(</span><span class="n">Input</span><span class="w"> </span><span class="n">input</span><span class="p">)</span>
 <span class="p">{</span>
-  <span class="k">if</span> <span class="p">(</span><span class="n">input</span> <span class="o">==</span> <span class="n">PRESS_B</span><span class="p">)</span>
-  <span class="p">{</span>
-    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">isJumping_</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="n">isDucking_</span><span class="p">)</span>
-    <span class="p">{</span>
-      <span class="c1">// 跳跃……</span>
-    <span class="p">}</span>
-  <span class="p">}</span>
-  <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">input</span> <span class="o">==</span> <span class="n">PRESS_DOWN</span><span class="p">)</span>
-  <span class="p">{</span>
-    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">isJumping_</span><span class="p">)</span>
-    <span class="p">{</span>
-      <span class="n">isDucking_</span> <span class="o">=</span> <span class="nb">true</span><span class="p">;</span>
-      <span class="n">setGraphics</span><span class="p">(</span><span class="n">IMAGE_DUCK</span><span class="p">);</span>
-    <span class="p">}</span>
-    <span class="k">else</span>
-    <span class="p">{</span>
-      <span class="n">isJumping_</span> <span class="o">=</span> <span class="nb">false</span><span class="p">;</span>
-      <span class="n">setGraphics</span><span class="p">(</span><span class="n">IMAGE_DIVE</span><span class="p">);</span>
-    <span class="p">}</span>
-  <span class="p">}</span>
-  <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">input</span> <span class="o">==</span> <span class="n">RELEASE_DOWN</span><span class="p">)</span>
-  <span class="p">{</span>
-    <span class="k">if</span> <span class="p">(</span><span class="n">isDucking_</span><span class="p">)</span>
-    <span class="p">{</span>
-      <span class="c1">// 站立……</span>
-    <span class="p">}</span>
-  <span class="p">}</span>
+<span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">input</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">PRESS_B</span><span class="p">)</span>
+<span class="w">  </span><span class="p">{</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">isJumping_</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="o">!</span><span class="n">isDucking_</span><span class="p">)</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">      </span><span class="c1">// 跳跃……</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="w">  </span><span class="k">else</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">input</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">PRESS_DOWN</span><span class="p">)</span>
+<span class="w">  </span><span class="p">{</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">isJumping_</span><span class="p">)</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">      </span><span class="n">isDucking_</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">true</span><span class="p">;</span>
+<span class="w">      </span><span class="n">setGraphics</span><span class="p">(</span><span class="n">IMAGE_DUCK</span><span class="p">);</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="k">else</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">      </span><span class="n">isJumping_</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">false</span><span class="p">;</span>
+<span class="w">      </span><span class="n">setGraphics</span><span class="p">(</span><span class="n">IMAGE_DIVE</span><span class="p">);</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="w">  </span><span class="k">else</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">input</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">RELEASE_DOWN</span><span class="p">)</span>
+<span class="w">  </span><span class="p">{</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">isDucking_</span><span class="p">)</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">      </span><span class="c1">// 站立……</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">}</span>
 <span class="p">}</span>
-</pre></div>
+</code></pre></div>
 
-
-<p>又是检查漏洞的时间了。找到了吗？</p>
-<p>跳跃时我们检查了字段，防止了空气跳，但是速降时没有。又是另一个字段……</p>
+<p>又到了找漏洞的时间。找到了吗？</p>
+<p>我们检查了跳跃时不能空中跳，却没检查速降时也能空中跳。于是又得加一个字段……</p>
 <p><span name="se"></span>
-我们的实现方法很明显有错。
-每次我们改动代码时，就破坏些东西。
-我们需要增加更多动作——<em>行走</em> 都还没有加入呢——但以这种做法，完成之前就会造成一堆漏洞。</p>
+我们的做法显然有问题。
+每改一次这些代码，就会弄坏点什么。
+我们要加的动作还多着呢——连<em>行走</em>都还没加呢——但照这个速度，还没做完它就会塌成一堆bug。</p>
 <aside name="se">
-<p>那些你崇拜的、看上去永远能写出完美代码的程序员并不是超人。
-相反，他们有<em>哪种</em>代码易于出错的直觉，然后避开。</p>
-<p>复杂分支和可变状态——随时间改变的字段——是两种易错代码，上面的例子覆盖了两者。</p>
+<p>那些你崇拜的、看起来永远能写出完美代码的程序员并不是超人。
+相反，他们对<em>哪些</em>代码容易出错有种直觉，并会主动避开。</p>
+<p>复杂分支和可变状态——随时间变化的字段——就是两种易错代码，上面的例子恰好两者都占全了。</p>
 </aside>
 <h2><a href="#有限状态机前来救援" name="有限状态机前来救援">有限状态机前来救援</a></h2>
-<p>在经历了上面的挫败之后，把桌子扫空，只留下纸笔，我们开始画流程图。
-你给英雄每件能做的事情都画了一个盒子：站立，跳跃，俯卧，跳斩。
-当角色在能响应按键的状态时，你从那个盒子画出一个箭头，标记上按键，然后连接到她变到的状态。</p>
-<p><img src="images/state-flowchart.png" alt="一张画有盒子的图表，盒子代表了站立，跳跃，俯卧和跳斩。标记了按键的按下和释放的箭头连接了这些盒子。" /></p>
+<p>一气之下，你把桌上所有东西都扫到一边，只留下纸笔，开始画流程图。
+你为英雄每个能做的动作都画了一个盒子：站立、跳跃、下蹲、速降。
+当她能在某个状态下响应按键时，你就从那个盒子画出一个箭头，标上那个按键，再连接到她要切换到的状态。</p>
+<p><img src="images/state-flowchart.png" alt="一张画有盒子的图表，盒子代表了站立，跳跃，下蹲和跳斩。标记了按键的按下和释放的箭头连接了这些盒子。" /></p>
 <p>祝贺，你刚刚建好了一个<em>有限状态机</em>。
-它来自计算机科学的分支<em>自动理论</em>，那里有很多著名的数据结构，包括著名的图灵机。
+它来自计算机科学中被称为<em>自动机理论</em>的分支，这个数据结构家族还包括著名的图灵机。
 FSMs是其中最简单的成员。</p>
 <p><span name="adventure"></span>
 要点是：</p>
 <ul>
 <li>
-<p><strong>你拥有状态机所有可能<em>状态</em>的集合。</strong>
-    在我们的例子中，是站立，跳跃，俯卧和速降。</p>
+<p><strong>你有一组固定的、状态机可能处于的<em>状态</em>。</strong>
+    在我们的例子中，是站立，跳跃，下蹲和速降。</p>
 </li>
 <li>
-<p><strong>状态机同时只能在<em>一个</em>状态。</strong>
+<p><strong>状态机同一时间只能处于<em>一个</em>状态。</strong>
     英雄不可能同时处于跳跃和站立状态。事实上，防止这点是使用FSM的理由之一。</p>
 </li>
 <li>
@@ -265,17 +260,16 @@ FSMs是其中最简单的成员。</p>
     在我们的例子中，就是按键按下和松开。</p>
 </li>
 <li>
-<p><strong>每个状态都有<em>一系列的转移</em>，每个转移与输入和另一状态相关。</strong>
-    当输入进来，如果它与当前状态的某个转移相匹配，机器转换为所指的状态。</p>
-<p>举个例子，在站立状态时，按下下方向键转换为俯卧状态。
+<p><strong>每个状态都有<em>一组转移</em>，每个转移都与一个输入相关联，并指向另一个状态。</strong>
+    当输入到来时，如果它与当前状态的某个转移相匹配，机器就转移到该转移所指向的状态。</p>
+<p>举个例子，在站立状态时，按下下方向键转换为下蹲状态。
 在跳跃时按下下方向键转换为速降。
 如果输入在当前状态没有定义转移，输入就被忽视。</p>
 </li>
 </ul>
-<p>这就是核心部分的全部了：状态，输入，和转移。
-你可以用一张流程图把它画出来。不幸的是，编译器不认识流程图，
-所以我们如何<em>实现</em>一个？
-GoF的状态模式是一个方法——我们会谈到的——但先从简单的开始。</p>
+<p>在纯粹的形式上，全部家当就这些：状态、输入和转移。
+你可以把它画成一张小流程图。可惜编译器可不认识我们的涂鸦，那要怎么<em>实现</em>一个呢？
+GoF的状态模式是其中一种方法——我们等会儿会讲到——不过先从更简单的入手吧。</p>
 <aside name="adventure">
 <p>对FSMs我最喜欢的类比是那种老式文字冒险游戏，比如Zork。
 你有个由屋子组成的世界，屋子彼此通过出口相连。你输入像“去北方”的导航指令探索屋子。</p>
@@ -284,207 +278,200 @@ GoF的状态模式是一个方法——我们会谈到的——但先从简单�
 导航指令是输入。</p>
 </aside>
 <h2><a href="#枚举和分支" name="枚举和分支">枚举和分支</a></h2>
-<p><code>Heroine</code>类的问题在于它不合法地捆绑了一堆布尔量：
-<code>isJumping_</code>和<code>isDucking_</code>不会同时为真。
-但有些标识同时只能有一个是<code>true</code>，这提示你真正需要的其实是<code>enum</code>（枚举）。</p>
+<p><code>Heroine</code>类的一个问题是，这些布尔字段的某些组合是不合法的：
+<code>isJumping_</code>和<code>isDucking_</code>永远不该同时为真。
+当你有一堆标识、同一时间只有一个为<code>true</code>时，这是在提示你真正需要的是<code>enum</code>（枚举）。</p>
 <p>在这个例子中的<code>enum</code>就是FSM的状态的集合，所以让我们这样定义它：</p>
-<div class="codehilite"><pre><span></span><span class="k">enum</span> <span class="n">State</span>
+<div class="codehilite"><pre><span></span><code><span class="k">enum</span><span class="w"> </span><span class="nc">State</span>
 <span class="p">{</span>
-  <span class="n">STATE_STANDING</span><span class="p">,</span>
-  <span class="n">STATE_JUMPING</span><span class="p">,</span>
-  <span class="n">STATE_DUCKING</span><span class="p">,</span>
-  <span class="n">STATE_DIVING</span>
+<span class="w">  </span><span class="n">STATE_STANDING</span><span class="p">,</span>
+<span class="w">  </span><span class="n">STATE_JUMPING</span><span class="p">,</span>
+<span class="w">  </span><span class="n">STATE_DUCKING</span><span class="p">,</span>
+<span class="w">  </span><span class="n">STATE_DIVING</span>
 <span class="p">};</span>
-</pre></div>
+</code></pre></div>
 
-
-<p>不需要一堆标识，<code>Heroine</code>只有一个<code>state_</code>状态。
-这里我们同时改变了分支顺序。在前面的代码中，我们先判断输入，<em>然后</em> 判断状态。
-这让处理某个按键的代码集中到了一处，但处理某个状态的代码分散到了各处。
-我们想让处理状态的代码聚在一起，所以先对状态做分支。这样的话：</p>
-<div class="codehilite"><pre><span></span><span class="kt">void</span> <span class="n">Heroine</span><span class="o">::</span><span class="n">handleInput</span><span class="p">(</span><span class="n">Input</span> <span class="n">input</span><span class="p">)</span>
+<p>不需要一堆标识，<code>Heroine</code>只有一个<code>state_</code>字段。
+这里我们同时调换了分支的顺序。在前面的代码里，我们先按输入分支，<em>然后</em>按状态分支。
+这样处理某个按键的代码集中到了一处，却把处理某个状态的代码抹得到处都是。
+我们想让处理状态的代码聚在一起，所以先按状态分支。于是就有了：</p>
+<div class="codehilite"><pre><span></span><code><span class="kt">void</span><span class="w"> </span><span class="nf">Heroine::handleInput</span><span class="p">(</span><span class="n">Input</span><span class="w"> </span><span class="n">input</span><span class="p">)</span>
 <span class="p">{</span>
-  <span class="k">switch</span> <span class="p">(</span><span class="n">state_</span><span class="p">)</span>
-  <span class="p">{</span>
-    <span class="k">case</span> <span class="nl">STATE_STANDING</span><span class="p">:</span>
-      <span class="k">if</span> <span class="p">(</span><span class="n">input</span> <span class="o">==</span> <span class="n">PRESS_B</span><span class="p">)</span>
-      <span class="p">{</span>
-        <span class="n">state_</span> <span class="o">=</span> <span class="n">STATE_JUMPING</span><span class="p">;</span>
-        <span class="n">yVelocity_</span> <span class="o">=</span> <span class="n">JUMP_VELOCITY</span><span class="p">;</span>
-        <span class="n">setGraphics</span><span class="p">(</span><span class="n">IMAGE_JUMP</span><span class="p">);</span>
-      <span class="p">}</span>
-      <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">input</span> <span class="o">==</span> <span class="n">PRESS_DOWN</span><span class="p">)</span>
-      <span class="p">{</span>
-        <span class="n">state_</span> <span class="o">=</span> <span class="n">STATE_DUCKING</span><span class="p">;</span>
-        <span class="n">setGraphics</span><span class="p">(</span><span class="n">IMAGE_DUCK</span><span class="p">);</span>
-      <span class="p">}</span>
-      <span class="k">break</span><span class="p">;</span>
+<span class="w">  </span><span class="k">switch</span><span class="w"> </span><span class="p">(</span><span class="n">state_</span><span class="p">)</span>
+<span class="w">  </span><span class="p">{</span>
+<span class="w">    </span><span class="k">case</span><span class="w"> </span><span class="no">STATE_STANDING</span><span class="p">:</span>
+<span class="w">      </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">input</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">PRESS_B</span><span class="p">)</span>
+<span class="w">      </span><span class="p">{</span>
+<span class="w">        </span><span class="n">state_</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">STATE_JUMPING</span><span class="p">;</span>
+<span class="w">        </span><span class="n">yVelocity_</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">JUMP_VELOCITY</span><span class="p">;</span>
+<span class="w">        </span><span class="n">setGraphics</span><span class="p">(</span><span class="n">IMAGE_JUMP</span><span class="p">);</span>
+<span class="w">      </span><span class="p">}</span>
+<span class="w">      </span><span class="k">else</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">input</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">PRESS_DOWN</span><span class="p">)</span>
+<span class="w">      </span><span class="p">{</span>
+<span class="w">        </span><span class="n">state_</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">STATE_DUCKING</span><span class="p">;</span>
+<span class="w">        </span><span class="n">setGraphics</span><span class="p">(</span><span class="n">IMAGE_DUCK</span><span class="p">);</span>
+<span class="w">      </span><span class="p">}</span>
+<span class="w">      </span><span class="k">break</span><span class="p">;</span>
 
-    <span class="k">case</span> <span class="nl">STATE_JUMPING</span><span class="p">:</span>
-      <span class="k">if</span> <span class="p">(</span><span class="n">input</span> <span class="o">==</span> <span class="n">PRESS_DOWN</span><span class="p">)</span>
-      <span class="p">{</span>
-        <span class="n">state_</span> <span class="o">=</span> <span class="n">STATE_DIVING</span><span class="p">;</span>
-        <span class="n">setGraphics</span><span class="p">(</span><span class="n">IMAGE_DIVE</span><span class="p">);</span>
-      <span class="p">}</span>
-      <span class="k">break</span><span class="p">;</span>
+<span class="w">    </span><span class="k">case</span><span class="w"> </span><span class="no">STATE_JUMPING</span><span class="p">:</span>
+<span class="w">      </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">input</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">PRESS_DOWN</span><span class="p">)</span>
+<span class="w">      </span><span class="p">{</span>
+<span class="w">        </span><span class="n">state_</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">STATE_DIVING</span><span class="p">;</span>
+<span class="w">        </span><span class="n">setGraphics</span><span class="p">(</span><span class="n">IMAGE_DIVE</span><span class="p">);</span>
+<span class="w">      </span><span class="p">}</span>
+<span class="w">      </span><span class="k">break</span><span class="p">;</span>
 
-    <span class="k">case</span> <span class="nl">STATE_DUCKING</span><span class="p">:</span>
-      <span class="k">if</span> <span class="p">(</span><span class="n">input</span> <span class="o">==</span> <span class="n">RELEASE_DOWN</span><span class="p">)</span>
-      <span class="p">{</span>
-        <span class="n">state_</span> <span class="o">=</span> <span class="n">STATE_STANDING</span><span class="p">;</span>
-        <span class="n">setGraphics</span><span class="p">(</span><span class="n">IMAGE_STAND</span><span class="p">);</span>
-      <span class="p">}</span>
-      <span class="k">break</span><span class="p">;</span>
-  <span class="p">}</span>
+<span class="w">    </span><span class="k">case</span><span class="w"> </span><span class="no">STATE_DUCKING</span><span class="p">:</span>
+<span class="w">      </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">input</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">RELEASE_DOWN</span><span class="p">)</span>
+<span class="w">      </span><span class="p">{</span>
+<span class="w">        </span><span class="n">state_</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">STATE_STANDING</span><span class="p">;</span>
+<span class="w">        </span><span class="n">setGraphics</span><span class="p">(</span><span class="n">IMAGE_STAND</span><span class="p">);</span>
+<span class="w">      </span><span class="p">}</span>
+<span class="w">      </span><span class="k">break</span><span class="p">;</span>
+<span class="w">  </span><span class="p">}</span>
 <span class="p">}</span>
-</pre></div>
-
+</code></pre></div>
 
 <p><span name="invalid"></span>
-这看起来很普通，但是比起前面的代码是个很大的进步。
-我们仍有条件分支，但简化了状态变化，将它变成了字段。
-处理同一状态的所有代码都聚到了一起。
-这是实现状态机最简单的方法，在某些情况下，这也不错。</p>
+这看起来平淡无奇，但相比前面的代码是个实打实的进步。
+我们仍有一些条件分支，但把可变状态简化为了单一字段。
+处理某个状态的所有代码现在都整齐地归拢到了一处。
+这是实现状态机最简单的方法，对某些用途来说已经足够了。</p>
 <aside name="invalid">
 <p>重要的是，英雄不再会处于<em>不合法</em>状态。
 使用布尔标识，很多可能存在的值的组合是不合法的。
 通过<code>enum</code>，每个值都是合法的。</p>
 </aside>
 <p>但是，你的问题也许超过了这个解法的能力范围。
-假设我们想增加一个动作动作，英雄可以俯卧一段时间充能，之后释放一次特殊攻击。
-当她俯卧时，我们需要追踪充能的持续时间。</p>
+假设我们想增加一个动作，英雄可以下蹲一段时间充能，之后释放一次特殊攻击。
+当她下蹲时，我们需要追踪充能的持续时间。</p>
 <p><span name="update"></span>
 我们为<code>Heroine</code>添加了<code>chargeTime_</code>字段，记录充能的时间长度。
 假设我们已经有一个每帧都会调用的<code>update()</code>方法。在那里，我们添加：</p>
-<div class="codehilite"><pre><span></span><span class="kt">void</span> <span class="n">Heroine</span><span class="o">::</span><span class="n">update</span><span class="p">()</span>
+<div class="codehilite"><pre><span></span><code><span class="kt">void</span><span class="w"> </span><span class="nf">Heroine::update</span><span class="p">()</span>
 <span class="p">{</span>
-  <span class="k">if</span> <span class="p">(</span><span class="n">state_</span> <span class="o">==</span> <span class="n">STATE_DUCKING</span><span class="p">)</span>
-  <span class="p">{</span>
-    <span class="n">chargeTime_</span><span class="o">++</span><span class="p">;</span>
-    <span class="k">if</span> <span class="p">(</span><span class="n">chargeTime_</span> <span class="o">&gt;</span> <span class="n">MAX_CHARGE</span><span class="p">)</span>
-    <span class="p">{</span>
-      <span class="n">superBomb</span><span class="p">();</span>
-    <span class="p">}</span>
-  <span class="p">}</span>
+<span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">state_</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">STATE_DUCKING</span><span class="p">)</span>
+<span class="w">  </span><span class="p">{</span>
+<span class="w">    </span><span class="n">chargeTime_</span><span class="o">++</span><span class="p">;</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">chargeTime_</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="n">MAX_CHARGE</span><span class="p">)</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">      </span><span class="n">superBomb</span><span class="p">();</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">}</span>
 <span class="p">}</span>
-</pre></div>
-
+</code></pre></div>
 
 <aside name="update">
 <p>如果你猜这就是<a href="update-method.html" class="pattern">更新方法</a>模式，恭喜你答对了！</p>
 </aside>
-<p>我们需要在她开始俯卧的时候重置计时器，所以我们修改<code>handleInput()</code>：</p>
-<div class="codehilite"><pre><span></span><span class="kt">void</span> <span class="n">Heroine</span><span class="o">::</span><span class="n">handleInput</span><span class="p">(</span><span class="n">Input</span> <span class="n">input</span><span class="p">)</span>
+<p>我们需要在她开始下蹲的时候重置计时器，所以我们修改<code>handleInput()</code>：</p>
+<div class="codehilite"><pre><span></span><code><span class="kt">void</span><span class="w"> </span><span class="nf">Heroine::handleInput</span><span class="p">(</span><span class="n">Input</span><span class="w"> </span><span class="n">input</span><span class="p">)</span>
 <span class="p">{</span>
-  <span class="k">switch</span> <span class="p">(</span><span class="n">state_</span><span class="p">)</span>
-  <span class="p">{</span>
-    <span class="k">case</span> <span class="nl">STATE_STANDING</span><span class="p">:</span>
-      <span class="k">if</span> <span class="p">(</span><span class="n">input</span> <span class="o">==</span> <span class="n">PRESS_DOWN</span><span class="p">)</span>
-      <span class="p">{</span>
-        <span class="n">state_</span> <span class="o">=</span> <span class="n">STATE_DUCKING</span><span class="p">;</span>
-        <span class="n">chargeTime_</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
-        <span class="n">setGraphics</span><span class="p">(</span><span class="n">IMAGE_DUCK</span><span class="p">);</span>
-      <span class="p">}</span>
-      <span class="c1">// 处理其他输入……</span>
-      <span class="k">break</span><span class="p">;</span>
+<span class="w">  </span><span class="k">switch</span><span class="w"> </span><span class="p">(</span><span class="n">state_</span><span class="p">)</span>
+<span class="w">  </span><span class="p">{</span>
+<span class="w">    </span><span class="k">case</span><span class="w"> </span><span class="no">STATE_STANDING</span><span class="p">:</span>
+<span class="w">      </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">input</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">PRESS_DOWN</span><span class="p">)</span>
+<span class="w">      </span><span class="p">{</span>
+<span class="w">        </span><span class="n">state_</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">STATE_DUCKING</span><span class="p">;</span>
+<span class="w">        </span><span class="n">chargeTime_</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">        </span><span class="n">setGraphics</span><span class="p">(</span><span class="n">IMAGE_DUCK</span><span class="p">);</span>
+<span class="w">      </span><span class="p">}</span>
+<span class="w">      </span><span class="c1">// 处理其他输入……</span>
+<span class="w">      </span><span class="k">break</span><span class="p">;</span>
 
-      <span class="c1">// 其他状态……</span>
-  <span class="p">}</span>
+<span class="w">      </span><span class="c1">// 其他状态……</span>
+<span class="w">  </span><span class="p">}</span>
 <span class="p">}</span>
-</pre></div>
+</code></pre></div>
 
-
-<p>总而言之，为了增加这个充能攻击，我们需要修改两个方法，
-添加一个<code>chargeTime_</code>字段到<code>Heroine</code>，哪怕它只在俯卧时有意义。
-我们更喜欢的是让所有相关的代码和数据都待在同一个地方。GoF完成了这个。</p>
+<p>总而言之，为了加入这个充能攻击，我们得修改两个方法，
+还要给<code>Heroine</code>加一个<code>chargeTime_</code>字段，尽管它只在下蹲时才有意义。
+我们更希望那些代码和数据都能整齐地打包到一处。对此，GoF早就替我们想好了。</p>
 <h2><a href="#状态模式" name="状态模式">状态模式</a></h2>
 <p><span name="branch"></span>
-对于那些思维模式深深沉浸在面向对象的人，每个条件分支都是使用动态分配的机会（在C++中叫做虚方法调用）。
-我觉得那就太过于复杂化了。有时候一个<code>if</code>就能满足你的需要了。</p>
+对于那些深度沉迷于面向对象思维的人来说，每个条件分支都是使用动态分派的机会（在C++中也就是虚方法调用）。
+但我觉得，往这个兔子洞里钻得太深就走过头了。有时候一个<code>if</code>就足够了。</p>
 <aside name="branch">
-<p>这里有个历史遗留问题。
-原先的面向对象传教徒，比如写《设计模式》的GoF和写《重构》的Martin Fowler都使用Smalltalk。
-那里，<code>ifThen:</code>只是个由你在一定情况下使用的方法，该方法在<code>true</code>和<code>false</code>对象中以不同的方式实现。</p>
+<p>这是有历史渊源的。
+许多早期的面向对象布道者，比如《设计模式：可复用面向对象软件的基础》的GoF四人组，以及《重构》的作者Martin Fowler，都来自Smalltalk。
+在那里，<code>ifThen:</code>只是你在条件对象上调用的一个方法，<code>true</code>和<code>false</code>对象分别以不同的方式实现了它。</p>
 </aside>
-<p>但是在我们的例子中，面向对象确实是一个更好的方案。
+<p>但在我们的例子里，已经到了一个临界点，面向对象成了更合适的选择。
 这带领我们走向状态模式。GoF这样描述状态模式：</p>
 <blockquote>
-<p>允许一个对象在其内部状态发生变化时改变自己的行为，该对象看起来好像修改了它的类型</p>
+<p>允许一个对象在其内部状态发生变化时改变自己的行为，该对象看起来好像修改了它的类</p>
 </blockquote>
-<p>这可没太多帮助。我们的<code>switch</code>也完成了这一点。
-它们描述的东西应用在英雄的身上实际是：</p>
+<p>这可没多大帮助。见鬼，我们的<code>switch</code>也能做到这一点。
+他们描述的具体模式应用到我们的女英雄身上时，看起来是这样的：</p>
 <h3><a href="#一个状态接口" name="一个状态接口">一个状态接口</a></h3>
 <p>首先，我们为状态定义接口。
 状态相关的行为——之前用<code>switch</code>的每一处——都成为了接口中的虚方法。
 在我们的例子中，那是<code>handleInput()</code>和<code>update()</code>：</p>
-<div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">HeroineState</span>
+<div class="codehilite"><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">HeroineState</span>
 <span class="p">{</span>
 <span class="k">public</span><span class="o">:</span>
-  <span class="k">virtual</span> <span class="o">~</span><span class="n">HeroineState</span><span class="p">()</span> <span class="p">{}</span>
-  <span class="k">virtual</span> <span class="kt">void</span> <span class="n">handleInput</span><span class="p">(</span><span class="n">Heroine</span><span class="o">&amp;</span> <span class="n">heroine</span><span class="p">,</span> <span class="n">Input</span> <span class="n">input</span><span class="p">)</span> <span class="p">{}</span>
-  <span class="k">virtual</span> <span class="kt">void</span> <span class="n">update</span><span class="p">(</span><span class="n">Heroine</span><span class="o">&amp;</span> <span class="n">heroine</span><span class="p">)</span> <span class="p">{}</span>
+<span class="w">  </span><span class="k">virtual</span><span class="w"> </span><span class="o">~</span><span class="n">HeroineState</span><span class="p">()</span><span class="w"> </span><span class="p">{}</span>
+<span class="w">  </span><span class="k">virtual</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="n">handleInput</span><span class="p">(</span><span class="n">Heroine</span><span class="o">&amp;</span><span class="w"> </span><span class="n">heroine</span><span class="p">,</span><span class="w"> </span><span class="n">Input</span><span class="w"> </span><span class="n">input</span><span class="p">)</span><span class="w"> </span><span class="p">{}</span>
+<span class="w">  </span><span class="k">virtual</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="n">update</span><span class="p">(</span><span class="n">Heroine</span><span class="o">&amp;</span><span class="w"> </span><span class="n">heroine</span><span class="p">)</span><span class="w"> </span><span class="p">{}</span>
 <span class="p">};</span>
-</pre></div>
-
+</code></pre></div>
 
 <h3><a href="#为每个状态写个类" name="为每个状态写个类">为每个状态写个类</a></h3>
-<p>对于每个状态，我们定义一个类实现接口。它的方法定义了英雄在状态的行为。
+<p>对于每个状态，我们定义一个类实现接口。它的方法定义了英雄在该状态下的行为。
 换言之，从之前的<code>switch</code>中取出每个<code>case</code>，将它们移动到状态类中。举个例子：</p>
-<div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">DuckingState</span> <span class="o">:</span> <span class="k">public</span> <span class="n">HeroineState</span>
+<div class="codehilite"><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">DuckingState</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="k">public</span><span class="w"> </span><span class="n">HeroineState</span>
 <span class="p">{</span>
 <span class="k">public</span><span class="o">:</span>
-  <span class="n">DuckingState</span><span class="p">()</span>
-  <span class="o">:</span> <span class="n">chargeTime_</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
-  <span class="p">{}</span>
+<span class="w">  </span><span class="n">DuckingState</span><span class="p">()</span>
+<span class="w">  </span><span class="o">:</span><span class="w"> </span><span class="n">chargeTime_</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+<span class="w">  </span><span class="p">{}</span>
 
-  <span class="k">virtual</span> <span class="kt">void</span> <span class="n">handleInput</span><span class="p">(</span><span class="n">Heroine</span><span class="o">&amp;</span> <span class="n">heroine</span><span class="p">,</span> <span class="n">Input</span> <span class="n">input</span><span class="p">)</span> <span class="p">{</span>
-    <span class="k">if</span> <span class="p">(</span><span class="n">input</span> <span class="o">==</span> <span class="n">RELEASE_DOWN</span><span class="p">)</span>
-    <span class="p">{</span>
-      <span class="c1">// 改回站立状态……</span>
-      <span class="n">heroine</span><span class="p">.</span><span class="n">setGraphics</span><span class="p">(</span><span class="n">IMAGE_STAND</span><span class="p">);</span>
-    <span class="p">}</span>
-  <span class="p">}</span>
+<span class="w">  </span><span class="k">virtual</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="n">handleInput</span><span class="p">(</span><span class="n">Heroine</span><span class="o">&amp;</span><span class="w"> </span><span class="n">heroine</span><span class="p">,</span><span class="w"> </span><span class="n">Input</span><span class="w"> </span><span class="n">input</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">input</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">RELEASE_DOWN</span><span class="p">)</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">      </span><span class="c1">// 改回站立状态……</span>
+<span class="w">      </span><span class="n">heroine</span><span class="p">.</span><span class="n">setGraphics</span><span class="p">(</span><span class="n">IMAGE_STAND</span><span class="p">);</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">}</span>
 
-  <span class="k">virtual</span> <span class="kt">void</span> <span class="n">update</span><span class="p">(</span><span class="n">Heroine</span><span class="o">&amp;</span> <span class="n">heroine</span><span class="p">)</span> <span class="p">{</span>
-    <span class="n">chargeTime_</span><span class="o">++</span><span class="p">;</span>
-    <span class="k">if</span> <span class="p">(</span><span class="n">chargeTime_</span> <span class="o">&gt;</span> <span class="n">MAX_CHARGE</span><span class="p">)</span>
-    <span class="p">{</span>
-      <span class="n">heroine</span><span class="p">.</span><span class="n">superBomb</span><span class="p">();</span>
-    <span class="p">}</span>
-  <span class="p">}</span>
+<span class="w">  </span><span class="k">virtual</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="n">update</span><span class="p">(</span><span class="n">Heroine</span><span class="o">&amp;</span><span class="w"> </span><span class="n">heroine</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">chargeTime_</span><span class="o">++</span><span class="p">;</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">chargeTime_</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="n">MAX_CHARGE</span><span class="p">)</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">      </span><span class="n">heroine</span><span class="p">.</span><span class="n">superBomb</span><span class="p">();</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">}</span>
 
 <span class="k">private</span><span class="o">:</span>
-  <span class="kt">int</span> <span class="n">chargeTime_</span><span class="p">;</span>
+<span class="w">  </span><span class="kt">int</span><span class="w"> </span><span class="n">chargeTime_</span><span class="p">;</span>
 <span class="p">};</span>
-</pre></div>
-
+</code></pre></div>
 
 <p>注意我们也将<code>chargeTime_</code>移出了<code>Heroine</code>，放到了<code>DuckingState</code>类中。
-这很好——那部分数据只在这个状态有用，现在我们的对象模型显式反映了这一点。</p>
+这很棒——那部分数据只在这个状态才有意义，现在我们的对象模型显式地反映了这一点。</p>
 <h3><a href="#状态委托" name="状态委托">状态委托</a></h3>
 <p>接下来，向<code>Heroine</code>添加指向当前状态的指针，放弃庞大的<code>switch</code>，转向状态委托：</p>
 <p><span name="delegate"></span></p>
-<div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">Heroine</span>
+<div class="codehilite"><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Heroine</span>
 <span class="p">{</span>
 <span class="k">public</span><span class="o">:</span>
-  <span class="k">virtual</span> <span class="kt">void</span> <span class="n">handleInput</span><span class="p">(</span><span class="n">Input</span> <span class="n">input</span><span class="p">)</span>
-  <span class="p">{</span>
-    <span class="n">state_</span><span class="o">-&gt;</span><span class="n">handleInput</span><span class="p">(</span><span class="o">*</span><span class="k">this</span><span class="p">,</span> <span class="n">input</span><span class="p">);</span>
-  <span class="p">}</span>
+<span class="w">  </span><span class="k">virtual</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="n">handleInput</span><span class="p">(</span><span class="n">Input</span><span class="w"> </span><span class="n">input</span><span class="p">)</span>
+<span class="w">  </span><span class="p">{</span>
+<span class="w">    </span><span class="n">state_</span><span class="o">-&gt;</span><span class="n">handleInput</span><span class="p">(</span><span class="o">*</span><span class="k">this</span><span class="p">,</span><span class="w"> </span><span class="n">input</span><span class="p">);</span>
+<span class="w">  </span><span class="p">}</span>
 
-  <span class="k">virtual</span> <span class="kt">void</span> <span class="n">update</span><span class="p">()</span>
-  <span class="p">{</span>
-    <span class="n">state_</span><span class="o">-&gt;</span><span class="n">update</span><span class="p">(</span><span class="o">*</span><span class="k">this</span><span class="p">);</span>
-  <span class="p">}</span>
+<span class="w">  </span><span class="k">virtual</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="n">update</span><span class="p">()</span>
+<span class="w">  </span><span class="p">{</span>
+<span class="w">    </span><span class="n">state_</span><span class="o">-&gt;</span><span class="n">update</span><span class="p">(</span><span class="o">*</span><span class="k">this</span><span class="p">);</span>
+<span class="w">  </span><span class="p">}</span>
 
-  <span class="c1">// 其他方法……</span>
+<span class="w">  </span><span class="c1">// 其他方法……</span>
 <span class="k">private</span><span class="o">:</span>
-  <span class="n">HeroineState</span><span class="o">*</span> <span class="n">state_</span><span class="p">;</span>
+<span class="w">  </span><span class="n">HeroineState</span><span class="o">*</span><span class="w"> </span><span class="n">state_</span><span class="p">;</span>
 <span class="p">};</span>
-</pre></div>
+</code></pre></div>
 
-
-<p>为了“改变状态”，我们只需要将<code>state_</code>声明指向不同的<code>HeroineState</code>对象。
+<p>为了“改变状态”，我们只需要给<code>state_</code>赋值，让它指向不同的<code>HeroineState</code>对象。
 这就是状态模式的全部了。</p>
 <aside name="delegate">
 <p>这看上去有些像<a href="http://en.wikipedia.org/wiki/Strategy_pattern" class="gof-pattern">策略</a>模式和<a href="type-object.html"class="pattern">类型对象</a>模式。
@@ -496,10 +483,10 @@ GoF的状态模式是一个方法——我们会谈到的——但先从简单�
 </ul>
 </aside>
 <h2><a href="#状态对象在哪里？" name="状态对象在哪里？">状态对象在哪里？</a></h2>
-<p>我这里掩掩藏了一些细节。为了改变状态，我们需要声明<code>state_</code>指向新的状态，
-但那个新状态又是从哪里来呢？
-在<code>enum</code>实现中，这都不用过脑子——<code>enum</code>实际上就像数字一样。
-但是现在状态是类了，意味着我们需要指向实例。通常这有两种方案：</p>
+<p>我在这里略过了一个细节。为了改变状态，我们需要让<code>state_</code>指向新的状态，
+但那个新状态又是从哪里来的呢？
+在<code>enum</code>实现里，这压根不用过脑子——<code>enum</code>值就像数字一样，是原始类型。
+但现在状态变成了类，意味着我们需要一个实际的实例来指向。对此通常有两种做法：</p>
 <h3><a href="#静态状态" name="静态状态">静态状态</a></h3>
 <p><span name="fn"></span></p>
 <p>如果状态对象没有其他数据字段，
@@ -507,81 +494,77 @@ GoF的状态模式是一个方法——我们会谈到的——但先从简单�
 在这种情况下，没理由产生多个实例。毕竟每个实例都完全一样。</p>
 <aside name="fn">
 <p>如果你的状态没有字段，只有<em>一个</em>虚方法，你可以再简化这个模式。
-将每个状态<em>类</em>替换成状态<em>函数</em>——只是一个普通的顶层函数。
+将每个状态<em>类</em>替换成状态<em>函数</em>——只是一个平淡无奇的顶层函数。
 然后，主类中的<code>state_</code>字段变成一个简单的函数指针。</p>
 </aside>
 <p>在那种情况下，你可以用一个<em>静态</em>实例。
-哪怕你有一堆FSM同时在同一状态上运行，它们也能指向同一实例，因为状态没有与状态机相关的部分。</p>
+哪怕你有一堆FSM同时在同一状态上运行，它们也都能指向同一实例，因为它没有任何与特定状态机相关的东西。</p>
 <p><span name="flyweight"></span></p>
 <aside name="flyweight">
 <p>这是<a href="flyweight.html" class="gof-pattern">享元</a>模式。</p>
 </aside>
 <p>在<em>哪里</em>放置静态实例取决于你。找一个合理的地方。
 没什么特殊的理由，在这里我将它放在状态基类中。</p>
-<div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">HeroineState</span>
+<div class="codehilite"><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">HeroineState</span>
 <span class="p">{</span>
 <span class="k">public</span><span class="o">:</span>
-  <span class="k">static</span> <span class="n">StandingState</span> <span class="n">standing</span><span class="p">;</span>
-  <span class="k">static</span> <span class="n">DuckingState</span> <span class="n">ducking</span><span class="p">;</span>
-  <span class="k">static</span> <span class="n">JumpingState</span> <span class="n">jumping</span><span class="p">;</span>
-  <span class="k">static</span> <span class="n">DivingState</span> <span class="n">diving</span><span class="p">;</span>
+<span class="w">  </span><span class="k">static</span><span class="w"> </span><span class="n">StandingState</span><span class="w"> </span><span class="n">standing</span><span class="p">;</span>
+<span class="w">  </span><span class="k">static</span><span class="w"> </span><span class="n">DuckingState</span><span class="w"> </span><span class="n">ducking</span><span class="p">;</span>
+<span class="w">  </span><span class="k">static</span><span class="w"> </span><span class="n">JumpingState</span><span class="w"> </span><span class="n">jumping</span><span class="p">;</span>
+<span class="w">  </span><span class="k">static</span><span class="w"> </span><span class="n">DivingState</span><span class="w"> </span><span class="n">diving</span><span class="p">;</span>
 
-  <span class="c1">// 其他代码……</span>
+<span class="w">  </span><span class="c1">// 其他代码……</span>
 <span class="p">};</span>
-</pre></div>
+</code></pre></div>
 
-
-<p>每个静态字段都是游戏状态类的一个实例。为了让英雄跳跃，站立状态会这样做：</p>
-<div class="codehilite"><pre><span></span><span class="k">if</span> <span class="p">(</span><span class="n">input</span> <span class="o">==</span> <span class="n">PRESS_B</span><span class="p">)</span>
+<p>这些静态字段中的每一个都是游戏所用的那个状态的唯一实例。为了让英雄跳跃，站立状态会这样做：</p>
+<div class="codehilite"><pre><span></span><code><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">input</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">PRESS_B</span><span class="p">)</span>
 <span class="p">{</span>
-  <span class="n">heroine</span><span class="p">.</span><span class="n">state_</span> <span class="o">=</span> <span class="o">&amp;</span><span class="n">HeroineState</span><span class="o">::</span><span class="n">jumping</span><span class="p">;</span>
-  <span class="n">heroine</span><span class="p">.</span><span class="n">setGraphics</span><span class="p">(</span><span class="n">IMAGE_JUMP</span><span class="p">);</span>
+<span class="w">  </span><span class="n">heroine</span><span class="p">.</span><span class="n">state_</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">&amp;</span><span class="n">HeroineState</span><span class="o">::</span><span class="n">jumping</span><span class="p">;</span>
+<span class="w">  </span><span class="n">heroine</span><span class="p">.</span><span class="n">setGraphics</span><span class="p">(</span><span class="n">IMAGE_JUMP</span><span class="p">);</span>
 <span class="p">}</span>
-</pre></div>
-
+</code></pre></div>
 
 <h3><a href="#实例化状态" name="实例化状态">实例化状态</a></h3>
-<p>有时没那么容易。静态状态对俯卧状态不起作用。
-它有一个<code>chargeTime_</code>字段，与正在俯卧的英雄特定相关。
-在游戏中，如果只有一个英雄，那也行，但是如果要添加双人合作，同时在屏幕上有两个英雄，就有麻烦了。</p>
+<p>不过有时这一套就行不通。静态状态对下蹲状态不适用。
+它有个<code>chargeTime_</code>字段，那是与恰好处于下蹲状态的那个英雄具体相关的。
+如果游戏里只有一个英雄，这可能碰巧能行，但若要加入双人合作，屏幕上同时出现两个英雄，就会出问题。</p>
 <p><span name="fragment"></span>
 在那种情况下，转换时需要创建状态对象。
-这需要每个FSM拥有自己的状态实例。如果我们分配<em>新</em>状态，
+这让每个FSM都能拥有自己的状态实例。如果我们分配<em>新</em>状态，
 那意味着我们需要释放<em>当前的</em>状态。
-在这里要小心，由于触发变化的代码是当前状态中的方法，需要删除<code>this</code>，因此需要小心从事。</p>
-<p>相反，我们允许<code>HeroineState</code>中的<code>handleInput()</code>返回一个新状态。
+这里需要小心，因为触发状态切换的代码位于当前状态的方法中。我们可不想在方法还没返回时就把自己脚下的<code>this</code>删掉。</p>
+<p>相反，我们允许<code>HeroineState</code>中的<code>handleInput()</code>选择性地返回一个新状态。
 如果它那么做了，<code>Heroine</code>会删除旧的，然后换成新的，就像这样：</p>
-<div class="codehilite"><pre><span></span><span class="kt">void</span> <span class="n">Heroine</span><span class="o">::</span><span class="n">handleInput</span><span class="p">(</span><span class="n">Input</span> <span class="n">input</span><span class="p">)</span>
+<div class="codehilite"><pre><span></span><code><span class="kt">void</span><span class="w"> </span><span class="nf">Heroine::handleInput</span><span class="p">(</span><span class="n">Input</span><span class="w"> </span><span class="n">input</span><span class="p">)</span>
 <span class="p">{</span>
-  <span class="n">HeroineState</span><span class="o">*</span> <span class="n">state</span> <span class="o">=</span> <span class="n">state_</span><span class="o">-&gt;</span><span class="n">handleInput</span><span class="p">(</span><span class="o">*</span><span class="k">this</span><span class="p">,</span> <span class="n">input</span><span class="p">);</span>
-  <span class="k">if</span> <span class="p">(</span><span class="n">state</span> <span class="o">!=</span> <span class="nb">NULL</span><span class="p">)</span>
-  <span class="p">{</span>
-    <span class="k">delete</span> <span class="n">state_</span><span class="p">;</span>
-    <span class="n">state_</span> <span class="o">=</span> <span class="n">state</span><span class="p">;</span>
-  <span class="p">}</span>
+<span class="w">  </span><span class="n">HeroineState</span><span class="o">*</span><span class="w"> </span><span class="n">state</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">state_</span><span class="o">-&gt;</span><span class="n">handleInput</span><span class="p">(</span><span class="o">*</span><span class="k">this</span><span class="p">,</span><span class="w"> </span><span class="n">input</span><span class="p">);</span>
+<span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">state</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="nb">NULL</span><span class="p">)</span>
+<span class="w">  </span><span class="p">{</span>
+<span class="w">    </span><span class="k">delete</span><span class="w"> </span><span class="n">state_</span><span class="p">;</span>
+<span class="w">    </span><span class="n">state_</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">state</span><span class="p">;</span>
+<span class="w">  </span><span class="p">}</span>
 <span class="p">}</span>
-</pre></div>
+</code></pre></div>
 
-
-<p>这样，直到从之前的状态返回，我们才需要删除它。
-现在，站立状态可以通过创建新实例转换为俯卧状态：</p>
-<div class="codehilite"><pre><span></span><span class="n">HeroineState</span><span class="o">*</span> <span class="n">StandingState</span><span class="o">::</span><span class="n">handleInput</span><span class="p">(</span><span class="n">Heroine</span><span class="o">&amp;</span> <span class="n">heroine</span><span class="p">,</span>
-                                         <span class="n">Input</span> <span class="n">input</span><span class="p">)</span>
+<p>这样，直到从它的方法返回之后，我们才会删除之前的状态。
+现在，站立状态可以通过创建新实例转换为下蹲状态：</p>
+<div class="codehilite"><pre><span></span><code><span class="n">HeroineState</span><span class="o">*</span><span class="w"> </span><span class="nf">StandingState::handleInput</span><span class="p">(</span><span class="n">Heroine</span><span class="o">&amp;</span><span class="w"> </span><span class="n">heroine</span><span class="p">,</span>
+<span class="w">                                         </span><span class="n">Input</span><span class="w"> </span><span class="n">input</span><span class="p">)</span>
 <span class="p">{</span>
-  <span class="k">if</span> <span class="p">(</span><span class="n">input</span> <span class="o">==</span> <span class="n">PRESS_DOWN</span><span class="p">)</span>
-  <span class="p">{</span>
-    <span class="c1">// 其他代码……</span>
-    <span class="k">return</span> <span class="k">new</span> <span class="n">DuckingState</span><span class="p">();</span>
-  <span class="p">}</span>
+<span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">input</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">PRESS_DOWN</span><span class="p">)</span>
+<span class="w">  </span><span class="p">{</span>
+<span class="w">    </span><span class="c1">// 其他代码……</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">DuckingState</span><span class="p">();</span>
+<span class="w">  </span><span class="p">}</span>
 
-  <span class="c1">// 保持这个状态</span>
-  <span class="k">return</span> <span class="nb">NULL</span><span class="p">;</span>
+<span class="w">  </span><span class="c1">// 保持这个状态</span>
+<span class="w">  </span><span class="k">return</span><span class="w"> </span><span class="nb">NULL</span><span class="p">;</span>
 <span class="p">}</span>
-</pre></div>
+</code></pre></div>
 
-
-<p>如果可以，我倾向于使用静态状态，因为它们不会在状态转换时消耗太多的内存和CPU。
-但是，对于更<em>多状态的事物</em>，需要耗费一些精力来实现。</p>
+<p>如果可以，我倾向于使用静态状态，因为它们不会在每次状态转换时消耗内存和CPU周期去分配对象。
+不过，对于那些更……呃……<em>有状态</em>的状态，就得用这种方式了。</p>
 <aside name="fragment">
 <p>当你为状态动态分配内存时，你也许会担心碎片。
 <a href="object-pool.html" class="pattern">对象池</a>模式可以帮上忙。</p>
@@ -590,210 +573,202 @@ GoF的状态模式是一个方法——我们会谈到的——但先从简单�
 <p>状态模式的目标是将状态的行为和数据封装到单一类中。
 我们完成了一部分，但是还有一些未了之事。</p>
 <p>当英雄改变状态时，我们也改变她的贴图。
-现在，那部分代码在她转换<em>前</em>的状态中。
-当她从俯卧转为站立，俯卧状态修改了她的贴图：</p>
-<div class="codehilite"><pre><span></span><span class="n">HeroineState</span><span class="o">*</span> <span class="n">DuckingState</span><span class="o">::</span><span class="n">handleInput</span><span class="p">(</span><span class="n">Heroine</span><span class="o">&amp;</span> <span class="n">heroine</span><span class="p">,</span>
-                                        <span class="n">Input</span> <span class="n">input</span><span class="p">)</span>
+现在，那部分代码由她正在切换<em>离开</em>的那个状态所拥有。
+当她从下蹲转为站立，下蹲状态修改了她的贴图：</p>
+<div class="codehilite"><pre><span></span><code><span class="n">HeroineState</span><span class="o">*</span><span class="w"> </span><span class="nf">DuckingState::handleInput</span><span class="p">(</span><span class="n">Heroine</span><span class="o">&amp;</span><span class="w"> </span><span class="n">heroine</span><span class="p">,</span>
+<span class="w">                                        </span><span class="n">Input</span><span class="w"> </span><span class="n">input</span><span class="p">)</span>
 <span class="p">{</span>
-  <span class="k">if</span> <span class="p">(</span><span class="n">input</span> <span class="o">==</span> <span class="n">RELEASE_DOWN</span><span class="p">)</span>
-  <span class="p">{</span>
-    <span class="n">heroine</span><span class="p">.</span><span class="n">setGraphics</span><span class="p">(</span><span class="n">IMAGE_STAND</span><span class="p">);</span>
-    <span class="k">return</span> <span class="k">new</span> <span class="nf">StandingState</span><span class="p">();</span>
-  <span class="p">}</span>
+<span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">input</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">RELEASE_DOWN</span><span class="p">)</span>
+<span class="w">  </span><span class="p">{</span>
+<span class="w">    </span><span class="n">heroine</span><span class="p">.</span><span class="n">setGraphics</span><span class="p">(</span><span class="n">IMAGE_STAND</span><span class="p">);</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">StandingState</span><span class="p">();</span>
+<span class="w">  </span><span class="p">}</span>
 
-  <span class="c1">// 其他代码……</span>
+<span class="w">  </span><span class="c1">// 其他代码……</span>
 <span class="p">}</span>
-</pre></div>
-
+</code></pre></div>
 
 <p>我们想做的是，每个状态控制自己的贴图。这可以通过给状态一个<em>入口行为</em>来实现：</p>
-<div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">StandingState</span> <span class="o">:</span> <span class="k">public</span> <span class="n">HeroineState</span>
+<div class="codehilite"><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">StandingState</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="k">public</span><span class="w"> </span><span class="n">HeroineState</span>
 <span class="p">{</span>
 <span class="k">public</span><span class="o">:</span>
-  <span class="k">virtual</span> <span class="kt">void</span> <span class="n">enter</span><span class="p">(</span><span class="n">Heroine</span><span class="o">&amp;</span> <span class="n">heroine</span><span class="p">)</span>
-  <span class="p">{</span>
-    <span class="n">heroine</span><span class="p">.</span><span class="n">setGraphics</span><span class="p">(</span><span class="n">IMAGE_STAND</span><span class="p">);</span>
-  <span class="p">}</span>
+<span class="w">  </span><span class="k">virtual</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="n">enter</span><span class="p">(</span><span class="n">Heroine</span><span class="o">&amp;</span><span class="w"> </span><span class="n">heroine</span><span class="p">)</span>
+<span class="w">  </span><span class="p">{</span>
+<span class="w">    </span><span class="n">heroine</span><span class="p">.</span><span class="n">setGraphics</span><span class="p">(</span><span class="n">IMAGE_STAND</span><span class="p">);</span>
+<span class="w">  </span><span class="p">}</span>
 
-  <span class="c1">// 其他代码……</span>
+<span class="w">  </span><span class="c1">// 其他代码……</span>
 <span class="p">};</span>
-</pre></div>
+</code></pre></div>
 
-
-<p>在<code>Heroine</code>中，我们将处理状态改变的代码移动到新状态上调用：</p>
-<div class="codehilite"><pre><span></span><span class="kt">void</span> <span class="n">Heroine</span><span class="o">::</span><span class="n">handleInput</span><span class="p">(</span><span class="n">Input</span> <span class="n">input</span><span class="p">)</span>
+<p>回到<code>Heroine</code>中，我们修改处理状态改变的代码，让它在新的状态上调用该方法：</p>
+<div class="codehilite"><pre><span></span><code><span class="kt">void</span><span class="w"> </span><span class="nf">Heroine::handleInput</span><span class="p">(</span><span class="n">Input</span><span class="w"> </span><span class="n">input</span><span class="p">)</span>
 <span class="p">{</span>
-  <span class="n">HeroineState</span><span class="o">*</span> <span class="n">state</span> <span class="o">=</span> <span class="n">state_</span><span class="o">-&gt;</span><span class="n">handleInput</span><span class="p">(</span><span class="o">*</span><span class="k">this</span><span class="p">,</span> <span class="n">input</span><span class="p">);</span>
-  <span class="k">if</span> <span class="p">(</span><span class="n">state</span> <span class="o">!=</span> <span class="nb">NULL</span><span class="p">)</span>
-  <span class="p">{</span>
-    <span class="k">delete</span> <span class="n">state_</span><span class="p">;</span>
-    <span class="n">state_</span> <span class="o">=</span> <span class="n">state</span><span class="p">;</span>
+<span class="w">  </span><span class="n">HeroineState</span><span class="o">*</span><span class="w"> </span><span class="n">state</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">state_</span><span class="o">-&gt;</span><span class="n">handleInput</span><span class="p">(</span><span class="o">*</span><span class="k">this</span><span class="p">,</span><span class="w"> </span><span class="n">input</span><span class="p">);</span>
+<span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">state</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="nb">NULL</span><span class="p">)</span>
+<span class="w">  </span><span class="p">{</span>
+<span class="w">    </span><span class="k">delete</span><span class="w"> </span><span class="n">state_</span><span class="p">;</span>
+<span class="w">    </span><span class="n">state_</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">state</span><span class="p">;</span>
 
-    <span class="c1">// 调用新状态的入口行为</span>
-    <span class="n">state_</span><span class="o">-&gt;</span><span class="n">enter</span><span class="p">(</span><span class="o">*</span><span class="k">this</span><span class="p">);</span>
-  <span class="p">}</span>
+<span class="w">    </span><span class="c1">// 调用新状态的入口行为</span>
+<span class="w">    </span><span class="n">state_</span><span class="o">-&gt;</span><span class="n">enter</span><span class="p">(</span><span class="o">*</span><span class="k">this</span><span class="p">);</span>
+<span class="w">  </span><span class="p">}</span>
 <span class="p">}</span>
-</pre></div>
+</code></pre></div>
 
-
-<p>这让我们将俯卧代码简化为：</p>
-<div class="codehilite"><pre><span></span><span class="n">HeroineState</span><span class="o">*</span> <span class="n">DuckingState</span><span class="o">::</span><span class="n">handleInput</span><span class="p">(</span><span class="n">Heroine</span><span class="o">&amp;</span> <span class="n">heroine</span><span class="p">,</span>
-                                        <span class="n">Input</span> <span class="n">input</span><span class="p">)</span>
+<p>这让我们将下蹲代码简化为：</p>
+<div class="codehilite"><pre><span></span><code><span class="n">HeroineState</span><span class="o">*</span><span class="w"> </span><span class="nf">DuckingState::handleInput</span><span class="p">(</span><span class="n">Heroine</span><span class="o">&amp;</span><span class="w"> </span><span class="n">heroine</span><span class="p">,</span>
+<span class="w">                                        </span><span class="n">Input</span><span class="w"> </span><span class="n">input</span><span class="p">)</span>
 <span class="p">{</span>
-  <span class="k">if</span> <span class="p">(</span><span class="n">input</span> <span class="o">==</span> <span class="n">RELEASE_DOWN</span><span class="p">)</span>
-  <span class="p">{</span>
-    <span class="k">return</span> <span class="k">new</span> <span class="n">StandingState</span><span class="p">();</span>
-  <span class="p">}</span>
+<span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">input</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">RELEASE_DOWN</span><span class="p">)</span>
+<span class="w">  </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">StandingState</span><span class="p">();</span>
+<span class="w">  </span><span class="p">}</span>
 
-  <span class="c1">// 其他代码……</span>
+<span class="w">  </span><span class="c1">// 其他代码……</span>
 <span class="p">}</span>
-</pre></div>
-
+</code></pre></div>
 
 <p>它做的所有事情就是转换到站立状态，站立状态控制贴图。
 现在我们的状态真正地封装了。
-关于入口行为的好事就是，当你进入状态时，不必关心你是从哪个状态转换<em>来的</em>。</p>
+入口行为特别好的一点是，无论你是从哪个状态切换<em>过来</em>的，它都会在你进入状态时运行。</p>
 <p>大多数真正的状态图都有转为同一状态的多个转移。
-举个例子，英雄在跳跃或跳斩后进入站立状态。
-这意味着我们在转换发生的最后重复相同的代码。
-入口行为很好地解决了这一点。</p>
-<p>我们能，当然，扩展并支持<em>出口行为</em>。
-这是在我们<em>离开</em>现有状态，转换到新状态之前调用的方法。</p>
-<h2><a href="#有什么收获？" name="有什么收获？">有什么收获？</a></h2>
-<p>我花了这么长时间向您推销FSMs，现在我们来捋一捋。
-我到现在讲的都是真的，FSM能很好地解决一些问题。但它们最大的优点也是它们最大的缺点。</p>
+举个例子，英雄在跳起或速降落地后也会进入站立状态。
+这意味着在每次发生这种转换的地方，我们都要重复一些代码。
+入口行为给了我们一个整合这些代码的地方。</p>
+<p>当然，我们也可以扩展这个做法，支持<em>出口行为</em>。
+它就是我们在切换<em>离开</em>当前状态、转换到新状态之前调用的方法。</p>
+<h2><a href="#有什么猫腻？" name="有什么猫腻？">有什么猫腻？</a></h2>
+<p>我花了这么长时间向你推销FSM，现在却要一把抽走你脚下的地毯。
+我前面讲的都是真的，FSM对某些问题确实很合适。但它们最大的优点也正是它们最大的缺点。</p>
 <p><span name="turing"></span>
-状态机通过使用有约束的结构来理清杂乱的代码。
-你只需一个固定状态的集合，单一的当前状态，和一些硬编码的转换。</p>
+状态机通过强制一种非常受限的结构，帮你理清一团乱麻的代码。
+你所能拥有的只是一个固定的状态集合、单一的当前状态，以及一些硬编码的转换。</p>
 <aside name="turing">
 <p>一个有限状态机甚至不是<em>图灵完全的</em>。
-自动理论用一系列抽象模型描述计算，每种都比之前的复杂。
+自动机理论用一系列抽象模型来描述计算，每种模型都比前一种更复杂。
 <em>图灵机</em> 是其中最具有表现力的模型之一。</p>
 <p>“图灵完全”意味着一个系统（通常是编程语言）足以在内部实现一个图灵机，
-也就意味着，在某种程度上，所有的图灵完全具有同样的表现力。
+也就意味着，在某种程度上，所有图灵完全的语言具有同样的表现力。
 FSMs不够灵活，并不在其中。</p>
 </aside>
-<p>如果你需要为更复杂的东西使用状态机，比如游戏AI，你会撞到这个模型的限制上。
-感谢上天，我们的前辈找到了一些方法来避免这些限制。我会在这一章的最后简单地浏览一下它们。</p>
+<p>如果你想把状态机用在更复杂的东西上，比如游戏AI，你会一头撞在这个模型的局限上。
+幸好，我们的前辈已经找到了一些绕开这些障碍的方法。我会带你了解其中几种，作为本章的收尾。</p>
 <h2><a href="#并发状态机" name="并发状态机">并发状态机</a></h2>
 <p>我们决定赋予英雄拿枪的能力。
-当她拿着枪的时候，她还是能做她之前的任何事情：跑动，跳跃，跳斩，等等。
-但是她在做这些的同时也要能开火。</p>
+当她带着家伙时，她还是能做之前所有的事：跑动、跳跃、下蹲，等等。
+但她还得能一边做这些一边开火。</p>
 <p>如果我们执着于FSM，我们需要<em>翻倍</em>现有状态。
-对于每个现有状态，我们需要另一个她持枪状态：站立，持枪站立，跳跃，持枪跳跃，
+对于每个现有状态，我们都需要另一个状态来表示她持枪时做同样的事：站立、持枪站立、跳跃、持枪跳跃，
 你知道我的意思了吧。</p>
-<p>多加几种武器，状态就会指数爆炸。
-不但增加了大量的状态，也增加了大量的冗余：
-持枪和不持枪的状态是完全一样的，只是多了一点负责射击的代码。</p>
+<p>再多加几种武器，状态数量就会组合爆炸。
+不仅状态数量庞大，冗余也极其严重：
+持枪和不持枪的状态几乎完全相同，只是多了一点负责射击的代码。</p>
 <p><span name="combination"></span>
 问题在于我们将两种状态绑定到了一个状态机上——她<em>做的</em>和她<em>携带的</em>。
 为了处理所有可能的组合，我们需要为每一<em>对</em>组合写一个状态。
 修复方法很明显：使用两个单独的状态机。</p>
 <aside name="combination">
-<p>如果她在做什么有<em>n</em>个状态，而她携带了什么有<em>m</em>个状态，要塞到一个状态机中，
+<p>如果想把她在做什么的<em>n</em>个状态、她携带什么的<em>m</em>个状态都塞进一个状态机，
 我们需要<em>n &times; m</em>个状态。使用两个状态机，就只有<em>n + m</em>个。</p>
 </aside>
 <p>我们保留之前记录她在做什么的状态机，不用管它。
 然后定义她携带了什么的单独状态机。
 <code>Heroine</code>将会有<em>两个</em>“状态”引用，每个对应一个状态机，就像这样：</p>
 <p><span name="equip-state"></span></p>
-<div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">Heroine</span>
+<div class="codehilite"><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Heroine</span>
 <span class="p">{</span>
-  <span class="c1">// 其他代码……</span>
+<span class="w">  </span><span class="c1">// 其他代码……</span>
 
 <span class="k">private</span><span class="o">:</span>
-  <span class="n">HeroineState</span><span class="o">*</span> <span class="n">state_</span><span class="p">;</span>
-  <span class="n">HeroineState</span><span class="o">*</span> <span class="n">equipment_</span><span class="p">;</span>
+<span class="w">  </span><span class="n">HeroineState</span><span class="o">*</span><span class="w"> </span><span class="n">state_</span><span class="p">;</span>
+<span class="w">  </span><span class="n">HeroineState</span><span class="o">*</span><span class="w"> </span><span class="n">equipment_</span><span class="p">;</span>
 <span class="p">};</span>
-</pre></div>
-
+</code></pre></div>
 
 <aside name="equip-state">
 <p>为了便于说明，她的装备也使用了状态模式。
 在实践中，由于装备只有两个状态，一个布尔标识就够了。</p>
 </aside>
-<p>当英雄把输入委托给了状态，两个状态都需要委托：</p>
+<p>当英雄把输入委托给状态时，她会把输入交给两个状态：</p>
 <p><span name="consume"></span></p>
-<div class="codehilite"><pre><span></span><span class="kt">void</span> <span class="n">Heroine</span><span class="o">::</span><span class="n">handleInput</span><span class="p">(</span><span class="n">Input</span> <span class="n">input</span><span class="p">)</span>
+<div class="codehilite"><pre><span></span><code><span class="kt">void</span><span class="w"> </span><span class="nf">Heroine::handleInput</span><span class="p">(</span><span class="n">Input</span><span class="w"> </span><span class="n">input</span><span class="p">)</span>
 <span class="p">{</span>
-  <span class="n">state_</span><span class="o">-&gt;</span><span class="n">handleInput</span><span class="p">(</span><span class="o">*</span><span class="k">this</span><span class="p">,</span> <span class="n">input</span><span class="p">);</span>
-  <span class="n">equipment_</span><span class="o">-&gt;</span><span class="n">handleInput</span><span class="p">(</span><span class="o">*</span><span class="k">this</span><span class="p">,</span> <span class="n">input</span><span class="p">);</span>
+<span class="w">  </span><span class="n">state_</span><span class="o">-&gt;</span><span class="n">handleInput</span><span class="p">(</span><span class="o">*</span><span class="k">this</span><span class="p">,</span><span class="w"> </span><span class="n">input</span><span class="p">);</span>
+<span class="w">  </span><span class="n">equipment_</span><span class="o">-&gt;</span><span class="n">handleInput</span><span class="p">(</span><span class="o">*</span><span class="k">this</span><span class="p">,</span><span class="w"> </span><span class="n">input</span><span class="p">);</span>
 <span class="p">}</span>
-</pre></div>
-
+</code></pre></div>
 
 <aside name="consume">
-<p>功能更完备的系统也许能让状态机<em>销毁</em>输入，这样其他状态机就不会收到了。
-这能阻止两个状态机响应同一输入。</p>
+<p>功能更完备的系统也许能让一个状态机<em>消费掉</em>输入，这样另一个状态机就不会收到了。
+这能防止两个状态机错误地同时响应同一个输入。</p>
 </aside>
-<p>每个状态机之后都能响应输入，发生行为，独立于其它机器改变状态。
+<p>这样每个状态机都能各自响应输入、产生行为，并独立于另一个状态机改变状态。
 当两个状态集合几乎没有联系的时候，它工作得不错。</p>
-<p>在实践中，你会发现状态有时需要交互。
+<p>在实践中，你会发现有些情况下状态之间确实会相互作用。
 举个例子，也许她在跳跃时不能开火，或者她在持枪时不能跳斩攻击。
-为了完成这个，你也许会在状态的代码中做一些粗糙的<code>if</code>测试<em>其他</em>状态来协同，
+为了处理这种情况，你也许会在一个状态的代码中做一些粗糙的<code>if</code>测试，去检查<em>另一个</em>状态机的状态来协调它们，
 这不是最优雅的解决方案，但这可以搞定工作。</p>
 <h2><a href="#分层状态机" name="分层状态机">分层状态机</a></h2>
 <p>再充实一下英雄的行为，她可能会有更多相似的状态。
-举个例子，她也许有站立、行走、奔跑和滑铲状态。在这些状态中，按B跳，按下蹲。</p>
-<p>如果使用简单的状态机实现，我们在每个状态中的都重复了代码。
+举个例子，她也许有站立、行走、奔跑和滑铲状态。在这些状态中，按B键会跳跃，按方向下键会下蹲。</p>
+<p>如果使用简单的状态机实现，我们必须在每个这样的状态中重复那段代码。
 如果我们能够实现一次，在多个状态间重用就好了。</p>
 <p><span name="inheritance"></span>
-如果这是面向对象的代码而不是状态机的，在状态间分享代码的方式是通过继承。
-我们可以为“在地面上”定义一个类处理跳跃和速降。
+如果这是普通的面向对象代码而不是状态机，在状态间共享代码的一种方式就是继承。
+我们可以为“在地面上”定义一个类，处理跳跃和下蹲。
 站立、行走、奔跑和滑铲都从它继承，然后增加各自的附加行为。</p>
 <aside name="inheritance">
 <p>它的影响有好有坏。
-继承是一种有力的代码重用工具，但也在两块代码间建立了非常强的耦合。
-这是重锤，所以请小心使用。</p>
+继承是代码重用的强大工具，但也会在两块代码之间建立非常强的耦合。
+这是把大锤子，挥动时要小心。</p>
 </aside>
 <p>你会发现，这是个被称为<em>分层状态机</em>的通用结构。
 状态可以有<em>父状态</em>（这让它变为<em>子状态</em>）。
 当一个事件进来，如果子状态没有处理，它就会交给链上的父状态。
-换言之，它像重载的继承方法那样运作。</p>
+换言之，它就像覆写继承的方法那样运作。</p>
 <p>事实上，如果我们使用状态模式实现FSM，我们可以使用继承来实现层次。
 定义一个基类作为父状态：</p>
-<div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">OnGroundState</span> <span class="o">:</span> <span class="k">public</span> <span class="n">HeroineState</span>
+<div class="codehilite"><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">OnGroundState</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="k">public</span><span class="w"> </span><span class="n">HeroineState</span>
 <span class="p">{</span>
 <span class="k">public</span><span class="o">:</span>
-  <span class="k">virtual</span> <span class="kt">void</span> <span class="n">handleInput</span><span class="p">(</span><span class="n">Heroine</span><span class="o">&amp;</span> <span class="n">heroine</span><span class="p">,</span> <span class="n">Input</span> <span class="n">input</span><span class="p">)</span>
-  <span class="p">{</span>
-    <span class="k">if</span> <span class="p">(</span><span class="n">input</span> <span class="o">==</span> <span class="n">PRESS_B</span><span class="p">)</span>
-    <span class="p">{</span>
-      <span class="c1">// 跳跃……</span>
-    <span class="p">}</span>
-    <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">input</span> <span class="o">==</span> <span class="n">PRESS_DOWN</span><span class="p">)</span>
-    <span class="p">{</span>
-      <span class="c1">// 俯卧……</span>
-    <span class="p">}</span>
-  <span class="p">}</span>
+<span class="w">  </span><span class="k">virtual</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="n">handleInput</span><span class="p">(</span><span class="n">Heroine</span><span class="o">&amp;</span><span class="w"> </span><span class="n">heroine</span><span class="p">,</span><span class="w"> </span><span class="n">Input</span><span class="w"> </span><span class="n">input</span><span class="p">)</span>
+<span class="w">  </span><span class="p">{</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">input</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">PRESS_B</span><span class="p">)</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">      </span><span class="c1">// 跳跃……</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="k">else</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">input</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">PRESS_DOWN</span><span class="p">)</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">      </span><span class="c1">// 俯卧……</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">}</span>
 <span class="p">};</span>
-</pre></div>
-
+</code></pre></div>
 
 <p>每个子状态继承它：</p>
-<div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">DuckingState</span> <span class="o">:</span> <span class="k">public</span> <span class="n">OnGroundState</span>
+<div class="codehilite"><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">DuckingState</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="k">public</span><span class="w"> </span><span class="n">OnGroundState</span>
 <span class="p">{</span>
 <span class="k">public</span><span class="o">:</span>
-  <span class="k">virtual</span> <span class="kt">void</span> <span class="n">handleInput</span><span class="p">(</span><span class="n">Heroine</span><span class="o">&amp;</span> <span class="n">heroine</span><span class="p">,</span> <span class="n">Input</span> <span class="n">input</span><span class="p">)</span>
-  <span class="p">{</span>
-    <span class="k">if</span> <span class="p">(</span><span class="n">input</span> <span class="o">==</span> <span class="n">RELEASE_DOWN</span><span class="p">)</span>
-    <span class="p">{</span>
-      <span class="c1">// 站起……</span>
-    <span class="p">}</span>
-    <span class="k">else</span>
-    <span class="p">{</span>
-      <span class="c1">// 没有处理输入，返回上一层</span>
-      <span class="n">OnGroundState</span><span class="o">::</span><span class="n">handleInput</span><span class="p">(</span><span class="n">heroine</span><span class="p">,</span> <span class="n">input</span><span class="p">);</span>
-    <span class="p">}</span>
-  <span class="p">}</span>
+<span class="w">  </span><span class="k">virtual</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="n">handleInput</span><span class="p">(</span><span class="n">Heroine</span><span class="o">&amp;</span><span class="w"> </span><span class="n">heroine</span><span class="p">,</span><span class="w"> </span><span class="n">Input</span><span class="w"> </span><span class="n">input</span><span class="p">)</span>
+<span class="w">  </span><span class="p">{</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">input</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">RELEASE_DOWN</span><span class="p">)</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">      </span><span class="c1">// 站起……</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="k">else</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">      </span><span class="c1">// 没有处理输入，返回上一层</span>
+<span class="w">      </span><span class="n">OnGroundState</span><span class="o">::</span><span class="n">handleInput</span><span class="p">(</span><span class="n">heroine</span><span class="p">,</span><span class="w"> </span><span class="n">input</span><span class="p">);</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">}</span>
 <span class="p">};</span>
-</pre></div>
+</code></pre></div>
 
-
-<p>这当然不是唯一的实现层次的方法。
-如果你没有使用GoF的状态模式，这可能不会有用。
-相反，你可以显式的使用状态<em>栈</em>而不是单一状态来表示当前状态的父状态链。</p>
-<p>栈顶的状态是当前状态，在他下面是它的直接父状态，
+<p>当然，这不是实现层次结构的唯一方法。
+如果你没用GoF的状态模式，这一招就行不通。
+相反，你可以不用主类里的单一状态，而是用一个状态<em>栈</em>来显式地表示当前状态的父状态链。</p>
+<p>栈顶的状态是当前状态，在它下面是它的直接父状态，
 然后是<em>那个</em>父状态的父状态，以此类推。
 当你需要状态的特定行为，你从栈的顶端开始，
 然后向下寻找，直到某一个状态处理了它。（如果到底也没找到，就无视它。）</p>
@@ -804,30 +779,30 @@ FSMs不够灵活，并不在其中。</p>
 你记得<em>正在</em>什么状态中，但是不记得<em>曾在</em>什么状态。
 没有简单的办法重回上一状态。</p>
 <p><span name="shared"></span>
-举个例子：早先，我们让无畏英雄武装到了牙齿。
+举个例子：早先，我们让无畏的女英雄武装到了牙齿。
 当她开火时，我们需要新状态播放开火动画，发射子弹，产生视觉效果。
-所以我们拼凑了一个<code>FiringState</code>，不管现在是什么状态，都能在按下开火按钮时跳转为这个状态。</p>
+所以我们拼凑了一个<code>FiringState</code>，并让她能开火的所有状态在按下开火按钮时都转移到这个状态。</p>
 <aside name="shared">
 <p>这个行为在多个状态间重复，也许是用层次状态机重用代码的好地方。</p>
 </aside>
 <p>问题在于她射击<em>后</em>转换到的状态。
-她可以在站立、奔跑、跳跃、跳斩时射击。
+她可以在站立、奔跑、跳跃、下蹲时开上一枪。
 当射击结束，应该转换为她之前的状态。</p>
-<p>如果我们固执于纯粹的FSM，我们就已经忘了她之前所处的状态。
-为了追踪之前的状态，我们定义了很多几乎完全一样的类——站立开火，跑步开火，跳跃开火，诸如此类——
-每个都有硬编码的转换，用来回到之前的状态。</p>
-<p>我们真正想要的是，它会<em>存储</em>开火前所处的状态，之后能<em>回想</em>起来。
-自动理论又一次能帮上忙了，相关的数据结构被称为<a href="http://en.wikipedia.org/wiki/Pushdown_automaton"><em>下推自动机</em></a>。</p>
-<p>有限状态机有<em>一个</em>指向状态的指针，下推自动机有<em>一栈</em>指针。
+<p>如果我们坚持使用普通的FSM，我们早就忘了她之前处在什么状态。
+为了追踪之前的状态，我们得定义一大堆几乎完全一样的状态——站立开火、奔跑开火、跳跃开火，诸如此类——
+就为了让每个状态都能在结束时硬编码地转回正确的状态。</p>
+<p>我们真正想要的是一种方法，能<em>存储</em>她开火前所处的状态，之后还能<em>取回</em>它。
+自动机理论又一次能帮上忙了，相关的数据结构被称为<a href="http://en.wikipedia.org/wiki/Pushdown_automaton"><em>下推自动机</em></a>。</p>
+<p>有限状态机只有<em>一个</em>指向状态的指针，下推自动机则有<em>一个状态指针栈</em>。
 在FSM中，新状态<em>代替</em>了之前的那个状态。
 下推自动机不仅能完成那个，还能给你两个额外操作：</p>
 <ol>
 <li>
-<p>你可以将新状态<em>压入</em>栈中。“当前的”状态总是在栈顶，所以你能转到新状态。
+<p>你可以将新状态<em>压入</em>栈中。“当前的”状态总是在栈顶，所以这会转移到新状态。
   但它让之前的状态待在栈中而不是销毁它。</p>
 </li>
 <li>
-<p>你可以<em>弹出</em>最上面的状态。这个状态会被销毁，它下面的状态成为新状态。</p>
+<p>你可以<em>弹出</em>最上面的状态。这个状态会被销毁，它下面的状态成为新的当前状态。</p>
 </li>
 </ol>
 <p><img src="images/state-pushdown.png" alt="下推自动机的栈。起初只包含了一个站立状态。然后一个开火状态被压入栈顶，当射击结束，开火状态被弹出。" /></p>
@@ -835,19 +810,19 @@ FSMs不够灵活，并不在其中。</p>
 当开火按钮在其他状态按下时，我们<em>压入</em>开火状态。
 当开火动画结束，我们<em>弹出</em>开火状态，然后下推自动机自动转回之前的状态。</p>
 <h2><a href="#所以它们有多有用呢？" name="所以它们有多有用呢？">所以它们有多有用呢？</a></h2>
-<p>即使状态机有这些常见的扩展，它们还是很受限制。
-这让今日游戏AI移向了更加激动人心的领域，比如<em><a href="http://web.archive.org/web/20140402204854/http://www.altdevblogaday.com/2011/02/24/introduction-to-behavior-trees/">行为树</a></em>和<em><a href="http://web.media.mit.edu/~jorkin/goap.html">规划系统</a></em> 。
+<p>即使给状态机加上这些常见的扩展，它们仍然相当受限。
+如今游戏AI的趋势更偏向于<em><a href="http://web.archive.org/web/20140402204854/http://www.altdevblogaday.com/2011/02/24/introduction-to-behavior-trees/">行为树</a></em>和<em><a href="http://web.media.mit.edu/~jorkin/goap.html">规划系统</a></em> 这类激动人心的东西。
 如果你关注复杂AI，这一整章只是为了勾起你的食欲。
 你需要阅读其他书来满足你的欲望。</p>
-<p>这不意味着有限状态机，下推自动机，和其他简单的系统没有用。
-它们是特定问题的好工具。有限状态机在以下情况有用：</p>
+<p>这不意味着有限状态机、下推自动机和其他简单系统就没用了。
+对某些类型的问题来说，它们是很好的建模工具。有限状态机在以下情况有用：</p>
 <ul>
-<li>你有个实体，它的行为基于一些内在状态。</li>
-<li>状态可以被严格地分割为相对较少的不相干项目。</li>
+<li>你有一个实体，它的行为会根据某个内部状态而改变。</li>
+<li>状态可以被严格地分割为相对较少的、互不相同的选项。</li>
 <li>实体响应一系列输入或事件。</li>
 </ul>
-<p>在游戏中，状态机因在AI中使用而闻名，但是它也常用于其他领域，
-比如处理玩家输入，导航菜单界面，分析文字，网络协议以及其他异步行为。</p>
+<p>在游戏中，状态机最出名的是用于AI，但它也常用于其他领域，
+比如实现玩家输入处理、菜单界面导航、文本解析、网络协议以及其他异步行为。</p>
 <nav>
   <span class="prev">&larr; <a href="singleton.html">上一章</a></span>
   <span class="next"><a href="sequencing-patterns.html">下一章</a> &rarr;</span>

@@ -86,11 +86,11 @@ delete the font style for english.
 <h1>事件队列</h1>
 <h1 class="book"><a href="/">游戏设计模式</a><span class="section"><a href="decoupling-patterns.html">Decoupling Patterns</a></span></h1>
 <h2><a href="#意图" name="意图">意图</a></h2>
-<p><em>解耦发出消息或事件的时间和处理它的时间。</em></p>
+<p><em>解耦消息或事件的发送时间和处理它的时间。</em></p>
 <h2><a href="#动机" name="动机">动机</a></h2>
 <p><span name="message"></span></p>
-<p>除非还呆在一两个没有互联网接入的犄角旮旯，否则你很可能已经听说过“事件序列”了。
-如果没有，也许“消息队列”或“事件循环”或“消息泵”可以让你想起些什么。
+<p>除非还住在少数几个没通网的石头底下，否则你很可能已经听说过“事件队列”了。
+如果没有，也许“消息队列”、“事件循环”或“消息泵”能让你觉得耳熟。
 为了唤醒你的记忆，让我们了解几个此模式的常见应用吧。</p>
 <aside name="message">
 <p>这章的大部分里，我交替使用“事件”和“消息”。
@@ -98,30 +98,29 @@ delete the font style for english.
 </aside>
 <h3><a href="#gui事件循环" name="gui事件循环">GUI事件循环</a></h3>
 <p><span name="event-driven"></span></p>
-<p>如果你曾做过任何用户界面编程，你就会很熟悉<em>事件</em>。
-每当用户与你的程序交互——点击按钮，拉出菜单，或者按个键——操作系统就会生成一个事件。
+<p>如果你做过任何用户界面编程，就会对<em>事件</em>再熟悉不过了。
+每当用户与你的程序交互——点击按钮，下拉菜单，或者按个键——操作系统就会生成一个事件。
 它会将这个对象扔给你的应用程序，你的工作就是获取它然后将其与有趣的行为相挂钩。</p>
 <aside name="event-driven">
 <p>这个程序风格非常普遍，被认为是一种编程范式：<a href="http://en.wikipedia.org/wiki/Event-driven_programming"><em>事件驱动编程</em></a>。</p>
 </aside>
-<p>为了获取这些事件，代码底层是<em>事件循环</em>。它大体上是这样的：</p>
-<div class="codehilite"><pre><span></span><span class="k">while</span> <span class="p">(</span><span class="n">running</span><span class="p">)</span>
+<p>为了接收这些消息，在你代码深处的某个地方有一个<em>事件循环</em>。它大体上是这样的：</p>
+<div class="codehilite"><pre><span></span><code><span class="k">while</span><span class="w"> </span><span class="p">(</span><span class="n">running</span><span class="p">)</span>
 <span class="p">{</span>
-  <span class="n">Event</span> <span class="n">event</span> <span class="o">=</span> <span class="n">getNextEvent</span><span class="p">();</span>
-  <span class="c1">// 处理事件……</span>
+<span class="w">  </span><span class="n">Event</span><span class="w"> </span><span class="n">event</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">getNextEvent</span><span class="p">();</span>
+<span class="w">  </span><span class="c1">// 处理事件……</span>
 <span class="p">}</span>
-</pre></div>
-
+</code></pre></div>
 
 <p><span name="interrupt"></span></p>
-<p>调用<code>getNextEvent()</code>将一堆未处理的用户输入传到应用程序中。
-你将它导向事件处理器，之后应用魔术般获得了生命。
+<p>调用<code>getNextEvent()</code>会将一点未处理的用户输入拉入你的应用程序。
+你将它导向事件处理器，之后应用就像被施了魔法一样活了过来。
 有趣的部分是应用在<em>它</em>想要的时候<em>获取</em>事件。
-操作系统在用户操作时不是直接跳转到你应用的某处代码。</p>
+当用户敲打外设时，操作系统不会立即跳转到你应用中的某处代码。</p>
 <aside name="interrupt">
-<p>相反，操作系统的<em>中断</em>确实是直接跳转的。
-当中断发生时，操作系统中断应用在做的事，强制它跳到中断处理。
-这种唐突的做法是中断很难使用的原因。</p>
+<p>相反，操作系统的<em>中断</em>确实是那样工作的。
+当中断发生时，操作系统会停下应用正在做的事，强制它跳到中断处理器。
+这种唐突劲儿正是中断难以驾驭的原因。</p>
 </aside>
 <p>这就意味着当用户输入进来时，它需要到某处去，
 这样操作系统在设备驱动报告输入和应用去调用<code>getNextEvent()</code>之间不会漏掉它。
@@ -131,451 +130,438 @@ delete the font style for english.
 当你调用<code>getNextEvent()</code>时，它从队列中获取最旧的事件然后交给应用程序。</p>
 <h3><a href="#中心事件总线" name="中心事件总线">中心事件总线</a></h3>
 <p><span name="game-loop"></span></p>
-<p>大多数游戏不是像这样事件驱动的，但是在游戏中使用事件循环来支撑中枢系统是很常见的。
-你通常听到用“中心”“全局”“主体”描述它。
-它通常被用于想要相互保持解耦的高层模块间通信。</p>
+<p>大多数游戏不是像这样事件驱动的，但游戏拥有自己的事件队列作为其神经系统的骨干是很常见的。
+你通常会听到用“中心”、“全局”或“主”来描述它。
+它被用于想要保持解耦的游戏系统之间的高层通信。</p>
 <aside name="game-loop">
-<p>如果你想知道<em>为什么</em>它们不是事件驱动的，看看<a href="game-loop.html" class="pattern">游戏循环</a>一章。</p>
+<p>如果你想知道<em>为什么</em>它们不是事件驱动的，不妨翻开<a href="game-loop.html" class="pattern">游戏循环</a>一章看看。</p>
 </aside>
 <p><span name="tutorial"></span></p>
 <p>假设游戏有新手教程系统，在某些特定游戏事件后显示帮助框。
-举个例子，当玩家第一次击败了邪恶野兽，你想要一个显示着“按X拿起战利品！”的小气泡。</p>
+举个例子，当玩家第一次干掉一只邪恶的小怪兽，你想要一个显示着“按X拿起战利品！”的小气泡。</p>
 <aside name="tutorial">
-<p>新手教程系统很难优雅地实现，大多数玩家很少使用游戏内的帮助，所以这感觉上吃力不讨好。
-但对那些<em>使用</em>教程的玩家，这是无价之宝。</p>
+<p>新手教程系统很难优雅地实现，大多数玩家只会花一小部分时间使用游戏内的帮助，所以这感觉上吃力不讨好。
+但正是那些<em>使用</em>教程的一小部分时间，对于引导玩家进入游戏可能是无价的。</p>
 </aside>
-<p>游戏玩法和战斗代码也许像上面一样复杂。
-你最不想做的就是检查一堆教程的触发器。
+<p>你的游戏玩法和战斗代码本身可能已经够复杂了。
+你最不想做的就是在里面塞进一堆触发教程的检查。
 相反，你可以使用中心事件队列。
 任何游戏系统都可以发事件给队列，这样战斗代码可以在砍倒敌人时发出“敌人死亡”事件。</p>
 <p><span name="blackboard"></span></p>
-<p>类似地，任何游戏系统都能从队列<em>接受</em>事件。
+<p>类似地，任何游戏系统都能从队列<em>接收</em>事件。
 教程引擎在队列中注册自己，然后表明它想要收到“敌人死亡”事件。
 用这种方式，敌人死了的消息从战斗系统传到了教程引擎，而不需要这两个系统直接知道对方的存在。</p>
 <aside name="blackboard">
-<p>实体可以发送和收到消息的模型很像AI界的<a href="http://en.wikipedia.org/wiki/Blackboard_system">blackboard systems</a>。</p>
+<p>这种拥有一个共享空间、实体可以向其中发布信息并从中接收通知的模型，很像AI界的<a href="http://en.wikipedia.org/wiki/Blackboard_system">blackboard systems</a>。</p>
 </aside>
 <p><img src="images/event-queue-central.png" alt="一个战斗代码和教程代码都可以读写的中心事件队列。" /></p>
-<p>我本想将这个作为这章其他部分的例子，但是我真的不喜欢这样巨大的全局系统。
-事件队列不需要在整个游戏引擎中沟通。在一个类或者领域中沟通就足够有用了。</p>
+<p>我本想把这个作为本章其余部分的例子，但我一般不喜欢这样庞大的全局系统。
+事件队列不必用于在整个游戏引擎的各部分之间通信。它们在单个类或领域内也同样有用。</p>
 <h3><a href="#你说什么？" name="你说什么？">你说什么？</a></h3>
-<p>所以说点别的，让我们给游戏添加一些声音。
-人类是视觉动物，但是听觉强烈影响到情感系统和空间感觉。
-正确模拟的回声可以让漆黑的屏幕感觉上是巨大的洞穴，而适时的小提琴慢板可以让心弦拉响同样的旋律。</p>
+<p>所以说点别的，让我们给游戏加点声音吧。
+人类主要是视觉动物，但听觉与我们的情感和对物理空间的感知紧密相连。
+正确模拟的回声可以让漆黑的屏幕感觉上是巨大的洞穴，而一段时机恰好的小提琴慢板能让你的心弦产生共鸣。</p>
 <p><span name="singleton"></span></p>
-<p>为了获得优秀的音效表现，我们从最简单的解决方法开始，看看结果如何。
-添加一个“声音引擎”，其中有使用标识符和音量就可以播放音乐的API：</p>
+<p>为了让游戏变得有声有色，我们从最简单的解决方法开始，看看结果如何。
+添加一个小小的“音频引擎”，其中有使用标识符和音量就可以播放声音的API：</p>
 <aside name="singleton">
-<p>我总是离<a href="singleton.html" class="gof-pattern">单例模式</a>远远的。
-这是少数它可以使用的领域，因为机器通常只有一个声源系统。
-我使用更简单的方法，直接将方法定为静态。</p>
+<p>我几乎总是对<a href="singleton.html" class="gof-pattern">单例模式</a>敬而远之。
+这是少数它可以使用的领域，因为机器通常只有一套扬声器。
+我使用更简单的方法，直接将方法设为静态。</p>
 </aside>
-<div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">Audio</span>
+<div class="codehilite"><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Audio</span>
 <span class="p">{</span>
 <span class="k">public</span><span class="o">:</span>
-  <span class="k">static</span> <span class="kt">void</span> <span class="n">playSound</span><span class="p">(</span><span class="n">SoundId</span> <span class="n">id</span><span class="p">,</span> <span class="kt">int</span> <span class="n">volume</span><span class="p">);</span>
+<span class="w">  </span><span class="k">static</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="n">playSound</span><span class="p">(</span><span class="n">SoundId</span><span class="w"> </span><span class="n">id</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">volume</span><span class="p">);</span>
 <span class="p">};</span>
-</pre></div>
+</code></pre></div>
 
-
-<p>它负责加载合适的声音资源，找到可靠的播放频道，然后启动它。
-这章不是关于某个平台真实的音频API，所以我会假设在其他某处魔术般实现了一个。
+<p>它负责加载合适的声音资源，找到可用的频道来播放它，然后启动它。
+这章不是关于某个平台真实的音频API，所以我会变出一个API，并假设它在别处已经实现了。
 使用它，我们像这样写方法：</p>
-<div class="codehilite"><pre><span></span><span class="kt">void</span> <span class="n">Audio</span><span class="o">::</span><span class="n">playSound</span><span class="p">(</span><span class="n">SoundId</span> <span class="n">id</span><span class="p">,</span> <span class="kt">int</span> <span class="n">volume</span><span class="p">)</span>
+<div class="codehilite"><pre><span></span><code><span class="kt">void</span><span class="w"> </span><span class="nf">Audio::playSound</span><span class="p">(</span><span class="n">SoundId</span><span class="w"> </span><span class="n">id</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">volume</span><span class="p">)</span>
 <span class="p">{</span>
-  <span class="n">ResourceId</span> <span class="n">resource</span> <span class="o">=</span> <span class="n">loadSound</span><span class="p">(</span><span class="n">id</span><span class="p">);</span>
-  <span class="kt">int</span> <span class="n">channel</span> <span class="o">=</span> <span class="n">findOpenChannel</span><span class="p">();</span>
-  <span class="k">if</span> <span class="p">(</span><span class="n">channel</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="k">return</span><span class="p">;</span>
-  <span class="n">startSound</span><span class="p">(</span><span class="n">resource</span><span class="p">,</span> <span class="n">channel</span><span class="p">,</span> <span class="n">volume</span><span class="p">);</span>
+<span class="w">  </span><span class="n">ResourceId</span><span class="w"> </span><span class="n">resource</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">loadSound</span><span class="p">(</span><span class="n">id</span><span class="p">);</span>
+<span class="w">  </span><span class="kt">int</span><span class="w"> </span><span class="n">channel</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">findOpenChannel</span><span class="p">();</span>
+<span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">channel</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">-1</span><span class="p">)</span><span class="w"> </span><span class="k">return</span><span class="p">;</span>
+<span class="w">  </span><span class="n">startSound</span><span class="p">(</span><span class="n">resource</span><span class="p">,</span><span class="w"> </span><span class="n">channel</span><span class="p">,</span><span class="w"> </span><span class="n">volume</span><span class="p">);</span>
 <span class="p">}</span>
-</pre></div>
+</code></pre></div>
 
-
-<p>我们签入以上代码，创建一些声音文件，然后在代码中加入一些对<code>playSound()</code>的调用。
-举个例子，在UI代码中，我们在选择菜单项变化时播放一点小音效：</p>
-<div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">Menu</span>
+<p>我们签入以上代码，创建一些声音文件，然后像神奇的音效小仙女一样，在代码库中到处撒满<code>playSound()</code>调用。
+举个例子，在UI代码中，当选中菜单项改变时，我们就播放一小声“啵”：</p>
+<div class="codehilite"><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Menu</span>
 <span class="p">{</span>
 <span class="k">public</span><span class="o">:</span>
-  <span class="kt">void</span> <span class="n">onSelect</span><span class="p">(</span><span class="kt">int</span> <span class="n">index</span><span class="p">)</span>
-  <span class="p">{</span>
-    <span class="n">Audio</span><span class="o">::</span><span class="n">playSound</span><span class="p">(</span><span class="n">SOUND_BLOOP</span><span class="p">,</span> <span class="n">VOL_MAX</span><span class="p">);</span>
-    <span class="c1">// 其他代码……</span>
-  <span class="p">}</span>
+<span class="w">  </span><span class="kt">void</span><span class="w"> </span><span class="n">onSelect</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">index</span><span class="p">)</span>
+<span class="w">  </span><span class="p">{</span>
+<span class="w">    </span><span class="n">Audio</span><span class="o">::</span><span class="n">playSound</span><span class="p">(</span><span class="n">SOUND_BLOOP</span><span class="p">,</span><span class="w"> </span><span class="n">VOL_MAX</span><span class="p">);</span>
+<span class="w">    </span><span class="c1">// 其他代码……</span>
+<span class="w">  </span><span class="p">}</span>
 <span class="p">};</span>
-</pre></div>
-
+</code></pre></div>
 
 <p>这样做了之后，我们注意到有时候你改变菜单项目，整个屏幕就会冻住几帧。
 我们遇到了第一个问题：</p>
 <ul>
 <li><strong>问题一：API在音频引擎完成对请求的处理前阻塞了调用者。</strong></li>
 </ul>
-<p>我们的<code>playSound()</code>方法是<em>同步</em>的——它在从播放器放出声音前不会返回调用者。
+<p>我们的<code>playSound()</code>方法是<em>同步</em>的——直到扬声器里传出“啵啵”声，它才会返回调用者。
 如果声音文件要从光盘上加载，那就得花费一定时间。
 与此同时，游戏的其他部分被卡住了。</p>
-<p>现在忽视这一点，我们继续。
-在AI代码中，我们增加了一个调用，在敌人承受玩家伤害时发出痛苦的低号。
+<p>先把这个放一边，我们继续。
+在AI代码中，我们增加了一个调用，在敌人承受玩家伤害时发出痛苦的哀嚎。
 没有什么比在虚拟的生物身上施加痛苦更能温暖玩家心灵的了。</p>
 <p><span name="hatsworth"></span></p>
-<p>这能行，但是有时玩家打出暴击，他在同一帧可以打到两个敌人。
+<p>这能行，但是有时英雄使出强力攻击，会在同一帧击中两个敌人。
 这让游戏同时要播放两遍哀嚎。
 如果你了解一些音频的知识，那么就知道要把两个不同的声音混合在一起，就要加和它们的波形。
 当这两个是<em>同一</em>波形时，它与<em>一个</em>声音播放<em>两倍响</em>是一样的。那会很刺耳。</p>
 <aside name="hatsworth">
-<p>我在完成<a href="http://en.wikipedia.org/wiki/Henry_Hatsworth_in_the_Puzzling_Adventure">Henry Hatsworth in the Puzzling Adventure</a>时遇到了同样的问题。解决方法和这里的很相似。</p>
+<p>我在开发<a href="http://en.wikipedia.org/wiki/Henry_Hatsworth_in_the_Puzzling_Adventure">Henry Hatsworth in the Puzzling Adventure</a>时就撞上了完全一样的问题。我那时的解决办法和这里讲的差不多。</p>
 </aside>
-<p>在Boss战中有个相关的问题，当有一堆小怪跑动并制造伤害时。
-硬件只能同时播放一定数量的音频。当数量超过限度时，声音就被忽视或者切断了。</p>
-<p>为了处理这些问题，我们需要获得音频调用的整个<em>集合</em>，用来整合和排序。
+<p>在Boss战中有个相关的问题，当有一堆小怪跑动并制造混乱时。
+硬件只能同时播放一定数量的声音。当数量超过限度时，声音就被忽视或者切断了。</p>
+<p>为了处理这些问题，我们需要审视声音调用的整个<em>集合</em>，对它们进行聚合和排定优先级。
 不幸的是，音频API独立处理每一个<code>playSound()</code>调用。
-看起来这些请求像是从针眼穿过一样，一次只能有一个。</p>
+它就像通过针眼观察请求，一次只能看到一个。</p>
 <ul>
 <li><strong>问题二：请求无法合并处理。</strong></li>
 </ul>
-<p>这个问题与下面的问题相比只是小烦恼。
-现在，我们在很多不同的游戏系统中散布了<code>playSound()</code>调用。
+<p>与接下来落到我们头上的问题相比，这些问题只是小烦恼。
+到现在为止，我们已经把<code>playSound()</code>调用撒满了代码库中许多不同的游戏系统。
 但是游戏引擎是在现代多核机器上运行的。
 为了使用多核带来的优势，我们将系统分散在不同线程上——渲染在一个，AI在另一个，诸如此类。</p>
 <p>由于我们的API是同步的，它在<em>调用者</em>的线程上运行。
 当从不同的游戏系统调用时，我们从多个线程同时使用API。
-看看示例代码，看到任何线程同步性吗？我也没看到。</p>
-<p>当我们想要分配一个<em>单独的</em>线程给音频，这个问题就更加严重。
-当其他线程都忙于互相跟随和制造事物，它只是傻傻待在那里。</p>
+看看示例代码，能找出任何线程同步吗？反正我是找不着。</p>
+<p>这尤其糟糕，因为我们本来打算为音频分配一个<em>单独的</em>线程。
+当其他线程都忙着互相踩来踩去、把事情搞得一团糟时，它却完全闲置地待在那里。</p>
 <ul>
 <li><strong>问题三：请求在错误的线程上执行。</strong></li>
 </ul>
-<p>音频引擎调用<code>playSound()</code>意味着，“放下任何东西，现在就播放声音！”<em>立即</em>就是问题。
-游戏系统在<em>它们</em>方便时调用<code>playSound()</code>，但是音频引擎不一定能方便去处理这个请求。
-为了解决这点，我们需要将<em>接受</em>请求和<em>处理</em>请求解耦。</p>
+<p>音频引擎把对<code>playSound()</code>的调用理解为“放下所有事情，现在就播放声音！”。<em>立即</em>就是问题所在。
+其他游戏系统在<em>它们</em>方便时调用<code>playSound()</code>，但这不一定是音频引擎方便处理该请求的时候。
+为了解决这点，我们需要将<em>接收</em>请求和<em>处理</em>请求解耦。</p>
 <h2><a href="#模式" name="模式">模式</a></h2>
-<p><strong>事件队列</strong>在队列中按先入先出的顺序存储一系列<strong>通知或请求</strong>。
+<p><strong>队列</strong>以先入先出的顺序存储一系列<strong>通知或请求</strong>。
 发送通知时，<strong>将请求放入队列并返回</strong>。
 处理请求的系统之后稍晚<strong>从队列中获取请求</strong>并处理。
-这<strong>解耦了发送者和接收者</strong>，既<strong>静态</strong>又<strong>及时</strong>。</p>
+这<strong>解耦了发送者和接收者</strong>，既<strong>静态</strong>又<strong>在时间上</strong>。</p>
 <h2><a href="#何时使用" name="何时使用">何时使用</a></h2>
 <p><span name="simple"></span></p>
-<p>如果你只是想解耦<em>接收者</em>和发送者，像<a href="observer.html">观察者模式</a>
+<p>如果你只是想解耦消息的<em>接收者</em>和发送者，像<a href="observer.html">观察者模式</a>
 和<a href="command.html">命令模式</a>都可以用较小的复杂度进行处理。
-在解耦某些需要<em>及时</em>处理的东西时使用队列。</p>
+只有当你想要在时间上解耦某些东西时，才需要队列。</p>
 <aside name="simple">
 <p>我在之前的几乎每章都提到了，但这值得反复提。
-复杂度会拖慢你，所以要将简单视为珍贵的财宝。</p>
+复杂度会拖慢你，所以要将简单视为宝贵的资源。</p>
 </aside>
 <p>用推和拉来考虑。
 有一块代码A需要另一块代码B去做些事情。
 对A自然的处理方式是将请求<em>推</em>给B。</p>
-<p>同时，对B自然的处理方式是在<em>B</em>方便时将请求<em>拉</em>入。
-当一端有推模型另一端有拉模型，你需要在它们之间设置缓存。
+<p>同时，对B自然的处理方式是在<em>它</em>运行周期中方便的时刻将请求<em>拉</em>入。
+当一端有推模型另一端有拉模型，你需要在它们之间设置缓冲区。
 这就是队列比简单的解耦模式多提供的部分。</p>
-<p>队列给了代码对拉取的控制权——接收者可以延迟处理，合并或者忽视请求。
+<p>队列把控制权交给了从中拉取的代码——接收者可以延迟处理、合并请求或完全丢弃它们。
 但队列做这些事是通过将控制权从发送者那里<em>拿走</em>完成的。
-发送者能做的就是向队列发送请求然后祈祷。
+发送者能做的只是把请求扔进队列，然后听天由命。
 当发送者需要回复时，队列不是好的选择。</p>
 <h2><a href="#记住" name="记住">记住</a></h2>
-<p>不像本书中的其他模式，事件队列很复杂，会对游戏架构产生广泛影响。
+<p>与本书中一些更朴素的模式不同，事件队列很复杂，往往会对游戏架构产生广泛影响。
 这就意味着你得仔细考虑如何——或者要不要——使用它。</p>
 <h3><a href="#中心事件队列是一个全局变量" name="中心事件队列是一个全局变量">中心事件队列是一个全局变量</a></h3>
-<p>这个模式的常用方法是一个大的交换站，游戏中的每个部分都能将消息送到这里。
-这是很有用的基础架构，但是<em>有用</em>并不代表<em>好用</em>。</p>
-<p>可能要走一些弯路，但是我们中的大多数最终学到了全局变量是不好的。
-当有一小片状态，程序的每部分都能接触到，会产生各种微妙的相关性。
-这个模式将状态封装在协议中，但是它还是全局的，仍然有全局变量引发的全部危险。</p>
-<h3><a href="#世界的状态可以因你改变" name="世界的状态可以因你改变">世界的状态可以因你改变</a></h3>
-<p>假设在虚拟的小怪结束它一生时，一些AI代码将“实体死亡”事件发送到队列中。
-这个事件在队列中等待了谁知有多少帧后才排到了前面，得以处理。</p>
-<p>同时，经验系统想要追踪英雄的杀敌数，并对他的效率加以奖励。
-它接受每个“实体死亡”事件，然后决定英雄击杀了何种怪物，以及击杀的难易程度，最终计算出合适的奖励。</p>
+<p>这个模式的一个常见用途是充当某种“纽约中央车站”，游戏的所有部分都可以通过它传递消息。
+这是一块强大的基础设施，但是<em>强大</em>并不总是意味着<em>好</em>。</p>
+<p>这花了不少时间，但我们大多数人都是吃过苦头才明白全局变量不是好东西。
+当有一块状态可被程序的任何部分随意摆弄时，各种微妙的相互依赖就会悄悄出现。
+这个模式将状态封装在一个不错的小协议里，但是它还是全局的，仍然带着随之而来的全部危险。</p>
+<h3><a href="#世界的状态可能在你脚下改变" name="世界的状态可能在你脚下改变">世界的状态可能在你脚下改变</a></h3>
+<p>假设在某个虚拟小怪一命呜呼时，一些AI代码将“实体死亡”事件发送到队列中。
+这个事件在队列里待了不知多少帧，直到最终排到最前面并被处理。</p>
+<p>同时，经验系统想要追踪女英雄的杀敌数，并奖励她可怕的效率。
+它接收每个“实体死亡”事件，确定被击杀实体的种类以及击杀难度，以便发放合适的奖励。</p>
 <p>这需要游戏世界的多种不同状态。
-我们需要死亡的实体以获取击杀它的难度。
-我们也许要看看英雄的周围有什么其他的障碍物或者怪物。
-但是如果事件没有及时处理，这些东西都会消失。
-实体可能被清除，周围的东西也有可能移开。</p>
-<p>当你接到事件时，得小心，不能假设<em>现在的</em>状态反映了<em>事件发生时</em>的世界。
-这就意味着队列中的事件比同步系统中的事件需要存储更多数据。
-在后者中，通知只需说“某事发生了”然后接收者可以找到细节。
+我们需要死亡的实体，才能知道它有多难对付。
+我们也许想检查它的周围，看看附近还有什么障碍物或小怪。
+但是如果事件直到稍后才被接收，这些东西可能已经消失了。
+实体可能已被释放，附近的其他敌人也可能已经走开。</p>
+<p>当你收到事件时，得小心，不能假设<em>当前</em>的世界状态反映了<em>事件被触发时</em>的世界状态。
+这就意味着排队的事件往往比同步系统中的事件携带更多数据。
+对于后者，通知只需说“某事发生了”，接收者可以四处查看细节。
 使用队列时，这些短暂的细节必须在事件发送时就被捕获，以方便之后使用。</p>
-<h3><a href="#会陷于反馈系统环路中" name="会陷于反馈系统环路中">会陷于反馈系统环路中</a></h3>
+<h3><a href="#你可能会陷入反馈循环" name="你可能会陷入反馈循环">你可能会陷入反馈循环</a></h3>
 <p>任何事件系统和消息系统都得担心环路：</p>
 <ol>
 <li>A发送了一个事件</li>
 <li>B接收然后发送事件作为回应。</li>
 <li>这个事件恰好是A关注的，所以它收到了。为了回应，它发送了一个事件。</li>
-<li>回到2.</li>
+<li>回到 2。</li>
 </ol>
 <p><span name="log"></span></p>
-<p>当消息系统是<em>同步的</em>，你很快就能找到环路——它们造成了栈溢出并让游戏崩溃。
-使用队列，它会异步地使用栈，即使虚假事件晃来晃去，游戏仍然可以继续运行。
+<p>当消息系统是<em>同步的</em>，你很快就能发现循环——它们造成了栈溢出并让游戏崩溃。
+使用队列时，异步性会展开栈，所以即使多余的事件在队列里来回晃荡，游戏仍然可以继续运行。
 避免这个的通用方法就是避免在<em>处理</em>事件的代码中<em>发送</em>事件。</p>
 <aside name="log">
-<p>在你的事件系统中加一个小小的漏洞日志也是一个好主意。</p>
+<p>在你的事件系统中加一个小小的调试日志也是一个好主意。</p>
 </aside>
 <h2><a href="#示例代码" name="示例代码">示例代码</a></h2>
-<p>我们已经看到一些代码了。它不完美，但是有基本的正确功能——公用的API和正确的底层音频调用。
+<p>我们已经看到一些代码了。它不完美，但是有正确的基本功能——我们想要的公共API和正确的底层音频调用。
 剩下需要做的就是修复它的问题。</p>
 <p>第一个问题是我们的API是<em>阻塞的</em>。
-当代码播放声音时，它不能做任何其他事情，直到<code>playSound()</code>加载完音频然后真正地开始播放。</p>
+当一段代码播放声音时，在<code>playSound()</code>完成加载资源并真正让扬声器震动之前，它不能做任何其他事情。</p>
 <p>我们想要推迟这项工作，这样 <code>playSound()</code> 可以很快地返回。
 为了达到这一点，我们需要<em>具体化</em>播放声音的请求。
-我们需要一个小结构存储发送请求时的细节，这样我们晚些时候可以使用：</p>
-<div class="codehilite"><pre><span></span><span class="k">struct</span> <span class="n">PlayMessage</span>
+我们需要一个小结构来存储待处理请求的细节，这样我们就能把它保留到以后使用：</p>
+<div class="codehilite"><pre><span></span><code><span class="k">struct</span><span class="w"> </span><span class="nc">PlayMessage</span>
 <span class="p">{</span>
-  <span class="n">SoundId</span> <span class="n">id</span><span class="p">;</span>
-  <span class="kt">int</span> <span class="n">volume</span><span class="p">;</span>
+<span class="w">  </span><span class="n">SoundId</span><span class="w"> </span><span class="n">id</span><span class="p">;</span>
+<span class="w">  </span><span class="kt">int</span><span class="w"> </span><span class="n">volume</span><span class="p">;</span>
 <span class="p">};</span>
-</pre></div>
+</code></pre></div>
 
-
-<p>下面我们需要给<code>Audio</code>一些存储空间来追踪正在播放的声音。
-现在，你的算法专家也许会告诉你使用激动人心的数据结构，
-比如<a href="http://en.wikipedia.org/wiki/Fibonacci_heap">Fibonacci heap</a>或者<a href="http://en.wikipedia.org/wiki/Skip_list">skip list</a>或者最起码<em>链表</em>。
-但是在实践中，存储一堆同类事物最好的办法是使用一个平凡无奇的经典数组：</p>
+<p>接下来，我们需要给<code>Audio</code>一些存储空间来追踪这些待处理的播放消息。
+现在，你的算法教授也许会告诉你用上激动人心的数据结构，
+比如<a href="http://en.wikipedia.org/wiki/Fibonacci_heap">Fibonacci heap</a>或者<a href="http://en.wikipedia.org/wiki/Skip_list">skip list</a>，或者，老天，至少用个<em>链表</em>吧。
+但在实践中，存储一堆同类事物的最好方法几乎总是一个普通的老式数组：</p>
 <aside name="prof">
-<p>算法研究者通过发表对新奇数据结构的研究获得收入。
-他们不鼓励使用基本的结构。</p>
+<p>算法研究者靠发表新奇数据结构的分析来赚钱。
+他们可没什么动力去死守那些基础结构。</p>
 </aside>
 <ul>
 <li>
 <p>没有动态分配。</p>
 </li>
 <li>
-<p>没有为记录信息造成的额外的开销或者多余的指针。</p>
+<p>没有用于记录信息或指针的内存开销。</p>
 </li>
 </ul>
 <p><span name="locality"></span></p>
 <ul>
-<li>对缓存友好的连续存储空间。</li>
+<li>对缓存友好的连续内存使用。</li>
 </ul>
 <aside name="locality">
 <p>更多“缓存友好”的内容，见<a href="data-locality.html" class="pattern">数据局部性</a>一章。</p>
 </aside>
 <p>所以让我们开干吧：</p>
-<div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">Audio</span>
+<div class="codehilite"><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Audio</span>
 <span class="p">{</span>
 <span class="k">public</span><span class="o">:</span>
-  <span class="k">static</span> <span class="kt">void</span> <span class="n">init</span><span class="p">()</span>
-  <span class="p">{</span>
-    <span class="n">numPending_</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
-  <span class="p">}</span>
+<span class="w">  </span><span class="k">static</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="n">init</span><span class="p">()</span>
+<span class="w">  </span><span class="p">{</span>
+<span class="w">    </span><span class="n">numPending_</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">  </span><span class="p">}</span>
 
-  <span class="c1">// 其他代码……</span>
+<span class="w">  </span><span class="c1">// 其他代码……</span>
 <span class="k">private</span><span class="o">:</span>
-  <span class="k">static</span> <span class="k">const</span> <span class="kt">int</span> <span class="n">MAX_PENDING</span> <span class="o">=</span> <span class="mi">16</span><span class="p">;</span>
+<span class="w">  </span><span class="k">static</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">MAX_PENDING</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">16</span><span class="p">;</span>
 
-  <span class="k">static</span> <span class="n">PlayMessage</span> <span class="n">pending_</span><span class="p">[</span><span class="n">MAX_PENDING</span><span class="p">];</span>
-  <span class="k">static</span> <span class="kt">int</span> <span class="n">numPending_</span><span class="p">;</span>
+<span class="w">  </span><span class="k">static</span><span class="w"> </span><span class="n">PlayMessage</span><span class="w"> </span><span class="n">pending_</span><span class="p">[</span><span class="n">MAX_PENDING</span><span class="p">];</span>
+<span class="w">  </span><span class="k">static</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">numPending_</span><span class="p">;</span>
 <span class="p">};</span>
-</pre></div>
+</code></pre></div>
 
-
-<p>我们可以将数组大小设置为最糟情况下的大小。
+<p>我们可以调整数组大小以覆盖最坏的情况。
 为了播放声音，简单地将新消息插到最后：</p>
-<div class="codehilite"><pre><span></span><span class="kt">void</span> <span class="n">Audio</span><span class="o">::</span><span class="n">playSound</span><span class="p">(</span><span class="n">SoundId</span> <span class="n">id</span><span class="p">,</span> <span class="kt">int</span> <span class="n">volume</span><span class="p">)</span>
+<div class="codehilite"><pre><span></span><code><span class="kt">void</span><span class="w"> </span><span class="nf">Audio::playSound</span><span class="p">(</span><span class="n">SoundId</span><span class="w"> </span><span class="n">id</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">volume</span><span class="p">)</span>
 <span class="p">{</span>
-  <span class="n">assert</span><span class="p">(</span><span class="n">numPending_</span> <span class="o">&lt;</span> <span class="n">MAX_PENDING</span><span class="p">);</span>
+<span class="w">  </span><span class="n">assert</span><span class="p">(</span><span class="n">numPending_</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">MAX_PENDING</span><span class="p">);</span>
 
-  <span class="n">pending_</span><span class="p">[</span><span class="n">numPending_</span><span class="p">].</span><span class="n">id</span> <span class="o">=</span> <span class="n">id</span><span class="p">;</span>
-  <span class="n">pending_</span><span class="p">[</span><span class="n">numPending_</span><span class="p">].</span><span class="n">volume</span> <span class="o">=</span> <span class="n">volume</span><span class="p">;</span>
-  <span class="n">numPending_</span><span class="o">++</span><span class="p">;</span>
+<span class="w">  </span><span class="n">pending_</span><span class="p">[</span><span class="n">numPending_</span><span class="p">].</span><span class="n">id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">id</span><span class="p">;</span>
+<span class="w">  </span><span class="n">pending_</span><span class="p">[</span><span class="n">numPending_</span><span class="p">].</span><span class="n">volume</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">volume</span><span class="p">;</span>
+<span class="w">  </span><span class="n">numPending_</span><span class="o">++</span><span class="p">;</span>
 <span class="p">}</span>
-</pre></div>
-
+</code></pre></div>
 
 <p>这让<code>playSound()</code>几乎是立即返回，当然我们仍得播放声音。
-那块代码在某处，即<code>update()</code>方法中：</p>
+那段代码需要放在某个地方，而那个地方就是<code>update()</code>方法：</p>
 <p><span name="update"></span></p>
-<div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">Audio</span>
+<div class="codehilite"><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Audio</span>
 <span class="p">{</span>
 <span class="k">public</span><span class="o">:</span>
-  <span class="k">static</span> <span class="kt">void</span> <span class="n">update</span><span class="p">()</span>
-  <span class="p">{</span>
-    <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">numPending_</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span>
-    <span class="p">{</span>
-      <span class="n">ResourceId</span> <span class="n">resource</span> <span class="o">=</span> <span class="n">loadSound</span><span class="p">(</span><span class="n">pending_</span><span class="p">[</span><span class="n">i</span><span class="p">].</span><span class="n">id</span><span class="p">);</span>
-      <span class="kt">int</span> <span class="n">channel</span> <span class="o">=</span> <span class="n">findOpenChannel</span><span class="p">();</span>
-      <span class="k">if</span> <span class="p">(</span><span class="n">channel</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="k">return</span><span class="p">;</span>
-      <span class="n">startSound</span><span class="p">(</span><span class="n">resource</span><span class="p">,</span> <span class="n">channel</span><span class="p">,</span> <span class="n">pending_</span><span class="p">[</span><span class="n">i</span><span class="p">].</span><span class="n">volume</span><span class="p">);</span>
-    <span class="p">}</span>
+<span class="w">  </span><span class="k">static</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="n">update</span><span class="p">()</span>
+<span class="w">  </span><span class="p">{</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">numPending_</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">      </span><span class="n">ResourceId</span><span class="w"> </span><span class="n">resource</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">loadSound</span><span class="p">(</span><span class="n">pending_</span><span class="p">[</span><span class="n">i</span><span class="p">].</span><span class="n">id</span><span class="p">);</span>
+<span class="w">      </span><span class="kt">int</span><span class="w"> </span><span class="n">channel</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">findOpenChannel</span><span class="p">();</span>
+<span class="w">      </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">channel</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">-1</span><span class="p">)</span><span class="w"> </span><span class="k">return</span><span class="p">;</span>
+<span class="w">      </span><span class="n">startSound</span><span class="p">(</span><span class="n">resource</span><span class="p">,</span><span class="w"> </span><span class="n">channel</span><span class="p">,</span><span class="w"> </span><span class="n">pending_</span><span class="p">[</span><span class="n">i</span><span class="p">].</span><span class="n">volume</span><span class="p">);</span>
+<span class="w">    </span><span class="p">}</span>
 
-    <span class="n">numPending_</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
-  <span class="p">}</span>
+<span class="w">    </span><span class="n">numPending_</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">  </span><span class="p">}</span>
 
-  <span class="c1">// 其他代码……</span>
+<span class="w">  </span><span class="c1">// 其他代码……</span>
 <span class="p">};</span>
-</pre></div>
-
+</code></pre></div>
 
 <aside name="update">
 <p>就像名字暗示的，这是<a href="update-method.html" class="pattern">更新方法</a>模式。</p>
 </aside>
-<p>现在我们需要在方便时候调用。
+<p>现在，我们需要从某个方便的地方调用它。
 这个“方便”取决于你的游戏。
-它也许要从主<a href="game-loop.html" class="pattern">游戏循环</a>中或者专注于音频的线程中调用。</p>
+它可能意味着从主<a href="game-loop.html" class="pattern">游戏循环</a>中调用，或从一个专用的音频线程调用。</p>
 <p>这可行，但是这假定了我们在对<code>update()</code>的单一调用中可以处理<em>每个</em>声音请求。
 如果你做了像在声音资源加载后处理异步请求的事情，这就没法工作了。
-<code>update()</code>一次处理一个请求，它需要有完成一个请求后从缓存中再拉取一个请求的能力。
+为了让<code>update()</code>一次处理一个请求，它需要能在从缓冲区中拉出请求的同时保留其余部分。
 换言之，我们需要一个真实的队列。</p>
-<h3><a href="#环状缓存" name="环状缓存">环状缓存</a></h3>
-<p>有很多种方式能实现队列，但我最喜欢的是<em>环状缓存</em>。
+<h3><a href="#环形缓冲区" name="环形缓冲区">环形缓冲区</a></h3>
+<p>有很多种方式能实现队列，但我最喜欢的是<em>环形缓冲区</em>。
 它保留了数组的所有优点，同时能让我们不断从队列的前方移除事物。</p>
 <p>现在，我知道你在想什么。
 如果我们从数组的前方移除东西，不是需要将所有剩下的部分都移动一次吗？这不是很慢吗？</p>
-<p>这就是为什么要学习链表——你可以从中移除一个节点，而无需移动东西。
+<p>这就是当年老师逼我们学链表的原因——你可以从链表中移除节点，而无需移动其他东西。
 好吧，其实你可以用数组实现一个队列而无需移动东西。
-我会展示给你看，但是首先预习一些术语：</p>
+我会带你走一遍，但是首先让我们明确一些术语：</p>
 <ul>
 <li>
-<p>队列的<strong>头部</strong>是<em>读取</em>请求的地方。头部存储最早发出的请求。</p>
+<p>队列的<strong>头部</strong>是<em>读取</em>请求的地方。头部是最早的待处理请求。</p>
 </li>
 <li>
-<p><strong>尾部</strong>是另一端。它是数组中下个<em>写入</em>请求的地方。注意它指向队列终点的下一个位置。你可以将其理解为一个半开半闭区间，如果这有帮助的话。</p>
+<p><strong>尾部</strong>是另一端。它是数组中下一个入队请求将被<em>写入</em>的位置。注意它正好在队列末尾<em>之后</em>。如果这样有帮助，你可以把它想成一个半开区间。</p>
 </li>
 </ul>
 <p>由于 <code>playSound()</code> 向数组的末尾添加了新的请求，头部开始指向元素0而尾部向右增长。</p>
 <p><img src="images/event-queue-queue.png" alt="一数组事件。头部指向第一个元素，尾部向右增长。" /></p>
-<p>让我们开始编码。首先，我们显式定义这两个标记在类中的意义：</p>
-<div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">Audio</span>
+<p>让我们开始编码。首先，我们稍微调整一下字段，让这两个标记在类中显式化：</p>
+<div class="codehilite"><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Audio</span>
 <span class="p">{</span>
 <span class="k">public</span><span class="o">:</span>
-  <span class="k">static</span> <span class="kt">void</span> <span class="n">init</span><span class="p">()</span>
-  <span class="p">{</span>
-    <span class="n">head_</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
-    <span class="n">tail_</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
-  <span class="p">}</span>
+<span class="w">  </span><span class="k">static</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="n">init</span><span class="p">()</span>
+<span class="w">  </span><span class="p">{</span>
+<span class="w">    </span><span class="n">head_</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">    </span><span class="n">tail_</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">  </span><span class="p">}</span>
 
-  <span class="c1">// 方法……</span>
+<span class="w">  </span><span class="c1">// 方法……</span>
 <span class="k">private</span><span class="o">:</span>
-  <span class="k">static</span> <span class="kt">int</span> <span class="n">head_</span><span class="p">;</span>
-  <span class="k">static</span> <span class="kt">int</span> <span class="n">tail_</span><span class="p">;</span>
+<span class="w">  </span><span class="k">static</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">head_</span><span class="p">;</span>
+<span class="w">  </span><span class="k">static</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">tail_</span><span class="p">;</span>
 
-  <span class="c1">// 数组……</span>
+<span class="w">  </span><span class="c1">// 数组……</span>
 <span class="p">};</span>
-</pre></div>
-
+</code></pre></div>
 
 <p>在 <code>playSound()</code> 的实现中，<code>numPending_</code>被<code>tail_</code>取代，但是其他都是一样的：</p>
-<div class="codehilite"><pre><span></span><span class="kt">void</span> <span class="n">Audio</span><span class="o">::</span><span class="n">playSound</span><span class="p">(</span><span class="n">SoundId</span> <span class="n">id</span><span class="p">,</span> <span class="kt">int</span> <span class="n">volume</span><span class="p">)</span>
+<div class="codehilite"><pre><span></span><code><span class="kt">void</span><span class="w"> </span><span class="nf">Audio::playSound</span><span class="p">(</span><span class="n">SoundId</span><span class="w"> </span><span class="n">id</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">volume</span><span class="p">)</span>
 <span class="p">{</span>
-  <span class="n">assert</span><span class="p">(</span><span class="n">tail_</span> <span class="o">&lt;</span> <span class="n">MAX_PENDING</span><span class="p">);</span>
+<span class="w">  </span><span class="n">assert</span><span class="p">(</span><span class="n">tail_</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">MAX_PENDING</span><span class="p">);</span>
 
-  <span class="c1">// Add to the end of the list.</span>
-  <span class="n">pending_</span><span class="p">[</span><span class="n">tail_</span><span class="p">].</span><span class="n">id</span> <span class="o">=</span> <span class="n">id</span><span class="p">;</span>
-  <span class="n">pending_</span><span class="p">[</span><span class="n">tail_</span><span class="p">].</span><span class="n">volume</span> <span class="o">=</span> <span class="n">volume</span><span class="p">;</span>
-  <span class="n">tail_</span><span class="o">++</span><span class="p">;</span>
+<span class="w">  </span><span class="c1">// Add to the end of the list.</span>
+<span class="w">  </span><span class="n">pending_</span><span class="p">[</span><span class="n">tail_</span><span class="p">].</span><span class="n">id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">id</span><span class="p">;</span>
+<span class="w">  </span><span class="n">pending_</span><span class="p">[</span><span class="n">tail_</span><span class="p">].</span><span class="n">volume</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">volume</span><span class="p">;</span>
+<span class="w">  </span><span class="n">tail_</span><span class="o">++</span><span class="p">;</span>
 <span class="p">}</span>
-</pre></div>
-
+</code></pre></div>
 
 <p>更有趣的变化在<code>update()</code>中：</p>
-<div class="codehilite"><pre><span></span><span class="kt">void</span> <span class="n">Audio</span><span class="o">::</span><span class="n">update</span><span class="p">()</span>
+<div class="codehilite"><pre><span></span><code><span class="kt">void</span><span class="w"> </span><span class="nf">Audio::update</span><span class="p">()</span>
 <span class="p">{</span>
-  <span class="c1">// 如果这里没有待处理的请求</span>
-  <span class="c1">// 那就什么也不做。</span>
-  <span class="k">if</span> <span class="p">(</span><span class="n">head_</span> <span class="o">==</span> <span class="n">tail_</span><span class="p">)</span> <span class="k">return</span><span class="p">;</span>
+<span class="w">  </span><span class="c1">// 如果这里没有待处理的请求</span>
+<span class="w">  </span><span class="c1">// 那就什么也不做。</span>
+<span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">head_</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">tail_</span><span class="p">)</span><span class="w"> </span><span class="k">return</span><span class="p">;</span>
 
-  <span class="n">ResourceId</span> <span class="n">resource</span> <span class="o">=</span> <span class="n">loadSound</span><span class="p">(</span><span class="n">pending_</span><span class="p">[</span><span class="n">head_</span><span class="p">].</span><span class="n">id</span><span class="p">);</span>
-  <span class="kt">int</span> <span class="n">channel</span> <span class="o">=</span> <span class="n">findOpenChannel</span><span class="p">();</span>
-  <span class="k">if</span> <span class="p">(</span><span class="n">channel</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="k">return</span><span class="p">;</span>
-  <span class="n">startSound</span><span class="p">(</span><span class="n">resource</span><span class="p">,</span> <span class="n">channel</span><span class="p">,</span> <span class="n">pending_</span><span class="p">[</span><span class="n">head_</span><span class="p">].</span><span class="n">volume</span><span class="p">);</span>
+<span class="w">  </span><span class="n">ResourceId</span><span class="w"> </span><span class="n">resource</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">loadSound</span><span class="p">(</span><span class="n">pending_</span><span class="p">[</span><span class="n">head_</span><span class="p">].</span><span class="n">id</span><span class="p">);</span>
+<span class="w">  </span><span class="kt">int</span><span class="w"> </span><span class="n">channel</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">findOpenChannel</span><span class="p">();</span>
+<span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">channel</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">-1</span><span class="p">)</span><span class="w"> </span><span class="k">return</span><span class="p">;</span>
+<span class="w">  </span><span class="n">startSound</span><span class="p">(</span><span class="n">resource</span><span class="p">,</span><span class="w"> </span><span class="n">channel</span><span class="p">,</span><span class="w"> </span><span class="n">pending_</span><span class="p">[</span><span class="n">head_</span><span class="p">].</span><span class="n">volume</span><span class="p">);</span>
 
-  <span class="n">head_</span><span class="o">++</span><span class="p">;</span>
+<span class="w">  </span><span class="n">head_</span><span class="o">++</span><span class="p">;</span>
 <span class="p">}</span>
-</pre></div>
+</code></pre></div>
 
-
-<p>我们在头部处理，然后通过将头部指针向右移动来消除它。
-我们定义头尾之间没有距离的队列为<span name="empty">空队列</span>。</p>
+<p>我们处理头部的请求，然后通过将头部指针向右移动来丢弃它。
+我们通过查看头部和尾部之间是否有距离来检测<span name="empty">空队列</span>。</p>
 <aside name="empty">
 <p>这就是为什么我们让尾部指向最后元素<em>之后</em>的那个位置。
 这意味着头尾相等则队列为空。</p>
 </aside>
 <p><span name="party"></span></p>
 <p>现在，我们获得了一个队列——我们可以向尾部添加元素，从头部移除元素。
-这里有很明显的问题。在我们让队列跑起来后，头部和尾部继续向右移动。
+不过这里有个明显的问题。随着请求经过队列，头部和尾部不断向右爬行。
 最终<code>tail_</code>碰到了数组的尾部，欢乐时光结束了。
-接下来是这个方法的灵巧之处。</p>
+妙就妙在这里。</p>
 <aside name="party">
 <p>你想结束欢乐时光吗？不，你不想。</p>
 </aside>
 <p><img src="images/event-queue-crawl.png" alt="像之前一样的数组，但是现在头部在向右移动，在左侧留下空白格子。" /></p>
 <p>注意当尾部移动时，<em>头部</em> 也是如此。
 这就意味着在数组<em>开始</em>部分的元素不再被使用了。
-所以我们做的就是，当抵达末尾时，将尾部折回到数组的头部。
-这就是为什么它被称为<em>环状</em>缓存，它表现得像是一个环状的数组。</p>
+所以我们所做的就是，当尾部越过末尾时，把它绕回到数组的开头。
+这就是为什么它被称为<em>环形</em>缓冲区，它表现得像是一个环形的数组。</p>
 <p><img src="images/event-queue-ring.png" alt="数组绕了一圈，现在头部可以回到开始时指向的地方了。" /></p>
-<p>这个的实现非常简单。
-当我们入队一个事物时，只需要保证尾部在抵达末尾的时候折回到数组的开头：</p>
-<div class="codehilite"><pre><span></span><span class="kt">void</span> <span class="n">Audio</span><span class="o">::</span><span class="n">playSound</span><span class="p">(</span><span class="n">SoundId</span> <span class="n">id</span><span class="p">,</span> <span class="kt">int</span> <span class="n">volume</span><span class="p">)</span>
+<p>实现这个非常简单。
+当我们入队一个项目时，只需要确保尾部在到达末尾时绕回到数组的开头：</p>
+<div class="codehilite"><pre><span></span><code><span class="kt">void</span><span class="w"> </span><span class="nf">Audio::playSound</span><span class="p">(</span><span class="n">SoundId</span><span class="w"> </span><span class="n">id</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">volume</span><span class="p">)</span>
 <span class="p">{</span>
-  <span class="n">assert</span><span class="p">((</span><span class="n">tail_</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">%</span> <span class="n">MAX_PENDING</span> <span class="o">!=</span> <span class="n">head_</span><span class="p">);</span>
+<span class="w">  </span><span class="n">assert</span><span class="p">((</span><span class="n">tail_</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span><span class="w"> </span><span class="o">%</span><span class="w"> </span><span class="n">MAX_PENDING</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="n">head_</span><span class="p">);</span>
 
-  <span class="c1">// 添加到列表的尾部</span>
-  <span class="n">pending_</span><span class="p">[</span><span class="n">tail_</span><span class="p">].</span><span class="n">id</span> <span class="o">=</span> <span class="n">id</span><span class="p">;</span>
-  <span class="n">pending_</span><span class="p">[</span><span class="n">tail_</span><span class="p">].</span><span class="n">volume</span> <span class="o">=</span> <span class="n">volume</span><span class="p">;</span>
-  <span class="n">tail_</span> <span class="o">=</span> <span class="p">(</span><span class="n">tail_</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">%</span> <span class="n">MAX_PENDING</span><span class="p">;</span>
+<span class="w">  </span><span class="c1">// 添加到列表的尾部</span>
+<span class="w">  </span><span class="n">pending_</span><span class="p">[</span><span class="n">tail_</span><span class="p">].</span><span class="n">id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">id</span><span class="p">;</span>
+<span class="w">  </span><span class="n">pending_</span><span class="p">[</span><span class="n">tail_</span><span class="p">].</span><span class="n">volume</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">volume</span><span class="p">;</span>
+<span class="w">  </span><span class="n">tail_</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">tail_</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span><span class="w"> </span><span class="o">%</span><span class="w"> </span><span class="n">MAX_PENDING</span><span class="p">;</span>
 <span class="p">}</span>
-</pre></div>
+</code></pre></div>
 
-
-<p>替代<code>tail++</code>，将增量设为数组长度的模，这样可将尾部回折回来。
+<p>用对数组大小取模的增量替换<code>tail_++</code>，就能把尾部绕回来。
 另一个改变是断言。我们得保证队列不会溢出。
-只要这里有少于<code>MAX_PENDING</code>的请求在队列中，在头部和尾部之间就有没有使用的间隔。
-如果队列满了，那就不会有间隔了，就像古怪的衔尾蛇一样，尾部会遇到头部然后覆盖它。
+只要队列中的请求少于<code>MAX_PENDING</code>个，头部和尾部之间就会有一小段未使用的单元间隙。
+如果队列满了，这些空隙就会消失，尾部会像一条倒着转的古怪衔尾蛇一样撞上头部，然后开始覆盖它。
 断言保证了这不会发生。</p>
-<p>在<code>update()</code>中，头部也折回了：</p>
-<div class="codehilite"><pre><span></span><span class="kt">void</span> <span class="n">Audio</span><span class="o">::</span><span class="n">update</span><span class="p">()</span>
+<p>在<code>update()</code>中，头部也绕回了：</p>
+<div class="codehilite"><pre><span></span><code><span class="kt">void</span><span class="w"> </span><span class="nf">Audio::update</span><span class="p">()</span>
 <span class="p">{</span>
-  <span class="c1">// 如果没有待处理的请求，就啥也不做</span>
-  <span class="k">if</span> <span class="p">(</span><span class="n">head_</span> <span class="o">==</span> <span class="n">tail_</span><span class="p">)</span> <span class="k">return</span><span class="p">;</span>
+<span class="w">  </span><span class="c1">// 如果没有待处理的请求，就啥也不做</span>
+<span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">head_</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">tail_</span><span class="p">)</span><span class="w"> </span><span class="k">return</span><span class="p">;</span>
 
-  <span class="n">ResourceId</span> <span class="n">resource</span> <span class="o">=</span> <span class="n">loadSound</span><span class="p">(</span><span class="n">pending_</span><span class="p">[</span><span class="n">head_</span><span class="p">].</span><span class="n">id</span><span class="p">);</span>
-  <span class="kt">int</span> <span class="n">channel</span> <span class="o">=</span> <span class="n">findOpenChannel</span><span class="p">();</span>
-  <span class="k">if</span> <span class="p">(</span><span class="n">channel</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="k">return</span><span class="p">;</span>
-  <span class="n">startSound</span><span class="p">(</span><span class="n">resource</span><span class="p">,</span> <span class="n">channel</span><span class="p">,</span> <span class="n">pending_</span><span class="p">[</span><span class="n">head_</span><span class="p">].</span><span class="n">volume</span><span class="p">);</span>
+<span class="w">  </span><span class="n">ResourceId</span><span class="w"> </span><span class="n">resource</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">loadSound</span><span class="p">(</span><span class="n">pending_</span><span class="p">[</span><span class="n">head_</span><span class="p">].</span><span class="n">id</span><span class="p">);</span>
+<span class="w">  </span><span class="kt">int</span><span class="w"> </span><span class="n">channel</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">findOpenChannel</span><span class="p">();</span>
+<span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">channel</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">-1</span><span class="p">)</span><span class="w"> </span><span class="k">return</span><span class="p">;</span>
+<span class="w">  </span><span class="n">startSound</span><span class="p">(</span><span class="n">resource</span><span class="p">,</span><span class="w"> </span><span class="n">channel</span><span class="p">,</span><span class="w"> </span><span class="n">pending_</span><span class="p">[</span><span class="n">head_</span><span class="p">].</span><span class="n">volume</span><span class="p">);</span>
 
-  <span class="n">head_</span> <span class="o">=</span> <span class="p">(</span><span class="n">head_</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">%</span> <span class="n">MAX_PENDING</span><span class="p">;</span>
+<span class="w">  </span><span class="n">head_</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">head_</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span><span class="w"> </span><span class="o">%</span><span class="w"> </span><span class="n">MAX_PENDING</span><span class="p">;</span>
 <span class="p">}</span>
-</pre></div>
-
+</code></pre></div>
 
 <p><span name="capacity"></span></p>
-<p>这样就好——没有动态分配，没有数据拷贝，缓存友好的简单数组实现的队列完成了。</p>
+<p>这样就好了——一个没有动态分配、不用搬移元素、拥有简单数组的缓存友好性的队列完成了。</p>
 <aside name="capacity">
-<p>如果最大容量影响了你，你可以使用增长的数组。
-当队列满了后，分配一块当前数组两倍大的数组（或者更多倍），然后将对象拷进去。</p>
-<p>哪怕你在队列增长时拷贝，入队仍然有常数级的<em>摊销</em>复杂度。</p>
+<p>如果最大容量让你困扰，你可以使用可增长的数组。
+当队列满了后，分配一个大小为当前数组两倍的新数组（或者更多倍），然后将对象拷进去。</p>
+<p>哪怕你在队列增长时需要拷贝，入队一项仍然具有常数级的<em>均摊</em>复杂度。</p>
 </aside>
 <h3><a href="#合并请求" name="合并请求">合并请求</a></h3>
 <p>现在有队列了，我们可以转向其他问题了。
-首先来解决多重请求播放同一音频，最终导致音量过大的问题。
-由于我们知道哪些请求在等待处理，需要做的所有事就是将请求和早先等待处理的请求合并：</p>
-<div class="codehilite"><pre><span></span><span class="kt">void</span> <span class="n">Audio</span><span class="o">::</span><span class="n">playSound</span><span class="p">(</span><span class="n">SoundId</span> <span class="n">id</span><span class="p">,</span> <span class="kt">int</span> <span class="n">volume</span><span class="p">)</span>
+首先，多个播放同一声音的请求最终会导致声音过大。
+由于我们知道哪些请求在等待处理，需要做的所有事就是：如果请求与某个已经待处理的请求匹配，就把它合并掉：</p>
+<div class="codehilite"><pre><span></span><code><span class="kt">void</span><span class="w"> </span><span class="nf">Audio::playSound</span><span class="p">(</span><span class="n">SoundId</span><span class="w"> </span><span class="n">id</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">volume</span><span class="p">)</span>
 <span class="p">{</span>
-  <span class="c1">// 遍历待处理的请求</span>
-  <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="n">head_</span><span class="p">;</span> <span class="n">i</span> <span class="o">!=</span> <span class="n">tail_</span><span class="p">;</span>
-       <span class="n">i</span> <span class="o">=</span> <span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">%</span> <span class="n">MAX_PENDING</span><span class="p">)</span>
-  <span class="p">{</span>
-    <span class="k">if</span> <span class="p">(</span><span class="n">pending_</span><span class="p">[</span><span class="n">i</span><span class="p">].</span><span class="n">id</span> <span class="o">==</span> <span class="n">id</span><span class="p">)</span>
-    <span class="p">{</span>
-      <span class="c1">// 使用较大的音量</span>
-      <span class="n">pending_</span><span class="p">[</span><span class="n">i</span><span class="p">].</span><span class="n">volume</span> <span class="o">=</span> <span class="n">max</span><span class="p">(</span><span class="n">volume</span><span class="p">,</span> <span class="n">pending_</span><span class="p">[</span><span class="n">i</span><span class="p">].</span><span class="n">volume</span><span class="p">);</span>
+<span class="w">  </span><span class="c1">// 遍历待处理的请求</span>
+<span class="w">  </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">head_</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="n">tail_</span><span class="p">;</span>
+<span class="w">       </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">i</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span><span class="w"> </span><span class="o">%</span><span class="w"> </span><span class="n">MAX_PENDING</span><span class="p">)</span>
+<span class="w">  </span><span class="p">{</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">pending_</span><span class="p">[</span><span class="n">i</span><span class="p">].</span><span class="n">id</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">id</span><span class="p">)</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">      </span><span class="c1">// 使用较大的音量</span>
+<span class="w">      </span><span class="n">pending_</span><span class="p">[</span><span class="n">i</span><span class="p">].</span><span class="n">volume</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">max</span><span class="p">(</span><span class="n">volume</span><span class="p">,</span><span class="w"> </span><span class="n">pending_</span><span class="p">[</span><span class="n">i</span><span class="p">].</span><span class="n">volume</span><span class="p">);</span>
 
-      <span class="c1">// 无需入队</span>
-      <span class="k">return</span><span class="p">;</span>
-    <span class="p">}</span>
-  <span class="p">}</span>
+<span class="w">      </span><span class="c1">// 无需入队</span>
+<span class="w">      </span><span class="k">return</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">}</span>
 
-  <span class="c1">// 之前的代码……</span>
+<span class="w">  </span><span class="c1">// 之前的代码……</span>
 <span class="p">}</span>
-</pre></div>
+</code></pre></div>
 
-
-<p>当有两个请求播放同一音频时，我们将它们合并成只保留声音最大的请求。
-这一“合并”非常简陋，但是我们可以用同样的方法做很多有趣的合并。</p>
+<p>当我们收到两个播放同一声音的请求时，把它们合并成单个请求，保留其中音量最大的那个。
+这种“聚合”相当原始，但是我们可以用同样的思路做很多有趣的批处理。</p>
 <p>注意在请求<em>入队</em>时合并，而不是<em>处理</em>时。
-在队列中处理更加容易，因为不需要在最终会被合并的多余请求上浪费时间。
-这也更加容易被实现。</p>
+这对队列来说更轻松，因为我们不会在最终会被合并的多余请求上浪费槽位。
+实现起来也更简单。</p>
 <p><span name="slow"></span></p>
-<p>但是，这确实将处理的职责放在了调用者肩上。
+<p>然而，这确实把处理负担放到了调用者肩上。
 对<code>playSound()</code>的调用返回前会遍历整个队列。
 如果队列很长，那么会很慢。
 在<code>update()</code>中合并也许更加合理。</p>
@@ -584,88 +570,83 @@ delete the font style for english.
 如果我们将<code>SoundId</code>作为哈希表的键，那么我们就可以在常量时间内检查重复。</p>
 </aside>
 <p>这里有些要记住的要点。
-我们能够合并的“同步”请求窗口只有队列长度那么大。
-如果我们快速处理请求，队列长度就会保持较短，我们就有更少的机会合并东西。
+我们能够聚合的“同时”请求窗口只有队列那么大。
+如果我们处理请求更快、队列保持较小，那么我们把事情合并在一起的机会就更少。
 同样地，如果处理慢了，队列满了，我们能找到更多的东西合并。</p>
-<p>这个模式隔离了请求者和请求何时被处理，但如果你将整个队列交互视为与数组结构交互，
-那么发出请求和处理它之间的延迟会显式地影响行为。
-确认在这么做之前保证了这不会造成问题。</p>
-<h3><a href="#分离线程" name="分离线程">分离线程</a></h3>
-<p>最终，最险恶的问题。
+<p>这个模式让请求者不必知道请求何时被处理，但当你把整个队列当作一个可以摆弄的活数据结构时，发出请求和处理请求之间的延迟就会明显影响行为。
+在做这件事之前，确保你能接受这一点。</p>
+<h3><a href="#跨越线程" name="跨越线程">跨越线程</a></h3>
+<p>最后，最棘手的问题。
 使用同步的音频API，调用<code>playSound()</code>的线程就是处理请求的线程。
 这通常不是我们想要的。</p>
 <p><span name="multicore"></span></p>
-<p>在今日的多核硬件上，你需要不止一个线程来最大程度使用芯片。
-有无数的编程范式在线程间分散代码，但是最通用的策略是将每个独立的领域分散到一个线程——音频，渲染，AI等等。</p>
+<p>在当今的多核硬件上，你需要不止一个线程来充分发挥芯片的能力。
+在线程间分配代码的方法有无数种，但一个常见的策略是把游戏的每个领域都放到各自的线程上——音频、渲染、AI等等。</p>
 <aside name="multicore">
-<p>单线程代码同时只在一个核心上运行。
-如果你不使用线程，哪怕做了流行的异步风格编程，能做的极限就是让一个核心繁忙，那也只发挥了CPU能力的一小部分。</p>
+<p>直线型代码一次只能运行在单个核心上。
+如果你不使用线程，哪怕做了流行的异步风格编程，能做的极限就是让一个核心忙碌，那也只发挥了CPU能力的一小部分。</p>
 <p>服务器程序员将他们的程序分割成多个独立<em>进程</em>作为弥补。
-这让系统在不同的核上同时运行它们。
+这让操作系统在不同的核上并发运行它们。
 游戏几乎总是单进程的，所以增加线程真的有用。</p>
 </aside>
-<p>我们很容易就能做到这一点是因为三个关键点：</p>
+<p>现在我们有了三个关键部分，可以很好地做到这一点：</p>
 <ol>
 <li>请求音频的代码与播放音频的代码解耦。</li>
-<li>有队列在两者之间整理它们。</li>
-<li>队列与程序其他部分是隔离的。</li>
+<li>有一个队列在两者之间进行传递。</li>
+<li>队列与程序其余部分是封装的。</li>
 </ol>
 <p>剩下要做的事情就是写修改队列的方法——<code>playSound()</code>和<code>update()</code>——使之线程安全。
-通常，我会写一写具体代码完成之，但是由于这是一本关于架构的书，我不想着眼于一些特定的API或者锁机制。</p>
-<p>从高层看来，我们只需保证队列不是同时被修改的。
-由于<code>playSound()</code>只做了一点点事情——基本上就是声明字段——不会阻塞线程太长时间。
-在<code>update()</code>中，我们等待条件变量之类的东西，直到有请求需要处理时才会消耗CPU循环。</p>
+通常，我会写点具体代码来完成这件事，但既然这是一本关于架构的书，我不想陷入某个特定API或锁机制的细节。</p>
+<p>从高层看来，我们只需保证队列不会被并发修改。
+由于<code>playSound()</code>只做很少的工作——基本上只是给几个字段赋值——它可以加锁而不会长时间阻塞处理。
+在<code>update()</code>中，我们等待条件变量之类的东西，这样在有请求要处理之前就不会浪费CPU周期。</p>
 <h2><a href="#设计决策" name="设计决策">设计决策</a></h2>
-<p>很多游戏使用事件队列作为交流结构的关键部分，你可以花很多时间设计各种复杂的路径和消息过滤器。
-但是在构建洛杉矶电话交换机之类的东西之前，我推荐你从简单的开始。这里是几个需要在开始时思考的问题：</p>
+<p>很多游戏把事件队列作为其通信结构的关键部分，你可以花大量时间为消息设计各种复杂的路由和过滤。
+但是，在你动手去造一座洛杉矶电话交换机那样的庞然大物之前，我劝你先从简单的开始。这里有几个起步时需要思考的问题：</p>
 <h3><a href="#队列中存储了什么？" name="队列中存储了什么？">队列中存储了什么？</a></h3>
 <p>到目前为止，我交替使用“事件”和“消息”，因为大多时候两者的区别并不重要。
-无论你在队列中塞了什么都可以获得解耦和合并的能力，但是还是有几个地方不同。</p>
+无论你在队列中塞什么，都能获得相同的解耦和聚合能力，但两者存在一些概念上的差异。</p>
 <ul>
 <li>
 <p><strong>如果你存储事件：</strong></p>
-<p>“事件”或者“通知”描绘<em>已经</em>发生的事情，比如“怪物死了”。
-你入队它，这样其他对象可以对这个事件作出<em>回应</em>，有点像异步的<a href="observer.html" class="gof-pattern">观察者</a>模式。</p>
+<p>“事件”或“通知”描述的是<em>已经</em>发生的事情，比如“怪物死了”。
+你把它入队，这样其他对象就能对这个事件作出<em>响应</em>，有点像异步的<a href="observer.html" class="gof-pattern">观察者</a>模式。</p>
 <ul>
 <li>
 <p><em>很可能允许多个监听者。</em>
-  由于队列包含的是已经发生的事情，发送者可能不关心谁接受它。
-  从这个层面来说，事件发生在过去，早已被遗忘。</p>
+  由于队列包含的是已经发生的事情，发送者可能不关心谁接收它。
+  从它的角度来看，事件已经过去，早被抛到脑后了。</p>
 </li>
 <li>
-<p><em>访问队列的模块更广。</em>
-  事件队列通常<em>广播</em>事件到任何感兴趣的部分。为了尽可能允许所有感兴趣的部分访问，队列一般是全局可见的。</p>
+<p><em>队列的作用域往往更广。</em>
+  事件队列通常<em>广播</em>事件到任何感兴趣的各方。为了让任意感兴趣的各方都能参与进来，这些队列往往更全局可见。</p>
 </li>
 </ul>
 </li>
 <li>
 <p><strong>如果你存储消息：</strong></p>
 <p><span name="command"></span></p>
-<p>“消息”或“请求”描绘了<em>想要</em>发生<em>在未来</em>的事情，比如“播放声音”。可以将其视为服务的异步API。</p>
+<p>“消息”或“请求”描述的是我们<em>希望</em>在<em>未来</em>发生的动作，比如“播放声音”。可以将其视为某项服务的异步API。</p>
 <aside name="command">
-
 <p>另一个描述“请求”的词是“命令”，就像在<a href="command.html" class="gof-pattern">命令模式</a>中那样，队列也可以在那里使用。</p>
 </aside>
-
 <p><span name="locator"></span></p>
 <ul>
 <li>
 <p><em>更可能只有一个监听者。</em>
-    在这个例子中，存储的消息只请求<em>音频API</em>播放声音。如果引擎的随便什么部分都能从队列中拿走消息，那可不好。</p>
+    在这个例子中，排队的消息是专门请求<em>音频API</em>播放声音的。如果游戏引擎的其他随机部分开始从队列中偷走消息，那可没什么好处。</p>
 <aside name="locator">
-
-<p>我在这里说“更可能”，因为只要像期望的<em>那样</em>处理消息，消息入队时可以不必担心哪块代码处理它。
+<p>我在这里说“更可能”，是因为你可以把消息入队而不关心哪块代码处理它，只要它按你期望的<em>方式</em>被处理。
 这样的话，你在做的事情类似于<a href="service-locator.html" class="pattern">服务定位器</a>。</p>
 </aside>
-
 </li>
 </ul>
 </li>
 </ul>
 <h3><a href="#谁能从队列中读取？" name="谁能从队列中读取？">谁能从队列中读取？</a></h3>
-<p>在例子中，队列是密封的，只有<code>Audio</code>类可以从中读取。
-在用户交互的事件系统中，你可以在核心内容中注册监听器。
-有时可以听到术语“单播”和“广播”来描述它，两者都很有用。</p>
+<p>在例子中，队列是封装的，只有<code>Audio</code>类可以从中读取。
+在用户界面的事件系统中，你可以随心所欲地注册监听器。
+你有时会听到用术语“单播”和“广播”来区分它们，这两种风格都很有用。</p>
 <ul>
 <li>
 <p><strong>单播队列：</strong></p>
@@ -673,16 +654,16 @@ delete the font style for english.
 就像我们的音频例子，从调用者的角度来说，它们只能看到可以调用的<code>playSound()</code>方法。</p>
 <ul>
 <li>
-<p><em>队列变成了读取者的实现细节。</em> 发送者知道的所有事就是发条消息。</p>
+<p><em>队列变成了读取者的实现细节。</em> 发送者只知道它发了一条消息。</p>
 </li>
 <li>
-<p><em>队列更封装。</em> 其他都一样时，越多封装越方便。</p>
+<p><em>队列更封装。</em> 其他都一样时，封装越多通常越好。</p>
 </li>
 <li>
 <p><em>无须担心监听者之间的竞争。</em>
-  使用多个监听者，你需要决定队列中的每个事物<em>一对多</em>分给全部的监听者（广播）
-  还是队列中的<em>每个</em>事物<em>一对一</em>分给单独的监听者（更加像工作队列）。</p>
-<p>在两种情况下，监听者最终要么做了多余的事情要么在相互干扰，你得谨慎考虑想要的行为。
+  使用多个监听者，你需要决定是让它们<em>全部</em>获得每个项目（广播）
+  还是把队列中的<em>每个</em>项目分配给<em>一个</em>监听者（更加像工作队列）。</p>
+<p>无论哪种情况，监听者最终都可能做冗余的工作或相互干扰，你必须仔细考虑你想要的行为。
 使用单一的监听者，这种复杂性消失了。</p>
 </li>
 </ul>
@@ -692,34 +673,34 @@ delete the font style for english.
 <p>这是大多数“事件”系统工作的方法。如果你有十个监听者，一个事件进来，所有监听者都能看到这个事件。</p>
 <ul>
 <li>
-<p><em>事件可能无人接收。</em>
-  前面那点的必然推论就是如果有<em>零个</em>监听者，没有谁能看到这个事件。
-  在大多数广播系统中，如果处理事件时没有监听者，事件就消失了。</p>
+<p><em>事件可能被丢在地上。</em>
+  由上一条可以推出：如果有<em>零个</em>监听者，那么这零个监听者全都看到了事件。
+  在大多数广播系统中，如果处理事件时没有监听者，事件就被丢弃了。</p>
 </li>
 <li>
 <p><em>也许需要过滤事件。</em>
-  广播队列经常对程序的所有部分可见，最终你会获得一系列监听者。
-  很多事件乘以很多监听者，你会获取一大堆事件处理器。</p>
-<p>为了削减大小，大多数广播事件系统让监听者筛出其需要接受的事件。
-比如，可能它们只想要接受鼠标事件或者在某一UI区域内的事件。</p>
+  广播队列通常对程序的大部分广泛可见，最终你可能会得到一大堆监听者。
+  大量事件乘以大量监听者，最终你会得到一大堆要调用的事件处理器。</p>
+<p>为了削减规模，大多数广播事件系统让监听者筛选出它们要接收的事件。
+比如，可能它们只想要接收鼠标事件或者在某一UI区域内的事件。</p>
 </li>
 </ul>
 </li>
 <li>
 <p><strong>工作队列：</strong></p>
-<p>类似广播队列，有多个监听器。不同之处在于队列中的每个东西只会投到监听器<em>其中的一个</em>。
-常应用于将工作打包给同时运行的线程池。</p>
+<p>类似广播队列，这里也有多个监听器。不同之处在于队列中的每个东西只会发给监听器<em>其中的一个</em>。
+这是把任务分配给一池并发运行线程的常见模式。</p>
 <ul>
-<li><em>你得规划。</em>
-  由于一个事物只有一个监听器，队列逻辑需要指出最好的选项。
-  这也许像round robin算法或者乱序选择一样简单，或者可以使用更加复杂的优先度系统。</li>
+<li><em>你得调度。</em>
+  由于每个项目只交给一个监听者，队列需要逻辑来决定选哪个最好。
+  这也许像round robin算法或者随机选择一样简单，或者可以使用更加复杂的优先级系统。</li>
 </ul>
 </li>
 </ul>
 <h3><a href="#谁能写入队列？" name="谁能写入队列？">谁能写入队列？</a></h3>
 <p><span name="configs"></span></p>
 <p>这是前一个设计决策的另一面。
-这个模式兼容所有可能的读/写设置：一对一，一对多，多对一，多对多。</p>
+这个模式适用于所有可能的读/写配置：一对一，一对多，多对一，多对多。</p>
 <aside name="configs">
 <p>你有时听到用“扇入”描述多对一的沟通系统，而用“扇出”描述一对多的沟通系统。</p>
 </aside>
@@ -727,7 +708,7 @@ delete the font style for english.
 <li>
 <p><strong>使用单个写入器：</strong></p>
 <p>这种风格和同步的<a href="observer.html" class="gof-pattern">观察者</a>模式很像。
-有特定对象收集所有可接受的事件。</p>
+有一个特权对象生成事件，其他对象可以接收这些事件。</p>
 <ul>
 <li>
 <p><em>你隐式知道事件是从哪里来的。</em>
@@ -735,7 +716,7 @@ delete the font style for english.
 </li>
 <li>
 <p><em>通常允许多个读取者。</em>
-  你可以使用单发送者对单接收者的队列，但是这样沟通系统更像纯粹的队列数据结构。</p>
+  你可以使用单发送者对单接收者的队列，但是那样它就开始不太像这个模式所关注的通信系统，而更像一个普通的队列数据结构。</p>
 </li>
 </ul>
 </li>
@@ -745,8 +726,8 @@ delete the font style for english.
 由于<code>playSound()</code>是公开的方法，代码库的任何部分都能给队列添加请求。“全局”或“中心”事件总线像这样工作。</p>
 <ul>
 <li>
-<p><em>得更小心环路。</em>
-  由于任何东西都有可能向队列中添加东西，这更容易意外地在处理事件时添加事件。
+<p><em>得更小心循环。</em>
+  由于任何代码都有可能往队列里塞东西，就更容易在处理事件的过程中不小心把事件入队。
   如果你不小心，那可能会触发反馈循环。</p>
 </li>
 <li>
@@ -758,63 +739,57 @@ delete the font style for english.
 </li>
 </ul>
 <h3><a href="#对象在队列中的生命周期如何？" name="对象在队列中的生命周期如何？">对象在队列中的生命周期如何？</a></h3>
-<p>使用同步的通知，当所有的接收者完成了消息处理才会返回发送者。
+<p>使用同步通知时，直到所有接收者都处理完消息，执行才会返回到发送者。
 这意味着消息本身可以安全地存在栈的局部变量中。
 使用队列，消息比让它入队的调用活得更久。</p>
-<p>如果你使用有垃圾回收的语言，你无需过度担心这个。
-消息存到队列中，会在需要它的时候一直存在。
+<p>如果你用的是带垃圾回收的语言，就不用太担心这一点。
+把消息塞进队列，只要还需要它，它就会一直留在内存中。
 而在C或C++中，得由你来保证对象活得足够长。</p>
 <ul>
 <li>
 <p><strong>传递所有权：</strong></p>
-<p>这是手动管理内存的传统方法。当消息入队时，队列拥有了它，发送者不再拥有它。
-当它被处理时，接收者获取了所有权，负责销毁他。</p>
+<p>这是手动管理内存时的传统方法。当消息入队时，队列拥有了它，发送者不再拥有它。
+当它被处理时，接收者获取了所有权，负责销毁它。</p>
 <aside name="unique">
-
-<p>在C++中，<code>unique_ptr&lt;T&gt;</code>给了你同样的语义。</p>
+<p>在C++中，<code>unique_ptr&lt;T&gt;</code>开箱即用地给了你这些确切的语义。</p>
 </aside>
-
 </li>
 <li>
 <p><strong>共享所有权：</strong></p>
-<p>现在，甚至C++程序员都更适应垃圾回收了，分享所有权更加可接受。
+<p>如今，既然连C++程序员都对垃圾回收习以为常了，共享所有权也就更容易被接受。
 这样，消息只要有东西对其有引用就会存在，当被遗忘时自动释放。</p>
 <aside name="shared">
-
-<p>同样的，C++的风格是使用<code>shared_ptr&lt;T&gt;</code>。</p>
+<p>同样地，对应的C++类型是<code>shared_ptr&lt;T&gt;</code>。</p>
 </aside>
-
 </li>
 <li>
 <p><strong>队列拥有它：</strong></p>
 <p><span name="pool"></span></p>
-<p>另一个选项是让消息<em>永远</em>存在于队列中。
-发送者不再自己分配消息的内存，它向内存请求一个“新的”消息。
-队列返回一个队列中已经在内存的消息的引用，接收者引用队列中相同的消息。</p>
+<p>另一个选项是让消息<em>始终</em>存在于队列中。
+发送者不自行分配消息，而是向队列请求一个“新鲜”的消息。
+队列返回一个对队列内存中已有消息的引用，发送者填入内容。当消息被处理时，接收者引用队列中的同一条消息。</p>
 <aside name="pool">
-
-<p>换言之，队列存储的背后是一个<a href="object-pool.html" class="pattern">对象池</a>模式。</p>
+<p>换言之，队列的后备存储是一个<a href="object-pool.html" class="pattern">对象池</a>模式。</p>
 </aside>
-
 </li>
 </ul>
 <h2><a href="#参见" name="参见">参见</a></h2>
 <ul>
 <li>
-<p>我在之前提到了几次，很大程度上，
-  这个模式是广为人知的<a href="observer.html" class="gof-pattern">观察者</a>模式的异步实现。</p>
+<p>我在之前提到了几次，但很大程度上，
+  这个模式是广为人知的<a href="observer.html" class="gof-pattern">观察者</a>模式的异步表亲。</p>
 </li>
 <li>
 <p>就像其他很多模式一样，事件队列有很多别名。
   其中一个是“消息队列”。这通常指代一个更高层次的实现。
   事件队列在应用<em>中</em>，消息队列通常在应用<em>间</em>交流。</p>
-<p>另一个术语是“发布/提交”，有时被缩写为“pubsub”。
-就像“消息队列”一样，这通常指代更大的分布式系统，而不是现在关注的这个模式。</p>
+<p>另一个术语是“发布/订阅”，有时被缩写为“pubsub”。
+就像“消息队列”一样，这通常指代更大的分布式系统，而不是我们现在关注的这个朴实的小模式。</p>
 </li>
 <li>
-<p><a href="http://en.wikipedia.org/wiki/Finite-state_machine">确定状态机</a>，很像GoF的<a href="state.html" class="gof-pattern">状态模式</a>，需要一个输入流。如果想要异步响应，可以考虑用队列存储它们。</p>
-<p>当你有一对状态机相互发送消息时，每个状态机都有一个小小的未处理队列（被称为一个<em>信箱</em>），
-然后你需要重新发明<a href="http://en.wikipedia.org/wiki/Actor_model">actor model</a>。</p>
+<p><a href="http://en.wikipedia.org/wiki/Finite-state_machine">有限状态机</a>，很像GoF的<a href="state.html" class="gof-pattern">状态模式</a>，需要一个输入流。如果想要异步响应，可以考虑用队列存储它们。</p>
+<p>当你有一堆状态机相互发送消息时，每个状态机都有一个装满待处理输入的小小队列（称为<em>信箱</em>），
+那么你就重新发明了计算领域的<a href="http://en.wikipedia.org/wiki/Actor_model">actor model</a>。</p>
 </li>
 <li>
 <p><a href="http://golang.org/">Go</a>语言内建的“通道”类型本质上是事件队列或消息队列。</p>

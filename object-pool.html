@@ -86,56 +86,56 @@ delete the font style for english.
 <h1>对象池模式</h1>
 <h1 class="book"><a href="/">游戏设计模式</a><span class="section"><a href="optimization-patterns.html">Optimization Patterns</a></span></h1>
 <h2><a href="#意图" name="意图">意图</a></h2>
-<p><em>放弃单独地分配和释放对象，从固定的池中重用对象，以提高性能和内存使用率</em></p>
+<p><em>通过从固定池中重用对象，而不是单独分配和释放它们，来提高性能和内存使用率</em></p>
 <h2><a href="#动机" name="动机">动机</a></h2>
-<p>我们在处理游戏的视觉效果。
-当英雄释放了法术，我们想要在屏幕上爆发闪光。
-这需要调用<em>粒子系统</em>，产生动态的闪烁图形，显示动画直到图形消失。</p>
-<p>由于一次简单的魔杖挥舞就能产生成百上千的粒子，系统需要能够快速地生成它们。
-更重要的是，我们需要保证创建和销毁这些粒子不会造成<em>内存碎片</em>。</p>
+<p>我们正在制作游戏的视觉效果。
+当英雄施放法术时，我们想要一片闪烁的火花在屏幕上迸发开来。
+这需要一个<em>粒子系统</em>——一个能生成细小闪光图形、让它们播放动画直到一闪而灭的引擎。</p>
+<p>由于魔杖轻轻一挥就能生成成百个粒子，系统需要能够非常快速地创建它们。
+更重要的是，我们需要确保创建和销毁这些粒子不会造成<em>内存碎片</em>。</p>
 <h3><a href="#碎片的诅咒" name="碎片的诅咒">碎片的诅咒</a></h3>
-<p>为游戏主机或者移动设备编程在许多方面比为普通的计算机编程更像是嵌入式编程。
-内存紧张，玩家希望游戏能如磐石般稳定运行，压缩内存的管理器很难有效。
+<p>为游戏主机或移动设备编程，在许多方面比常规PC编程更接近嵌入式编程。
+内存稀缺，用户希望游戏坚如磐石，而高效的紧凑化内存管理器几乎没有。
 在这种环境下，内存碎片是致命的。</p>
 <p><span name="park"></span></p>
-<p>碎片意味着在堆中的空余空间被打碎成了很多小的内存碎片，而不是大的连续内存块。
-<em>总共的</em> 可用内存也许很大，但是最长的<em>连续</em>空间可能难以忍受地小。
-假设我们有十四个空余字节，但是被一块正在使用的内存分割成了两个七字节的碎片。
-而我们尝试分配十二字节的对象，那么就会失败。屏幕上不会有更多的闪烁火花了。</p>
+<p>碎片意味着堆中的空闲空间被打碎成较小的内存块，而不是一大块连续空间。
+<em>总共的</em> 可用内存也许很大，但最大的<em>连续</em>区域可能小得令人难受。
+假设我们有十四字节的空闲内存，但它被一块使用中的内存分割成了两个七字节的碎片。
+如果我们尝试分配一个十二字节的对象，就会失败。屏幕上不会再出现闪烁的火花了。</p>
 <aside name="park">
-<p>这有点像在已经停了很多车的繁忙街道上停车。
-如果它们挤在一起，尽管空间还是有剩余的，但空闲地带变成了车之间的<em>碎片</em>空间。</p>
+<p>这就像试图在一条繁忙的街道上侧方停车，而已经停好的车彼此之间停得有点太散。
+如果它们挤在一起，本来是有空间的，但空闲空间被<em>碎片化</em>成了五六辆车之间的一小段一小段路边。</p>
 </aside>
 <p><span name="heap"></span></p>
 <p><img src="images/object-pool-heap-fragment.png" alt="一系列导致碎片化的内存操作。" /></p>
 <aside name="heap">
-<p>这里展现了堆是怎么碎片化的，以及即使在理论上有足够的可用内存，内存也会分配失败。</p>
+<p>这里展现了堆是怎么碎片化的，以及即使在理论上有足够的可用内存，分配也可能失败。</p>
 </aside>
 <p><span name="soak"></span></p>
-<p>哪怕碎片化发生得不频繁，它也仍会逐渐把堆变成有空洞和裂隙的不可用泡沫，最终完全无法运行游戏。</p>
+<p>哪怕碎片化并不频繁，它仍会逐渐把堆变成一片满是空洞和裂缝的无用泡沫，最终把游戏彻底冲垮。</p>
 <aside name="soak">
-<p>大多数主机游戏制作商要求游戏通过“浸泡测试”，即让游戏在demo模式运行上几天。
-如果游戏崩溃了，他们不允许游戏发售。
-浸泡测试失败有时是因为发生罕见的漏洞，但碎片增长或者内存泄露是造成游戏停止的大部分原因。</p>
+<p>大多数主机制造商要求游戏通过“浸泡测试”，也就是让游戏在演示模式下运行好几天。
+如果游戏崩溃了，他们就不允许它发售。
+浸泡测试失败有时是因为极少出现的bug，但通常让游戏崩溃的是逐渐蔓延的碎片化或内存泄漏。</p>
 </aside>
 <h3><a href="#兼得鱼和熊掌" name="兼得鱼和熊掌">兼得鱼和熊掌</a></h3>
-<p>由于碎片化和可能很慢的内存分配，游戏中何时何处管理内存通常需要十分小心。
-一个简单又有效的办法是——游戏开始时取一大块内存，然后直到游戏结束才去释放它。
-但是这对要在游戏运行时创建和销毁事物的系统来说是痛苦的。</p>
-<p>使用对象池能让我们兼得鱼和熊掌。
-对内存管理器，我们只需要将一大块内存分出来，保持在游戏运行时不释放它。
-对于池的使用者，我们可以简单地构造析构我们想要的内容对象。</p>
+<p>由于碎片化以及内存分配可能很慢，游戏对何时以及如何管理内存非常小心。
+一个简单的解决方案往往最好——在游戏开始时抓取一大块内存，直到游戏结束才释放。
+但对于需要在游戏运行时创建和销毁东西的系统来说，这很痛苦。</p>
+<p>对象池让我们兼得鱼和熊掌。
+对内存管理器来说，我们只是预先分配了一大块内存，并且在游戏运行期间不释放它。
+对池的使用者来说，我们可以想分配就分配、想释放就释放，随我们高兴。</p>
 <h2><a href="#模式" name="模式">模式</a></h2>
-<p>定义一个<strong>池</strong>对象，其包含了一组<strong>可重用对象</strong>。
-其中每个可重用对象都支持<strong>查询“使用中”状态</strong>，说明它是不是“正在使用”。
-池被初始化时，它就创建了整个对象集合（通常使用一次连续的分配），然后初始化所有对象到“不在使用中”状态。</p>
-<p>当你需要新对象，向池子要一个。
-它找到一个可用对象，初始化为“使用中”然后返回。
-当对象不再被需要，它被设置回“不在使用中”。
-通过这种方式，可以轻易地创建和销毁对象而不必分配内存或其他资源。</p>
+<p>定义一个<strong>池</strong>类，它维护一组<strong>可重用对象</strong>。
+每个对象都支持<strong>“使用中”查询</strong>，用来判断它当前是否“存活”。
+池被初始化时，它会预先创建整个对象集合（通常用一次连续分配），并把所有对象初始化到“不在使用中”状态。</p>
+<p>当你需要新对象时，向池请求一个。
+它找到一个可用对象，将其初始化为“使用中”并返回。
+当对象不再被需要时，它被设置回“不在使用中”。
+这样，就可以自由地创建和销毁对象，而不必分配内存或其他资源。</p>
 <h2><a href="#何时使用" name="何时使用">何时使用</a></h2>
-<p>这个模式广泛应用于可见的事物上，比如游戏实体和视觉效果，
-但是它也可在不那么视觉化的数据结构上使用，比如正在播放的声音。
+<p>这个模式在游戏中广泛用于像游戏实体和视觉效果这样明显的事物，
+但它也用于不那么显眼的数据结构，比如当前正在播放的声音。
 在以下情况中使用对象池：</p>
 <ul>
 <li>
@@ -145,377 +145,366 @@ delete the font style for english.
 <p>对象大小相仿。</p>
 </li>
 <li>
-<p>在堆上进行对象内存分配十分缓慢或者会导致内存碎片。</p>
+<p>在堆上分配对象很慢，或者可能导致内存碎片。</p>
 </li>
 <li>
-<p>每个对象都封装了像数据库或者网络连接这样很昂贵又可以重用的资源。</p>
+<p>每个对象都封装了像数据库或网络连接这样获取代价高昂且可重用的资源。</p>
 </li>
 </ul>
 <h2><a href="#记住" name="记住">记住</a></h2>
-<p>你通常依赖垃圾回收机制或者<code>new</code>和<code>delete</code>来处理内存管理。
-通过使用对象池，你是在说，“我知道如何更好地处理这些字节。”
-这就意味着处理内存的责任落到了你头上。</p>
+<p>你通常依赖垃圾回收器或者<code>new</code>和<code>delete</code>来帮你处理内存管理。
+通过使用对象池，你等于是在说：“我更清楚该如何处理这些字节。”
+这意味着，应对这个模式种种局限的责任就落在了你身上。</p>
 <h3><a href="#池可能在不需要的对象上浪费内存" name="池可能在不需要的对象上浪费内存">池可能在不需要的对象上浪费内存</a></h3>
-<p>对象池的大小需要根据游戏的需求设置。
-当池子太<em>小</em>时，很明显需要调整（没有什么比崩溃更能获得你的注意力了）。
-但是也要小心确保池子没有太<em>大</em>。更小的池子提供了空余的内存做其他有趣的事情。</p>
+<p>对象池的大小需要根据游戏的需求进行调校。
+调校时，池子太<em>小</em>通常很明显（没有什么比崩溃更能引起你的注意了）。
+但也要注意别让池子太<em>大</em>。更小的池子能腾出内存，用于其他有趣的东西。</p>
 <h3><a href="#同时只能激活固定数量的对象" name="同时只能激活固定数量的对象">同时只能激活固定数量的对象</a></h3>
-<p>在某种程度上这是好事。
-将内存按不同的对象类型划分单独的池保证了这点。
-举个例子，一连串爆炸不会让粒子系统消耗掉<em>所有</em>可用内存，然后阻碍创建新敌人这样的关键事件。</p>
-<p>尽管如此，这也意味着试图从池子重用对象可能会失败，因为它们都在使用中。
+<p>在某种程度上，这是好事。
+将内存按不同对象类型划分成独立的池，能确保例如一连串巨大的爆炸不会让你的粒子系统吃掉<em>所有</em>可用内存，从而阻止创建像新敌人这样更关键的东西。</p>
+<p>尽管如此，这也意味着你要做好准备：从池中重用对象的尝试可能会失败，因为它们都在使用中。
 这里有几个常见对策：</p>
 <ul>
 <li>
-<p><em>完全阻止这点。</em>
-  这是通常的“修复”：增加对象池的大小，这样无论用户做什么，它们都不会溢出。
-  对于重要对象，比如敌人或游戏道具，这通常是正确的选择。
-  也许没有“正确的”方法来处理玩家抵达关底时创建巨大Boss内存不足的问题，所以最聪明的办法就是保证这不发生。</p>
-<p>这个的副作用是强迫你为那些只在一两个罕见情况下需要的对象分配过多的内存。
-因此，固定大小的对象池也许不对所有的游戏状态都适用。
-举个例子，某些关卡也许需要更多的效果而其他的需要声音。
-在这种情况下，考虑为每个场景调整对象池的大小。</p>
+<p><em>彻底阻止这种情况。</em>
+  这是最常见的“修复”方式：调整池的大小，这样无论用户做什么，它们都不会溢出。
+  对于像敌人或游戏道具这样重要的对象，这通常是正确的答案。
+  当玩家到达关卡末尾时，可能没有“正确”的方法来处理缺少空闲槽位来创建大boss的问题，所以聪明的做法是确保这种情况永远不会发生。</p>
+<p>其代价是，你不得不为只在少数罕见边缘情况下才需要的对象槽占用大量内存。
+因此，单一的固定池大小可能并不适合所有游戏状态。
+例如，有些关卡可能突出展现视觉效果，而其他关卡则侧重声音。
+在这种情况下，可以考虑为每个场景分别调整池的大小。</p>
 </li>
 <li>
-<p><em>就不要创建对象了。</em>
-  这听起来很糟，但是对于像粒子系统这样的情况很有道理。
-  如果所有的粒子都在使用，那么屏幕已经充满了闪动的图形。
-  用户不会注意到下个爆炸不如现在的这个一样引人注目。</p>
+<p><em>干脆不创建对象。</em>
+  这听起来很粗暴，但对于像粒子系统这样的情况是合理的。
+  如果所有粒子都在使用中，屏幕可能已经满是闪烁的图形。
+  用户不会注意到下一次爆炸不如正在进行的那些令人印象深刻。</p>
 </li>
 <li>
-<p><em>强制干掉一个已有的对象。</em>
-  想想正在播放声音的内存池，假设需要播放新声音而对象池满了。
-  你<em>不想</em>简单地忽视新声音——用户会注意到魔法剑有时会发出戏剧般的声音，有时顽固地一声不吭。
-  更好的解决方法是找到播放中最轻的声音，然后用新声音替代之。新声音会覆盖掉前一个声音。</p>
-<p>大体上，如果已有对象的<em>消失</em>要比新对象的<em>出现</em>更不引人察觉，这也许是正确的选择。</p>
+<p><em>强制干掉一个已有对象。</em>
+  考虑一个用于当前正在播放的声音的池，假设你想播放新声音但池已经满了。
+  你<em>不想</em>简单地忽略新声音——用户会注意到魔法杖有时戏剧性地嗖嗖作响，有时却倔强地一声不吭。
+  更好的办法是找到已在播放的声音中最安静的那个，然后用新声音替换它。新声音会盖住前一个声音戛然而止时露出的破绽。</p>
+<p>一般来说，如果已有对象的<em>消失</em>比新对象的<em>缺失</em>更不引人注意，这也许是正确的选择。</p>
 </li>
 <li>
 <p><em>增加池的大小。</em>
-  如果游戏允许你使用一点内存上的灵活性，我们也许会在运行时增加池子的大小或者创建新的溢出池。
-  如果用这种方式获取内存，考虑下在增加的内存不再需要时，池是否需要缩回原来的大小。</p>
+  如果你的游戏允许你在内存上更灵活一些，你也许可以在运行时增加池的大小，或者创建第二个溢出池。
+  如果你通过这两种方式之一获取了更多内存，考虑一下当额外的容量不再需要时，池是否应该缩回之前的大小。</p>
 </li>
 </ul>
 <h3><a href="#每个对象的内存大小是固定的" name="每个对象的内存大小是固定的">每个对象的内存大小是固定的</a></h3>
-<p>多数对象池将对象存储在一个数组中。
-如果你所有的对象都是同样的类型，这很好。
-但是，如果你想要在同一个对象池中存储不同类型的对象，或者存储子类的实例，
-你需要保证池中的每个位置对<em>最大的</em>可能对象都有足够的内存。
-否则，超过预期大小的对象会占据下一个对象的内存空间，导致内存崩坏。</p>
-<p>同时，如果对象大小是变化的，你是在浪费内存。
-每个槽都需要能存储最大的对象。
-如果对象很少那么大，每放进去一个小对象都是在浪费内存。
-这很像是通过机场安检时，使用最大允许尺寸的箱子，而里面只放了钥匙和钱包。</p>
+<p>多数对象池实现把对象直接存储在一个数组里。
+如果你所有的对象都是同一种类型，这没问题。
+但是，如果你想在池中存储不同类型的对象，或者存储可能添加字段的子类实例，
+你需要确保池中的每个槽位都为<em>最大</em>的可能对象留出足够内存。
+否则，一个出乎意料地大的对象会踩踏到下一个对象，破坏内存。</p>
+<p>同时，当对象大小不一时，你就在浪费内存。
+每个槽都必须大到足以容纳最大的对象。
+如果对象很少有那么大，每次把较小的对象放进那个槽里都是在浪费内存。
+这就像过机场安检时，用一个随身行李大小的巨大托盘，却只放你的钥匙和钱包。</p>
 <p><span name="pools"></span></p>
-<p>当你发现自己在用这种方式浪费内存，考虑将池根据对象的大小分割为分离的池
-——大箱子给大行李，小箱子给口袋里的东西。</p>
+<p>当你发现自己以这种方式浪费大量内存时，考虑把池按对象大小拆分成独立的池
+——大托盘装行李，小托盘装口袋里的东西。</p>
 <aside name="pools">
-<p>这是一种实现有效率的内存管理的常用模式。
-管理者拥有一系列池，池的块大小不相同。
-当你申请分配一块，它会从合适块大小的池中取出一块，然后分配给你。</p>
+<p>这是实现高效内存管理器的一种常见模式。
+管理器拥有一批块大小不同的池。
+当你请求分配一个块时，它会在合适大小的池中找到一个空闲槽，并从那个池中分配。</p>
 </aside>
-<h3><a href="#重用对象不会自动清除。" name="重用对象不会自动清除。">重用对象不会自动清除。</a></h3>
-<p>很多内存管理系统拥有debug特性，会清除或释放所有内存成特定的值，比如<code>0xdeadbeef</code>。
-这帮助你找到使用未初始化变量或使用已被释放内存造成的痛苦漏洞。</p>
-<p>由于对象池重用对象不再经过内存管理系统，我们失去了这层安全网。
-更糟的是，为“新”对象使用的内存之前存储的是同样类型的对象。
-这使你很难分辨出创建新对象时的未初始化问题：
-那个存储新对象的内存已经保存了来自于上个生命周期中的<em>几乎完全</em>正确的数据。</p>
+<h3><a href="#重用对象不会自动清除" name="重用对象不会自动清除">重用对象不会自动清除</a></h3>
+<p>很多内存管理器都有一个调试特性，会把刚分配或刚释放的内存填充成某个醒目的魔数值，比如<code>0xdeadbeef</code>。
+这能帮你找到由未初始化变量或使用已释放内存引起的、让人头疼的bug。</p>
+<p>由于对象池在重用对象时不再经过内存管理器，我们失去了这层安全网。
+更糟的是，用于“新”对象的内存之前存放的是类型完全相同的对象。
+这几乎让你无法分辨在创建新对象时是否忘了初始化某些东西：
+存储该对象的内存中可能已经包含了来自它前世的<em>几乎</em>正确的数据。</p>
 <p><span name="clear"></span></p>
-<p>由于这点，特别注意在池里初始化对象的代码，保证它<em>完全</em>地初始化了对象。
-甚至很值得加个在对象回收时清空对象槽的debug选项。</p>
+<p>因此，要特别注意在池中初始化新对象的代码，确保它<em>完全</em>初始化了对象。
+甚至值得花点时间添加一个调试特性，在对象被回收时清空对象槽的内存。</p>
 <aside name="clear">
-<p>如果你将其清空为<code>0x1deadb0b</code>，我会很荣幸的。</p>
+<p>如果你把它清成<code>0x1deadb0b</code>，我将不胜荣幸。</p>
 </aside>
 <h3><a href="#未使用的对象会保留在内存中" name="未使用的对象会保留在内存中">未使用的对象会保留在内存中</a></h3>
-<p>对象池在支持垃圾回收的系统中很少见，因为内存管理系统通常会为你处理这些碎片。
-但是对象池仍然是避免构建和析构的有用手段，特别是在有更慢CPU和更简陋垃圾回收系统的移动设备上。</p>
-<p>如果你使用有垃圾回收的对象池系统，注意潜在的冲突。
-由于池不会在对象不再使用时真正地析构它们，如果对象仍然保留任何对<em>其他</em>对象的引用，也会阻止垃圾回收器回收它。
-为了避免这点，当池中对象不再使用，清除它对其他对象的所有引用。</p>
+<p>对象池在支持垃圾回收的系统中不太常见，因为内存管理器通常会帮你处理碎片化。
+但对象池在那里仍然有用，可以避免分配和释放的开销，尤其是在CPU更慢、垃圾回收器更简单的移动设备上。</p>
+<p>如果你确实与垃圾回收器一起使用对象池，要当心潜在的冲突。
+由于池在对象不再使用时并不会真正释放它们，它们会留在内存中。如果它们包含对<em>其他</em>对象的引用，也会阻止回收器回收那些对象。
+为了避免这种情况，当池中的对象不再使用时，清除它对其他对象的所有引用。</p>
 <h2><a href="#示例代码" name="示例代码">示例代码</a></h2>
-<p>现实世界的粒子系统通常应用重力，风，摩擦，和其他物理效果。
-我们简陋的例子只在直线上移动粒子几帧，然后销毁粒子。
-这不是工业级的代码，但足够说明如何使用对象池。</p>
-<p>我们应该从最简单的可能实现开始。首先是小小的粒子类：</p>
-<div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">Particle</span>
+<p>现实世界的粒子系统通常会应用重力、风、摩擦以及其他物理效果。
+我们这个简单得多的示例只会让粒子沿直线移动若干帧，然后消灭该粒子。
+算不上电影级水准，但足以说明如何使用对象池。</p>
+<p>我们从最简单的实现开始。首先是小小的粒子类：</p>
+<div class="codehilite"><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Particle</span>
 <span class="p">{</span>
 <span class="k">public</span><span class="o">:</span>
-  <span class="n">Particle</span><span class="p">()</span>
-  <span class="o">:</span> <span class="n">framesLeft_</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
-  <span class="p">{}</span>
+<span class="w">  </span><span class="n">Particle</span><span class="p">()</span>
+<span class="w">  </span><span class="o">:</span><span class="w"> </span><span class="n">framesLeft_</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+<span class="w">  </span><span class="p">{}</span>
 
-  <span class="kt">void</span> <span class="n">init</span><span class="p">(</span><span class="kt">double</span> <span class="n">x</span><span class="p">,</span> <span class="kt">double</span> <span class="n">y</span><span class="p">,</span>
-            <span class="kt">double</span> <span class="n">xVel</span><span class="p">,</span> <span class="kt">double</span> <span class="n">yVel</span><span class="p">,</span> <span class="kt">int</span> <span class="n">lifetime</span><span class="p">)</span>
-  <span class="p">{</span>
-    <span class="n">x_</span> <span class="o">=</span> <span class="n">x</span><span class="p">;</span> <span class="n">y_</span> <span class="o">=</span> <span class="n">y</span><span class="p">;</span>
-    <span class="n">xVel_</span> <span class="o">=</span> <span class="n">xVel</span><span class="p">;</span> <span class="n">yVel_</span> <span class="o">=</span> <span class="n">yVel</span><span class="p">;</span>
-    <span class="n">framesLeft_</span> <span class="o">=</span> <span class="n">lifetime</span><span class="p">;</span>
-  <span class="p">}</span>
+<span class="w">  </span><span class="kt">void</span><span class="w"> </span><span class="n">init</span><span class="p">(</span><span class="kt">double</span><span class="w"> </span><span class="n">x</span><span class="p">,</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">y</span><span class="p">,</span>
+<span class="w">            </span><span class="kt">double</span><span class="w"> </span><span class="n">xVel</span><span class="p">,</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">yVel</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">lifetime</span><span class="p">)</span>
+<span class="w">  </span><span class="p">{</span>
+<span class="w">    </span><span class="n">x_</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">x</span><span class="p">;</span><span class="w"> </span><span class="n">y_</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">y</span><span class="p">;</span>
+<span class="w">    </span><span class="n">xVel_</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">xVel</span><span class="p">;</span><span class="w"> </span><span class="n">yVel_</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">yVel</span><span class="p">;</span>
+<span class="w">    </span><span class="n">framesLeft_</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">lifetime</span><span class="p">;</span>
+<span class="w">  </span><span class="p">}</span>
 
-  <span class="kt">void</span> <span class="n">animate</span><span class="p">()</span>
-  <span class="p">{</span>
-    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">inUse</span><span class="p">())</span> <span class="k">return</span><span class="p">;</span>
+<span class="w">  </span><span class="kt">void</span><span class="w"> </span><span class="n">animate</span><span class="p">()</span>
+<span class="w">  </span><span class="p">{</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">inUse</span><span class="p">())</span><span class="w"> </span><span class="k">return</span><span class="p">;</span>
 
-    <span class="n">framesLeft_</span><span class="o">--</span><span class="p">;</span>
-    <span class="n">x_</span> <span class="o">+=</span> <span class="n">xVel_</span><span class="p">;</span>
-    <span class="n">y_</span> <span class="o">+=</span> <span class="n">yVel_</span><span class="p">;</span>
-  <span class="p">}</span>
+<span class="w">    </span><span class="n">framesLeft_</span><span class="o">--</span><span class="p">;</span>
+<span class="w">    </span><span class="n">x_</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="n">xVel_</span><span class="p">;</span>
+<span class="w">    </span><span class="n">y_</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="n">yVel_</span><span class="p">;</span>
+<span class="w">  </span><span class="p">}</span>
 
-  <span class="kt">bool</span> <span class="n">inUse</span><span class="p">()</span> <span class="k">const</span> <span class="p">{</span> <span class="k">return</span> <span class="n">framesLeft_</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">;</span> <span class="p">}</span>
+<span class="w">  </span><span class="kt">bool</span><span class="w"> </span><span class="n">inUse</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="n">framesLeft_</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
 
 <span class="k">private</span><span class="o">:</span>
-  <span class="kt">int</span> <span class="n">framesLeft_</span><span class="p">;</span>
-  <span class="kt">double</span> <span class="n">x_</span><span class="p">,</span> <span class="n">y_</span><span class="p">;</span>
-  <span class="kt">double</span> <span class="n">xVel_</span><span class="p">,</span> <span class="n">yVel_</span><span class="p">;</span>
+<span class="w">  </span><span class="kt">int</span><span class="w"> </span><span class="n">framesLeft_</span><span class="p">;</span>
+<span class="w">  </span><span class="kt">double</span><span class="w"> </span><span class="n">x_</span><span class="p">,</span><span class="w"> </span><span class="n">y_</span><span class="p">;</span>
+<span class="w">  </span><span class="kt">double</span><span class="w"> </span><span class="n">xVel_</span><span class="p">,</span><span class="w"> </span><span class="n">yVel_</span><span class="p">;</span>
 <span class="p">};</span>
-</pre></div>
+</code></pre></div>
 
-
-<p>默认的构造器将粒子初始化为“不在使用中”。之后对<code>init()</code>的调用初始化粒子到活跃状态。
-粒子随着时间播放动画，一帧调用一次<code>animate()</code>函数。</p>
-<p>对象池需要知道哪个粒子可以被重用。它通过粒子的<code>inUse()</code>函数获知这点。
-这个函数利用了粒子生命时间有限这点，并使用变量<code>framesLeft_</code>来决定哪些粒子在被使用，无需存储分离的标识。</p>
+<p>默认构造函数把粒子初始化为“不在使用中”。之后对 <code>init()</code> 的调用会把粒子初始化到存活状态。
+粒子随着时间推移播放动画，用的是那个名字毫无悬念的 <code>animate()</code> 函数，它应该每帧调用一次。</p>
+<p>对象池需要知道哪些粒子可以重用。它通过粒子的 <code>inUse()</code> 函数获知这一点。
+这个函数利用了粒子寿命有限这一事实，用 <code>framesLeft_</code> 变量来判断哪些粒子正在使用中，而无需存储单独的标志。</p>
 <p>对象池类也很简单：</p>
-<div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">ParticlePool</span>
+<div class="codehilite"><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">ParticlePool</span>
 <span class="p">{</span>
 <span class="k">public</span><span class="o">:</span>
-  <span class="kt">void</span> <span class="n">create</span><span class="p">(</span><span class="kt">double</span> <span class="n">x</span><span class="p">,</span> <span class="kt">double</span> <span class="n">y</span><span class="p">,</span>
-              <span class="kt">double</span> <span class="n">xVel</span><span class="p">,</span> <span class="kt">double</span> <span class="n">yVel</span><span class="p">,</span> <span class="kt">int</span> <span class="n">lifetime</span><span class="p">);</span>
+<span class="w">  </span><span class="kt">void</span><span class="w"> </span><span class="n">create</span><span class="p">(</span><span class="kt">double</span><span class="w"> </span><span class="n">x</span><span class="p">,</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">y</span><span class="p">,</span>
+<span class="w">              </span><span class="kt">double</span><span class="w"> </span><span class="n">xVel</span><span class="p">,</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">yVel</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">lifetime</span><span class="p">);</span>
 
-  <span class="kt">void</span> <span class="nf">animate</span><span class="p">()</span>
-  <span class="p">{</span>
-    <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">POOL_SIZE</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span>
-    <span class="p">{</span>
-      <span class="n">particles_</span><span class="p">[</span><span class="n">i</span><span class="p">].</span><span class="n">animate</span><span class="p">();</span>
-    <span class="p">}</span>
-  <span class="p">}</span>
+<span class="w">  </span><span class="kt">void</span><span class="w"> </span><span class="nf">animate</span><span class="p">()</span>
+<span class="w">  </span><span class="p">{</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">POOL_SIZE</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">      </span><span class="n">particles_</span><span class="p">[</span><span class="n">i</span><span class="p">].</span><span class="n">animate</span><span class="p">();</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">}</span>
 
 <span class="k">private</span><span class="o">:</span>
-  <span class="k">static</span> <span class="k">const</span> <span class="kt">int</span> <span class="n">POOL_SIZE</span> <span class="o">=</span> <span class="mi">100</span><span class="p">;</span>
-  <span class="n">Particle</span> <span class="n">particles_</span><span class="p">[</span><span class="n">POOL_SIZE</span><span class="p">];</span>
+<span class="w">  </span><span class="k">static</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">POOL_SIZE</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">100</span><span class="p">;</span>
+<span class="w">  </span><span class="n">Particle</span><span class="w"> </span><span class="n">particles_</span><span class="p">[</span><span class="n">POOL_SIZE</span><span class="p">];</span>
 <span class="p">};</span>
-</pre></div>
-
+</code></pre></div>
 
 <p><span name="update"></span></p>
-<p><code>create()</code>函数允许外部代码创建新粒子。
-游戏每帧调用<code>animate()</code>一次，让对象池中的粒子轮流显示动画。</p>
+<p><code>create()</code> 函数允许外部代码创建新粒子。
+游戏每帧调用一次 <code>animate()</code>，它再依次让池中的每个粒子播放动画。</p>
 <aside name="update">
-<p><code>animate()</code>方法是<a href="update-method.html" class="pattern">更新方法</a>模式的一个例子。</p>
+<p><code>animate()</code> 方法是<a href="update-method.html" class="pattern">更新方法</a>模式的一个例子。</p>
 </aside>
-<p>粒子本身被存储在对象池类中一个固定大小的数组里。
-在这个简单的实现中，池的大小在类声明时被硬编码了，但是也可以使用动态大小的数组或使用由外部定义的模板变量。</p>
+<p>粒子本身被存储在类中一个固定大小的数组里。
+在这个示例实现中，池的大小在类声明中被硬编码了，但也可以通过使用给定大小的动态数组或值模板参数在外部定义。</p>
 <p>创建新粒子很直观：</p>
-<div class="codehilite"><pre><span></span><span class="kt">void</span> <span class="n">ParticlePool</span><span class="o">::</span><span class="n">create</span><span class="p">(</span><span class="kt">double</span> <span class="n">x</span><span class="p">,</span> <span class="kt">double</span> <span class="n">y</span><span class="p">,</span>
-                          <span class="kt">double</span> <span class="n">xVel</span><span class="p">,</span> <span class="kt">double</span> <span class="n">yVel</span><span class="p">,</span>
-                          <span class="kt">int</span> <span class="n">lifetime</span><span class="p">)</span>
+<div class="codehilite"><pre><span></span><code><span class="kt">void</span><span class="w"> </span><span class="nf">ParticlePool::create</span><span class="p">(</span><span class="kt">double</span><span class="w"> </span><span class="n">x</span><span class="p">,</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">y</span><span class="p">,</span>
+<span class="w">                          </span><span class="kt">double</span><span class="w"> </span><span class="n">xVel</span><span class="p">,</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">yVel</span><span class="p">,</span>
+<span class="w">                          </span><span class="kt">int</span><span class="w"> </span><span class="n">lifetime</span><span class="p">)</span>
 <span class="p">{</span>
-  <span class="c1">// 找到一个可用粒子</span>
-  <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">POOL_SIZE</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span>
-  <span class="p">{</span>
-    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">particles_</span><span class="p">[</span><span class="n">i</span><span class="p">].</span><span class="n">inUse</span><span class="p">())</span>
-    <span class="p">{</span>
-      <span class="n">particles_</span><span class="p">[</span><span class="n">i</span><span class="p">].</span><span class="n">init</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">xVel</span><span class="p">,</span> <span class="n">yVel</span><span class="p">,</span> <span class="n">lifetime</span><span class="p">);</span>
-      <span class="k">return</span><span class="p">;</span>
-    <span class="p">}</span>
-  <span class="p">}</span>
+<span class="w">  </span><span class="c1">// 找到一个可用粒子</span>
+<span class="w">  </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">POOL_SIZE</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span>
+<span class="w">  </span><span class="p">{</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">particles_</span><span class="p">[</span><span class="n">i</span><span class="p">].</span><span class="n">inUse</span><span class="p">())</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">      </span><span class="n">particles_</span><span class="p">[</span><span class="n">i</span><span class="p">].</span><span class="n">init</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="w"> </span><span class="n">y</span><span class="p">,</span><span class="w"> </span><span class="n">xVel</span><span class="p">,</span><span class="w"> </span><span class="n">yVel</span><span class="p">,</span><span class="w"> </span><span class="n">lifetime</span><span class="p">);</span>
+<span class="w">      </span><span class="k">return</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">}</span>
 <span class="p">}</span>
-</pre></div>
+</code></pre></div>
 
-
-<p>我们遍历对象池找到第一个可用粒子。
-当我们找到后，初始化它然后就完成了。
-注意在这个实现中，如果这里没有找到任何可用的粒子，就不创建新的粒子。</p>
-<p>做一个简单粒子系统的所有东西都在这里了，当然，没有包含渲染粒子。
-我们现在可以创建对象池然后使用它创建粒子。当时间到了，粒子会自动失效。</p>
+<p>我们遍历整个池，寻找第一个可用的粒子。
+找到后，初始化它，就完成了。
+注意，在这个实现中，如果没有可用粒子，我们就不创建新的粒子。</p>
+<p>除了渲染粒子之外，这就是一个简单粒子系统的全部了。
+我们现在可以创建一个池，并用它创建一些粒子。当它们的寿命到期时，粒子会自动停用。</p>
 <p><span name="create"></span></p>
-<p>这足够承载一个游戏了，但是敏锐的读者也许会注意到创建新粒子（可能）需要遍历整个集合，直到找到一个空闲槽。
-如果池很大很满，这可能很慢。
-让我们看看可以怎样改进这一点。</p>
+<p>这已经足够发布一款游戏了，但眼尖的人也许已经注意到，创建新粒子需要（可能）遍历整个集合，直到找到空闲槽位。
+如果池很大而且几乎满了，这可能会变慢。
+让我们看看如何改进这一点。</p>
 <aside name="create">
-<p>创建一个粒子的复杂度是<em>O(n)</em> ，上过算法课的人都知道。</p>
+<p>创建粒子的复杂度是<em>O(n)</em>——如果你还记得算法课的话。</p>
 </aside>
 <h3><a href="#空闲列表" name="空闲列表">空闲列表</a></h3>
-<p>如果不想浪费时间在<em>查找</em>空闲粒子上，明显的解决方案是不要失去对它们的追踪。
-我们可以存储指向每个未使用粒子的单独指针列表。
-然后，当需要创建粒子时，我们从列表中移除第一个指针，然后重用它指向的粒子。</p>
-<p>不幸的是，这回要我们管理一个和对象池同样大小的单独数组。
-无论如何，在我们创建池时，<em>所有的</em> 粒子都未被使用，所以列表初始会包含池中每个对象的指针。</p>
-<p>如果<em>无需</em>牺牲任何内存就能修复性能问题那就好了。
-方便的是，这里已经有可以借用的内存了——那些未使用粒子自身的内存。</p>
-<p>当粒子未被使用时，它的大部分的状态都是无关紧要的。
-它的位置和速度没有被使用。唯一需要的是表示自身是否激活的状态。
-在我们的例子中，那是<code>framesLeft_</code>成员。
-其他的所有位都可以被重用。这里是改进后的粒子：</p>
-<div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">Particle</span>
+<p>如果不想浪费时间<em>寻找</em>空闲粒子，明显的办法就是不要失去对它们的追踪。
+我们可以另外存储一个指针列表，指向每个未使用的粒子。
+然后，当需要创建粒子时，从列表中移除第一个指针，并重用它所指向的粒子。</p>
+<p>不幸的是，这需要我们维护一个完整的独立数组，其指针数量与池中对象一样多。
+毕竟，在首次创建池时，<em>所有</em>粒子都未被使用，所以这个列表最初会包含指向池中每个对象的指针。</p>
+<p>如果<em>不用</em>牺牲任何内存就能解决性能问题，那就好了。
+方便的是，这里已经有现成的内存可以借用——那些未使用粒子自身的数据。</p>
+<p>当粒子不在使用中时，它的大部分状态都无关紧要。
+它的位置和速度没有被用到。它唯一需要的状态是用来判断它是否已死亡的信息。
+在我们的例子中，那是 <code>framesLeft_</code> 成员。
+其余所有位都可以被重用。下面是修改后的粒子：</p>
+<div class="codehilite"><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Particle</span>
 <span class="p">{</span>
 <span class="k">public</span><span class="o">:</span>
-  <span class="c1">// ...</span>
+<span class="w">  </span><span class="c1">// ...</span>
 
-  <span class="n">Particle</span><span class="o">*</span> <span class="n">getNext</span><span class="p">()</span> <span class="k">const</span> <span class="p">{</span> <span class="k">return</span> <span class="n">state_</span><span class="p">.</span><span class="n">next</span><span class="p">;</span> <span class="p">}</span>
-  <span class="kt">void</span> <span class="n">setNext</span><span class="p">(</span><span class="n">Particle</span><span class="o">*</span> <span class="n">next</span><span class="p">)</span> <span class="p">{</span> <span class="n">state_</span><span class="p">.</span><span class="n">next</span> <span class="o">=</span> <span class="n">next</span><span class="p">;</span> <span class="p">}</span>
+<span class="w">  </span><span class="n">Particle</span><span class="o">*</span><span class="w"> </span><span class="n">getNext</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="n">state_</span><span class="p">.</span><span class="n">next</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
+<span class="w">  </span><span class="kt">void</span><span class="w"> </span><span class="n">setNext</span><span class="p">(</span><span class="n">Particle</span><span class="o">*</span><span class="w"> </span><span class="n">next</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">state_</span><span class="p">.</span><span class="n">next</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">next</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
 
 <span class="k">private</span><span class="o">:</span>
-  <span class="kt">int</span> <span class="n">framesLeft_</span><span class="p">;</span>
+<span class="w">  </span><span class="kt">int</span><span class="w"> </span><span class="n">framesLeft_</span><span class="p">;</span>
 
-  <span class="k">union</span>
-  <span class="p">{</span>
-    <span class="c1">// 使用时的状态</span>
-    <span class="k">struct</span>
-    <span class="p">{</span>
-      <span class="kt">double</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">;</span>
-      <span class="kt">double</span> <span class="n">xVel</span><span class="p">,</span> <span class="n">yVel</span><span class="p">;</span>
-    <span class="p">}</span> <span class="n">live</span><span class="p">;</span>
+<span class="w">  </span><span class="k">union</span>
+<span class="w">  </span><span class="p">{</span>
+<span class="w">    </span><span class="c1">// 使用时的状态</span>
+<span class="w">    </span><span class="k">struct</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">      </span><span class="kt">double</span><span class="w"> </span><span class="n">x</span><span class="p">,</span><span class="w"> </span><span class="n">y</span><span class="p">;</span>
+<span class="w">      </span><span class="kt">double</span><span class="w"> </span><span class="n">xVel</span><span class="p">,</span><span class="w"> </span><span class="n">yVel</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span><span class="w"> </span><span class="n">live</span><span class="p">;</span>
 
-    <span class="c1">// 可重用时的状态</span>
-    <span class="n">Particle</span><span class="o">*</span> <span class="n">next</span><span class="p">;</span>
-  <span class="p">}</span> <span class="n">state_</span><span class="p">;</span>
+<span class="w">    </span><span class="c1">// 可重用时的状态</span>
+<span class="w">    </span><span class="n">Particle</span><span class="o">*</span><span class="w"> </span><span class="n">next</span><span class="p">;</span>
+<span class="w">  </span><span class="p">}</span><span class="w"> </span><span class="n">state_</span><span class="p">;</span>
 <span class="p">};</span>
-</pre></div>
-
+</code></pre></div>
 
 <p><span name="union"></span></p>
-<p>我们将除<code>framesLeft_</code>外的所有成员变量移到<code>live</code>结构中，而该结构存储在union<code>state_</code>中。
+<p>我们把除 <code>framesLeft_</code> 之外的所有成员变量都移到了 <code>state_</code> union 中的一个 <code>live</code> 结构里。
 这个结构保存粒子在播放动画时的状态。
-当粒子被重用时，union的其他部分，<code>next</code>成员被使用了。
-它保留了一个指向这个粒子后面的可用粒子的指针。</p>
+当粒子未被使用时，就会用到 union 的另一个分支——<code>next</code> 成员。
+它保存一个指针，指向这个粒子之后的下一个可用粒子。</p>
 <aside name="union">
-<p>Unions近些年不那么常见了，所以你可能不熟悉这些语法。
-如果你在游戏团队中，你可能会遇见“内存大师”，当游戏遇到不可避免的内存耗尽问题时，他们就挺身而出。
-问问他们关于unions的事。
-他们知道所有有关union的事情，还有其他有趣的位压缩技巧。</p>
+<p>Union 如今似乎不那么常用了，所以你可能不熟悉这些语法。
+如果你在游戏团队里，很可能有一位“内存大师”，就是那位饱受折磨的难兄难弟，他的活儿是在游戏不可避免地突破内存预算后想办法补救。
+问问他们 union 的事。
+他们不但精通 union，还知道各种有趣的位压缩技巧。</p>
 </aside>
-<p>我们可以使用这些指针构建链表，将池中每个未使用的粒子都连在一起。
-我们有可用粒子的列表，而且无需使用额外的内存。
-我们使用了死亡粒子本身的内存来存储列表。</p>
-<p>这种聪明的技术被称为<a href="http://en.wikipedia.org/wiki/Free_list"><em>freelist</em></a>。
-为了让其工作，我们需要保证指针正确地初始化，在粒子创建和销毁时好好被管理了。
-并且，当然，我们要追踪列表的头指针：</p>
-<div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">ParticlePool</span>
+<p>我们可以用这些指针构建一个链表，把池中每个未使用的粒子串在一起。
+我们得到了所需的可用粒子列表，却无需使用任何额外内存。
+我们拆用了死亡粒子自身的内存来存储这个列表。</p>
+<p>这种聪明的技术被称为<a href="http://en.wikipedia.org/wiki/Free_list"><em>空闲列表</em></a>。
+为了让它生效，我们需要确保指针被正确初始化，并在粒子创建和销毁时得到维护。
+当然，我们还需要追踪列表的头：</p>
+<div class="codehilite"><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">ParticlePool</span>
 <span class="p">{</span>
-  <span class="c1">// ...</span>
+<span class="w">  </span><span class="c1">// ...</span>
 <span class="k">private</span><span class="o">:</span>
-  <span class="n">Particle</span><span class="o">*</span> <span class="n">firstAvailable_</span><span class="p">;</span>
+<span class="w">  </span><span class="n">Particle</span><span class="o">*</span><span class="w"> </span><span class="n">firstAvailable_</span><span class="p">;</span>
 <span class="p">};</span>
-</pre></div>
+</code></pre></div>
 
-
-<p>当首次创建对象池时，<em>所有的</em> 粒子都是可用的，所以空余列表应该贯穿整个对象池。对象池构造器设置了这些：</p>
-<div class="codehilite"><pre><span></span><span class="n">ParticlePool</span><span class="o">::</span><span class="n">ParticlePool</span><span class="p">()</span>
+<p>当池首次创建时，<em>所有</em>粒子都是可用的，所以我们的空闲列表应该贯穿整个池。池构造函数完成这些设置：</p>
+<div class="codehilite"><pre><span></span><code><span class="n">ParticlePool</span><span class="o">::</span><span class="n">ParticlePool</span><span class="p">()</span>
 <span class="p">{</span>
-  <span class="c1">// 第一个可用的粒子</span>
-  <span class="n">firstAvailable_</span> <span class="o">=</span> <span class="o">&amp;</span><span class="n">particles_</span><span class="p">[</span><span class="mi">0</span><span class="p">];</span>
+<span class="w">  </span><span class="c1">// 第一个可用的粒子</span>
+<span class="w">  </span><span class="n">firstAvailable_</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">&amp;</span><span class="n">particles_</span><span class="p">[</span><span class="mi">0</span><span class="p">];</span>
 
-  <span class="c1">// 每个粒子指向下一个</span>
-  <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">POOL_SIZE</span> <span class="o">-</span> <span class="mi">1</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span>
-  <span class="p">{</span>
-    <span class="n">particles_</span><span class="p">[</span><span class="n">i</span><span class="p">].</span><span class="n">setNext</span><span class="p">(</span><span class="o">&amp;</span><span class="n">particles_</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]);</span>
-  <span class="p">}</span>
+<span class="w">  </span><span class="c1">// 每个粒子指向下一个</span>
+<span class="w">  </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">POOL_SIZE</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span>
+<span class="w">  </span><span class="p">{</span>
+<span class="w">    </span><span class="n">particles_</span><span class="p">[</span><span class="n">i</span><span class="p">].</span><span class="n">setNext</span><span class="p">(</span><span class="o">&amp;</span><span class="n">particles_</span><span class="p">[</span><span class="n">i</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="p">]);</span>
+<span class="w">  </span><span class="p">}</span>
 
-  <span class="c1">// 最后一个终结的列表</span>
-  <span class="n">particles_</span><span class="p">[</span><span class="n">POOL_SIZE</span> <span class="o">-</span> <span class="mi">1</span><span class="p">].</span><span class="n">setNext</span><span class="p">(</span><span class="nb">NULL</span><span class="p">);</span>
+<span class="w">  </span><span class="c1">// 最后一个终结的列表</span>
+<span class="w">  </span><span class="n">particles_</span><span class="p">[</span><span class="n">POOL_SIZE</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">1</span><span class="p">].</span><span class="n">setNext</span><span class="p">(</span><span class="nb">NULL</span><span class="p">);</span>
 <span class="p">}</span>
-</pre></div>
-
+</code></pre></div>
 
 <p><span name="first"></span></p>
 <p>现在为了创建新粒子，我们直接跳到首个可用的粒子：</p>
 <aside name="first">
-<p><em>O(1)</em> 复杂度，孩子！这才叫编码！</p>
+<p><em>O(1)</em> 复杂度，伙计！这才叫带劲！</p>
 </aside>
-<div class="codehilite"><pre><span></span><span class="kt">void</span> <span class="n">ParticlePool</span><span class="o">::</span><span class="n">create</span><span class="p">(</span><span class="kt">double</span> <span class="n">x</span><span class="p">,</span> <span class="kt">double</span> <span class="n">y</span><span class="p">,</span>
-                          <span class="kt">double</span> <span class="n">xVel</span><span class="p">,</span> <span class="kt">double</span> <span class="n">yVel</span><span class="p">,</span>
-                          <span class="kt">int</span> <span class="n">lifetime</span><span class="p">)</span>
+<div class="codehilite"><pre><span></span><code><span class="kt">void</span><span class="w"> </span><span class="nf">ParticlePool::create</span><span class="p">(</span><span class="kt">double</span><span class="w"> </span><span class="n">x</span><span class="p">,</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">y</span><span class="p">,</span>
+<span class="w">                          </span><span class="kt">double</span><span class="w"> </span><span class="n">xVel</span><span class="p">,</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">yVel</span><span class="p">,</span>
+<span class="w">                          </span><span class="kt">int</span><span class="w"> </span><span class="n">lifetime</span><span class="p">)</span>
 <span class="p">{</span>
-  <span class="c1">// 保证池没有满</span>
-  <span class="n">assert</span><span class="p">(</span><span class="n">firstAvailable_</span> <span class="o">!=</span> <span class="nb">NULL</span><span class="p">);</span>
+<span class="w">  </span><span class="c1">// 保证池没有满</span>
+<span class="w">  </span><span class="n">assert</span><span class="p">(</span><span class="n">firstAvailable_</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="nb">NULL</span><span class="p">);</span>
 
-  <span class="c1">// 将它从可用粒子列表中移除</span>
-  <span class="n">Particle</span><span class="o">*</span> <span class="n">newParticle</span> <span class="o">=</span> <span class="n">firstAvailable_</span><span class="p">;</span>
-  <span class="n">firstAvailable_</span> <span class="o">=</span> <span class="n">newParticle</span><span class="o">-&gt;</span><span class="n">getNext</span><span class="p">();</span>
+<span class="w">  </span><span class="c1">// 将它从可用粒子列表中移除</span>
+<span class="w">  </span><span class="n">Particle</span><span class="o">*</span><span class="w"> </span><span class="n">newParticle</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">firstAvailable_</span><span class="p">;</span>
+<span class="w">  </span><span class="n">firstAvailable_</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">newParticle</span><span class="o">-&gt;</span><span class="n">getNext</span><span class="p">();</span>
 
-  <span class="n">newParticle</span><span class="o">-&gt;</span><span class="n">init</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">xVel</span><span class="p">,</span> <span class="n">yVel</span><span class="p">,</span> <span class="n">lifetime</span><span class="p">);</span>
+<span class="w">  </span><span class="n">newParticle</span><span class="o">-&gt;</span><span class="n">init</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="w"> </span><span class="n">y</span><span class="p">,</span><span class="w"> </span><span class="n">xVel</span><span class="p">,</span><span class="w"> </span><span class="n">yVel</span><span class="p">,</span><span class="w"> </span><span class="n">lifetime</span><span class="p">);</span>
 <span class="p">}</span>
-</pre></div>
+</code></pre></div>
 
-
-<p>我们需要知道粒子何时死亡，这样可将其放回到空闲列表中，
-所以我们将<code>animate()</code>改为在粒子不再活跃时返回<code>true</code>：</p>
-<div class="codehilite"><pre><span></span><span class="kt">bool</span> <span class="n">Particle</span><span class="o">::</span><span class="n">animate</span><span class="p">()</span>
+<p>我们需要知道粒子何时死亡，以便把它放回空闲列表，
+所以我们将 <code>animate()</code> 改为：如果此前存活的粒子在这一帧咽了气，就返回 <code>true</code>：</p>
+<div class="codehilite"><pre><span></span><code><span class="kt">bool</span><span class="w"> </span><span class="nf">Particle::animate</span><span class="p">()</span>
 <span class="p">{</span>
-  <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">inUse</span><span class="p">())</span> <span class="k">return</span> <span class="nb">false</span><span class="p">;</span>
+<span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">inUse</span><span class="p">())</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="nb">false</span><span class="p">;</span>
 
-  <span class="n">framesLeft_</span><span class="o">--</span><span class="p">;</span>
-  <span class="n">x_</span> <span class="o">+=</span> <span class="n">xVel_</span><span class="p">;</span>
-  <span class="n">y_</span> <span class="o">+=</span> <span class="n">yVel_</span><span class="p">;</span>
+<span class="w">  </span><span class="n">framesLeft_</span><span class="o">--</span><span class="p">;</span>
+<span class="w">  </span><span class="n">x_</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="n">xVel_</span><span class="p">;</span>
+<span class="w">  </span><span class="n">y_</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="n">yVel_</span><span class="p">;</span>
 
-  <span class="k">return</span> <span class="n">framesLeft_</span> <span class="o">==</span> <span class="mi">0</span><span class="p">;</span>
+<span class="w">  </span><span class="k">return</span><span class="w"> </span><span class="n">framesLeft_</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
 <span class="p">}</span>
-</pre></div>
+</code></pre></div>
 
-
-<p>当那发生时，简单地将其放回列表：</p>
-<div class="codehilite"><pre><span></span><span class="kt">void</span> <span class="n">ParticlePool</span><span class="o">::</span><span class="n">animate</span><span class="p">()</span>
+<p>当这种情况发生时，我们简单地把它串回列表：</p>
+<div class="codehilite"><pre><span></span><code><span class="kt">void</span><span class="w"> </span><span class="nf">ParticlePool::animate</span><span class="p">()</span>
 <span class="p">{</span>
-  <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">POOL_SIZE</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span>
-  <span class="p">{</span>
-    <span class="k">if</span> <span class="p">(</span><span class="n">particles_</span><span class="p">[</span><span class="n">i</span><span class="p">].</span><span class="n">animate</span><span class="p">())</span>
-    <span class="p">{</span>
-      <span class="c1">// 将粒子加到列表的前部</span>
-      <span class="n">particles_</span><span class="p">[</span><span class="n">i</span><span class="p">].</span><span class="n">setNext</span><span class="p">(</span><span class="n">firstAvailable_</span><span class="p">);</span>
-      <span class="n">firstAvailable_</span> <span class="o">=</span> <span class="o">&amp;</span><span class="n">particles_</span><span class="p">[</span><span class="n">i</span><span class="p">];</span>
-    <span class="p">}</span>
-  <span class="p">}</span>
+<span class="w">  </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">POOL_SIZE</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span>
+<span class="w">  </span><span class="p">{</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">particles_</span><span class="p">[</span><span class="n">i</span><span class="p">].</span><span class="n">animate</span><span class="p">())</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">      </span><span class="c1">// 将粒子加到列表的前部</span>
+<span class="w">      </span><span class="n">particles_</span><span class="p">[</span><span class="n">i</span><span class="p">].</span><span class="n">setNext</span><span class="p">(</span><span class="n">firstAvailable_</span><span class="p">);</span>
+<span class="w">      </span><span class="n">firstAvailable_</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">&amp;</span><span class="n">particles_</span><span class="p">[</span><span class="n">i</span><span class="p">];</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">}</span>
 <span class="p">}</span>
-</pre></div>
+</code></pre></div>
 
-
-<p>这样就成了，一个小对象池，拥有常量时间的构造和删除。</p>
+<p>就这样，一个不错的小对象池，创建和删除都是常数时间。</p>
 <h2><a href="#设计决策" name="设计决策">设计决策</a></h2>
-<p>如你所见，对象池最简单的实现非常平凡：创建对象数组，在需要它们时重新初始化。
-实际的代码很少会那么简单，这里还有很多方式让池更加的通用，安全，或容易管理。
+<p>如你所见，最简单的对象池实现几乎微不足道：创建一个对象数组，并在需要时重新初始化它们。
+生产代码很少那么精简。有很多方式可以在此基础上扩展，让池更通用、使用更安全或更易维护。
 在游戏中实现对象池时，你需要回答以下问题：</p>
 <h3><a href="#对象和池耦合吗？" name="对象和池耦合吗？">对象和池耦合吗？</a></h3>
-<p>写对象池时第一个需要思考的问题：对象本身是否需要知道它们在池子中。
-大多数情况下它们需要，但是那样你就不大可能写一个通用对象池类来保存任意对象。</p>
+<p>编写对象池时你会遇到的第一个问题是：对象本身是否知道自己身处池中。
+大多数情况下它们会知道，但在编写能容纳任意对象的通用池类时，你就没有这种便利了。</p>
 <ul>
 <li>
 <p><strong>如果对象与池耦合：</strong></p>
 <ul>
 <li>
 <p><em>实现更简单。</em>
-  你可以在对象中简单地放个“在使用中”标识或者函数，就完成了。</p>
+  你只需在池化对象中放一个“使用中”标志或函数，就完成了。</p>
 </li>
 <li>
-<p><em>你可以保证对象只能被对象池创建。</em>
-  在C++中，做这事最简单的方法是让池对象是对象类的友类，将对象的构造器设为私有。</p>
-<div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">Particle</span>
+<p><em>你可以确保对象只能由池创建。</em>
+  在 C++ 中，一个简单的做法是让池类成为对象类的友元，然后把对象的构造函数设为私有。</p>
+<div class="codehilite"><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Particle</span>
 <span class="p">{</span>
-  <span class="k">friend</span> <span class="k">class</span> <span class="nc">ParticlePool</span><span class="p">;</span>
+<span class="w">  </span><span class="k">friend</span><span class="w"> </span><span class="k">class</span><span class="w"> </span><span class="nc">ParticlePool</span><span class="p">;</span>
 
 <span class="k">private</span><span class="o">:</span>
-  <span class="n">Particle</span><span class="p">()</span>
-  <span class="o">:</span> <span class="n">inUse_</span><span class="p">(</span><span class="nb">false</span><span class="p">)</span>
-  <span class="p">{}</span>
+<span class="w">  </span><span class="n">Particle</span><span class="p">()</span>
+<span class="w">  </span><span class="o">:</span><span class="w"> </span><span class="n">inUse_</span><span class="p">(</span><span class="nb">false</span><span class="p">)</span>
+<span class="w">  </span><span class="p">{}</span>
 
-  <span class="kt">bool</span> <span class="n">inUse_</span><span class="p">;</span>
+<span class="w">  </span><span class="kt">bool</span><span class="w"> </span><span class="n">inUse_</span><span class="p">;</span>
 <span class="p">};</span>
 
-<span class="k">class</span> <span class="nc">ParticlePool</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">ParticlePool</span>
 <span class="p">{</span>
-  <span class="n">Particle</span> <span class="n">pool_</span><span class="p">[</span><span class="mi">100</span><span class="p">];</span>
+<span class="w">  </span><span class="n">Particle</span><span class="w"> </span><span class="n">pool_</span><span class="p">[</span><span class="mi">100</span><span class="p">];</span>
 <span class="p">};</span>
-</pre></div>
+</code></pre></div>
 
-
-<p>在类间保持这种关系来确保使用者无法创建对象池没有追踪的对象。</p>
+<p>这种关系记录了类的预期使用方式，并确保使用者不会创建池没有追踪的对象。</p>
 </li>
 <li>
-<p><em>你也许可以避免显式存储“使用中”的标识。</em>
-  很多对象已经保存了可以告诉外界它有没有在使用的状态。
-  举个例子，粒子的位置如果不在屏幕上，也许它就可以被重用。
-  如果对象类知道它在对象池中，那它可以提供一个<code>inUse()</code>来查询这个状态。
-  这省下了对象池存储“在使用中”标识的多余内存。</p>
+<p><em>你也许可以避免显式存储“使用中”标志。</em>
+  很多对象已经保留了一些可以用来判断其是否存活的状态。
+  例如，如果粒子当前位置在屏幕外，它就可以被重用。
+  如果对象类知道自己可能被用在池中，它可以提供一个 <code>inUse()</code> 方法来查询该状态。
+  这让池不必再额外消耗内存去存储一堆“使用中”标志。</p>
 </li>
 </ul>
 </li>
@@ -523,72 +512,70 @@ delete the font style for english.
 <p><strong>如果对象没有和对象池耦合：</strong></p>
 <ul>
 <li>
-<p><em>可以保存多种类型的对象。</em>
-  这是最大的好处。通过解耦对象和对象池，你可以实现通用的、可重用的对象池类。</p>
+<p><em>任何类型的对象都可以入池。</em>
+  这是最大的优点。通过把对象与池解耦，你可以实现一个通用的、可复用的池类。</p>
 </li>
 <li>
-<p><em>必须在对象的外部追踪“使用中”状态。</em>
-  做这点最简单的方式是创建分离的位字段：</p>
-<div class="codehilite"><pre><span></span><span class="k">template</span> <span class="o">&lt;</span><span class="k">class</span> <span class="nc">TObject</span><span class="o">&gt;</span>
-<span class="k">class</span> <span class="nc">GenericPool</span>
+<p><em>“使用中”状态必须在对象外部追踪。</em>
+  最简单的方式是创建一个单独的位字段：</p>
+<div class="codehilite"><pre><span></span><code><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">class</span><span class="w"> </span><span class="nc">TObject</span><span class="o">&gt;</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">GenericPool</span>
 <span class="p">{</span>
 <span class="k">private</span><span class="o">:</span>
-  <span class="k">static</span> <span class="k">const</span> <span class="kt">int</span> <span class="n">POOL_SIZE</span> <span class="o">=</span> <span class="mi">100</span><span class="p">;</span>
+<span class="w">  </span><span class="k">static</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">POOL_SIZE</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">100</span><span class="p">;</span>
 
-  <span class="n">TObject</span> <span class="n">pool_</span><span class="p">[</span><span class="n">POOL_SIZE</span><span class="p">];</span>
-  <span class="kt">bool</span>    <span class="n">inUse_</span><span class="p">[</span><span class="n">POOL_SIZE</span><span class="p">];</span>
+<span class="w">  </span><span class="n">TObject</span><span class="w"> </span><span class="n">pool_</span><span class="p">[</span><span class="n">POOL_SIZE</span><span class="p">];</span>
+<span class="w">  </span><span class="kt">bool</span><span class="w">    </span><span class="n">inUse_</span><span class="p">[</span><span class="n">POOL_SIZE</span><span class="p">];</span>
 <span class="p">};</span>
-</pre></div>
-
+</code></pre></div>
 
 </li>
 </ul>
 </li>
 </ul>
 <h3><a href="#谁负责初始化重用对象？" name="谁负责初始化重用对象？">谁负责初始化重用对象？</a></h3>
-<p>为了重用一个已经存在的对象，它必须用新状态重新初始化。
-这里的关键问题是你需要在对象池的内部还是外部重新初始化。</p>
+<p>为了重用现有对象，它必须用新状态重新初始化。
+这里的关键问题是，在池类内部还是外部重新初始化对象。</p>
 <ul>
 <li>
 <p><strong>如果在对象池的内部重新初始化：</strong></p>
 <ul>
 <li>
-<p><em>对象池可以完全封装管理对象。</em>
-  取决于对象需要的其他能力，你可以让它们完全处于池的内部。
-  这保证了其外部代码不会引用到已重用的对象。</p>
+<p><em>池可以完全封装它的对象。</em>
+  根据对象所需的其他能力，你可以让它们完全留在池内部。
+  这确保了其他代码不会保留对可能被意外重用的对象的引用。</p>
 </li>
 <li>
-<p><em>对象池与对象是如何初始化的相绑定。</em>
-  池中对象也许提供了不同的初始化函数。
-  如果对象池控制了初始化，它的接口需要支持所有的初始化函数，然后转发给对象。</p>
-<div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">Particle</span>
+<p><em>池与对象的初始化方式绑定在一起。</em>
+  池化对象可能提供多个初始化函数。
+  如果由池管理初始化，它的接口就需要支持所有这些函数，并把它们转发给对象。</p>
+<div class="codehilite"><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Particle</span>
 <span class="p">{</span>
-  <span class="c1">// 多种初始化方式……</span>
-  <span class="kt">void</span> <span class="n">init</span><span class="p">(</span><span class="kt">double</span> <span class="n">x</span><span class="p">,</span> <span class="kt">double</span> <span class="n">y</span><span class="p">);</span>
-  <span class="kt">void</span> <span class="nf">init</span><span class="p">(</span><span class="kt">double</span> <span class="n">x</span><span class="p">,</span> <span class="kt">double</span> <span class="n">y</span><span class="p">,</span> <span class="kt">double</span> <span class="n">angle</span><span class="p">);</span>
-  <span class="kt">void</span> <span class="nf">init</span><span class="p">(</span><span class="kt">double</span> <span class="n">x</span><span class="p">,</span> <span class="kt">double</span> <span class="n">y</span><span class="p">,</span> <span class="kt">double</span> <span class="n">xVel</span><span class="p">,</span> <span class="kt">double</span> <span class="n">yVel</span><span class="p">);</span>
+<span class="w">  </span><span class="c1">// 多种初始化方式……</span>
+<span class="w">  </span><span class="kt">void</span><span class="w"> </span><span class="nf">init</span><span class="p">(</span><span class="kt">double</span><span class="w"> </span><span class="n">x</span><span class="p">,</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">y</span><span class="p">);</span>
+<span class="w">  </span><span class="kt">void</span><span class="w"> </span><span class="nf">init</span><span class="p">(</span><span class="kt">double</span><span class="w"> </span><span class="n">x</span><span class="p">,</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">y</span><span class="p">,</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">angle</span><span class="p">);</span>
+<span class="w">  </span><span class="kt">void</span><span class="w"> </span><span class="nf">init</span><span class="p">(</span><span class="kt">double</span><span class="w"> </span><span class="n">x</span><span class="p">,</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">y</span><span class="p">,</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">xVel</span><span class="p">,</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">yVel</span><span class="p">);</span>
 <span class="p">};</span>
 
-<span class="k">class</span> <span class="nc">ParticlePool</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">ParticlePool</span>
 <span class="p">{</span>
 <span class="k">public</span><span class="o">:</span>
-  <span class="kt">void</span> <span class="n">create</span><span class="p">(</span><span class="kt">double</span> <span class="n">x</span><span class="p">,</span> <span class="kt">double</span> <span class="n">y</span><span class="p">)</span>
-  <span class="p">{</span>
-    <span class="c1">// 转发给粒子……</span>
-  <span class="p">}</span>
+<span class="w">  </span><span class="kt">void</span><span class="w"> </span><span class="n">create</span><span class="p">(</span><span class="kt">double</span><span class="w"> </span><span class="n">x</span><span class="p">,</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">y</span><span class="p">)</span>
+<span class="w">  </span><span class="p">{</span>
+<span class="w">    </span><span class="c1">// 转发给粒子……</span>
+<span class="w">  </span><span class="p">}</span>
 
-  <span class="kt">void</span> <span class="n">create</span><span class="p">(</span><span class="kt">double</span> <span class="n">x</span><span class="p">,</span> <span class="kt">double</span> <span class="n">y</span><span class="p">,</span> <span class="kt">double</span> <span class="n">angle</span><span class="p">)</span>
-  <span class="p">{</span>
-    <span class="c1">// 转发给粒子……</span>
-  <span class="p">}</span>
+<span class="w">  </span><span class="kt">void</span><span class="w"> </span><span class="n">create</span><span class="p">(</span><span class="kt">double</span><span class="w"> </span><span class="n">x</span><span class="p">,</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">y</span><span class="p">,</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">angle</span><span class="p">)</span>
+<span class="w">  </span><span class="p">{</span>
+<span class="w">    </span><span class="c1">// 转发给粒子……</span>
+<span class="w">  </span><span class="p">}</span>
 
-  <span class="kt">void</span> <span class="n">create</span><span class="p">(</span><span class="kt">double</span> <span class="n">x</span><span class="p">,</span> <span class="kt">double</span> <span class="n">y</span><span class="p">,</span> <span class="kt">double</span> <span class="n">xVel</span><span class="p">,</span> <span class="kt">double</span> <span class="n">yVel</span><span class="p">)</span>
-  <span class="p">{</span>
-    <span class="c1">// 转发给粒子……</span>
-  <span class="p">}</span>
+<span class="w">  </span><span class="kt">void</span><span class="w"> </span><span class="n">create</span><span class="p">(</span><span class="kt">double</span><span class="w"> </span><span class="n">x</span><span class="p">,</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">y</span><span class="p">,</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">xVel</span><span class="p">,</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">yVel</span><span class="p">)</span>
+<span class="w">  </span><span class="p">{</span>
+<span class="w">    </span><span class="c1">// 转发给粒子……</span>
+<span class="w">  </span><span class="p">}</span>
 <span class="p">};</span>
-</pre></div>
-
+</code></pre></div>
 
 </li>
 </ul>
@@ -597,48 +584,45 @@ delete the font style for english.
 <p><strong>如果外部代码初始化对象：</strong></p>
 <ul>
 <li>
-<p><em>对象池的接口更简单。</em>
-  无需提供覆盖每种对象初始化的多种函数，对象池只需要返回新对象的引用：</p>
-<div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">Particle</span>
+<p><em>池的接口可以更简单。</em>
+  池无需提供多个函数来覆盖对象每种可能的初始化方式，只需返回对新对象的引用：</p>
+<div class="codehilite"><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Particle</span>
 <span class="p">{</span>
 <span class="k">public</span><span class="o">:</span>
-  <span class="c1">// 多种初始化方法</span>
-  <span class="kt">void</span> <span class="n">init</span><span class="p">(</span><span class="kt">double</span> <span class="n">x</span><span class="p">,</span> <span class="kt">double</span> <span class="n">y</span><span class="p">);</span>
-  <span class="kt">void</span> <span class="nf">init</span><span class="p">(</span><span class="kt">double</span> <span class="n">x</span><span class="p">,</span> <span class="kt">double</span> <span class="n">y</span><span class="p">,</span> <span class="kt">double</span> <span class="n">angle</span><span class="p">);</span>
-  <span class="kt">void</span> <span class="nf">init</span><span class="p">(</span><span class="kt">double</span> <span class="n">x</span><span class="p">,</span> <span class="kt">double</span> <span class="n">y</span><span class="p">,</span> <span class="kt">double</span> <span class="n">xVel</span><span class="p">,</span> <span class="kt">double</span> <span class="n">yVel</span><span class="p">);</span>
+<span class="w">  </span><span class="c1">// 多种初始化方法</span>
+<span class="w">  </span><span class="kt">void</span><span class="w"> </span><span class="n">init</span><span class="p">(</span><span class="kt">double</span><span class="w"> </span><span class="n">x</span><span class="p">,</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">y</span><span class="p">);</span>
+<span class="w">  </span><span class="kt">void</span><span class="w"> </span><span class="nf">init</span><span class="p">(</span><span class="kt">double</span><span class="w"> </span><span class="n">x</span><span class="p">,</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">y</span><span class="p">,</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">angle</span><span class="p">);</span>
+<span class="w">  </span><span class="kt">void</span><span class="w"> </span><span class="nf">init</span><span class="p">(</span><span class="kt">double</span><span class="w"> </span><span class="n">x</span><span class="p">,</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">y</span><span class="p">,</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">xVel</span><span class="p">,</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">yVel</span><span class="p">);</span>
 <span class="p">};</span>
 
-<span class="k">class</span> <span class="nc">ParticlePool</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">ParticlePool</span>
 <span class="p">{</span>
 <span class="k">public</span><span class="o">:</span>
-  <span class="n">Particle</span><span class="o">*</span> <span class="n">create</span><span class="p">()</span>
-  <span class="p">{</span>
-    <span class="c1">// 返回可用粒子的引用……</span>
-  <span class="p">}</span>
+<span class="w">  </span><span class="n">Particle</span><span class="o">*</span><span class="w"> </span><span class="n">create</span><span class="p">()</span>
+<span class="w">  </span><span class="p">{</span>
+<span class="w">    </span><span class="c1">// 返回可用粒子的引用……</span>
+<span class="w">  </span><span class="p">}</span>
 <span class="k">private</span><span class="o">:</span>
-  <span class="n">Particle</span> <span class="n">pool_</span><span class="p">[</span><span class="mi">100</span><span class="p">];</span>
+<span class="w">  </span><span class="n">Particle</span><span class="w"> </span><span class="n">pool_</span><span class="p">[</span><span class="mi">100</span><span class="p">];</span>
 <span class="p">};</span>
-</pre></div>
-
+</code></pre></div>
 
 <p>调用者可以使用对象暴露的任何方法进行初始化：</p>
-<div class="codehilite"><pre><span></span><span class="n">ParticlePool</span> <span class="n">pool</span><span class="p">;</span>
+<div class="codehilite"><pre><span></span><code><span class="n">ParticlePool</span><span class="w"> </span><span class="n">pool</span><span class="p">;</span>
 
-<span class="n">pool</span><span class="p">.</span><span class="n">create</span><span class="p">()</span><span class="o">-&gt;</span><span class="n">init</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">);</span>
-<span class="n">pool</span><span class="p">.</span><span class="n">create</span><span class="p">()</span><span class="o">-&gt;</span><span class="n">init</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">);</span>
-<span class="n">pool</span><span class="p">.</span><span class="n">create</span><span class="p">()</span><span class="o">-&gt;</span><span class="n">init</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mf">3.3</span><span class="p">,</span> <span class="mf">4.4</span><span class="p">);</span>
-</pre></div>
-
+<span class="n">pool</span><span class="p">.</span><span class="n">create</span><span class="p">()</span><span class="o">-&gt;</span><span class="n">init</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">);</span>
+<span class="n">pool</span><span class="p">.</span><span class="n">create</span><span class="p">()</span><span class="o">-&gt;</span><span class="n">init</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="mf">0.3</span><span class="p">);</span>
+<span class="n">pool</span><span class="p">.</span><span class="n">create</span><span class="p">()</span><span class="o">-&gt;</span><span class="n">init</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="mf">3.3</span><span class="p">,</span><span class="w"> </span><span class="mf">4.4</span><span class="p">);</span>
+</code></pre></div>
 
 </li>
 <li>
 <p><em>外部代码需要处理无法创建新对象的失败。</em>
   前面的例子假设<code>create()</code>总能成功地返回一个指向对象的指针。
   但如果对象池已经满了，返回的会是<code>NULL</code>。安全起见，你需要在初始化之前检查这一点。</p>
-<div class="codehilite"><pre><span></span><span class="n">Particle</span><span class="o">*</span> <span class="n">particle</span> <span class="o">=</span> <span class="n">pool</span><span class="p">.</span><span class="n">create</span><span class="p">();</span>
-<span class="k">if</span> <span class="p">(</span><span class="n">particle</span> <span class="o">!=</span> <span class="nb">NULL</span><span class="p">)</span> <span class="n">particle</span><span class="o">-&gt;</span><span class="n">init</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">);</span>
-</pre></div>
-
+<div class="codehilite"><pre><span></span><code><span class="n">Particle</span><span class="o">*</span><span class="w"> </span><span class="n">particle</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">pool</span><span class="p">.</span><span class="n">create</span><span class="p">();</span>
+<span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">particle</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="nb">NULL</span><span class="p">)</span><span class="w"> </span><span class="n">particle</span><span class="o">-&gt;</span><span class="n">init</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">);</span>
+</code></pre></div>
 
 </li>
 </ul>
@@ -647,16 +631,16 @@ delete the font style for english.
 <h2><a href="#参见" name="参见">参见</a></h2>
 <ul>
 <li>
-<p>这看上去很像是<a class="gof-pattern" href="flyweight.html">享元</a>模式。
-  两者都控制了一系列可重用的对象。不同在于“重用”的含义。
-  享元对象分享实例间<em>同时</em>拥有的相同部分。享元模式在不同上下文中使用相同对象避免了<em>重复</em>内存使用。</p>
-<p>对象池中的对象也被重用了，但是是在不同的时间点上被重用的。
-“重用”在对象池中意味着对象在原先的对象用完<em>之后</em>分配内存。
-对象池没有期待对象会在它的生命周期中分享什么。</p>
+<p>这看上去很像 <a class="gof-pattern" href="flyweight.html">享元</a> 模式。
+  两者都维护一个可重用对象的集合。区别在于“重用”的含义。
+  享元对象通过<em>同时</em>在多个拥有者之间共享同一实例来实现重用。享元模式通过在多个上下文中使用同一对象，避免了<em>重复</em>的内存使用。</p>
+<p>对象池中的对象也会被重用，但只是在时间上先后重用。
+“重用”在对象池的语境中意味着，在原始拥有者用完对象<em>之后</em>回收它的内存。
+对象池并不期望对象在其生命周期内被共享。</p>
 </li>
 <li>
-<p>将内存中同样类型的对象进行整合，能确保在遍历对象时CPU缓存总是满的。
-  <a class="pattern" href="data-locality.html">数据局部性</a>模式介绍了这一点。</p>
+<p>把一堆相同类型的对象紧密地放在内存中，有助于在游戏遍历这些对象时让CPU缓存保持满载。
+  <a class="pattern" href="data-locality.html">数据局部性</a>模式讲的就是这个。</p>
 </li>
 </ul>
 <nav>

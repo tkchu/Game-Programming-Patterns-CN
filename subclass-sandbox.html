@@ -88,9 +88,9 @@ delete the font style for english.
 <h2><a href="#意图" name="意图">意图</a></h2>
 <p><em>用一系列由基类提供的操作定义子类中的行为。</em></p>
 <h2><a href="#动机" name="动机">动机</a></h2>
-<p>每个孩子都梦想过变成超级英雄，但是不幸的是，高能射线在地球上很短缺。
-游戏是让你扮演超级英雄最简单的方法。
-因为我们的游戏设计者从来没有学会说“不”，<em>我们的</em>超级英雄游戏中有成百上千种不同的超级能力可供选择。</p>
+<p>每个孩子都梦想过变成超级英雄，但不幸的是，宇宙射线在地球上供不应求。
+让你扮演超级英雄的游戏是最接近的替代品。
+因为我们的游戏设计者从来没有学会说“不”，<em>我们的</em>超级英雄游戏旨在提供几十种、甚至上百种不同的超级能力供英雄选择。</p>
 <p><span name="lots"></span></p>
 <p>我们的计划是创建一个<code>Superpower</code>基类。然后由它派生出各种超级能力的实现类。
 我们在程序员队伍中分发设计文档，然后开始编程。
@@ -100,342 +100,332 @@ delete the font style for english.
 不再用<em>代码</em>定义不同的能力，用<em>数据</em>吧。</p>
 <p>像<a class="pattern" href="type-object.html">类型对象</a>，<a class="pattern" href="bytecode.html">字节码</a>，和<a class="gof-pattern" href="http://en.wikipedia.org/wiki/Interpreter_pattern">解释器</a>模式都能帮忙。</p>
 </aside>
-<p>我们想让玩家处于拥有无限可能的世界中。无论他们在孩童时想象过什么能力，我们都要在游戏中展现。
-这就意味着这些超能力子类需要做任何事情：
-播放声音，产生视觉刺激，与AI交互，创建和销毁其他游戏实体，与物理打交道。没有哪处代码是它们不会接触的。</p>
+<p>我们想让玩家沉浸在一个充满多样性的世界里。无论他们在孩童时想象过什么能力，我们都要在游戏中展现。
+这就意味着这些超能力子类几乎需要做任何事情：
+播放声音，生成视觉特效，与AI交互，创建和销毁其他游戏实体，与物理打交道。代码库中没有哪个角落是它们不会碰到的。</p>
 <p>假设我们让团队信马由缰地写超能力类。会发生什么？</p>
 <ul>
 <li>
 <p><em>会有很多冗余代码。</em>
-  当超能力种类繁多，我们可以预期有很多重叠。
-  很多超能力都会用相同的方式产生视觉效果并播放声音。
-  当你坐下来看看，冷冻光线，热能光线，芥末酱光线都很相似。
-  如果人们实现这些的时候没有协同，那就会有很多冗余的代码和重复劳动。</p>
+  虽然不同的能力千差万别，我们仍然可以预期有不少重叠。
+  很多超能力都会用相同的方式生成视觉特效并播放声音。
+  仔细想想，冷冻光线、热能光线、第戎芥末酱光线其实都很相似。
+  如果实现这些的人不互相协调，那就会产生大量重复的代码和重复劳动。</p>
 </li>
 <li>
 <p><em>游戏引擎中的每一部分都会与这些类耦合。</em>
-  没有深入了解的话，任何人都能写出直接调用子系统的代码，但子系统从来没打算直接与超能力类绑定。
-  就算渲染系统被好好组织成多个层次，只有一个能被外部的图形引擎使用，
-  我们可以打赌，最终超能力代码会与每一个接触。</p>
+  如果不了解情况，人们就会写出直接调用那些子系统的代码，但这些子系统从来没打算直接与超能力类绑定。
+  就算渲染器被好好组织成多个整洁的层次，其中只有一层是打算让图形引擎之外的代码使用的，
+  我们也可以打赌，最终超能力代码会插手每一层。</p>
 </li>
 <li>
-<p><em>当外部代码需要改变时，一些随机超能力代码有很大几率会损坏。</em>
-  一旦我们有了不同的超能力类绑定到游戏引擎的多个部分，改变那些部分必然影响超能力类。
-  这可不合理，因为图形，音频，UI程序员很可能不想<em>也</em>成为玩法程序员。</p>
+<p><em>当这些外部系统需要改变时，某些随机的超能力代码很有可能被破坏。</em>
+  一旦我们有了不同的超能力类把自己绑定到游戏引擎的各种部分，改变那些部分就必然影响超能力类。
+  这可不好玩，因为图形、音频、UI程序员很可能不想<em>也</em>成为玩法程序员。</p>
 </li>
 <li>
-<p><em>很难定义所有超能力遵守的不变量。</em>
-  假设我们想保证超能力播放的所有音频都有正确的顺序和优先级。
-  如果我们的几百个类都直接调用音频引擎，就没什么好办法来完成这点。</p>
+<p><em>很难定义所有超能力都遵守的不变量。</em>
+  假设我们想保证超能力播放的所有音频都被正确地排队并设定优先级。
+  如果我们的上百个类都各自直接调用音频引擎，就没什么好办法来完成这点。</p>
 </li>
 </ul>
-<p>我们要的是给每个实现超能力的玩法程序员一系列可使用的基本单元。
+<p>我们要的是给每个实现超能力的玩法程序员一套可以拿来玩的原语。
 你想要播放声音？这是你的<code>playSound()</code>函数。
 你想要粒子效果？这是你的<code>spawnParticles()</code>函数。
-我们保证了这些操作覆盖了你要做的事情，所以你不需要<code>#include</code>随机的头文件，干扰到代码库的其他部分。</p>
-<p>我们实现的方法是通过定义这些操作为<code>Superpower</code><em>基类</em>的<em>protected方法</em>。
-将它们放在基类给了每个子类直接便捷的途径获取方法。
-让它们成为protected（很可能不是虚方法）方法暗示了它们存在就是为了被子类<em>调用</em>。</p>
-<p>一旦有了这些东西来使用，我们需要一个地方使用他们。
-为了做到这点，我们定义<em>沙箱方法</em>，这是子类必须实现的抽象的protected方法。
+我们会确保这些操作覆盖你需要做的一切，所以你不需要<code>#include</code>随机的头文件，也不必探头探脑地钻进代码库的其他部分里。</p>
+<p>我们的做法是让这些操作成为<code>Superpower</code><em>基类</em>的<em>protected方法</em>。
+将它们放在基类中，让每个超能力子类都能直接、方便地访问这些方法。
+把它们设为protected（很可能不是虚方法）传达出它们存在就是为了被子类<em>调用</em>。</p>
+<p>有了这些玩具之后，我们还需要一个使用它们的地方。
+为了做到这点，我们定义<em>沙箱方法</em>，这是子类必须实现的抽象protected方法。
 有了这些，要实现一种新的能力，你需要：</p>
 <ol>
 <li>创建从<code>Superpower</code>继承的新类。</li>
-<li>重载沙箱方法<code>activate()</code>。</li>
-<li>通过调用<code>Superpower</code>提供的protected方法实现主体。</li>
+<li>重写沙箱方法<code>activate()</code>。</li>
+<li>通过调用<code>Superpower</code>提供的protected方法来实现方法体。</li>
 </ol>
-<p>我们现在可以使用这些高层次的操作来解决冗余代码问题了。
-当我们看到代码在多个子类间重复，我们总可以将其打包到<code>Superpower</code>中，作为它们都可以使用的新操作。</p>
-<p>我们通过将耦合约束到一个地方解决了耦合问题。
-<code>Superpower</code>最终与不同的系统耦合，但是继承它的几百个类不会。
-相反，它们<em>只</em>耦合基类。
-当游戏系统的某部分改变时，修改<code>Superpower</code>也许是必须的，但是众多的子类不需要修改。</p>
+<p>现在，我们可以通过把那些提供的操作做得尽可能高层次来解决冗余代码问题。
+当我们看到代码在多个子类间重复，我们总可以将其收拢到<code>Superpower</code>中，作为它们都可以使用的新操作。</p>
+<p>我们通过把耦合约束到一个地方解决了耦合问题。
+<code>Superpower</code>最终会与不同的游戏系统耦合，但是继承它的上百个派生类不会。
+相反，它们<em>只</em>与基类耦合。
+当游戏系统的某部分改变时，修改<code>Superpower</code>也许是必须的，但几十个子类不该需要改动。</p>
 <p><span name="wide"></span></p>
-<p>这个模式带来浅层但是广泛的类层次。
-你的继承链不<em>深</em>，但是有<em>很多</em>类与<code>Superpower</code>挂钩。
-通过使用有很多直接子类的基类，我们在代码库中创造了一个支撑点。
-我们投入到<code>Superpower</code>的时间和爱可以让游戏中众多类获益。</p>
+<p>这个模式带来一个类层次浅而宽的架构。
+你的继承链不<em>深</em>，但是有<em>很多</em>类挂在<code>Superpower</code>下。
+通过使用一个拥有很多直接子类的类，我们在代码库中获得了一个杠杆点。
+我们投入到<code>Superpower</code>中的时间和爱可以让游戏中一大批类获益。</p>
 <aside name="wide">
-<p>最近，你会发现很多人批评面向对象语言中的继承。
-继承<em>是</em>有问题——在代码库中没有比父类子类之间的耦合更深的了——但我发现<em>扁平的</em>继承树比起<em>深的</em>继承树更好处理。</p>
+<p>最近，你会发现很多人在批评面向对象语言中的继承。
+继承确实<em>有问题</em>——在代码库中，没有比基类和子类之间的耦合更深的了——但我发现<em>宽的</em>继承树比<em>深的</em>继承树更好处理。</p>
 </aside>
 <h2><a href="#模式" name="模式">模式</a></h2>
 <p><strong>基类</strong>定义抽象的<strong>沙箱方法</strong>和几个<strong>提供的操作</strong>。
-将操作标为protected，表明它们只为子类所使用。
-每个推导出的<strong>沙箱子类</strong>用提供的操作实现了沙箱函数。</p>
+将操作标为protected，表明它们只供派生类使用。
+每个派生出的<strong>沙箱子类</strong>都用提供的操作实现沙箱方法。</p>
 <h2><a href="#何时使用" name="何时使用">何时使用</a></h2>
-<p>子类沙箱模式是潜伏在代码库中简单常用的模式，哪怕是在游戏之外的地方亦有应用。
+<p>子类沙箱模式是一个非常简单、常见的模式，潜伏在许多代码库中，哪怕是在游戏之外的地方也有应用。
 如果你有一个非虚的protected方法，你可能已经在用类似的东西了。
-沙箱方法在以下情况适用：</p>
+子类沙箱在以下情况适用：</p>
 <ul>
 <li>
-<p>你有一个能推导很多子类的基类。</p>
+<p>你有一个带着若干派生类的基类。</p>
 </li>
 <li>
-<p>基类可以提供子类需要的所有操作。</p>
+<p>基类能提供派生类执行任务时可能需要的所有操作。</p>
 </li>
 <li>
-<p>在子类中有行为重复，你想要更容易地在它们间分享代码。</p>
+<p>子类中有行为重叠，你想要更容易地在它们之间共享代码。</p>
 </li>
 <li>
-<p>你想要最小化子类和程序的其他部分的耦合。</p>
+<p>你想要最小化这些派生类和程序其他部分的耦合。</p>
 </li>
 </ul>
 <h2><a href="#记住" name="记住">记住</a></h2>
-<p>“继承”近来在很多编程圈子为人诟病，原因之一是基类趋向于增加越来越多的代码
+<p>“继承”近来在很多编程圈子里是个“坏词”，原因之一是基类趋向于积累越来越多的代码。
 这个模式特别容易染上这个毛病。</p>
-<p>由于子类通过基类接触游戏的剩余部分，基类最后和子类需要的<em>每个</em>系统耦合。
-当然，子类也紧密地与基类相绑定。这种蛛网耦合让你很难在不破坏什么的情况下改变基类——你得到了（脆弱的基类问题）<a href="http://en.wikipedia.org/wiki/Fragile_base_class">brittle base class problem</a>。</p>
-<p>硬币的另一面是由于你耦合的大部分都被推到了基类，子类现在与世界的其他部分分离。
-理想的情况下，你大多数的行为都在子类中。这意味着你的代码库大部分是孤立的，很容易管理。</p>
-<p>如果你发现这个模式正把你的基类变成一锅代码糊糊，
-考虑将它提供的一些操作放入分离的类中，
-这样基类可以分散它的责任。<a class="pattern" href="component.html">组件</a>模式可以在这里帮上忙。</p>
+<p>由于子类通过基类接触游戏的剩余部分，基类最后会和<em>任何</em>派生类需要对话的每个系统耦合。
+当然，子类也紧密地与基类相绑定。这种蛛网耦合让你很难在不破坏什么的情况下改变基类——你就遇到了<a href="http://en.wikipedia.org/wiki/Fragile_base_class">脆弱的基类问题</a>。</p>
+<p>硬币的另一面是，由于你的大部分耦合都被推到了基类，派生类现在与世界其他部分的分离要干净得多。
+理想情况下，你的大多数行为都在那些子类中。这意味着你代码库的大部分是孤立的，更容易维护。</p>
+<p>如果你发现这个模式正把你的基类变成一大锅代码糊糊，
+考虑把其中一些提供的操作移到独立的类中，
+这样基类可以把责任分派出去。<a class="pattern" href="component.html">组件</a>模式可以在这里帮上忙。</p>
 <h2><a href="#示例代码" name="示例代码">示例代码</a></h2>
 <p>因为这个模式太简单了，示例代码中没有太多东西。
-这不是说它没用——这个模式关键在于“意图”，而不是它实现的复杂度。</p>
+这不是说它没用——这个模式的关键在于“意图”，而不是它实现的复杂度。</p>
 <p>我们从<code>Superpower</code>基类开始：</p>
-<div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">Superpower</span>
+<div class="codehilite"><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Superpower</span>
 <span class="p">{</span>
 <span class="k">public</span><span class="o">:</span>
-  <span class="k">virtual</span> <span class="o">~</span><span class="n">Superpower</span><span class="p">()</span> <span class="p">{}</span>
+<span class="w">  </span><span class="k">virtual</span><span class="w"> </span><span class="o">~</span><span class="n">Superpower</span><span class="p">()</span><span class="w"> </span><span class="p">{}</span>
 
 <span class="k">protected</span><span class="o">:</span>
-  <span class="k">virtual</span> <span class="kt">void</span> <span class="n">activate</span><span class="p">()</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+<span class="w">  </span><span class="k">virtual</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="n">activate</span><span class="p">()</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
 
-  <span class="kt">void</span> <span class="nf">move</span><span class="p">(</span><span class="kt">double</span> <span class="n">x</span><span class="p">,</span> <span class="kt">double</span> <span class="n">y</span><span class="p">,</span> <span class="kt">double</span> <span class="n">z</span><span class="p">)</span>
-  <span class="p">{</span>
-    <span class="c1">// 实现代码……</span>
-  <span class="p">}</span>
+<span class="w">  </span><span class="kt">void</span><span class="w"> </span><span class="nf">move</span><span class="p">(</span><span class="kt">double</span><span class="w"> </span><span class="n">x</span><span class="p">,</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">y</span><span class="p">,</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">z</span><span class="p">)</span>
+<span class="w">  </span><span class="p">{</span>
+<span class="w">    </span><span class="c1">// 实现代码……</span>
+<span class="w">  </span><span class="p">}</span>
 
-  <span class="kt">void</span> <span class="nf">playSound</span><span class="p">(</span><span class="n">SoundId</span> <span class="n">sound</span><span class="p">,</span> <span class="kt">double</span> <span class="n">volume</span><span class="p">)</span>
-  <span class="p">{</span>
-    <span class="c1">// 实现代码……</span>
-  <span class="p">}</span>
+<span class="w">  </span><span class="kt">void</span><span class="w"> </span><span class="nf">playSound</span><span class="p">(</span><span class="n">SoundId</span><span class="w"> </span><span class="n">sound</span><span class="p">,</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">volume</span><span class="p">)</span>
+<span class="w">  </span><span class="p">{</span>
+<span class="w">    </span><span class="c1">// 实现代码……</span>
+<span class="w">  </span><span class="p">}</span>
 
-  <span class="kt">void</span> <span class="nf">spawnParticles</span><span class="p">(</span><span class="n">ParticleType</span> <span class="n">type</span><span class="p">,</span> <span class="kt">int</span> <span class="n">count</span><span class="p">)</span>
-  <span class="p">{</span>
-    <span class="c1">// 实现代码……</span>
-  <span class="p">}</span>
+<span class="w">  </span><span class="kt">void</span><span class="w"> </span><span class="nf">spawnParticles</span><span class="p">(</span><span class="n">ParticleType</span><span class="w"> </span><span class="n">type</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">count</span><span class="p">)</span>
+<span class="w">  </span><span class="p">{</span>
+<span class="w">    </span><span class="c1">// 实现代码……</span>
+<span class="w">  </span><span class="p">}</span>
 <span class="p">};</span>
-</pre></div>
+</code></pre></div>
 
-
-<p><code>activate()</code>方法是沙箱方法。由于它是抽象虚函数，子类<em>必须</em>重载它。
-这让那些需要创建子类的人知道要做哪些工作。</p>
-<p>其他的protected函数<code>move()</code>，<code>playSound()</code>，和<code>spawnParticles()</code>都是提供的操作。
+<p><code>activate()</code>方法是沙箱方法。由于它是虚的抽象方法，子类<em>必须</em>重写它。
+这让创建超能力子类的人清楚地知道自己的工作该写在哪里。</p>
+<p>其他的protected方法<code>move()</code>、<code>playSound()</code>和<code>spawnParticles()</code>都是提供的操作。
 它们是子类在实现<code>activate()</code>时要调用的。</p>
-<p>在这个例子中，我们没有实现提供的操作，但真正的游戏在那里有真正的代码。
-那些代码中，<code>Superpower</code>与游戏中其他部分的耦合——<code>move()</code>也许调用物理代码，<code>playSound()</code>会与音频引擎交互，等等。
-由于这都在基类的<em>实现</em>中，保证了耦合封闭在<code>Superpower</code>中。</p>
-<p>好了，拿出我们的放射蜘蛛，创建个能力。像这样：</p>
+<p>在这个例子中，我们没有实现提供的操作，但真正的游戏会在那里放真正的代码。
+这些方法正是<code>Superpower</code>与游戏中其他系统耦合的地方——<code>move()</code>也许调用物理代码，<code>playSound()</code>会与音频引擎交互，等等。
+由于这都在基类的<em>实现</em>中，耦合就被封装在<code>Superpower</code>内部。</p>
+<p>好了，现在放出我们的放射性蜘蛛，创建一个能力。像这样：</p>
 <p><span name="jump"></span></p>
-<div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">SkyLaunch</span> <span class="o">:</span> <span class="k">public</span> <span class="n">Superpower</span>
+<div class="codehilite"><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">SkyLaunch</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="k">public</span><span class="w"> </span><span class="n">Superpower</span>
 <span class="p">{</span>
 <span class="k">protected</span><span class="o">:</span>
-  <span class="k">virtual</span> <span class="kt">void</span> <span class="n">activate</span><span class="p">()</span>
-  <span class="p">{</span>
-    <span class="c1">// 空中滑行</span>
-    <span class="n">playSound</span><span class="p">(</span><span class="n">SOUND_SPROING</span><span class="p">,</span> <span class="mf">1.0f</span><span class="p">);</span>
-    <span class="n">spawnParticles</span><span class="p">(</span><span class="n">PARTICLE_DUST</span><span class="p">,</span> <span class="mi">10</span><span class="p">);</span>
-    <span class="n">move</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">20</span><span class="p">);</span>
-  <span class="p">}</span>
+<span class="w">  </span><span class="k">virtual</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="n">activate</span><span class="p">()</span>
+<span class="w">  </span><span class="p">{</span>
+<span class="w">    </span><span class="c1">// 空中滑行</span>
+<span class="w">    </span><span class="n">playSound</span><span class="p">(</span><span class="n">SOUND_SPROING</span><span class="p">,</span><span class="w"> </span><span class="mf">1.0f</span><span class="p">);</span>
+<span class="w">    </span><span class="n">spawnParticles</span><span class="p">(</span><span class="n">PARTICLE_DUST</span><span class="p">,</span><span class="w"> </span><span class="mi">10</span><span class="p">);</span>
+<span class="w">    </span><span class="n">move</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">20</span><span class="p">);</span>
+<span class="w">  </span><span class="p">}</span>
 <span class="p">};</span>
-</pre></div>
-
+</code></pre></div>
 
 <aside name="jump">
-<p>好吧，也许<em>跳跃</em>不是<em>超级能力</em>，但我在这里讲的是基础知识。</p>
+<p>好吧，也许能<em>跳跃</em>并没有那么<em>超级</em>，但我在这里只想保持简单。</p>
 </aside>
-<p>这种能力将超级英雄射向天空，播放合适的声音，扬起尘土。
-如果所有的超能力都这样简单——只是声音，粒子效果，动作的组合——那么就根本不需要这个模式了。
-相反，<code>Superpower</code>有内置的<code>activate()</code>能获取声音ID，粒子类型和运动的字段。
-但是这只在所有能力运行方式相同，只在数据上不同时才可行。让我们精细一些：</p>
-<div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">Superpower</span>
+<p>这种能力把超级英雄弹向空中，播放合适的声音，扬起一小团尘土。
+如果所有的超能力都这样简单——只是声音、粒子效果和动作的组合——那么就根本不需要这个模式了。
+相反，<code>Superpower</code>可以有一个内置的<code>activate()</code>实现，去访问声音ID、粒子类型和移动对应的字段。
+但这只在每个能力本质上运行方式相同、只有数据差异时才可行。让我们再详细展开一点：</p>
+<div class="codehilite"><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Superpower</span>
 <span class="p">{</span>
 <span class="k">protected</span><span class="o">:</span>
-  <span class="kt">double</span> <span class="n">getHeroX</span><span class="p">()</span>
-  <span class="p">{</span>
-    <span class="c1">// 实现代码……</span>
-  <span class="p">}</span>
+<span class="w">  </span><span class="kt">double</span><span class="w"> </span><span class="n">getHeroX</span><span class="p">()</span>
+<span class="w">  </span><span class="p">{</span>
+<span class="w">    </span><span class="c1">// 实现代码……</span>
+<span class="w">  </span><span class="p">}</span>
 
-  <span class="kt">double</span> <span class="n">getHeroY</span><span class="p">()</span>
-  <span class="p">{</span>
-    <span class="c1">// 实现代码……</span>
-  <span class="p">}</span>
+<span class="w">  </span><span class="kt">double</span><span class="w"> </span><span class="n">getHeroY</span><span class="p">()</span>
+<span class="w">  </span><span class="p">{</span>
+<span class="w">    </span><span class="c1">// 实现代码……</span>
+<span class="w">  </span><span class="p">}</span>
 
-  <span class="kt">double</span> <span class="n">getHeroZ</span><span class="p">()</span>
-  <span class="p">{</span>
-    <span class="c1">// 实现代码……</span>
-  <span class="p">}</span>
+<span class="w">  </span><span class="kt">double</span><span class="w"> </span><span class="n">getHeroZ</span><span class="p">()</span>
+<span class="w">  </span><span class="p">{</span>
+<span class="w">    </span><span class="c1">// 实现代码……</span>
+<span class="w">  </span><span class="p">}</span>
 
-  <span class="c1">// 退出之类的……</span>
+<span class="w">  </span><span class="c1">// 退出之类的……</span>
 <span class="p">};</span>
-</pre></div>
+</code></pre></div>
 
-
-<p>这里我们增加了些方法获取英雄的位置。我们的<code>SkyLaunch</code>现在可以使用它们了：</p>
-<div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">SkyLaunch</span> <span class="o">:</span> <span class="k">public</span> <span class="n">Superpower</span>
+<p>这里我们增加了几个获取英雄位置的方法。我们的<code>SkyLaunch</code>子类现在可以使用它们了：</p>
+<div class="codehilite"><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">SkyLaunch</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="k">public</span><span class="w"> </span><span class="n">Superpower</span>
 <span class="p">{</span>
 <span class="k">protected</span><span class="o">:</span>
-  <span class="k">virtual</span> <span class="kt">void</span> <span class="n">activate</span><span class="p">()</span>
-  <span class="p">{</span>
-    <span class="k">if</span> <span class="p">(</span><span class="n">getHeroZ</span><span class="p">()</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span>
-    <span class="p">{</span>
-      <span class="c1">// 在地面上，冲向空中</span>
-      <span class="n">playSound</span><span class="p">(</span><span class="n">SOUND_SPROING</span><span class="p">,</span> <span class="mf">1.0f</span><span class="p">);</span>
-      <span class="n">spawnParticles</span><span class="p">(</span><span class="n">PARTICLE_DUST</span><span class="p">,</span> <span class="mi">10</span><span class="p">);</span>
-      <span class="n">move</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">20</span><span class="p">);</span>
-    <span class="p">}</span>
-    <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">getHeroZ</span><span class="p">()</span> <span class="o">&lt;</span> <span class="mf">10.0f</span><span class="p">)</span>
-    <span class="p">{</span>
-      <span class="c1">// 接近地面，再跳一次</span>
-      <span class="n">playSound</span><span class="p">(</span><span class="n">SOUND_SWOOP</span><span class="p">,</span> <span class="mf">1.0f</span><span class="p">);</span>
-      <span class="n">move</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">getHeroZ</span><span class="p">()</span> <span class="o">+</span> <span class="mi">20</span><span class="p">);</span>
-    <span class="p">}</span>
-    <span class="k">else</span>
-    <span class="p">{</span>
-      <span class="c1">// 正在空中，跳劈攻击</span>
-      <span class="n">playSound</span><span class="p">(</span><span class="n">SOUND_DIVE</span><span class="p">,</span> <span class="mf">0.7f</span><span class="p">);</span>
-      <span class="n">spawnParticles</span><span class="p">(</span><span class="n">PARTICLE_SPARKLES</span><span class="p">,</span> <span class="mi">1</span><span class="p">);</span>
-      <span class="n">move</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="n">getHeroZ</span><span class="p">());</span>
-    <span class="p">}</span>
-  <span class="p">}</span>
+<span class="w">  </span><span class="k">virtual</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="n">activate</span><span class="p">()</span>
+<span class="w">  </span><span class="p">{</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">getHeroZ</span><span class="p">()</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">      </span><span class="c1">// 在地面上，冲向空中</span>
+<span class="w">      </span><span class="n">playSound</span><span class="p">(</span><span class="n">SOUND_SPROING</span><span class="p">,</span><span class="w"> </span><span class="mf">1.0f</span><span class="p">);</span>
+<span class="w">      </span><span class="n">spawnParticles</span><span class="p">(</span><span class="n">PARTICLE_DUST</span><span class="p">,</span><span class="w"> </span><span class="mi">10</span><span class="p">);</span>
+<span class="w">      </span><span class="n">move</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">20</span><span class="p">);</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="k">else</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">getHeroZ</span><span class="p">()</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mf">10.0f</span><span class="p">)</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">      </span><span class="c1">// 接近地面，再跳一次</span>
+<span class="w">      </span><span class="n">playSound</span><span class="p">(</span><span class="n">SOUND_SWOOP</span><span class="p">,</span><span class="w"> </span><span class="mf">1.0f</span><span class="p">);</span>
+<span class="w">      </span><span class="n">move</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="n">getHeroZ</span><span class="p">()</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">20</span><span class="p">);</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="k">else</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">      </span><span class="c1">// 正在空中，跳劈攻击</span>
+<span class="w">      </span><span class="n">playSound</span><span class="p">(</span><span class="n">SOUND_DIVE</span><span class="p">,</span><span class="w"> </span><span class="mf">0.7f</span><span class="p">);</span>
+<span class="w">      </span><span class="n">spawnParticles</span><span class="p">(</span><span class="n">PARTICLE_SPARKLES</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">);</span>
+<span class="w">      </span><span class="n">move</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="o">-</span><span class="n">getHeroZ</span><span class="p">());</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">}</span>
 <span class="p">};</span>
-</pre></div>
-
+</code></pre></div>
 
 <p><span name="data"></span>
-由于我们现在可以访问状态，沙箱方法可以做有用有趣的控制流了。
-这还需要几个简单的<code>if</code>声明，
-但你可以做任何你想做的东西。
-使用包含任意代码的成熟沙箱方法，天高任鸟飞了。</p>
+由于我们现在可以访问状态，沙箱方法就可以做真正有趣的控制流了。
+这里仍然只是几个简单的<code>if</code>语句，
+但你可以做任何你想做的事情。
+让沙箱方法成为一个真正完整、能包含任意代码的方法，就可以天高任鸟飞了。</p>
 <aside name="data">
-<p>早先，我建议以数据驱动的方式建立超能力。
+<p>早先，我建议对超能力采用数据驱动的方式。
 这里是你可能<em>不</em>想那么做的原因之一。
-如果你的行为复杂而使用命令式风格，它更难在数据中定义。</p>
+如果行为复杂且是命令式的，它就更难在数据中定义。</p>
 </aside>
 <h2><a href="#设计决策" name="设计决策">设计决策</a></h2>
-<p>如你所见，子类沙箱是一个“软”模式。它表述了一个基本思路，但是没有很多细节机制。
-这意味着每次使用都面临着一些有趣的选择。这里是一些需要思考的问题。</p>
+<p>如你所见，子类沙箱是一个相当“软”的模式。它描述了一个基本思路，但是没有很多细节机制。
+这意味着每次应用它时，你都需要做出一些有趣的选择。这里是一些需要思考的问题。</p>
 <h3><a href="#应该提供什么操作？" name="应该提供什么操作？">应该提供什么操作？</a></h3>
-<p>这是最大的问题。这深深影响了模式感觉上和实际上有多好。
-在一个极端，基类几乎不提供<em>任何</em>操作。只有一个沙箱方法。
-为了实现功能，总是需要调用基类外部的系统。如果你这样做，很难说你在使用这个模式。</p>
+<p>这是最大的问题。它深刻影响这个模式给人的感觉以及实际效果。
+在一个极端，基类不提供<em>任何</em>操作。只有一个沙箱方法。
+要实现它，就必须调用基类之外的系统。如果你采取这种方式，甚至很难说你在使用这个模式。</p>
 <p><span name="include"></span></p>
-<p>另一个极端，基类提供了<em>所有</em>子类也许需要的操作。
-子类<em>只</em>与基类耦合，不调用任何外部系统的东西。</p>
+<p>另一个极端，基类提供了子类可能需要的<em>所有</em>操作。
+子类<em>只</em>与基类耦合，完全不调用任何外部系统。</p>
 <aside name="include">
 <p>具体来说，这意味着每个子类的源文件只需要<code>#include</code>它的基类头文件。</p>
 </aside>
-<p>在这两个极端之间，操作由基类提供还是向外部直接调用有很大的操作余地。
-你提供的操作越多，外部系统与子类耦合越少，但是与基类耦合<em>越多</em>。
-从子类中移除了耦合是通过将耦合推给基类完成的。</p>
-<p>如果你有一堆与外部系统耦合的子类的话，这很好。
-通过将耦合移到提供的操作中，你将其移动到了一个地方：基类。但是你越这么做，基类就越大越难管理。</p>
-<p>所以分界线在哪里？这里是一些首要原则：</p>
+<p>在这两点之间，有很大一片中间地带：一些操作由基类提供，另一些则直接从定义它们的外部系统访问。
+你提供的操作越多，子类与外部系统的耦合就越少，但是基类的耦合就<em>越多</em>。
+它消除了派生类中的耦合，但做法是把耦合向上推到基类自身。</p>
+<p>如果你有一堆本来都与某个外部系统耦合的派生类，那就是一笔划算的买卖。
+通过把耦合上移到提供的操作中，你把它集中到了一个地方：基类。但是你越这么做，这个类就变得越大、越难维护。</p>
+<p>那么分界线该画在哪里？这里是一些经验法则：</p>
 <ul>
 <li>
-<p>如果提供的操作只被一个或几个子类使用，将操作加入基类获益不会太多。
-  你向基类添加了会影响所有事物的复杂性，但是只有少数几个类受益。</p>
-<p>让该操作与其他提供的操作保持一致或许有价值，但让使用操作的子类直接调用外部系统也许更简单明了。</p>
+<p>如果提供的操作只被一个或几个子类使用，你的投入就换不来多少回报。
+  你向基类添加了会影响所有人的复杂性，但是只有少数几个类受益。</p>
+<p>为了让该操作与其他提供的操作保持一致，这样做或许是值得的；但让那些特殊情况下的子类直接调用外部系统也许更简单明了。</p>
 </li>
 </ul>
 <p><span name="safe"></span></p>
 <ul>
 <li>
-<p>当你调用游戏中其他地方的方法，如果方法没有修改状态就有更少的干扰。
-  它仍然制造耦合，但是这是“安全的”耦合，因为它没有破坏游戏中的任何东西。</p>
+<p>当你调用游戏中其他角落的方法时，如果那个方法不修改任何状态，侵入性就会更小。
+  它仍然制造耦合，但这是“安全的”耦合，因为它不会破坏游戏中的任何东西。</p>
 <aside name="safe">
-
-<p>“安全的”在这里打了引号是因为严格来说，接触数据也能造成问题。
-如果你的游戏是多线程的，读取的数据可能正在被修改。如果你不小心，就会读入错误的数据。</p>
-<p>另一个不愉快的情况是，如果你的游戏状态是严格确定性的（很多在线游戏为了保持玩家同步都是这样的）。
-接触了游戏同步状态之外的东西会造成极糟的不确定性漏洞。</p>
+<p>“安全的”在这里打了引号是因为严格来说，哪怕只是访问数据也可能引发问题。
+如果你的游戏是多线程的，你读取的内容可能正在同时被修改。如果你不小心，就可能得到错误的数据。</p>
+<p>另一个恼人的情况是，如果你的游戏状态是严格确定性的（很多在线游戏为了保持玩家同步都是这样的）。
+如果你访问了同步游戏状态集合之外的东西，就可能引发极其令人抓狂的非确定性bug。</p>
 </aside>
-
-<p>另一方面，修改状态的调用会和代码库的其他方面紧密绑定，你需要三思。打包他们成基类提供的操作是个好的候选项。</p>
+<p>另一方面，确实会修改状态的调用会把你更紧地绑到代码库的那些部分，你需要对此有更清醒的认识。这让它们很适合被收拢到更显眼的基类所提供的操作中。</p>
 </li>
 <li>
-<p>如果操作只是增加了向外部系统的转发调用，那它就没增加太多价值。那种情况下，也许直接调用外部系统的方法更简单。</p>
-<p>但是，简单的转发也是有用的——那些方法接触了基类不想直接暴露给子类的状态。
+<p>如果一个提供的操作的实现只是把调用转发给某个外部系统，那它就没增加太多价值。那种情况下，也许直接调用外部方法更简单。</p>
+<p>但是，简单的转发仍然有用——那些方法常常访问基类不想直接暴露给子类的状态。
 举个例子，假设<code>Superpower</code>提供这个：</p>
-<div class="codehilite"><pre><span></span><span class="kt">void</span> <span class="nf">playSound</span><span class="p">(</span><span class="n">SoundId</span> <span class="n">sound</span><span class="p">,</span> <span class="kt">double</span> <span class="n">volume</span><span class="p">)</span>
+<div class="codehilite"><pre><span></span><code><span class="kt">void</span><span class="w"> </span><span class="nf">playSound</span><span class="p">(</span><span class="n">SoundId</span><span class="w"> </span><span class="n">sound</span><span class="p">,</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">volume</span><span class="p">)</span>
 <span class="p">{</span>
-  <span class="n">soundEngine_</span><span class="p">.</span><span class="n">play</span><span class="p">(</span><span class="n">sound</span><span class="p">,</span> <span class="n">volume</span><span class="p">);</span>
+<span class="w">  </span><span class="n">soundEngine_</span><span class="p">.</span><span class="n">play</span><span class="p">(</span><span class="n">sound</span><span class="p">,</span><span class="w"> </span><span class="n">volume</span><span class="p">);</span>
 <span class="p">}</span>
-</pre></div>
+</code></pre></div>
 
-
-<p>它只是转发调用给<code>Superpower</code>中<code>soundEngine_</code>字段。
-但是，好处是将字段封装在<code>Superpower</code>中，避免子类接触。</p>
 </li>
 </ul>
+<p>它只是把调用转发给<code>Superpower</code>中的某个<code>soundEngine_</code>字段。
+但好处是，它让该字段封装在<code>Superpower</code>中，让子类无法随便摆弄它。</p>
 <h3><a href="#方法应该直接提供，还是包在对象中提供？" name="方法应该直接提供，还是包在对象中提供？">方法应该直接提供，还是包在对象中提供？</a></h3>
-<p>这个模式的挑战是基类中最终加入了很多方法。
-你可以将一些方法移到其他类中来缓和。基类通过返回对象提供方法。</p>
+<p>这个模式的挑战是，你可能会在基类里塞进多得令人痛苦的方法。
+你可以把其中一些方法移到其他类中来缓解。基类中提供的操作则只返回这些对象之一。</p>
 <p>举个例子，为了让超能力播放声音，我们可以直接将它们加到<code>Superpower</code>中：</p>
-<div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">Superpower</span>
+<div class="codehilite"><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Superpower</span>
 <span class="p">{</span>
 <span class="k">protected</span><span class="o">:</span>
-  <span class="kt">void</span> <span class="n">playSound</span><span class="p">(</span><span class="n">SoundId</span> <span class="n">sound</span><span class="p">,</span> <span class="kt">double</span> <span class="n">volume</span><span class="p">)</span>
-  <span class="p">{</span>
-    <span class="c1">// 实现代码……</span>
-  <span class="p">}</span>
+<span class="w">  </span><span class="kt">void</span><span class="w"> </span><span class="n">playSound</span><span class="p">(</span><span class="n">SoundId</span><span class="w"> </span><span class="n">sound</span><span class="p">,</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">volume</span><span class="p">)</span>
+<span class="w">  </span><span class="p">{</span>
+<span class="w">    </span><span class="c1">// 实现代码……</span>
+<span class="w">  </span><span class="p">}</span>
 
-  <span class="kt">void</span> <span class="n">stopSound</span><span class="p">(</span><span class="n">SoundId</span> <span class="n">sound</span><span class="p">)</span>
-  <span class="p">{</span>
-    <span class="c1">// 实现代码……</span>
-  <span class="p">}</span>
+<span class="w">  </span><span class="kt">void</span><span class="w"> </span><span class="n">stopSound</span><span class="p">(</span><span class="n">SoundId</span><span class="w"> </span><span class="n">sound</span><span class="p">)</span>
+<span class="w">  </span><span class="p">{</span>
+<span class="w">    </span><span class="c1">// 实现代码……</span>
+<span class="w">  </span><span class="p">}</span>
 
-  <span class="kt">void</span> <span class="n">setVolume</span><span class="p">(</span><span class="n">SoundId</span> <span class="n">sound</span><span class="p">)</span>
-  <span class="p">{</span>
-    <span class="c1">// 实现代码……</span>
-  <span class="p">}</span>
+<span class="w">  </span><span class="kt">void</span><span class="w"> </span><span class="n">setVolume</span><span class="p">(</span><span class="n">SoundId</span><span class="w"> </span><span class="n">sound</span><span class="p">)</span>
+<span class="w">  </span><span class="p">{</span>
+<span class="w">    </span><span class="c1">// 实现代码……</span>
+<span class="w">  </span><span class="p">}</span>
 
-  <span class="c1">// 沙盒方法和其他操作……</span>
+<span class="w">  </span><span class="c1">// 沙盒方法和其他操作……</span>
 <span class="p">};</span>
-</pre></div>
+</code></pre></div>
 
-
-<p>但是如果<code>Superpower</code>已经很庞杂了，我们也许想要避免这样。
-取而代之的是创建<code>SoundPlayer</code>类暴露该函数：</p>
-<div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">SoundPlayer</span>
+<p>但是如果<code>Superpower</code>已经变得大而笨重，我们也许想要避免这样。
+取而代之的是创建<code>SoundPlayer</code>类来暴露该功能：</p>
+<div class="codehilite"><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">SoundPlayer</span>
 <span class="p">{</span>
-  <span class="kt">void</span> <span class="n">playSound</span><span class="p">(</span><span class="n">SoundId</span> <span class="n">sound</span><span class="p">,</span> <span class="kt">double</span> <span class="n">volume</span><span class="p">)</span>
-  <span class="p">{</span>
-    <span class="c1">// 实现代码……</span>
-  <span class="p">}</span>
+<span class="w">  </span><span class="kt">void</span><span class="w"> </span><span class="nf">playSound</span><span class="p">(</span><span class="n">SoundId</span><span class="w"> </span><span class="n">sound</span><span class="p">,</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">volume</span><span class="p">)</span>
+<span class="w">  </span><span class="p">{</span>
+<span class="w">    </span><span class="c1">// 实现代码……</span>
+<span class="w">  </span><span class="p">}</span>
 
-  <span class="kt">void</span> <span class="n">stopSound</span><span class="p">(</span><span class="n">SoundId</span> <span class="n">sound</span><span class="p">)</span>
-  <span class="p">{</span>
-    <span class="c1">// 实现代码……</span>
-  <span class="p">}</span>
+<span class="w">  </span><span class="kt">void</span><span class="w"> </span><span class="nf">stopSound</span><span class="p">(</span><span class="n">SoundId</span><span class="w"> </span><span class="n">sound</span><span class="p">)</span>
+<span class="w">  </span><span class="p">{</span>
+<span class="w">    </span><span class="c1">// 实现代码……</span>
+<span class="w">  </span><span class="p">}</span>
 
-  <span class="kt">void</span> <span class="n">setVolume</span><span class="p">(</span><span class="n">SoundId</span> <span class="n">sound</span><span class="p">)</span>
-  <span class="p">{</span>
-    <span class="c1">// 实现代码……</span>
-  <span class="p">}</span>
+<span class="w">  </span><span class="kt">void</span><span class="w"> </span><span class="nf">setVolume</span><span class="p">(</span><span class="n">SoundId</span><span class="w"> </span><span class="n">sound</span><span class="p">)</span>
+<span class="w">  </span><span class="p">{</span>
+<span class="w">    </span><span class="c1">// 实现代码……</span>
+<span class="w">  </span><span class="p">}</span>
 <span class="p">};</span>
-</pre></div>
+</code></pre></div>
 
-
-<p><code>Superpower</code>提供了对其的接触：</p>
-<div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">Superpower</span>
+<p>然后<code>Superpower</code>提供对它的访问：</p>
+<div class="codehilite"><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Superpower</span>
 <span class="p">{</span>
 <span class="k">protected</span><span class="o">:</span>
-  <span class="n">SoundPlayer</span><span class="o">&amp;</span> <span class="n">getSoundPlayer</span><span class="p">()</span>
-  <span class="p">{</span>
-    <span class="k">return</span> <span class="n">soundPlayer_</span><span class="p">;</span>
-  <span class="p">}</span>
+<span class="w">  </span><span class="n">SoundPlayer</span><span class="o">&amp;</span><span class="w"> </span><span class="n">getSoundPlayer</span><span class="p">()</span>
+<span class="w">  </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">soundPlayer_</span><span class="p">;</span>
+<span class="w">  </span><span class="p">}</span>
 
-  <span class="c1">// 沙箱方法和其他操作……</span>
+<span class="w">  </span><span class="c1">// 沙箱方法和其他操作……</span>
 
 <span class="k">private</span><span class="o">:</span>
-  <span class="n">SoundPlayer</span> <span class="n">soundPlayer_</span><span class="p">;</span>
+<span class="w">  </span><span class="n">SoundPlayer</span><span class="w"> </span><span class="n">soundPlayer_</span><span class="p">;</span>
 <span class="p">};</span>
-</pre></div>
-
+</code></pre></div>
 
 <p>将提供的操作分流到辅助类可以为你做一些事情：</p>
 <ul>
@@ -444,152 +434,141 @@ delete the font style for english.
   在这里的例子中，将三个方法变成了一个简单的获取函数。</p>
 </li>
 <li>
-<p><em>在辅助类中的代码通常更好管理。</em>
-  像<code>Superpower</code>的核心基类，不管意图如何好，它被太多的类依赖而很难改变。
-  通过将函数移到耦合较少的次要类，代码变得更容易被使用而不破坏任何东西。</p>
+<p><em>辅助类中的代码通常更容易维护。</em>
+  像<code>Superpower</code>这样的核心基类，不管我们本意多好，往往都很难改动，因为有太多东西依赖它。
+  通过把功能移到耦合较少的次要类中，我们让这些代码更容易摆弄，而不必破坏其他东西。</p>
 </li>
 <li>
-<p><em>减少了基类和其他系统的耦合度。</em>
-  当<code>playSound()</code>方法直接在<code>Superpower</code>时，基类与<code>SoundId</code>以及其他涉及的音频代码直接绑定。
-  将它移动到<code>SoundPlayer</code>中，减少了<code>Superpower</code>与<code>SoundPlayer</code>类的耦合，这就封装了它其他的依赖。</p>
+<p><em>降低了基类和其他系统的耦合度。</em>
+  当<code>playSound()</code>是直接定义在<code>Superpower</code>上的方法时，基类会与<code>SoundId</code>以及实现所调用的任何音频代码直接绑定。
+  把它移到<code>SoundPlayer</code>中，把<code>Superpower</code>的耦合减少到只剩<code>SoundPlayer</code>这一个类，由后者封装它其余的所有依赖。</p>
 </li>
 </ul>
 <h3><a href="#基类如何获得它需要的状态？" name="基类如何获得它需要的状态？">基类如何获得它需要的状态？</a></h3>
-<p>你的基类经常需要将对子类隐藏的数据封装起来。
+<p>你的基类经常需要一些数据，它想把这些数据封装起来并对子类隐藏。
 在第一个例子中，<code>Superpower</code>类提供了<code>spawnParticles()</code>方法。
-如果方法的实现需要一些粒子系统对象，怎么获得呢？</p>
+如果这个方法的实现需要某个粒子系统对象，它该怎么获得呢？</p>
 <ul>
 <li>
 <p><strong>将它传给基类构造器：</strong></p>
-<p>最简单的解决方案是让基类将其作为构造器变量：</p>
-<div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">Superpower</span>
+<p>最简单的解决方案是让基类把它作为构造器参数：</p>
+<div class="codehilite"><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Superpower</span>
 <span class="p">{</span>
 <span class="k">public</span><span class="o">:</span>
-  <span class="n">Superpower</span><span class="p">(</span><span class="n">ParticleSystem</span><span class="o">*</span> <span class="n">particles</span><span class="p">)</span>
-  <span class="o">:</span> <span class="n">particles_</span><span class="p">(</span><span class="n">particles</span><span class="p">)</span>
-  <span class="p">{}</span>
+<span class="w">  </span><span class="n">Superpower</span><span class="p">(</span><span class="n">ParticleSystem</span><span class="o">*</span><span class="w"> </span><span class="n">particles</span><span class="p">)</span>
+<span class="w">  </span><span class="o">:</span><span class="w"> </span><span class="n">particles_</span><span class="p">(</span><span class="n">particles</span><span class="p">)</span>
+<span class="w">  </span><span class="p">{}</span>
 
-  <span class="c1">// 沙箱方法和其他操作……</span>
+<span class="w">  </span><span class="c1">// 沙箱方法和其他操作……</span>
 
 <span class="k">private</span><span class="o">:</span>
-  <span class="n">ParticleSystem</span><span class="o">*</span> <span class="n">particles_</span><span class="p">;</span>
+<span class="w">  </span><span class="n">ParticleSystem</span><span class="o">*</span><span class="w"> </span><span class="n">particles_</span><span class="p">;</span>
 <span class="p">};</span>
-</pre></div>
-
+</code></pre></div>
 
 <p>这安全地保证了每个超能力在构造时能得到粒子系统。但让我们看看子类：</p>
-<div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">SkyLaunch</span> <span class="o">:</span> <span class="k">public</span> <span class="n">Superpower</span>
+<div class="codehilite"><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">SkyLaunch</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="k">public</span><span class="w"> </span><span class="n">Superpower</span>
 <span class="p">{</span>
 <span class="k">public</span><span class="o">:</span>
-  <span class="n">SkyLaunch</span><span class="p">(</span><span class="n">ParticleSystem</span><span class="o">*</span> <span class="n">particles</span><span class="p">)</span>
-  <span class="o">:</span> <span class="n">Superpower</span><span class="p">(</span><span class="n">particles</span><span class="p">)</span>
-  <span class="p">{}</span>
+<span class="w">  </span><span class="n">SkyLaunch</span><span class="p">(</span><span class="n">ParticleSystem</span><span class="o">*</span><span class="w"> </span><span class="n">particles</span><span class="p">)</span>
+<span class="w">  </span><span class="o">:</span><span class="w"> </span><span class="n">Superpower</span><span class="p">(</span><span class="n">particles</span><span class="p">)</span>
+<span class="w">  </span><span class="p">{}</span>
 <span class="p">};</span>
-</pre></div>
+</code></pre></div>
 
-
-<p>我们在这儿看到了问题。每个子类都需要构造器调用基类构造器并传递变量。这让子类接触了我们不想要它知道的状态。</p>
-<p>这也造成了维护的负担。如果我们后续向基类添加了状态，每个子类都需要修改并传递这个状态。</p>
+<p>我们在这儿看到了问题。每个派生类都需要有一个构造器，去调用基类构造器并把这个参数传过去。这让每个派生类都接触到一段我们不想让它们知道的状态。</p>
+<p>这也是维护上的麻烦。如果我们后续向基类添加了另一段状态，每个派生类里的每个构造器都得修改才能把它传过去。</p>
 </li>
 <li>
-<p><strong>使用两阶初始化：</strong></p>
-<p>为了避免通过构造器传递所有东西，我们可以将初始化划分为两个部分。
-构造器不接受任何参数，只是创建对象。然后，我们调用定义在基类的分离方法传入必要的数据：</p>
-<div class="codehilite"><pre><span></span><span class="n">Superpower</span><span class="o">*</span> <span class="n">power</span> <span class="o">=</span> <span class="k">new</span> <span class="n">SkyLaunch</span><span class="p">();</span>
+<p><strong>使用两阶段初始化：</strong></p>
+<p>为了避免通过构造器传递所有东西，我们可以把初始化划分为两个步骤。
+构造器不接受任何参数，只是创建对象。然后，我们调用直接定义在基类上的单独方法，传入它需要的其余数据：</p>
+<div class="codehilite"><pre><span></span><code><span class="n">Superpower</span><span class="o">*</span><span class="w"> </span><span class="n">power</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">SkyLaunch</span><span class="p">();</span>
 <span class="n">power</span><span class="o">-&gt;</span><span class="n">init</span><span class="p">(</span><span class="n">particles</span><span class="p">);</span>
-</pre></div>
+</code></pre></div>
 
-
-<p>注意我们没有为<code>SkyLaunch</code>的构造器传入任何东西，它与<code>Superpower</code>中想要保持私有的任何东西都不耦合。
-这种方法的问题在于，你要保证永远记得调用<code>init()</code>，如果忘了，你会获得处于半完成的，无法运行的超能力。</p>
-<p>你可以将整个过程封装到一个函数中来修复这一点，就像这样：</p>
-<p><span name="friend"></span></p>
-<div class="codehilite"><pre><span></span><span class="n">Superpower</span><span class="o">*</span> <span class="nf">createSkyLaunch</span><span class="p">(</span><span class="n">ParticleSystem</span><span class="o">*</span> <span class="n">particles</span><span class="p">)</span>
+<p>注意，由于我们不会向<code>SkyLaunch</code>的构造器传入任何东西，它不会与<code>Superpower</code>中想要保持私有的任何东西耦合。
+这种方法的问题在于，你必须保证永远记得调用<code>init()</code>。如果忘了，你会得到一个处在半明半暗的半成品状态、无法运行的超能力。</p>
+<p>你可以将整个过程封装到一个函数中来修复这一点，就像这样：<span name="friend"></span></p>
+<div class="codehilite"><pre><span></span><code><span class="n">Superpower</span><span class="o">*</span><span class="w"> </span><span class="nf">createSkyLaunch</span><span class="p">(</span><span class="n">ParticleSystem</span><span class="o">*</span><span class="w"> </span><span class="n">particles</span><span class="p">)</span>
 <span class="p">{</span>
-  <span class="n">Superpower</span><span class="o">*</span> <span class="n">power</span> <span class="o">=</span> <span class="k">new</span> <span class="n">SkyLaunch</span><span class="p">();</span>
-  <span class="n">power</span><span class="o">-&gt;</span><span class="n">init</span><span class="p">(</span><span class="n">particles</span><span class="p">);</span>
-  <span class="k">return</span> <span class="n">power</span><span class="p">;</span>
+<span class="w">  </span><span class="n">Superpower</span><span class="o">*</span><span class="w"> </span><span class="n">power</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">SkyLaunch</span><span class="p">();</span>
+<span class="w">  </span><span class="n">power</span><span class="o">-&gt;</span><span class="n">init</span><span class="p">(</span><span class="n">particles</span><span class="p">);</span>
+<span class="w">  </span><span class="k">return</span><span class="w"> </span><span class="n">power</span><span class="p">;</span>
 <span class="p">}</span>
-</pre></div>
-
+</code></pre></div>
 
 <aside name="friend">
-
-<p>使用一点像私有构造器和友类的技巧，你可以保证<code>createSkylaunch()</code>函数是唯一能够创建能力的函数。
-这样，你不会忘记任何初始化步骤。</p>
+<p>使用一点像私有构造函数和友元类这样的小技巧，你可以保证<code>createSkylaunch()</code>函数是唯一真正能创建能力的函数。
+这样，你不会漏掉任何初始化步骤。</p>
 </aside>
-
 </li>
 <li>
 <p><strong>让状态静态化：</strong></p>
 <p>在先前的例子中，我们用粒子系统初始化每一个<code>Superpower</code><em>实例</em>。
-在每个能力都需要自己独特的状态时这是有意义的。但是如果粒子系统是<a class="pattern" href="singleton.html">单例</a>，那么每个能力都会分享相同的状态。</p>
+在每个能力都需要自己独特的状态时，这是有意义的。但如果粒子系统是<a class="pattern" href="singleton.html">单例</a>，那么每个能力都会共享相同的状态。</p>
 <p>如果是这样，我们可以让状态是基类私有而<span name="singleton"><em>静态</em></span>的。
 游戏仍然要保证初始化状态，但是它只需要为整个游戏初始化<code>Superpower</code><em>类</em>一遍，而不是为每个实例初始化一遍。</p>
 <aside name="singleton">
-
-<p>记住单例仍然有很多问题。你在很多对象中分享了状态（所有的<code>Superpower</code>实例）。
-粒子系统被封装了，因此它不是全局<em>可见的</em>，这很好，但它们都访问同一对象，这让分析更加困难了。</p>
+<p>记住，这仍然有单例的很多问题。你在很多很多对象之间共享了状态（所有的<code>Superpower</code>实例）。
+粒子系统被封装了，因此它不是全局<em>可见的</em>，这很好，但它仍然让理解超能力的行为变得更困难，因为它们都能摆弄同一个对象。</p>
 </aside>
-
-<div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">Superpower</span>
+<div class="codehilite"><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Superpower</span>
 <span class="p">{</span>
 <span class="k">public</span><span class="o">:</span>
-  <span class="k">static</span> <span class="kt">void</span> <span class="n">init</span><span class="p">(</span><span class="n">ParticleSystem</span><span class="o">*</span> <span class="n">particles</span><span class="p">)</span>
-  <span class="p">{</span>
-    <span class="n">particles_</span> <span class="o">=</span> <span class="n">particles</span><span class="p">;</span>
-  <span class="p">}</span>
+<span class="w">  </span><span class="k">static</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="n">init</span><span class="p">(</span><span class="n">ParticleSystem</span><span class="o">*</span><span class="w"> </span><span class="n">particles</span><span class="p">)</span>
+<span class="w">  </span><span class="p">{</span>
+<span class="w">    </span><span class="n">particles_</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">particles</span><span class="p">;</span>
+<span class="w">  </span><span class="p">}</span>
 
-  <span class="c1">// 沙箱方法和其他操作……</span>
+<span class="w">  </span><span class="c1">// 沙箱方法和其他操作……</span>
 
 <span class="k">private</span><span class="o">:</span>
-  <span class="k">static</span> <span class="n">ParticleSystem</span><span class="o">*</span> <span class="n">particles_</span><span class="p">;</span>
+<span class="w">  </span><span class="k">static</span><span class="w"> </span><span class="n">ParticleSystem</span><span class="o">*</span><span class="w"> </span><span class="n">particles_</span><span class="p">;</span>
 <span class="p">};</span>
-</pre></div>
-
+</code></pre></div>
 
 <p>注意这里的<code>init()</code>和<code>particles_</code>都是静态的。
-只要游戏早先调用过一次<code>Superpower::init()</code>，每种能力都能接触粒子系统。
-同时，可以调用正确的推导类构造器来自由创建<code>Superpower</code>实例。</p>
+只要游戏早早调用过一次<code>Superpower::init()</code>，每种能力都能访问粒子系统。
+同时，可以调用正确的派生类构造器来自由创建<code>Superpower</code>实例。</p>
 <p>更棒的是，现在<code>particles_</code>是<em>静态</em>变量，
-我们不需要在每个<code>Superpower</code>中存储它，这样我们的类占据的内存更少了。</p>
+我们不需要为每个<code>Superpower</code>实例存储它，这样我们的类占用的内存更少了。</p>
 </li>
 <li>
 <p><strong>使用服务定位器：</strong></p>
-<p>前一选项中，外部代码要在基类请求前压入基类需要的全部状态。
-初始化的责任交给了周围的代码。另一选项是让基类拉取它需要的状态。
+<p>前一选项要求外部代码特意记得在基类需要之前把它需要的状态塞进来。
+初始化的负担落到了周围的代码身上。另一选项是让基类拉取它需要的状态。
 而做到这点的一种实现方法是使用<a class="pattern" href="service-locator.html">服务定位器</a>模式：</p>
-<div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">Superpower</span>
+<div class="codehilite"><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Superpower</span>
 <span class="p">{</span>
 <span class="k">protected</span><span class="o">:</span>
-  <span class="kt">void</span> <span class="n">spawnParticles</span><span class="p">(</span><span class="n">ParticleType</span> <span class="n">type</span><span class="p">,</span> <span class="kt">int</span> <span class="n">count</span><span class="p">)</span>
-  <span class="p">{</span>
-    <span class="n">ParticleSystem</span><span class="o">&amp;</span> <span class="n">particles</span> <span class="o">=</span> <span class="n">Locator</span><span class="o">::</span><span class="n">getParticles</span><span class="p">();</span>
-    <span class="n">particles</span><span class="p">.</span><span class="n">spawn</span><span class="p">(</span><span class="n">type</span><span class="p">,</span> <span class="n">count</span><span class="p">);</span>
-  <span class="p">}</span>
+<span class="w">  </span><span class="kt">void</span><span class="w"> </span><span class="n">spawnParticles</span><span class="p">(</span><span class="n">ParticleType</span><span class="w"> </span><span class="n">type</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">count</span><span class="p">)</span>
+<span class="w">  </span><span class="p">{</span>
+<span class="w">    </span><span class="n">ParticleSystem</span><span class="o">&amp;</span><span class="w"> </span><span class="n">particles</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Locator</span><span class="o">::</span><span class="n">getParticles</span><span class="p">();</span>
+<span class="w">    </span><span class="n">particles</span><span class="p">.</span><span class="n">spawn</span><span class="p">(</span><span class="n">type</span><span class="p">,</span><span class="w"> </span><span class="n">count</span><span class="p">);</span>
+<span class="w">  </span><span class="p">}</span>
 
-  <span class="c1">// 沙箱方法和其他操作……</span>
+<span class="w">  </span><span class="c1">// 沙箱方法和其他操作……</span>
 <span class="p">};</span>
-</pre></div>
+</code></pre></div>
 
-
-<p>这儿，<code>spawnParticles()</code>需要粒子系统，不是外部系统<em>给</em>它，而是它自己从服务定位器中拿了一个。</p>
+<p>这里，<code>spawnParticles()</code>需要一个粒子系统；它不靠外部代码<em>递给</em>它，而是自己从服务定位器里取一个。</p>
 </li>
 </ul>
 <h2><a href="#参见" name="参见">参见</a></h2>
 <ul>
 <li>
-<p>当你使用<a class="pattern" href="update-method.html">更新模式</a>时，你的更新函数通常也是沙箱方法。</p>
+<p>当你应用<a class="pattern" href="update-method.html">更新方法</a>模式时，你的更新方法通常也是沙箱方法。</p>
 </li>
 <li>
-<p>这个模式与<a class="gof-pattern" href="http://en.wikipedia.org/wiki/Template_method_pattern">模板方法</a>正相反。
-  两种模式中，都使用一系列受限操作实现方法。
-  使用子类沙箱时，方法在推导类中，受限操作在基类中。
-  使用模板方法时，<em>基类</em> 有方法，而受限操作在<em>推导</em>类中。</p>
+<p>这个模式与<a class="gof-pattern" href="http://en.wikipedia.org/wiki/Template_method_pattern">模板方法</a>模式是角色对调。
+  两种模式中，你都使用一组基本操作来实现一个方法。
+  使用子类沙箱时，方法在派生类中，基本操作在基类中。
+  使用模板方法时，<em>基类</em>有方法，而基本操作由<em>派生</em>类实现。</p>
 </li>
 <li>
 <p>你也可以认为这个模式是<a class="gof-pattern" href="http://en.wikipedia.org/wiki/Facade_Pattern">外观</a>模式的变形。
-  外观模式将一系列不同系统藏在简化的API后。使用子类沙箱，基类起到了在子类前隐藏整个游戏引擎的作用。</p>
+  外观模式把若干不同系统藏在一个简化的API后面。使用子类沙箱，基类充当外观，把整个游戏引擎藏在子类看不见的地方。</p>
 </li>
 </ul>
 <nav>

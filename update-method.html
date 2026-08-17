@@ -86,570 +86,558 @@ delete the font style for english.
 <h1>更新方法</h1>
 <h1 class="book"><a href="/">游戏设计模式</a><span class="section"><a href="sequencing-patterns.html">Sequencing Patterns</a></span></h1>
 <h2><a href="#意图" name="意图">意图</a></h2>
-<p><em>通过每次处理一帧的行为模拟一系列独立对象。</em></p>
+<p><em>让每个对象一次处理一帧的行为，从而模拟一群独立对象。</em></p>
 <h2><a href="#动机" name="动机">动机</a></h2>
-<p>玩家操作强大的女武神完成考验：从死亡巫王的栖骨之处偷走华丽的珠宝。
-她尝试接近巫王华丽的地宫门口，然后遇到了……<em>啥也没遇到</em>。
+<p>玩家强大的女武神正在执行一项任务：从早已死去的巫王的尸骨上偷走华丽的珠宝。
+她小心翼翼地靠近那座华丽地宫的入口，攻击她的是……<em>什么也没有</em>。
 没有诅咒雕像向她发射闪电，没有不死战士巡逻入口。
 她直捣黄龙，拿走了珠宝。游戏结束。你赢了。</p>
 <p>好吧，这可不行。</p>
 <p><span name="brains"></span>
 地宫需要守卫——一些英雄可以杀死的敌人。
-首先，我们需要一个骷髅战士在门口前后移动巡逻。
+首先，我们需要一个复活的骷髅战士在门口来回巡逻。
 如果无视任何关于游戏编程的知识，
 让骷髅蹒跚着来回移动的最简单的代码大概是这样的：</p>
 <aside name="brains">
-<p>如果巫王想表现得更加智慧，它应创造一些仍有脑子的东西。</p>
+<p>如果巫王想要更聪明的行为，他应该复活一些还有脑组织的东西。</p>
 </aside>
-<div class="codehilite"><pre><span></span><span class="k">while</span> <span class="p">(</span><span class="nb">true</span><span class="p">)</span>
+<div class="codehilite"><pre><span></span><code><span class="k">while</span><span class="w"> </span><span class="p">(</span><span class="nb">true</span><span class="p">)</span>
 <span class="p">{</span>
-  <span class="c1">// 向右巡逻</span>
-  <span class="k">for</span> <span class="p">(</span><span class="kt">double</span> <span class="n">x</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">x</span> <span class="o">&lt;</span> <span class="mi">100</span><span class="p">;</span> <span class="n">x</span><span class="o">++</span><span class="p">)</span>
-  <span class="p">{</span>
-    <span class="n">skeleton</span><span class="p">.</span><span class="n">setX</span><span class="p">(</span><span class="n">x</span><span class="p">);</span>
-  <span class="p">}</span>
+<span class="w">  </span><span class="c1">// 向右巡逻</span>
+<span class="w">  </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">double</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">100</span><span class="p">;</span><span class="w"> </span><span class="n">x</span><span class="o">++</span><span class="p">)</span>
+<span class="w">  </span><span class="p">{</span>
+<span class="w">    </span><span class="n">skeleton</span><span class="p">.</span><span class="n">setX</span><span class="p">(</span><span class="n">x</span><span class="p">);</span>
+<span class="w">  </span><span class="p">}</span>
 
-  <span class="c1">// 向左巡逻</span>
-  <span class="k">for</span> <span class="p">(</span><span class="kt">double</span> <span class="n">x</span> <span class="o">=</span> <span class="mi">100</span><span class="p">;</span> <span class="n">x</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">;</span> <span class="n">x</span><span class="o">--</span><span class="p">)</span>
-  <span class="p">{</span>
-    <span class="n">skeleton</span><span class="p">.</span><span class="n">setX</span><span class="p">(</span><span class="n">x</span><span class="p">);</span>
-  <span class="p">}</span>
+<span class="w">  </span><span class="c1">// 向左巡逻</span>
+<span class="w">  </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">double</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">100</span><span class="p">;</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">x</span><span class="o">--</span><span class="p">)</span>
+<span class="w">  </span><span class="p">{</span>
+<span class="w">    </span><span class="n">skeleton</span><span class="p">.</span><span class="n">setX</span><span class="p">(</span><span class="n">x</span><span class="p">);</span>
+<span class="w">  </span><span class="p">}</span>
 <span class="p">}</span>
-</pre></div>
+</code></pre></div>
 
-
-<p>这里的问题，当然，是骷髅来回打转，可玩家永远看不到。
-程序锁死在一个无限循环，那可不是有趣的游戏体验。
-我们事实上想要的是骷髅<em>每帧</em>移动一步。</p>
+<p>这里的问题当然是，骷髅来回移动，可玩家永远看不到。
+程序被困在一个无限循环里，那实在算不上有趣的游戏体验。
+我们真正想要的是让骷髅<em>每帧</em>移动一步。</p>
 <p><span name="game-loop1"></span>
 我们得移除这些循环，依赖外层游戏循环来迭代。
-这保证了在卫士来回巡逻时，游戏能响应玩家的输入并进行渲染。如下：</p>
+这保证了在守卫来回巡逻时，游戏能响应玩家的输入并进行渲染。如下：</p>
 <aside name="game-loop1">
-<p>当然，<a href="game-loop.html" class="pattern">游戏循环</a>是本书的另一个章节。</p>
+<p>当然，<a href="game-loop.html" class="pattern">游戏循环</a>是本书中的另一个模式。</p>
 </aside>
-<div class="codehilite"><pre><span></span><span class="n">Entity</span> <span class="n">skeleton</span><span class="p">;</span>
-<span class="kt">bool</span> <span class="n">patrollingLeft</span> <span class="o">=</span> <span class="nb">false</span><span class="p">;</span>
-<span class="kt">double</span> <span class="n">x</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+<div class="codehilite"><pre><span></span><code><span class="n">Entity</span><span class="w"> </span><span class="n">skeleton</span><span class="p">;</span>
+<span class="kt">bool</span><span class="w"> </span><span class="n">patrollingLeft</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">false</span><span class="p">;</span>
+<span class="kt">double</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
 
 <span class="c1">// 游戏主循环</span>
-<span class="k">while</span> <span class="p">(</span><span class="nb">true</span><span class="p">)</span>
+<span class="k">while</span><span class="w"> </span><span class="p">(</span><span class="nb">true</span><span class="p">)</span>
 <span class="p">{</span>
-  <span class="k">if</span> <span class="p">(</span><span class="n">patrollingLeft</span><span class="p">)</span>
-  <span class="p">{</span>
-    <span class="n">x</span><span class="o">--</span><span class="p">;</span>
-    <span class="k">if</span> <span class="p">(</span><span class="n">x</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span> <span class="n">patrollingLeft</span> <span class="o">=</span> <span class="nb">false</span><span class="p">;</span>
-  <span class="p">}</span>
-  <span class="k">else</span>
-  <span class="p">{</span>
-    <span class="n">x</span><span class="o">++</span><span class="p">;</span>
-    <span class="k">if</span> <span class="p">(</span><span class="n">x</span> <span class="o">==</span> <span class="mi">100</span><span class="p">)</span> <span class="n">patrollingLeft</span> <span class="o">=</span> <span class="nb">true</span><span class="p">;</span>
-  <span class="p">}</span>
+<span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">patrollingLeft</span><span class="p">)</span>
+<span class="w">  </span><span class="p">{</span>
+<span class="w">    </span><span class="n">x</span><span class="o">--</span><span class="p">;</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">x</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="w"> </span><span class="n">patrollingLeft</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">false</span><span class="p">;</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="w">  </span><span class="k">else</span>
+<span class="w">  </span><span class="p">{</span>
+<span class="w">    </span><span class="n">x</span><span class="o">++</span><span class="p">;</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">x</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">100</span><span class="p">)</span><span class="w"> </span><span class="n">patrollingLeft</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">true</span><span class="p">;</span>
+<span class="w">  </span><span class="p">}</span>
 
-  <span class="n">skeleton</span><span class="p">.</span><span class="n">setX</span><span class="p">(</span><span class="n">x</span><span class="p">);</span>
+<span class="w">  </span><span class="n">skeleton</span><span class="p">.</span><span class="n">setX</span><span class="p">(</span><span class="n">x</span><span class="p">);</span>
 
-  <span class="c1">// 处理用户输入并渲染游戏……</span>
+<span class="w">  </span><span class="c1">// 处理用户输入并渲染游戏……</span>
 <span class="p">}</span>
-</pre></div>
+</code></pre></div>
 
-
-<p>在这里前后两个版本展示了代码是如何变得复杂的。
-左右巡逻需要两个简单的<code>for</code>循环。
-通过指定哪个循环在执行，我们追踪了骷髅在移向哪个方向。
-现在我们每帧跳出到外层的游戏循环，然后再跳回继续我们之前所做的，我们使用<code>patrollingLeft</code>显式地追踪了方向。</p>
-<p>但或多或少这能行，所以我们继续。
-一堆无脑的骨头不会对你的女武神提出太多挑战，
-我们下一个添加的是魔法雕像。它们一直会向她发射闪电球，这样可让她保持移动。</p>
+<p>我在这里给出前后两个版本，是为了展示代码是如何变复杂的。
+左右巡逻原本是两个简单的<code>for</code>循环。
+它通过正在执行哪个循环来隐式地记录骷髅移动的方向。
+现在我们必须每帧让出控制权给外层游戏循环，再从中断处继续，于是我们得用<code>patrollingLeft</code>变量显式地记录方向。</p>
+<p>但这段代码或多或少能用，所以我们继续往下走。
+一副没脑子的骨头架子不会给那位北欧少女带来太大挑战，
+于是我们接下来添加几个被施了魔法的雕像。它们会时不时向她发射闪电，好让她不敢松懈。</p>
 <p>继续我们的“用最简单的方式编码”的风格，我们得到了：</p>
-<div class="codehilite"><pre><span></span><span class="c1">// 骷髅的变量……</span>
-<span class="n">Entity</span> <span class="n">leftStatue</span><span class="p">;</span>
-<span class="n">Entity</span> <span class="n">rightStatue</span><span class="p">;</span>
-<span class="kt">int</span> <span class="n">leftStatueFrames</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
-<span class="kt">int</span> <span class="n">rightStatueFrames</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+<div class="codehilite"><pre><span></span><code><span class="c1">// 骷髅的变量……</span>
+<span class="n">Entity</span><span class="w"> </span><span class="n">leftStatue</span><span class="p">;</span>
+<span class="n">Entity</span><span class="w"> </span><span class="n">rightStatue</span><span class="p">;</span>
+<span class="kt">int</span><span class="w"> </span><span class="n">leftStatueFrames</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="kt">int</span><span class="w"> </span><span class="n">rightStatueFrames</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
 
 <span class="c1">// 游戏主循环：</span>
-<span class="k">while</span> <span class="p">(</span><span class="nb">true</span><span class="p">)</span>
+<span class="k">while</span><span class="w"> </span><span class="p">(</span><span class="nb">true</span><span class="p">)</span>
 <span class="p">{</span>
-  <span class="c1">// 骷髅的代码……</span>
+<span class="w">  </span><span class="c1">// 骷髅的代码……</span>
 
-  <span class="k">if</span> <span class="p">(</span><span class="o">++</span><span class="n">leftStatueFrames</span> <span class="o">==</span> <span class="mi">90</span><span class="p">)</span>
-  <span class="p">{</span>
-    <span class="n">leftStatueFrames</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
-    <span class="n">leftStatue</span><span class="p">.</span><span class="n">shootLightning</span><span class="p">();</span>
-  <span class="p">}</span>
+<span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">++</span><span class="n">leftStatueFrames</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">90</span><span class="p">)</span>
+<span class="w">  </span><span class="p">{</span>
+<span class="w">    </span><span class="n">leftStatueFrames</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">    </span><span class="n">leftStatue</span><span class="p">.</span><span class="n">shootLightning</span><span class="p">();</span>
+<span class="w">  </span><span class="p">}</span>
 
-  <span class="k">if</span> <span class="p">(</span><span class="o">++</span><span class="n">rightStatueFrames</span> <span class="o">==</span> <span class="mi">80</span><span class="p">)</span>
-  <span class="p">{</span>
-    <span class="n">rightStatueFrames</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
-    <span class="n">rightStatue</span><span class="p">.</span><span class="n">shootLightning</span><span class="p">();</span>
-  <span class="p">}</span>
+<span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">++</span><span class="n">rightStatueFrames</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">80</span><span class="p">)</span>
+<span class="w">  </span><span class="p">{</span>
+<span class="w">    </span><span class="n">rightStatueFrames</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">    </span><span class="n">rightStatue</span><span class="p">.</span><span class="n">shootLightning</span><span class="p">();</span>
+<span class="w">  </span><span class="p">}</span>
 
-  <span class="c1">// 处理用户输入，渲染游戏</span>
+<span class="w">  </span><span class="c1">// 处理用户输入，渲染游戏</span>
 <span class="p">}</span>
-</pre></div>
-
+</code></pre></div>
 
 <p><span name="mush"></span></p>
-<p>你会发现这代码渐渐滑向失控。
-变量数目不断增长，代码都在游戏循环中，每段代码处理一个特殊的游戏实体。
-为了同时访问并运行它们，我们将它们的代码混杂在了一起。</p>
+<p>你能看出，这并没有朝着我们乐于维护的代码方向发展。
+变量和命令式代码越堆越多，全都塞在游戏循环里，每段代码处理游戏中的一个特定实体。
+为了让它们同时运转起来，我们把它们的代码搅在了一起。</p>
 <aside name="mush">
 <p>一旦能用“混杂”一词描述你的架构，你就有麻烦了。</p>
 </aside>
-<p>你也许已经猜到了修复这个所用的简单模式了：
-<em>每个游戏实体应该封装它自己的行为。</em>
-这保持了游戏循环的整洁，便于添加和移除实体。</p>
-<p>为了做到这点需要<em>抽象层</em>，我们通过定义抽象的<code>update()</code>方法来完成。
-游戏循环管理对象的集合，但是不知道对象的具体类型。
+<p>我们要用来修复这个问题的模式非常简单，你可能已经想到了：
+<em>游戏中的每个实体都应该封装自己的行为。</em>
+这会让游戏循环保持整洁，也便于添加和移除实体。</p>
+<p>要做到这一点，我们需要一个<em>抽象层</em>，通过定义抽象的<code>update()</code>方法来实现。
+游戏循环维护一个对象集合，但不知道它们的具体类型。
 它只知道这些对象可以被更新。
-这样，每个对象的行为与游戏循环分离，与其他对象分离。</p>
+这样，每个对象的行为既与游戏循环分离，也与其他对象分离。</p>
 <p><span name="simultaneously"></span></p>
 <p>每一帧，游戏循环遍历集合，在每个对象上调用<code>update()</code>。
-这给了我们在每帧上更新一次行为的机会。
-在所有对象上每帧调用它，对象就能同时行动。</p>
+这让每个对象有机会执行一帧的行为。
+每帧在所有对象上调用它，它们就表现得像是在同时行动。</p>
 <aside name="simultaneously">
-<p>死抠细节的人会在这点上揪着我不放，是的，它们没有<em>真的同步</em>。
-当一个对象更新时，其他的都不在更新中。
-我们等会儿再说这点。</p>
+<p>既然会有较真的人抓住这点不放：是的，它们并非<em>真正并发</em>地运行。
+当一个对象在更新时，其他对象都没有在更新。
+我们稍后再深入讨论这一点。</p>
 </aside>
-<p>游戏循环维护动态的对象集合，所以从关卡添加和移除对象是很容易的——只需要将它们从集合中添加和移除。
-不必再用硬编码，我们甚至可以用数据文件构成这个关卡，那正是我们的关卡设计者需要的。</p>
+<p>游戏循环维护一个动态的对象集合，所以在关卡中添加和移除对象很容易——只需从集合中添加和移除它们。
+不再需要任何硬编码，我们甚至可以用某种数据文件来填充关卡，这正是关卡设计者想要的。</p>
 <h2><a href="#模式" name="模式">模式</a></h2>
 <p><strong>游戏世界</strong>管理<strong>对象集合</strong>。
 每个对象实现一个<strong>更新方法</strong>模拟对象在<strong>一帧</strong>内的行为。每一帧，游戏循环更新集合中的每一个对象。</p>
 <h2><a href="#何时使用" name="何时使用">何时使用</a></h2>
-<p>如果<a href="game-loop.html" class="pattern">游戏循环</a>模式是切片面包，
-那么更新方法模式就是它的奶油。
-很多玩家交互的游戏实体都以这样或那样的方式实现了这个模式。
-如果游戏有太空陆战队，火龙，火星人，鬼魂或者运动员，很有可能它使用了这个模式。</p>
+<p>如果说<a href="game-loop.html" class="pattern">游戏循环</a>模式是自切片面包以来最棒的东西，
+那么更新方法模式就是它的黄油。
+大量包含玩家会与之互动的活跃实体的游戏，都以某种形式使用这个模式。
+如果游戏里有星际战士、龙、火星人、鬼魂或运动员，那它很可能就使用了这个模式。</p>
 <p><span name="pawn"></span>
-但是如果游戏更加抽象，移动部分不太像活动的角色而更加像棋盘上的棋子，
-这个模式通常就不适用了。
-在棋类游戏中，你不需要同时模拟所有的部分，
-你可能也不需要告诉棋子每帧都更新它们自己。</p>
+但是，如果游戏更抽象，移动的部件不太像活生生的角色，而更像棋盘上的棋子，
+这个模式通常就不太合适。
+在象棋这类游戏中，你不需要并发地模拟所有棋子，
+你大概也不需要告诉兵每帧更新自己。</p>
 <aside name="pawn">
-<p>你也许不需要每帧更新它们的<em>行为</em>，但即使是棋类游戏，
-你可能也需要每帧更新<em>动画</em>。
-这个设计模式也可以帮到你。</p>
+<p>你也许不需要每帧更新它们的<em>行为</em>，但即使是棋盘游戏，
+你可能仍然想每帧更新它们的<em>动画</em>。
+这个模式对此也能帮上忙。</p>
 </aside>
-<p>更新方法适应以下情况：</p>
+<p>更新方法在以下情况下很适用：</p>
 <ul>
 <li>
-<p>你的游戏有很多对象或系统需要同时运行。</p>
+<p>你的游戏中有许多对象或系统需要同时运行。</p>
 </li>
 <li>
-<p>每个对象的行为都与其他的大部分独立。</p>
+<p>每个对象的行为大多独立于其他对象。</p>
 </li>
 <li>
-<p>对象需要跟着时间进行模拟。</p>
+<p>对象需要随时间推移被模拟。</p>
 </li>
 </ul>
 <h2><a href="#记住" name="记住">记住</a></h2>
-<p>这个模式很简单，所以没有太多值得发现的惊喜。当然，每行代码还是有利有弊。</p>
-<h2><a href="#将代码划分到一帧帧中会让它更复杂" name="将代码划分到一帧帧中会让它更复杂">将代码划分到一帧帧中会让它更复杂</a></h2>
-<p>当你比较前面两块代码时，第二块看上去更加复杂。
-两者都只是让骷髅守卫来回移动，但与此同时，第二块代码将控制权交给了游戏循环的一帧帧中。</p>
+<p>这个模式相当简单，所以它的阴暗角落里没有多少隐藏的意外。不过，每行代码都有其后果。</p>
+<h3><a href="#将代码划分到一帧帧中会让它更复杂" name="将代码划分到一帧帧中会让它更复杂">将代码划分到一帧帧中会让它更复杂</a></h3>
+<p>当你比较前面两段代码时，第二段明显复杂得多。
+两者都只是让骷髅守卫来回移动，但第二段是在每帧把控制权让给游戏循环的同时做到这一点。</p>
 <p><span name="coroutine">几乎</span>
-这个改变是游戏循环处理用户输入，渲染等几乎必须要注意的事项，所以第一个例子不大实用。
-但是很有必要记住，将你的行为切片会增加很高的复杂性。</p>
+为了处理用户输入、渲染以及游戏循环负责的其他事情，这种改动几乎总是必要的，
+所以第一个例子不太实用。
+但值得记住的是，像这样把行为代码切成细丝会带来很高的前期复杂度成本。</p>
 <aside name="coroutine">
-<p>我在这里说几乎是因为有时候鱼和熊掌可以兼得。
-你可以直接为对象编码而不进行返回，
-保持很多对象同时运行并与游戏循环保持协调。</p>
-<p>你需要的是允许你同时拥有多个“线程”执行的系统。
-如果对象的代码可以在执行中暂停和继续，而不是总得<em>返回</em>，
-你可以用更加命令式的方式编码。</p>
-<p>真实的线程太过重量级而不能这么做，
-但如果你的语言支持轻量协同架构比如generators，coroutines或者fibers，那你也许可以使用它们。</p>
-<p><a href="bytecode.html" class="pattern">字节码</a>模式是另一个在应用层创建多个线程执行的方法。</p>
+<p>我在这里说“几乎”，是因为有时候鱼和熊掌可以兼得。
+你可以为对象行为编写从不返回的直线式代码，
+同时让许多对象并发运行并与游戏循环协调。</p>
+<p>你需要的是一个允许你同时拥有多个执行“线程”的系统。
+如果对象的代码可以在执行中途暂停和恢复，而不必完全<em>返回</em>，
+你就可以用更命令式的形式来编写它。</p>
+<p>真正的线程通常太重，难以胜任这种工作，
+但如果你的语言支持生成器（generator）、协程（coroutine）或纤程（fiber）这类轻量级并发构造，你也许可以使用它们。</p>
+<p><a href="bytecode.html" class="pattern">字节码</a>模式是另一个在应用层创建执行线程的选项。</p>
 </aside>
-<h3><a href="#当离开每帧时，你需要存储状态，以备将来继续。" name="当离开每帧时，你需要存储状态，以备将来继续。">当离开每帧时，你需要存储状态，以备将来继续。</a></h3>
-<p>在第一个示例代码中，我们不需要用任何变量表明守卫在向左还是向右移动。
-这显式的依赖于哪块代码正在运行。</p>
-<p>当我们将其变为一次一帧的形式，我们需要创建<code>patrollingLeft</code>变量来追踪行走的方向。
-当从代码中返回时，就丢失了行走的方向，所以为了下帧继续，我们需要显式存储足够的信息。</p>
-<p><a href="state.html" class="pattern">状态模式</a>通常可以在这里帮忙。
-状态机在游戏中频繁出现的部分原因是（就像名字暗示的），它能在你离开时为你存储各种你需要的状态。</p>
-<h3><a href="#对象逐帧模拟，但并非真的同步" name="对象逐帧模拟，但并非真的同步">对象逐帧模拟，但并非真的同步</a></h3>
-<p>在这个模式中，游戏遍历对象集合，更新每一个对象。
-在<code>update()</code>调用中，大多数对象都能够接触到游戏世界的其他部分，
-包括现在正在更新的其他对象。这就意味着你更新对象的<em>顺序</em>至关重要。</p>
+<h3><a href="#你必须存储状态，以便每帧从中断处继续" name="你必须存储状态，以便每帧从中断处继续">你必须存储状态，以便每帧从中断处继续</a></h3>
+<p>在第一个代码示例中，我们没有任何变量表明守卫是在向左还是向右移动。
+那是由当时正在执行哪段代码隐式决定的。</p>
+<p>当我们把它改成一次一帧的形式时，就不得不创建一个<code>patrollingLeft</code>变量来记录方向。
+当我们从代码中返回时，执行位置就丢失了，所以我们需要显式地存储足够的信息，以便在下一帧恢复它。</p>
+<p><a href="state.html" class="pattern">状态模式</a>在这里通常能帮上忙。
+状态机在游戏中很常见的部分原因是（正如其名所暗示的），它们存储了你需要的那种用于从中断处继续的状态。</p>
+<h3><a href="#对象逐帧模拟，但并非真正并发" name="对象逐帧模拟，但并非真正并发">对象逐帧模拟，但并非真正并发</a></h3>
+<p>在这个模式中，游戏遍历对象集合并更新每一个对象。
+在<code>update()</code>调用内部，大多数对象都能触达游戏世界的其余部分，
+包括其他正在被更新的对象。这意味着对象被更新的<em>顺序</em>很重要。</p>
 <p><span name="double-buffer"></span></p>
-<p>如果对象更新列表中，A在B之前，当A更新时，它会看到B之前的状态。
-但是当B更新时，由于A已经在这帧更新了，它会看见A的<em>新</em>状态。
-哪怕按照玩家的视角，所有对象都是同时运转的，游戏的核心还是回合制的。
-只是完整的“回合”只有一帧那么长。</p>
+<p>如果对象列表中A在B之前，那么当A更新时，它看到的是B上一帧的状态。
+但是当B更新时，由于A已经在这一帧更新过了，它会看到A的<em>新</em>状态。
+哪怕从玩家的视角看，所有对象都在同时移动，游戏的核心仍是回合制的。
+只不过一个完整的“回合”只有一帧那么长。</p>
 <aside name="double-buffer">
-<p>如果，由于某些原因，你决定<em>不</em>让游戏按这样的顺序更新，你需要<a href="double-buffer.html" class="pattern">双缓冲</a>模式。
-那么AB更新的顺序就没有关系了，因为<em>双方</em>都会看对方之前那帧的状态。</p>
+<p>如果出于某种原因，你决定<em>不</em>让游戏像这样按顺序执行，你就需要使用<a href="double-buffer.html" class="pattern">双缓冲</a>模式之类的东西。
+那样A和B的更新顺序就无所谓了，因为<em>两者</em>看到的都是上一帧的状态。</p>
 </aside>
-<p>当关注游戏逻辑时，这通常是件好事。
-同时更新所有对象将把你带到一些不愉快的语义角落。
-想象如果国际象棋中，黑白双方同时移动会发生什么。
-双方都试图同时往同一个空格子中放置棋子。这怎么解决？</p>
+<p>就游戏逻辑而言，这通常是件好事。
+并行更新对象会把你带进一些令人不快的语义困境。
+想象一下国际象棋中，黑方和白方同时移动会怎样。
+双方都试图把棋子放到同一个当前还是空的格子里。这该怎么解决？</p>
 <p><span name="sequential"></span></p>
-<p>序列更新解决了这点——每次更新都让游戏世界从一个合法状态增量更新到下一个，不会出现引发歧义而需要协调的部分。</p>
+<p>顺序更新解决了这个问题——每次更新都让游戏世界从一个有效状态增量地过渡到下一个，
+不存在任何事物处于歧义状态、需要协调的时间段。</p>
 <aside name="sequential">
-<p>这对在线游戏也有用，因为你有了可以在网上发送的行动指令序列。</p>
+<p>它对在线游戏也有帮助，因为你拥有一串可以在网络上发送的序列化走子。</p>
 </aside>
 <h3><a href="#在更新时修改对象列表需小心" name="在更新时修改对象列表需小心">在更新时修改对象列表需小心</a></h3>
-<p>当你使用这个模式时，很多游戏行为在更新方法中纠缠在一起。
-这些行为通常包括增加和删除可更新对象。</p>
-<p>举个例子，假设骷髅守卫被杀死时掉落物品。
-使用新对象，你通常可以将其增加到列表尾部，而不引起任何问题。
-你会继续遍历这张链表，最终找到新的那个，然后也更新了它。</p>
-<p>但这确实表明新对象在它产生的那帧就有机会活动，甚至有可能在玩家看到它之前。
-如果你不想发生那种情况，简单的修复方法就是在游戏循环中缓存列表对象的数目，然后只更新那么多数目的对象就停止：</p>
-<div class="codehilite"><pre><span></span><span class="kt">int</span> <span class="n">numObjectsThisTurn</span> <span class="o">=</span> <span class="n">numObjects_</span><span class="p">;</span>
-<span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">numObjectsThisTurn</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span>
+<p>使用这个模式时，很多游戏行为最终都落在这些更新方法里。
+其中往往包括从游戏中添加或移除可更新对象的代码。</p>
+<p>举个例子，假设骷髅守卫被杀死时掉落了一件物品。
+对于新对象，你通常可以把它加到列表末尾，不会有太大问题。
+你会继续遍历这个列表，最终到达末尾那个新对象，并把它也更新掉。</p>
+<p>但这确实意味着，新对象在它产生的那一帧就有机会行动，甚至在玩家有机会看到它之前就行动了。
+如果你不想发生这种情况，一个简单的修复方法是，在更新循环开始时缓存列表中的对象数量，只更新这么多对象就停止：</p>
+<div class="codehilite"><pre><span></span><code><span class="kt">int</span><span class="w"> </span><span class="n">numObjectsThisTurn</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">numObjects_</span><span class="p">;</span>
+<span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">numObjectsThisTurn</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span>
 <span class="p">{</span>
-  <span class="n">objects_</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">-&gt;</span><span class="n">update</span><span class="p">();</span>
+<span class="w">  </span><span class="n">objects_</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">-&gt;</span><span class="n">update</span><span class="p">();</span>
 <span class="p">}</span>
-</pre></div>
+</code></pre></div>
 
-
-<p>这里，<code>objects_</code>是可更新游戏对象的数组，而<code>numObjects_</code>是数组的长度。
-当添加新对象时，这个数组长度变量就增加。
-在循环的一开始，我们在<code>numObjectsThisTurn</code>中存储数组的长度，
-这样这帧的遍历循环会停在新添加的对象之前。</p>
-<p>一个更麻烦的问题是在遍历时<em>移除</em>对象。
-你击败了邪恶的野兽，现在它需要被移出对象列表。
-如果它正好位于你当前更新对象之前，你会意外地跳过一个对象：</p>
-<div class="codehilite"><pre><span></span><span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">numObjects_</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span>
+<p>这里，<code>objects_</code>是游戏中可更新对象的数组，<code>numObjects_</code>是它的长度。
+当添加新对象时，这个长度会递增。
+我们在循环开始时把长度缓存到<code>numObjectsThisTurn</code>中，
+这样迭代就会在当前帧新添加的对象之前停下。</p>
+<p>更棘手的问题是在遍历时<em>移除</em>对象。
+你击败了某只邪恶的野兽，现在需要把它从对象列表中拽出去。
+如果它恰好位于你当前正在更新的对象之前，你就可能不小心跳过一个对象：</p>
+<div class="codehilite"><pre><span></span><code><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">numObjects_</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span>
 <span class="p">{</span>
-  <span class="n">objects_</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">-&gt;</span><span class="n">update</span><span class="p">();</span>
+<span class="w">  </span><span class="n">objects_</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">-&gt;</span><span class="n">update</span><span class="p">();</span>
 <span class="p">}</span>
-</pre></div>
+</code></pre></div>
 
-
-<p>这个简单的循环通过增加索引值来遍历每个对象。
-下图的左侧展示了在我们更新英雄时，数组看上去是什么样的：</p>
+<p>这个简单的循环每轮迭代都会递增正在更新的对象的索引。
+下图左侧展示了我们在更新英雄时数组的样子：</p>
 <p><img src="images/update-method-remove.png" alt="在一次移除中的对象实体列表。一个指针指向第二个实体，英雄。排在第一个的怪兽被移除后，英雄向上移动一格，与此同时，指针向下移动一格。" /></p>
 <p><span name="backwards"></span></p>
-<p>我们在更新她时，索引值<code>i</code>是1。
-邪恶野兽被她杀了，因此需要从数组移除。
-英雄移到了位置0，倒霉的乡下人移到了位置1。
-在更新英雄之后，<code>i</code>增加到了2。
-就像你在右图看到的，倒霉的乡下人被跳过了，没有更新。</p>
+<p>由于我们正在更新她，索引<code>i</code>是1。
+她杀死了邪恶野兽，于是它被从数组中移除。
+英雄上移到0，倒霉的农民上移到1。
+更新完英雄后，<code>i</code>递增到2。
+正如你在右图看到的，倒霉的农民被跳过了，永远不会被更新。</p>
 <aside name="backwards">
-<p>一种简单的解决方案是在更新时<em>从后往前</em>遍历列表。
-这种方式只会移动已经被更新的对象。</p>
+<p>一种廉价的解决方案是在更新时<em>从后往前</em>遍历列表。
+这样移除对象只会移动那些已经更新过的对象。</p>
 </aside>
 <p><span name="defer"></span></p>
-<p>一种解决方案是小心地移除对象，任何对象被移除时，更新索引。
-另一种是在遍历完列表后再移除对象。
-将对象标为“死亡”，但是把它放在那里。
-在更新时跳过任何死亡的对象。然后，在完成遍历后，遍历列表并删除尸体。</p>
+<p>一种修复方法是，在移除对象时多加小心，更新任何迭代变量以反映移除的影响。
+另一种是把移除推迟到遍历完列表之后。
+把对象标记为“死亡”，但让它留在原地。
+更新时跳过任何已死亡的对象。然后，等遍历完成后，再遍历一次列表，清除尸体。</p>
 <aside name="defer">
-<p>如果在更新循环中有多个线程处理对象，
-那么你可能更喜欢推迟任何修改，避免更新时同步线程的开销。</p>
+<p>如果有多个线程在处理更新循环中的对象，
+那么你甚至更可能推迟对它的任何修改，以避免在更新期间进行代价高昂的线程同步。</p>
 </aside>
 <h2><a href="#示例代码" name="示例代码">示例代码</a></h2>
-<p>这个模式太直观了，代码几乎只是在重复说明要点。
-这不意味着这个模式没<em>有用</em>。它<em>因为</em>简单而有用：这是一个无需装饰的干净解决方案。</p>
+<p>这个模式太过直截了当，示例代码几乎是在反复唠叨要点。
+这并不意味着这个模式<em>没用</em>。它有用，部分原因<em>正是</em>因为它简单：它是一个没有太多花哨装饰的干净解决方案。</p>
 <p>但是为了让事情更具体些，让我们看看一个基础的实现。
 我们会从代表骷髅和雕像的<code>Entity</code>类开始：</p>
-<div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">Entity</span>
+<div class="codehilite"><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Entity</span>
 <span class="p">{</span>
 <span class="k">public</span><span class="o">:</span>
-  <span class="n">Entity</span><span class="p">()</span>
-  <span class="o">:</span> <span class="n">x_</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span> <span class="n">y_</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
-  <span class="p">{}</span>
+<span class="w">  </span><span class="n">Entity</span><span class="p">()</span>
+<span class="w">  </span><span class="o">:</span><span class="w"> </span><span class="n">x_</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span><span class="w"> </span><span class="n">y_</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+<span class="w">  </span><span class="p">{}</span>
 
-  <span class="k">virtual</span> <span class="o">~</span><span class="n">Entity</span><span class="p">()</span> <span class="p">{}</span>
-  <span class="k">virtual</span> <span class="kt">void</span> <span class="n">update</span><span class="p">()</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+<span class="w">  </span><span class="k">virtual</span><span class="w"> </span><span class="o">~</span><span class="n">Entity</span><span class="p">()</span><span class="w"> </span><span class="p">{}</span>
+<span class="w">  </span><span class="k">virtual</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="n">update</span><span class="p">()</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
 
-  <span class="kt">double</span> <span class="nf">x</span><span class="p">()</span> <span class="k">const</span> <span class="p">{</span> <span class="k">return</span> <span class="n">x_</span><span class="p">;</span> <span class="p">}</span>
-  <span class="kt">double</span> <span class="nf">y</span><span class="p">()</span> <span class="k">const</span> <span class="p">{</span> <span class="k">return</span> <span class="n">y_</span><span class="p">;</span> <span class="p">}</span>
+<span class="w">  </span><span class="kt">double</span><span class="w"> </span><span class="nf">x</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="n">x_</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
+<span class="w">  </span><span class="kt">double</span><span class="w"> </span><span class="nf">y</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="n">y_</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
 
-  <span class="kt">void</span> <span class="nf">setX</span><span class="p">(</span><span class="kt">double</span> <span class="n">x</span><span class="p">)</span> <span class="p">{</span> <span class="n">x_</span> <span class="o">=</span> <span class="n">x</span><span class="p">;</span> <span class="p">}</span>
-  <span class="kt">void</span> <span class="nf">setY</span><span class="p">(</span><span class="kt">double</span> <span class="n">y</span><span class="p">)</span> <span class="p">{</span> <span class="n">y_</span> <span class="o">=</span> <span class="n">y</span><span class="p">;</span> <span class="p">}</span>
+<span class="w">  </span><span class="kt">void</span><span class="w"> </span><span class="nf">setX</span><span class="p">(</span><span class="kt">double</span><span class="w"> </span><span class="n">x</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">x_</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">x</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
+<span class="w">  </span><span class="kt">void</span><span class="w"> </span><span class="nf">setY</span><span class="p">(</span><span class="kt">double</span><span class="w"> </span><span class="n">y</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">y_</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">y</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
 
 <span class="k">private</span><span class="o">:</span>
-  <span class="kt">double</span> <span class="n">x_</span><span class="p">;</span>
-  <span class="kt">double</span> <span class="n">y_</span><span class="p">;</span>
+<span class="w">  </span><span class="kt">double</span><span class="w"> </span><span class="n">x_</span><span class="p">;</span>
+<span class="w">  </span><span class="kt">double</span><span class="w"> </span><span class="n">y_</span><span class="p">;</span>
 <span class="p">};</span>
-</pre></div>
+</code></pre></div>
 
-
-<p>我在这里只呈现了我们后面所需东西的最小集合。
-可以推断在真实代码中，会有很多图形和物理这样的其他东西。
-上面这部分代码最重要的部分是它有抽象的<code>update()</code>方法。</p>
+<p>我在里面放了一些东西，但只是我们后面所需的最低限度。
+可以想见，在真实代码里还会有图形、物理等大量其他内容。
+就这个模式而言，重要的部分是它有一个抽象的<code>update()</code>方法。</p>
 <p>游戏管理实体的集合。在我们的示例中，我会把它放在一个代表游戏世界的类中。</p>
 <p><span name="array"></span></p>
-<div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">World</span>
+<div class="codehilite"><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">World</span>
 <span class="p">{</span>
 <span class="k">public</span><span class="o">:</span>
-  <span class="n">World</span><span class="p">()</span>
-  <span class="o">:</span> <span class="n">numEntities_</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
-  <span class="p">{}</span>
+<span class="w">  </span><span class="n">World</span><span class="p">()</span>
+<span class="w">  </span><span class="o">:</span><span class="w"> </span><span class="n">numEntities_</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+<span class="w">  </span><span class="p">{}</span>
 
-  <span class="kt">void</span> <span class="n">gameLoop</span><span class="p">();</span>
+<span class="w">  </span><span class="kt">void</span><span class="w"> </span><span class="n">gameLoop</span><span class="p">();</span>
 
 <span class="k">private</span><span class="o">:</span>
-  <span class="n">Entity</span><span class="o">*</span> <span class="n">entities_</span><span class="p">[</span><span class="n">MAX_ENTITIES</span><span class="p">];</span>
-  <span class="kt">int</span> <span class="n">numEntities_</span><span class="p">;</span>
+<span class="w">  </span><span class="n">Entity</span><span class="o">*</span><span class="w"> </span><span class="n">entities_</span><span class="p">[</span><span class="n">MAX_ENTITIES</span><span class="p">];</span>
+<span class="w">  </span><span class="kt">int</span><span class="w"> </span><span class="n">numEntities_</span><span class="p">;</span>
 <span class="p">};</span>
-</pre></div>
-
+</code></pre></div>
 
 <aside name="array">
-<p>在真实的世界程序中，你可能真的要使用集合类，我在这里使用数组来保持简单</p>
+<p>在真实项目里，你大概会使用真正的集合类，我这里用普通数组只是为了保持简单。</p>
 </aside>
 <p>现在，万事俱备，游戏通过每帧更新每个实体来实现模式：</p>
 <p><span name="game-loop"></span></p>
-<div class="codehilite"><pre><span></span><span class="kt">void</span> <span class="n">World</span><span class="o">::</span><span class="n">gameLoop</span><span class="p">()</span>
+<div class="codehilite"><pre><span></span><code><span class="kt">void</span><span class="w"> </span><span class="nf">World::gameLoop</span><span class="p">()</span>
 <span class="p">{</span>
-  <span class="k">while</span> <span class="p">(</span><span class="nb">true</span><span class="p">)</span>
-  <span class="p">{</span>
-    <span class="c1">// 处理用户输入……</span>
+<span class="w">  </span><span class="k">while</span><span class="w"> </span><span class="p">(</span><span class="nb">true</span><span class="p">)</span>
+<span class="w">  </span><span class="p">{</span>
+<span class="w">    </span><span class="c1">// 处理用户输入……</span>
 
-    <span class="c1">// 更新每个实体</span>
-    <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">numEntities_</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span>
-    <span class="p">{</span>
-      <span class="n">entities_</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">-&gt;</span><span class="n">update</span><span class="p">();</span>
-    <span class="p">}</span>
+<span class="w">    </span><span class="c1">// 更新每个实体</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">numEntities_</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">      </span><span class="n">entities_</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">-&gt;</span><span class="n">update</span><span class="p">();</span>
+<span class="w">    </span><span class="p">}</span>
 
-    <span class="c1">// 物理和渲染……</span>
-  <span class="p">}</span>
+<span class="w">    </span><span class="c1">// 物理和渲染……</span>
+<span class="w">  </span><span class="p">}</span>
 <span class="p">}</span>
-</pre></div>
-
+</code></pre></div>
 
 <aside name="game-loop">
 <p>正如其名，这是<a href="game-loop.html" class="pattern">游戏循环</a>模式的一个例子。</p>
 </aside>
 <h3><a href="#子类化实体？！" name="子类化实体？！">子类化实体？！</a></h3>
-<p>有很多读者刚刚起了鸡皮疙瘩，因为我在<code>Entity</code>主类中使用继承来定义不同的行为。
-如果你在这里还没有看出问题，我会提供一些线索。</p>
-<p>当游戏业界从6502汇编代码和VBLANKs转向面向对象的语言时，
-开发者陷入了对软件架构的狂热之中。
-其中之一就是使用继承。他们建立了遮天蔽日的高耸的拜占庭式对象层次。</p>
-<p><span name="subclass"></p>
-<p>最终证明这是个糟点子，没人可以不拆解它们来管理庞杂的对象层次。
-哪怕在1994年的GoF都知道这点，并写道：</p>
+<p>此刻有些读者正起鸡皮疙瘩，因为我在主<code>Entity</code>类上用继承来定义不同的行为。
+如果你恰好没看出问题所在，我来提供一些背景。</p>
+<p>当游戏业界从6502汇编代码和VBLANK的原始海洋登上面向对象语言的海岸时，
+开发者陷入了一场软件架构的狂热风潮。
+其中最大的风潮之一就是使用继承。他们建起了高耸的、拜占庭式的类层级，大到足以遮天蔽日。</p>
+<p><span name="subclass"></span></p>
+<p>最终证明这是个糟糕的主意，没人能维护一个庞大的类层级而不让它在自己周围崩塌。
+甚至四人组（GoF）在1994年就明白这一点，他们写道：</p>
 <blockquote>
 <p>多用“对象组合”，而非“类继承”。</p>
 </blockquote>
 <aside name="subclass">
-<p>只在你我间聊聊，我认为这已经是一朝被蛇咬十年怕井绳了。
-我通常避免使用它，但教条地不用和教条地使用一样糟。
-你可以适度使用，不必完全禁用。</p>
+<p>咱们私下里说，我认为钟摆已经摆得离子类化有点太<em>远</em>了。
+我通常避免使用它，但教条地<em>不</em>使用继承，和教条地使用它一样糟糕。
+你可以适度使用，不必完全禁绝。</p>
 </aside>
-<p>当游戏业界都明白了这一点，解决方案是使用<a href="component.html" class="pattern">组件</a>模式。
-使用它，<code>update()</code>是实体的<em>组件</em>而不是在<code>Entity</code>中。
-这让你避开了为了定义和重用行为而创建实体所需的复杂类继承层次。相反，你只需混合和组装组件。</p>
+<p>当这一认识在游戏业界传播开来后，随之出现的解决方案就是<a href="component.html" class="pattern">组件</a>模式。
+使用它，<code>update()</code>会放在实体的<em>组件</em>上，而不是放在<code>Entity</code>本身上。
+这样你就不必为了定义和重用行为而创建复杂的实体类层级。相反，你只需混搭组合组件。</p>
 <p><span name="chapter"></span></p>
-<p>如果我真正在做游戏，我也许也会那么做。
-但是这章不是关于组件的，
-而是关于<code>update()</code>方法，最简单，最少牵连其他部分的介绍方法，
-就是把更新方法放在<code>Entity</code>中然后创建一些子类。</p>
+<p>如果我在做一款真正的游戏，我大概也会那么做。
+但本章不是关于组件的。
+它是关于<code>update()</code>方法的，而我要展示它们最简单的方式、尽可能少的活动部件，
+就是把该方法直接放在<code>Entity</code>上，再创建几个子类。</p>
 <aside name="chapter">
-<p>组件模式在<a href="component.html" class="pattern">这里</a>。</p>
+<p><a href="component.html" class="pattern">这一章</a>是。</p>
 </aside>
 <h3><a href="#定义实体" name="定义实体">定义实体</a></h3>
-<p>好了，回到任务中。
-我们原先的动机是定义巡逻的骷髅守卫和释放闪电的魔法雕像。
-让我们从我们的骷髅朋友开始吧。
-为了定义它的巡逻行为，我们定义恰当地实现了<code>update()</code>的新实体：</p>
-<div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">Skeleton</span> <span class="o">:</span> <span class="k">public</span> <span class="n">Entity</span>
+<p>好了，回到手头的任务。
+我们最初的动机是能定义巡逻的骷髅守卫和释放闪电的魔法雕像。
+让我们从这位只剩骨头的朋友开始吧。
+为了定义它的巡逻行为，我们创建一个恰当实现<code>update()</code>的新实体：</p>
+<div class="codehilite"><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Skeleton</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="k">public</span><span class="w"> </span><span class="n">Entity</span>
 <span class="p">{</span>
 <span class="k">public</span><span class="o">:</span>
-  <span class="n">Skeleton</span><span class="p">()</span>
-  <span class="o">:</span> <span class="n">patrollingLeft_</span><span class="p">(</span><span class="nb">false</span><span class="p">)</span>
-  <span class="p">{}</span>
+<span class="w">  </span><span class="n">Skeleton</span><span class="p">()</span>
+<span class="w">  </span><span class="o">:</span><span class="w"> </span><span class="n">patrollingLeft_</span><span class="p">(</span><span class="nb">false</span><span class="p">)</span>
+<span class="w">  </span><span class="p">{}</span>
 
-  <span class="k">virtual</span> <span class="kt">void</span> <span class="n">update</span><span class="p">()</span>
-  <span class="p">{</span>
-    <span class="k">if</span> <span class="p">(</span><span class="n">patrollingLeft_</span><span class="p">)</span>
-    <span class="p">{</span>
-      <span class="n">setX</span><span class="p">(</span><span class="n">x</span><span class="p">()</span> <span class="o">-</span> <span class="mi">1</span><span class="p">);</span>
-      <span class="k">if</span> <span class="p">(</span><span class="n">x</span><span class="p">()</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span> <span class="n">patrollingLeft_</span> <span class="o">=</span> <span class="nb">false</span><span class="p">;</span>
-    <span class="p">}</span>
-    <span class="k">else</span>
-    <span class="p">{</span>
-      <span class="n">setX</span><span class="p">(</span><span class="n">x</span><span class="p">()</span> <span class="o">+</span> <span class="mi">1</span><span class="p">);</span>
-      <span class="k">if</span> <span class="p">(</span><span class="n">x</span><span class="p">()</span> <span class="o">==</span> <span class="mi">100</span><span class="p">)</span> <span class="n">patrollingLeft_</span> <span class="o">=</span> <span class="nb">true</span><span class="p">;</span>
-    <span class="p">}</span>
-  <span class="p">}</span>
+<span class="w">  </span><span class="k">virtual</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="n">update</span><span class="p">()</span>
+<span class="w">  </span><span class="p">{</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">patrollingLeft_</span><span class="p">)</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">      </span><span class="n">setX</span><span class="p">(</span><span class="n">x</span><span class="p">()</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">1</span><span class="p">);</span>
+<span class="w">      </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">x</span><span class="p">()</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="w"> </span><span class="n">patrollingLeft_</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">false</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="k">else</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">      </span><span class="n">setX</span><span class="p">(</span><span class="n">x</span><span class="p">()</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="p">);</span>
+<span class="w">      </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">x</span><span class="p">()</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">100</span><span class="p">)</span><span class="w"> </span><span class="n">patrollingLeft_</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">true</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">}</span>
 
 <span class="k">private</span><span class="o">:</span>
-  <span class="kt">bool</span> <span class="n">patrollingLeft_</span><span class="p">;</span>
+<span class="w">  </span><span class="kt">bool</span><span class="w"> </span><span class="n">patrollingLeft_</span><span class="p">;</span>
 <span class="p">};</span>
-</pre></div>
+</code></pre></div>
 
-
-<p>如你所见，几乎就是从早先的游戏循环中剪切代码，然后粘贴到<code>Skeleton</code>的<code>update()</code>方法中。
-唯一的小小不同是<code>patrollingLeft_</code>被定义为字段而不是本地变量。
-通过这种方式，它的值在<code>update()</code>两次调用间保持不变。</p>
+<p>如你所见，我们几乎只是把本章前面游戏循环里的那段代码剪切出来，粘贴到<code>Skeleton</code>的<code>update()</code>方法中。
+唯一的细微差别是，<code>patrollingLeft_</code>被改成了字段，而不是局部变量。
+这样，它的值在两次<code>update()</code>调用之间得以保留。</p>
 <p>让我们对雕像如法炮制：</p>
-<div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">Statue</span> <span class="o">:</span> <span class="k">public</span> <span class="n">Entity</span>
+<div class="codehilite"><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Statue</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="k">public</span><span class="w"> </span><span class="n">Entity</span>
 <span class="p">{</span>
 <span class="k">public</span><span class="o">:</span>
-  <span class="n">Statue</span><span class="p">(</span><span class="kt">int</span> <span class="n">delay</span><span class="p">)</span>
-  <span class="o">:</span> <span class="n">frames_</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span>
-    <span class="n">delay_</span><span class="p">(</span><span class="n">delay</span><span class="p">)</span>
-  <span class="p">{}</span>
+<span class="w">  </span><span class="n">Statue</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">delay</span><span class="p">)</span>
+<span class="w">  </span><span class="o">:</span><span class="w"> </span><span class="n">frames_</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span>
+<span class="w">    </span><span class="n">delay_</span><span class="p">(</span><span class="n">delay</span><span class="p">)</span>
+<span class="w">  </span><span class="p">{}</span>
 
-  <span class="k">virtual</span> <span class="kt">void</span> <span class="n">update</span><span class="p">()</span>
-  <span class="p">{</span>
-    <span class="k">if</span> <span class="p">(</span><span class="o">++</span><span class="n">frames_</span> <span class="o">==</span> <span class="n">delay_</span><span class="p">)</span>
-    <span class="p">{</span>
-      <span class="n">shootLightning</span><span class="p">();</span>
+<span class="w">  </span><span class="k">virtual</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="n">update</span><span class="p">()</span>
+<span class="w">  </span><span class="p">{</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">++</span><span class="n">frames_</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">delay_</span><span class="p">)</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">      </span><span class="n">shootLightning</span><span class="p">();</span>
 
-      <span class="c1">// 重置计时器</span>
-      <span class="n">frames_</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
-    <span class="p">}</span>
-  <span class="p">}</span>
+<span class="w">      </span><span class="c1">// 重置计时器</span>
+<span class="w">      </span><span class="n">frames_</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">}</span>
 
 <span class="k">private</span><span class="o">:</span>
-  <span class="kt">int</span> <span class="n">frames_</span><span class="p">;</span>
-  <span class="kt">int</span> <span class="n">delay_</span><span class="p">;</span>
+<span class="w">  </span><span class="kt">int</span><span class="w"> </span><span class="n">frames_</span><span class="p">;</span>
+<span class="w">  </span><span class="kt">int</span><span class="w"> </span><span class="n">delay_</span><span class="p">;</span>
 
-  <span class="kt">void</span> <span class="nf">shootLightning</span><span class="p">()</span>
-  <span class="p">{</span>
-    <span class="c1">// 火光效果……</span>
-  <span class="p">}</span>
+<span class="w">  </span><span class="kt">void</span><span class="w"> </span><span class="nf">shootLightning</span><span class="p">()</span>
+<span class="w">  </span><span class="p">{</span>
+<span class="w">    </span><span class="c1">// 火光效果……</span>
+<span class="w">  </span><span class="p">}</span>
 <span class="p">};</span>
-</pre></div>
+</code></pre></div>
 
-
-<p>又一次，大部分改动是将代码从游戏循环中移动到类中，然后重命名一些东西。
-但是，在这个例子中，我们真的让代码库变简单了。
-先前讨厌的命令式代码中，存在存储每个雕像的帧计数器和开火的速率的分散的本地变量。</p>
-<p>现在那些都被移动到了<code>Statue</code>类中，你可以想创建多少就创建多少实例了，
-每个实例都有它自己的小计时器。
-这是这章背后的真实动机——现在为游戏世界增加新实体会更加简单，
-因为每个实体都带来了它需要的全部东西。</p>
-<p>这个模式让我们分离了游戏世界的<em>构建</em>和<em>实现</em>。
-这同样能让我们灵活地使用分散的数据文件或关卡编辑器来构建游戏世界。</p>
+<p>又一次，大部分改动在于把代码从游戏循环移入类中，并重命名一些东西。
+不过在这个例子里，我们确实让代码库变简单了。
+在原来糟糕的命令式代码中，每个雕像的帧计数器和射击速率都有各自独立的局部变量。</p>
+<p>现在这些都移进了<code>Statue</code>类本身，你想创建多少个实例都行，
+每个实例都有自己的小计时器。
+这才是这个模式背后的真正动机——现在向游戏世界添加新实体容易多了，
+因为每个实体都自带照顾自己所需的全部东西。</p>
+<p>这个模式让我们把<em>填充</em>游戏世界与<em>实现</em>游戏世界分离开来。
+这反过来又让我们能够灵活地用独立的数据文件或关卡编辑器来填充世界。</p>
 <p><span name="uml"></span></p>
 <p><img src="images/update-method-uml.png" alt="一个UML图。世界有一系列实体组成，每实体都有update()方法。可镂卫士和魔法雕像都继承实体。" /></p>
 <aside name="uml">
-<p>还有人关心UML吗？如果还有，那就是我们刚刚建的。</p>
+<p>还有人关心UML吗？如果有，这就是我们刚刚创建的东西。</p>
 </aside>
 <h3><a href="#传递时间" name="传递时间">传递时间</a></h3>
-<p>这是模式的关键，但是我只对常用的部分进行了细化。
-到目前为止，我们假设每次对<code>update()</code>的调用都推动游戏世界前进一个固定的时间。</p>
+<p>这就是核心模式，但我想再简要提一种常见的改进。
+到目前为止，我们一直假设每次调用<code>update()</code>都会让游戏世界的状态以相同的固定时间单位推进。</p>
 <p><span name="variable"></span></p>
-<p>我更喜欢那样，但是很多游戏使用<em>可变时间步长</em>。
-在那种情况下，每次游戏循环推进的时间长度或长或短，
-具体取决于它需要多长时间处理和渲染前一帧。</p>
+<p>我恰好更喜欢那样，但很多游戏使用<em>可变时间步长</em>。
+在这些游戏中，游戏循环的每一轮所模拟的时间片可能更长或更短，
+具体取决于处理和渲染上一帧花了多长时间。</p>
 <aside name="variable">
 <p><a href="game-loop.html" class="pattern">游戏循环</a>一章讨论了更多关于固定和可变时间步长的优劣。</p>
 </aside>
-<p>这意味着每次<code>update()</code>调用都需要知道虚拟的时钟转动了多少，
-所以你经常可以看到传入消逝的时间。
-举个例子，我们可以让骷髅卫士像这样处理变化的时间步长：</p>
-<div class="codehilite"><pre><span></span><span class="kt">void</span> <span class="n">Skeleton</span><span class="o">::</span><span class="n">update</span><span class="p">(</span><span class="kt">double</span> <span class="n">elapsed</span><span class="p">)</span>
+<p>这意味着每次<code>update()</code>调用都需要知道虚拟时钟的指针走了多远，
+所以你经常会看到把经过的时间作为参数传入。
+例如，我们可以让巡逻的骷髅像这样处理可变时间步长：</p>
+<div class="codehilite"><pre><span></span><code><span class="kt">void</span><span class="w"> </span><span class="nf">Skeleton::update</span><span class="p">(</span><span class="kt">double</span><span class="w"> </span><span class="n">elapsed</span><span class="p">)</span>
 <span class="p">{</span>
-  <span class="k">if</span> <span class="p">(</span><span class="n">patrollingLeft_</span><span class="p">)</span>
-  <span class="p">{</span>
-    <span class="n">x</span> <span class="o">-=</span> <span class="n">elapsed</span><span class="p">;</span>
-    <span class="k">if</span> <span class="p">(</span><span class="n">x</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">)</span>
-    <span class="p">{</span>
-      <span class="n">patrollingLeft_</span> <span class="o">=</span> <span class="nb">false</span><span class="p">;</span>
-      <span class="n">x</span> <span class="o">=</span> <span class="o">-</span><span class="n">x</span><span class="p">;</span>
-    <span class="p">}</span>
-  <span class="p">}</span>
-  <span class="k">else</span>
-  <span class="p">{</span>
-    <span class="n">x</span> <span class="o">+=</span> <span class="n">elapsed</span><span class="p">;</span>
-    <span class="k">if</span> <span class="p">(</span><span class="n">x</span> <span class="o">&gt;=</span> <span class="mi">100</span><span class="p">)</span>
-    <span class="p">{</span>
-      <span class="n">patrollingLeft_</span> <span class="o">=</span> <span class="nb">true</span><span class="p">;</span>
-      <span class="n">x</span> <span class="o">=</span> <span class="mi">100</span> <span class="o">-</span> <span class="p">(</span><span class="n">x</span> <span class="o">-</span> <span class="mi">100</span><span class="p">);</span>
-    <span class="p">}</span>
-  <span class="p">}</span>
+<span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">patrollingLeft_</span><span class="p">)</span>
+<span class="w">  </span><span class="p">{</span>
+<span class="w">    </span><span class="n">x</span><span class="w"> </span><span class="o">-=</span><span class="w"> </span><span class="n">elapsed</span><span class="p">;</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">x</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">      </span><span class="n">patrollingLeft_</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">false</span><span class="p">;</span>
+<span class="w">      </span><span class="n">x</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">-</span><span class="n">x</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="w">  </span><span class="k">else</span>
+<span class="w">  </span><span class="p">{</span>
+<span class="w">    </span><span class="n">x</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="n">elapsed</span><span class="p">;</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">x</span><span class="w"> </span><span class="o">&gt;=</span><span class="w"> </span><span class="mi">100</span><span class="p">)</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">      </span><span class="n">patrollingLeft_</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">true</span><span class="p">;</span>
+<span class="w">      </span><span class="n">x</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">100</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="p">(</span><span class="n">x</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">100</span><span class="p">);</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">}</span>
 <span class="p">}</span>
-</pre></div>
+</code></pre></div>
 
-
-<p>现在，骷髅卫士移动的距离随着消逝时间的增长而增长。
-也可以看出，处理变化时间步长需要的额外复杂度。
-如果一次需要更新的时间步长过长，骷髅卫士也许就超过了其巡逻的范围，因此需要小心的处理。</p>
+<p>现在，骷髅移动的距离会随经过时间的增加而增加。
+你也能看到处理可变时间步长带来的额外复杂度。
+如果时间片很大，骷髅可能会越过它巡逻范围的边界，我们必须小心处理。</p>
 <h2><a href="#设计决策" name="设计决策">设计决策</a></h2>
-<p>在这样简单的模式中，没有太多的调控之处，但是这里仍有两个你需要决策的地方：</p>
+<p>对于这样简单的模式，没有太多变化，不过仍有两个可以调整的旋钮：</p>
 <h3><a href="#更新方法在哪个类中？" name="更新方法在哪个类中？">更新方法在哪个类中？</a></h3>
 <p>最明显和最重要的决策就是决定将<code>update()</code>放在哪个类中。</p>
 <ul>
 <li>
 <p><strong>实体类中：</strong></p>
-<p>如果你已经有实体类了，这是最简单的选项，
-因为这不会带来额外的类。如果你需要的实体种类不多，这也许可行，但是业界已经逐渐远离这种做法了。</p>
-<p>当类的种类很多时，一有新行为就建<code>Entity</code>子类来实现是痛苦的。
-当你最终发现你想要用单一继承的方法重用代码时，你就卡住了。</p>
+<p>如果你已经有实体类，这是最简单的选项，
+因为它不会引入任何额外的类。如果你没有太多类型的实体，这也许可行，但业界普遍正在远离这种做法。</p>
+<p>当实体种类很多时，每次想要新行为都得子类化<code>Entity</code>，既脆弱又痛苦。
+你最终会发现自己想以一种无法优雅地映射到单一继承层级的方式重用代码，那时你就卡住了。</p>
 </li>
 <li>
 <p><strong>组件类：</strong></p>
-<p>如果你已经使用了<a href="component.html" class="pattern">组件</a>模式，你知道这个该怎么做。
-这让每个组件独立更新它自己。
-更新方法用了同样的方法解耦游戏中的实体，组件让你进一步解耦了<em>单一实体中的各部分</em>。
-渲染，物理，AI都可以自顾自了。</p>
+<p>如果你已经在使用<a href="component.html" class="pattern">组件</a>模式，这就是个不用想的选择。
+它让每个组件独立更新自己。
+正如更新方法模式总体上让你解耦游戏世界中的各个游戏实体，这让你解耦<em>单个实体的各个部分</em>。
+渲染、物理和 AI 都能各自照顾好自己。</p>
 </li>
 <li>
 <p><strong>委托类：</strong></p>
-<p>还可将类的部分行为委托给其他的对象。
-<a href="state.html" class="pattern">状态</a>模式可以这样做，你可以通过改变它委托的对象来改变它的行为。
-<a href="type-object.html" class="pattern">类型对象</a>模式也这样做了，这样你可以在同“种”实体间分享行为。</p>
-<p>如果你使用了这些模式，将<code>update()</code>放在委托类中是很自然的。
-在那种情况下，也许主类中仍有<code>update()</code>方法，但是它不是虚方法，可以简单地委托给委托对象。就像这样：</p>
-<div class="codehilite"><pre><span></span><span class="kt">void</span> <span class="n">Entity</span><span class="o">::</span><span class="n">update</span><span class="p">()</span>
+<p>还有其他一些模式涉及把类的部分行为委托给另一个对象。
+<a href="state.html" class="pattern">状态</a>模式就是这样，让你可以通过改变委托对象来改变对象的行为。
+<a href="type-object.html" class="pattern">类型对象</a>模式也是这样，让你可以在同“种”的一批实体间共享行为。</p>
+<p>如果你使用了这些模式，将<code>update()</code>放在被委托的类中是很自然的。
+在那种情况下，你可能仍会在主类上保留<code>update()</code>方法，但它会是非虚方法，只是简单地转发给被委托的对象。就像这样：</p>
+<div class="codehilite"><pre><span></span><code><span class="kt">void</span><span class="w"> </span><span class="nf">Entity::update</span><span class="p">()</span>
 <span class="p">{</span>
-  <span class="c1">// 转发给状态对象</span>
-  <span class="n">state_</span><span class="o">-&gt;</span><span class="n">update</span><span class="p">();</span>
+<span class="w">  </span><span class="c1">// 转发给状态对象</span>
+<span class="w">  </span><span class="n">state_</span><span class="o">-&gt;</span><span class="n">update</span><span class="p">();</span>
 <span class="p">}</span>
-</pre></div>
+</code></pre></div>
 
-
-<p>这样做允许你改变委托对象来定义新行为。就像使用组件，这给了你无须定义全新的子类就能改变行为的灵活性。</p>
+<p>这样做允许你通过更换被委托的对象来定义新行为。就像使用组件，这给了你无须定义全新子类就能改变行为的灵活性。</p>
 </li>
 </ul>
-<h3><a href="#如何处理隐藏对象？" name="如何处理隐藏对象？">如何处理隐藏对象？</a></h3>
-<p>游戏中的对象，不管什么原因，可能暂时无需更新。
-它们可能是停用了，或者超出了屏幕，或者还没有解锁。
-如果状态中的这种对象很多，每帧遍历它们却什么都不做是在浪费CPU循环。</p>
-<p>一种方法是管理单独的“活动”对象集合，它存储真正需要更新的对象。
-当一个对象停用时，从那个集合中移除它。当它启用时，再把它添加回来。
-用这种方式，你只需要迭代那些真正需要更新的东西：</p>
+<h3><a href="#如何处理休眠对象？" name="如何处理休眠对象？">如何处理休眠对象？</a></h3>
+<p>游戏世界中往往有许多对象，出于种种原因暂时不需要更新。
+它们可能是被禁用了，或者在屏幕外，或者还没解锁。
+如果处于这种状态的对象很多，每帧遍历它们却什么都不做就是在浪费CPU周期。</p>
+<p>一种替代方案是单独维护一个只包含确实需要更新的“活跃”对象的集合。
+当对象被禁用时，就把它从集合中移除；当它被重新启用时，再把它加回来。
+这样，你只需迭代那些真正有实际工作要做的对象：</p>
 <ul>
 <li>
-<p><strong>如果你使用单个包括了所有不活跃对象的集合：</strong></p>
+<p><strong>如果你使用一个包含非活跃对象的单一集合：</strong></p>
 <p><span name="cache"></span></p>
 <ul>
-<li><em>浪费时间</em>。对于不活跃对象，你要么检查一些“是否启用”的标识，要么调用一些啥都不做的方法。</li>
+<li><em>你浪费了时间</em>。对于非活跃对象，你最终要么检查某个“我是否启用”的标志，要么调用一个什么都不做的方法。</li>
 </ul>
 <aside name="cache">
-
-<p>检查对象启用与否然后跳过它，不但消耗了CPU循环，还报销了你的数据缓存。
-CPU通过从RAM上读取数据到缓存上来优化读取。
-这样做是基于刚刚读取内存之后的内存部分很可能等会儿也会被读取到这个假设。</p>
-<p>当你跳过对象，你可能越过了缓存的尾部，强迫它从缓慢的主存中再取一块。</p>
+<p>除了检查对象是否启用并跳过它所浪费的CPU周期之外，毫无意义地遍历对象还会弄糟你的数据缓存。
+CPU通过把内存从RAM加载到快得多的片上缓存来优化读取。
+它们是推测性地这样做的，假设你很可能在刚读过的位置之后紧接着读取内存。</p>
+<p>当你跳过一个对象时，你可能会越过缓存的末尾，迫使它去缓慢地再拉取一大块主存。</p>
 </aside>
-
 </li>
 <li>
-<p><strong>如果你使用单独的集合保存活动对象：</strong></p>
+<p><strong>如果你使用一个只包含活跃对象的单独集合：</strong></p>
 <ul>
-<li><em>使用了额外的内存管理第二个集合。</em>
-  当你需要所有实体时，通常又需要一个巨大的集合。在那种情况下，这集合是多余的。
-  在速度比内存要求更高的时候（通常如此），这取舍仍是值得的。</li>
+<li><em>你使用额外的内存来维护第二个集合。</em>
+  通常还会有一个包含所有实体的主集合，以备你需要全部实体的场合。在这种情况下，这个集合在技术上是冗余的。
+  当速度比内存更紧张时（通常如此），这仍然是一笔值得的取舍。</li>
 </ul>
-<p>另一个权衡后的选择是使用两个集合，除了活动对象集合的另一个集合只包含<em>不活跃</em>实体而不是全部实体。</p>
+<p>缓解这一点的另一个选择是保留两个集合，但让另一个集合只包含<em>非活跃</em>实体，而不是包含全部实体。</p>
 <ul>
-<li><em>得保持集合同步。</em>
-    当对象创建或完全销毁时（不是暂时停用），你得修改全部对象集合和活跃对象集合。</li>
+<li><em>你必须让这些集合保持同步。</em>
+    当对象被创建或完全销毁（而不只是暂时变成非活跃）时，你得记得同时修改主集合和活跃对象集合。</li>
 </ul>
 </li>
 </ul>
-<p>方法选择的度量标准是不活跃对象的可能数量。
-数量越多，用分离的集合避免在核心游戏循环中用到它们就更有用。</p>
+<p>指导你选择哪种方法的衡量标准，是你通常会有多少非活跃对象。
+数量越多，拥有一个单独的集合、在核心游戏循环中避开它们就越有用。</p>
 <h2><a href="#参见" name="参见">参见</a></h2>
 <ul>
 <li>
-<p>这个模式，以及<a href="game-loop.html" class="pattern">游戏循环</a>模式和<a href="component.html" class="pattern">组件</a>模式，是构建游戏引擎核心的三位一体。</p>
+<p>这个模式，与<a href="game-loop.html" class="pattern">游戏循环</a>模式和<a href="component.html" class="pattern">组件</a>模式一起，是常常构成游戏引擎核心的三位一体。</p>
 </li>
 <li>
-<p>当你关注在每帧中更新实体或组件的缓存性能时，<a href="data-locality.html" class="pattern">数据局部性</a>模式可以让它跑到更快。</p>
+<p>当你开始关心每帧在循环中更新一批实体或组件时的缓存性能时，<a href="data-locality.html" class="pattern">数据局部性</a>模式可以让它变得更快。</p>
 </li>
 <li>
 <p><a href="http://unity3d.com">Unity</a>框架在多个类中使用了这个模式，包括
@@ -663,7 +651,7 @@ CPU通过从RAM上读取数据到缓存上来优化读取。
   类中使用了这个模式。</p>
 </li>
 <li>
-<p><a href="http://html5quintus.com/">Quintus</a>，一个JavaScript游戏引擎在它的主<a href="http://html5quintus.com/guide/sprites.md"><code>Sprite</code></a>类中使用了这个模式。</p>
+<p><a href="http://html5quintus.com/">Quintus</a>，一个JavaScript游戏引擎，在它的主<a href="http://html5quintus.com/guide/sprites.md"><code>Sprite</code></a>类中使用了这个模式。</p>
 </li>
 </ul>
 <nav>

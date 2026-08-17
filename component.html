@@ -89,56 +89,55 @@ delete the font style for english.
 <p><em>允许单一的实体跨越多个领域而不会导致这些领域彼此耦合。</em></p>
 <h2><a href="#动机" name="动机">动机</a></h2>
 <p><span name="baker"></span></p>
-<p>让我们假设我们正在制作平台跳跃游戏。
-意大利水管工已经有人做了，因此我们将出动丹麦面包师，Bjorn。
+<p>假设我们正在制作一款平台跳跃游戏。
+意大利水管工这个细分市场已经有人占了，所以我们的主角是一位丹麦面包师，Bjorn。
 照理说，会有一个类来表示友好的糕点厨师，包含他在游戏中做的一切。</p>
 <aside name="baker">
-<p>像这样的游戏创意导致了我是程序员而不是设计师。</p>
+<p>像这样的游戏创意正是我成为程序员而不是设计师的原因。</p>
 </aside>
-<p>由于玩家控制着他，这意味着需要读取控制器的输入然后转化为动作。
-而且他当然需要与关卡进行互动，所以要引入物理和碰撞。
-一旦这样做了，他就必须在屏幕上出现，所以要引入动画和渲染。
-他可能还会播放一些声音。</p>
-<p>等一下，这一切正在失控。软件体系结构101课程告诉我们，程序的不同领域应保持分离。
-如果我们做一个文字处理器，处理打印的代码不应该受加载和保存文件的代码影响。
-游戏和企业应用程序的领域不尽相同，但该规则仍然适用。</p>
-<p>我们希望AI，物理，渲染，声音和其他领域域尽可能相互不了解，
+<p>由于玩家控制着他，这意味着要读取控制器输入，并把输入转化为动作。
+当然，他还得和关卡互动，所以物理和碰撞也得塞进来。
+这些搞定之后，他还得在屏幕上亮相，那就再把动画和渲染扔进去。
+他多半还会发出点声音。</p>
+<p>等一下，事情正在失控。软件架构 101 告诉我们，程序中的不同领域应彼此隔离。
+如果我们做的是文字处理器，处理打印的代码就不该受加载和保存文档的代码影响。
+游戏和企业应用的领域不尽相同，但这条规则仍然适用。</p>
+<p>我们希望AI，物理，渲染，声音和其他领域尽可能相互不了解，
 但现在我们将所有这一切挤在一个类中。
-我们已经看到了这条路通往何处：5000行的巨大代码文件，哪怕是你们团队中最勇敢的程序员也不敢打开。</p>
-<p>这工作对能驯服他的少数人来说是有趣的，但对其他人而言是地狱。
+我们已经看到这条路通向何方：一个 5000 行的垃圾倾倒场源码文件，大到只有你们团队里最勇敢的忍者程序员才敢进去。</p>
+<p>这对能驯服它的少数人来说是极好的工作保障，但对其他人而言是地狱。
 这么大的类意味着，即使是看似微不足道的变化亦可有深远的影响。
-很快，为类添加<em>错误</em>的速度会明显快于添加<em>功能</em>的速度。</p>
+很快，这个类累积<em>错误</em>的速度就会超过累积<em>功能</em>的速度。</p>
 <h3><a href="#一团乱麻" name="一团乱麻">一团乱麻</a></h3>
 <p><span name="coupling"></span></p>
 <p>比起单纯的规模问题，更糟糕的是耦合。
 在游戏中，所有不同的系统被绑成了一个巨大的代码球：</p>
-<div class="codehilite"><pre><span></span><span class="k">if</span> <span class="p">(</span><span class="n">collidingWithFloor</span><span class="p">()</span> <span class="o">&amp;&amp;</span> <span class="p">(</span><span class="n">getRenderState</span><span class="p">()</span> <span class="o">!=</span> <span class="n">INVISIBLE</span><span class="p">))</span>
+<div class="codehilite"><pre><span></span><code><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">collidingWithFloor</span><span class="p">()</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="p">(</span><span class="n">getRenderState</span><span class="p">()</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="n">INVISIBLE</span><span class="p">))</span>
 <span class="p">{</span>
-  <span class="n">playSound</span><span class="p">(</span><span class="n">HIT_FLOOR</span><span class="p">);</span>
+<span class="w">  </span><span class="n">playSound</span><span class="p">(</span><span class="n">HIT_FLOOR</span><span class="p">);</span>
 <span class="p">}</span>
-</pre></div>
+</code></pre></div>
 
-
-<p>任何试图改变上面代码的程序员，都需要物理，图形和声音的相关知识，以确保没破坏什么。</p>
+<p>任何试图修改这种代码的程序员，都得懂点物理、图形和声音知识，以免弄坏什么东西。</p>
 <aside name="coupling">
 <p>这样的耦合在<em>任何</em>游戏中出现都是个问题，但是在使用并发的现代游戏中尤其糟糕。
 在多核硬件上，让代码同时在多个线程上运行是至关重要的。
-将游戏分割为多线程的一种通用方法是通过领域划分——在一个核上运行AI代码，在另一个上播放声音，在第三个上渲染，等等。</p>
+将游戏分割为多线程的一种通用方法是沿领域边界划分——在一个核上运行AI代码，在另一个上运行声音，在第三个上渲染，等等。</p>
 <p>一旦你这么做了，在领域间保持解耦就是至关重要的，这是为了避免死锁或者其他噩梦般的并发问题。
-如果某个函数从一个线程上调用<code>UpdateSounds()</code>方法，从另一个线程上调用<code>RenderGraphics()</code>方法，那它是在自找麻烦。</p>
+如果有一个类，它的<code>UpdateSounds()</code>方法必须从一个线程调用，而<code>RenderGraphics()</code>方法必须从另一个线程调用，那简直是在自找这些麻烦。</p>
 </aside>
-<p>这两个问题互相混合；这个类涉及太多的域，每个程序员都得接触它，
+<p>这两个问题相互加剧；这个类涉及太多的领域，每个程序员都得接触它，
 但它又太过巨大，这就变成了一场噩梦。
-如果变得够糟糕，程序员会黑入代码库的其他部分，仅仅为了躲开这个像毛球一样的<code>Bjorn</code>类。</p>
+如果情况糟到一定程度，程序员会开始往代码库的其他地方塞各种 hack，就为了躲开这个已经变成一团毛球的 <code>Bjorn</code> 类。</p>
 <h3><a href="#快刀斩乱麻" name="快刀斩乱麻">快刀斩乱麻</a></h3>
-<p>我们可以像亚历山大大帝一样解决这个问题——快刀斩乱麻。
-按领域将<code>Bjorn</code>类割成相互独立的部分。
+<p>我们可以像亚历山大大帝那样解决这个问题——用剑劈开。
+把庞大的 <code>Bjorn</code> 类按领域边界切成相互独立的部分。
 例如，抽出所有处理用户输入的代码，将其移动到一个单独的<code>InputComponent</code>类。
 <code>Bjorn</code>拥有这个部件的一个实例。我们将对<code>Bjorn</code>接触的每个领域重复这一过程。</p>
-<p>当完成后，我们就将<code>Bjorn</code>大多数的东西都抽走了。
-剩下的是一个薄壳包着所有的组件。
-通过将类划分为多个小类，我们已经解决了这个问题。但我们所完成的远不止如此。</p>
-<h3><a href="#宽松的结果" name="宽松的结果">宽松的结果</a></h3>
+<p>当完成后，我们就将<code>Bjorn</code>中几乎所有的东西都移出去了。
+剩下的是一个把组件绑在一起的薄壳。
+通过把类划分成多个小类，我们已经解决了巨型类的问题。但我们所完成的远不止如此。</p>
+<h3><a href="#松散的线头" name="松散的线头">松散的线头</a></h3>
 <p>我们的组件类现在解耦了。
 尽管<code>Bjorn</code>有<code>PhysicsComponent</code>和<code>GraphicsComponent</code>，
 但这两部分都不知道对方的存在。
@@ -146,7 +145,7 @@ delete the font style for english.
 <p>在实践中，这些部件之间需要有<em>一些</em>相互作用。
 例如，AI组件可能需要告诉物理组件Bjorn试图去哪里。
 然而，我们可以将这种交互限制在<em>确实</em>需要交互的组件之间，
-而不是把它们围在同一个围栏里。</p>
+而不是把它们统统扔进同一个围栏里。</p>
 <h3><a href="#绑到一起" name="绑到一起">绑到一起</a></h3>
 <p><span name="inheritance"></span></p>
 <p>这种设计的另一特性是，组件现在是可复用的包。
@@ -156,11 +155,11 @@ delete the font style for english.
 <em>区域</em> 与装饰相反——无形但可互动。
 它们是很好的触发器，比如在Bjorn进入区域时触发过场动画。</p>
 <aside name="inheritance">
-<p>当面向对象语言第一次接触这个场景时，继承是它箱子里最闪耀的工具。
-它被认为是代码无限重用之锤，编程者常常挥舞着它。
-然而我们痛苦地学到，事实上它是一把重锤。
-继承有它的用处，但对简单的代码重用来说太过复杂。</p>
-<p>相反，在今日软件设计的趋势是尽可能使用组件代替继承。
+<p>当面向对象编程第一次登场时，继承是其工具箱里最闪耀的工具。
+它被认为是代码重用的终极锤子，程序员们常常挥舞它。
+此后我们才痛苦地学到，它实在是一把沉重的大锤。
+继承自有其用武之地，但对简单的代码重用来说往往太过笨重。</p>
+<p>相反，当今软件设计的趋势是尽可能使用组合代替继承。
 不是让两个类<em>继承</em>同一类来分享代码，而是让它们<em>拥有同一个类的实例</em>。</p>
 </aside>
 <p>现在，考虑如果不用组件，我们将如何建立这些类的继承层次。第一遍可能是这样的：</p>
@@ -173,14 +172,14 @@ delete the font style for english.
 然而，<code>Prop</code>不能<em>同时</em>继承<code>Decoration</code>来重用<em>渲染</em>，
 否则就会造成致命菱形结构。</p>
 <aside name="diamond">
-<p>“致命菱形”发生在类继承了多个类，而这多个类中有两个继承同一基类时。
-介绍它造成的痛苦超过了本书的范围，但它被说成“致命”是有原因的。</p>
+<p>“致命菱形”发生在使用多重继承的类层次中：当有两条不同的路径通向同一个基类时。
+它带来的痛苦稍微超出了本书的范围，但要知道，人们称它为“致命”是有原因的。</p>
 </aside>
 <p>我们可以反过来让<code>Prop</code>继承<code>Decoration</code>，但随后不得不重复<em>碰撞检测</em>代码。
 无论哪种方式，没有干净的办法重用碰撞和渲染代码而不诉诸多重继承。
-唯一的其他选择是一切都继承<code>GameObject</code>，
-但随后<code>Zone</code>会浪费内存在并不需要的渲染数据上，
-<code>Decoration</code>在物理效果上有同样的浪费。</p>
+唯一的其他选择是把所有内容都上移到<code>GameObject</code>，
+但这样<code>Zone</code>会在不需要的渲染数据上浪费内存，
+<code>Decoration</code>则会在物理数据上有同样的浪费。</p>
 <p><span name="menu"></span></p>
 <p>现在，让我们尝试用组件。子类将彻底消失。
 取而代之的是一个<code>GameObject</code>类和两个组件类：<code>PhysicsComponent</code>和<code>GraphicsComponent</code>。
@@ -188,29 +187,29 @@ delete the font style for english.
 区域与其恰好相反，而道具包含两种组件。
 没有代码重复，没有多重继承，只有三个类，而不是四个。</p>
 <aside name="menu">
-<p>可以拿饭店菜单打比方。如果每个实体是一个类，那就只能订套餐。
-我们需要为每种<em>可能</em>的组合定义各自的类。
-为了满足每位用户，我们需要十几种套餐。</p>
-<p>组件是照单点菜——每位顾客都可以选他们想要的，菜单记录可选的菜式。</p>
+<p>可以拿餐厅菜单打个比方。如果每个实体都是一个整体的类，那就只能点套餐。
+每种<em>可能</em>的特性组合都得有一个单独的类。
+为了满足每位顾客，我们就需要几十种套餐。</p>
+<p>组件则是单点用餐——每位顾客只选自己想要的菜，而菜单就是可供选择的菜品清单。</p>
 </aside>
-<p>对对象而言，组件是即插即用的。
-将不同的可重用部件插入对象，我们就能构建复杂且具有丰富行为的实体。
-就像软件中的战神金刚。</p>
+<p>对对象而言，组件基本上就是即插即用的。
+把不同的可复用组件对象插到实体上的插槽里，我们就能构建出行为丰富的复杂实体。
+想想软件版战神金刚。</p>
 <h2><a href="#模式" name="模式">模式</a></h2>
 <p><span name="component"></span></p>
 <p><strong>单一实体跨越了多个领域</strong>。为了保持领域之间相互分离，将每部分代码放入<strong>各自的组件类</strong>中。
 实体被简化为<em>组件的容器</em>。</p>
 <aside name="component">
-<p>“组件”，就像“对象”，在编程中意味任何东西也不意味任何东西。
-正因如此，它被用来描述一些概念。
-在商业软件中，“组件”设计模式描述通过网络解耦的服务。</p>
-<p>我试图从游戏中找到无关这个设计模式的另一个名字，但“组件”看来是最常用的术语。
-由于设计模式是记录已存的实践，我没有创建新术语的余地。
-所以，跟着XNA，Delta3D和其他人的脚步，我称之为“组件”。</p>
+<p>“组件”和“对象”一样，是编程中那种“什么都指、又什么都不指”的词。
+正因如此，它被用来描述不少概念。
+在商业软件中，“组件”设计模式描述的是通过网络通信、彼此解耦的服务。</p>
+<p>我试图为游戏里这个不相关的模式另找一个名字，但“组件”看来是最常用的术语。
+由于设计模式要记录的是既有实践，我可没有自创新术语的奢侈。
+所以，跟着XNA、Delta3D和其他人的脚步，就叫它“组件”。</p>
 </aside>
 <h2><a href="#何时使用" name="何时使用">何时使用</a></h2>
-<p>组件通常在定义游戏实体的核心部分中使用，但它们在其他地方也有用。
-这个模式应用在在如下情况中：</p>
+<p>组件最常见于定义游戏实体的核心类中，但它们在其他地方也可能有用。
+当以下任一条件成立时，这个模式都能派上用场：</p>
 <ul>
 <li>
 <p>有一个涉及了多个领域的类，而你想保持这些领域互相隔离。</p>
@@ -219,462 +218,444 @@ delete the font style for english.
 <p>一个类正在变大而且越来越难以使用。</p>
 </li>
 <li>
-<p>想要能定义一系列分享不同能力的类，但是使用继承无法让你精确选取要重用的部分。</p>
+<p>想要能定义一系列具备不同能力的对象，但是使用继承无法让你足够精确地选取要重用的部分。</p>
 </li>
 </ul>
 <h2><a href="#记住" name="记住">记住</a></h2>
-<p>组件模式比简单地向类中添加代码增加了一点点复杂性。
-每个概念上的“对象”要组成真正的对象需要实例化，初始化，然后正确地连接。
-不同组件间沟通会有些困难，而控制它们如何使用内存就更加复杂。</p>
-<p>对于大型代码库，为了解耦和重用而付出这样的复杂度是值得的。
-但是在使用这种模式之前，保证你没有为了不存在的问题而“过度设计”。</p>
+<p>组件模式比起简单地创建一个类并在里面写代码，会增加不少复杂性。
+每个概念上的“对象”都变成了一簇对象，需要实例化、初始化并正确地连接在一起。
+不同组件之间的沟通会变得更有挑战，而控制它们如何占用内存也更加复杂。</p>
+<p>对于大型代码库，为了解耦和代码重用而付出这样的复杂度是值得的。
+但是在使用这种模式之前，要确保你没有为了不存在的问题而“过度设计”。</p>
 <p><span name="perf"></span></p>
-<p>使用组件的另一后果是，需要多一层跳转才能做要做的事。
-拿到容器对象，获得相应的组件，<em>然后</em> 你才能做想做的事情。
-在性能攸关的内部循环中，这种跳转也许会导致糟糕的性能。</p>
+<p>使用组件的另一个后果是，你常常需要多经过一层间接引用才能完成要做的事。
+拿到容器对象后，先获得想要的组件，<em>然后</em> 才能做想做的事情。
+在性能攸关的内部循环中，这种指针跟随可能导致糟糕的性能。</p>
 <aside name="perf">
-<p>这是硬币的两面。组件模式通常可以<em>增进</em>性能和缓存一致性。
-组件让使用<a class="pattern" href="data-locality.html">数据局部性</a>模式的CPU更容易组织数据。</p>
+<p>硬币也有另一面：组件模式常常能<em>提升</em>性能和缓存一致性。
+组件让你更容易使用<a class="pattern" href="data-locality.html">数据局部性</a>模式，按CPU期望的顺序组织数据。</p>
 </aside>
 <h2><a href="#示例代码" name="示例代码">示例代码</a></h2>
 <p>我写这本书的最大挑战之一就是搞明白如何隔离各个模式。
-许多设计模式包含了不属于这种模式的代码。
-为了将提取模式的本质，我尽可能地消减代码，
-但是在某种程度上，这就像是没有衣服还要说明如何整理衣柜。</p>
+许多设计模式存在的意义，就是容纳那些本身并不属于该模式的代码。
+为了提炼出模式的本质，我尽可能地削减代码，
+但是在某种程度上，这就像是不展示任何衣服，却要说明如何整理衣柜。</p>
 <p>说明组件模式尤其困难。
-如果看不到它解耦的各个领域的代码，你就不能获得正确的体会，
-因此我会多写一些有关于Bjorn的代码。
-这个模式事实上只关于将组件变为<em>类</em>，但类中的代码可以帮助表明类是做什么用的。
-它是伪代码——它调用了其他不存在的类——但这应该可以让你理解我们正在做什么。</p>
+如果看不到它解耦的各个领域的代码，你就无法真正体会它，
+所以我不得不比我希望的多写一点 Bjorn 的代码。
+这个模式实际上只涉及组件<em>类</em>本身，但类中的代码可以帮助说明这些类是做什么用的。
+它是伪代码——它会调用其他这里没有展示的类——但这应该能让你理解我们的意图。</p>
 <h3><a href="#单块类" name="单块类">单块类</a></h3>
 <p><span name="cat"></span></p>
-<p>为了清晰的看到这个模式是如何应用的，
+<p>为了清晰地看到这个模式是如何应用的，
 我们先展示一个<code>Bjorn</code>类，
 它包含了所有我们需要的事物，但是<em>没有</em>使用这个模式：</p>
 <aside name="cat">
-<p>我应指出在代码中使用角色的名字总是个坏主意。市场部有在发售之前改名字的坏习惯。
-“焦点测试表明，在11岁到15岁之间的男性不喜欢&lsquo;Bjorn&rsquo;，请改为&lsquo;Sven‘”。</p>
-<p>这就是为什么很多软件项目使用内部代码名。
-而且比起告诉人们你在完成“Photoshop的下一版本”，告诉他们你在完成“大电猫”更有趣。</p>
+<p>我应指出，在代码库中使用角色的真名通常是个坏主意。市场部有个恼人的习惯：在发售前几天要求改名字。
+“焦点测试表明，11岁到15岁之间的男性对&lsquo;Bjorn&rsquo;反应消极。请改用&lsquo;Sven&rsquo;”。</p>
+<p>这就是为什么很多软件项目使用仅限内部的代号。
+当然，还有一个原因：比起告诉别人你在做“Photoshop 的下一版本”，说你在做“大电猫”要有趣得多。</p>
 </aside>
-<div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">Bjorn</span>
+<div class="codehilite"><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Bjorn</span>
 <span class="p">{</span>
 <span class="k">public</span><span class="o">:</span>
-  <span class="n">Bjorn</span><span class="p">()</span>
-  <span class="o">:</span> <span class="n">velocity_</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span>
-    <span class="n">x_</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span> <span class="n">y_</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
-  <span class="p">{}</span>
+<span class="w">  </span><span class="n">Bjorn</span><span class="p">()</span>
+<span class="w">  </span><span class="o">:</span><span class="w"> </span><span class="n">velocity_</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span>
+<span class="w">    </span><span class="n">x_</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span><span class="w"> </span><span class="n">y_</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+<span class="w">  </span><span class="p">{}</span>
 
-  <span class="kt">void</span> <span class="n">update</span><span class="p">(</span><span class="n">World</span><span class="o">&amp;</span> <span class="n">world</span><span class="p">,</span> <span class="n">Graphics</span><span class="o">&amp;</span> <span class="n">graphics</span><span class="p">);</span>
+<span class="w">  </span><span class="kt">void</span><span class="w"> </span><span class="n">update</span><span class="p">(</span><span class="n">World</span><span class="o">&amp;</span><span class="w"> </span><span class="n">world</span><span class="p">,</span><span class="w"> </span><span class="n">Graphics</span><span class="o">&amp;</span><span class="w"> </span><span class="n">graphics</span><span class="p">);</span>
 
 <span class="k">private</span><span class="o">:</span>
-  <span class="k">static</span> <span class="k">const</span> <span class="kt">int</span> <span class="n">WALK_ACCELERATION</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+<span class="w">  </span><span class="k">static</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">WALK_ACCELERATION</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span>
 
-  <span class="kt">int</span> <span class="n">velocity_</span><span class="p">;</span>
-  <span class="kt">int</span> <span class="n">x_</span><span class="p">,</span> <span class="n">y_</span><span class="p">;</span>
+<span class="w">  </span><span class="kt">int</span><span class="w"> </span><span class="n">velocity_</span><span class="p">;</span>
+<span class="w">  </span><span class="kt">int</span><span class="w"> </span><span class="n">x_</span><span class="p">,</span><span class="w"> </span><span class="n">y_</span><span class="p">;</span>
 
-  <span class="n">Volume</span> <span class="n">volume_</span><span class="p">;</span>
+<span class="w">  </span><span class="n">Volume</span><span class="w"> </span><span class="n">volume_</span><span class="p">;</span>
 
-  <span class="n">Sprite</span> <span class="n">spriteStand_</span><span class="p">;</span>
-  <span class="n">Sprite</span> <span class="n">spriteWalkLeft_</span><span class="p">;</span>
-  <span class="n">Sprite</span> <span class="n">spriteWalkRight_</span><span class="p">;</span>
+<span class="w">  </span><span class="n">Sprite</span><span class="w"> </span><span class="n">spriteStand_</span><span class="p">;</span>
+<span class="w">  </span><span class="n">Sprite</span><span class="w"> </span><span class="n">spriteWalkLeft_</span><span class="p">;</span>
+<span class="w">  </span><span class="n">Sprite</span><span class="w"> </span><span class="n">spriteWalkRight_</span><span class="p">;</span>
 <span class="p">};</span>
-</pre></div>
+</code></pre></div>
 
-
-<p><code>Bjorn</code>有个每帧调用的<code>update()</code>方法。</p>
-<div class="codehilite"><pre><span></span><span class="kt">void</span> <span class="n">Bjorn</span><span class="o">::</span><span class="n">update</span><span class="p">(</span><span class="n">World</span><span class="o">&amp;</span> <span class="n">world</span><span class="p">,</span> <span class="n">Graphics</span><span class="o">&amp;</span> <span class="n">graphics</span><span class="p">)</span>
+<p><code>Bjorn</code>有一个由游戏每帧调用的<code>update()</code>方法。</p>
+<div class="codehilite"><pre><span></span><code><span class="kt">void</span><span class="w"> </span><span class="nf">Bjorn::update</span><span class="p">(</span><span class="n">World</span><span class="o">&amp;</span><span class="w"> </span><span class="n">world</span><span class="p">,</span><span class="w"> </span><span class="n">Graphics</span><span class="o">&amp;</span><span class="w"> </span><span class="n">graphics</span><span class="p">)</span>
 <span class="p">{</span>
-  <span class="c1">// 根据用户输入修改英雄的速度</span>
-  <span class="k">switch</span> <span class="p">(</span><span class="n">Controller</span><span class="o">::</span><span class="n">getJoystickDirection</span><span class="p">())</span>
-  <span class="p">{</span>
-    <span class="k">case</span> <span class="nl">DIR_LEFT</span><span class="p">:</span>
-      <span class="n">velocity_</span> <span class="o">-=</span> <span class="n">WALK_ACCELERATION</span><span class="p">;</span>
-      <span class="k">break</span><span class="p">;</span>
+<span class="w">  </span><span class="c1">// 根据用户输入修改英雄的速度</span>
+<span class="w">  </span><span class="k">switch</span><span class="w"> </span><span class="p">(</span><span class="n">Controller</span><span class="o">::</span><span class="n">getJoystickDirection</span><span class="p">())</span>
+<span class="w">  </span><span class="p">{</span>
+<span class="w">    </span><span class="k">case</span><span class="w"> </span><span class="no">DIR_LEFT</span><span class="p">:</span>
+<span class="w">      </span><span class="n">velocity_</span><span class="w"> </span><span class="o">-=</span><span class="w"> </span><span class="n">WALK_ACCELERATION</span><span class="p">;</span>
+<span class="w">      </span><span class="k">break</span><span class="p">;</span>
 
-    <span class="k">case</span> <span class="nl">DIR_RIGHT</span><span class="p">:</span>
-      <span class="n">velocity_</span> <span class="o">+=</span> <span class="n">WALK_ACCELERATION</span><span class="p">;</span>
-      <span class="k">break</span><span class="p">;</span>
-  <span class="p">}</span>
+<span class="w">    </span><span class="k">case</span><span class="w"> </span><span class="no">DIR_RIGHT</span><span class="p">:</span>
+<span class="w">      </span><span class="n">velocity_</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="n">WALK_ACCELERATION</span><span class="p">;</span>
+<span class="w">      </span><span class="k">break</span><span class="p">;</span>
+<span class="w">  </span><span class="p">}</span>
 
-  <span class="c1">// 根据速度修改位置</span>
-  <span class="n">x_</span> <span class="o">+=</span> <span class="n">velocity_</span><span class="p">;</span>
-  <span class="n">world</span><span class="p">.</span><span class="n">resolveCollision</span><span class="p">(</span><span class="n">volume_</span><span class="p">,</span> <span class="n">x_</span><span class="p">,</span> <span class="n">y_</span><span class="p">,</span> <span class="n">velocity_</span><span class="p">);</span>
+<span class="w">  </span><span class="c1">// 根据速度修改位置</span>
+<span class="w">  </span><span class="n">x_</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="n">velocity_</span><span class="p">;</span>
+<span class="w">  </span><span class="n">world</span><span class="p">.</span><span class="n">resolveCollision</span><span class="p">(</span><span class="n">volume_</span><span class="p">,</span><span class="w"> </span><span class="n">x_</span><span class="p">,</span><span class="w"> </span><span class="n">y_</span><span class="p">,</span><span class="w"> </span><span class="n">velocity_</span><span class="p">);</span>
 
-  <span class="c1">// 绘制合适的图形</span>
-  <span class="n">Sprite</span><span class="o">*</span> <span class="n">sprite</span> <span class="o">=</span> <span class="o">&amp;</span><span class="n">spriteStand_</span><span class="p">;</span>
-  <span class="k">if</span> <span class="p">(</span><span class="n">velocity_</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">)</span>
-  <span class="p">{</span>
-    <span class="n">sprite</span> <span class="o">=</span> <span class="o">&amp;</span><span class="n">spriteWalkLeft_</span><span class="p">;</span>
-  <span class="p">}</span>
-  <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">velocity_</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span>
-  <span class="p">{</span>
-    <span class="n">sprite</span> <span class="o">=</span> <span class="o">&amp;</span><span class="n">spriteWalkRight_</span><span class="p">;</span>
-  <span class="p">}</span>
+<span class="w">  </span><span class="c1">// 绘制合适的图形</span>
+<span class="w">  </span><span class="n">Sprite</span><span class="o">*</span><span class="w"> </span><span class="n">sprite</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">&amp;</span><span class="n">spriteStand_</span><span class="p">;</span>
+<span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">velocity_</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span>
+<span class="w">  </span><span class="p">{</span>
+<span class="w">    </span><span class="n">sprite</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">&amp;</span><span class="n">spriteWalkLeft_</span><span class="p">;</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="w">  </span><span class="k">else</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">velocity_</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span>
+<span class="w">  </span><span class="p">{</span>
+<span class="w">    </span><span class="n">sprite</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">&amp;</span><span class="n">spriteWalkRight_</span><span class="p">;</span>
+<span class="w">  </span><span class="p">}</span>
 
-  <span class="n">graphics</span><span class="p">.</span><span class="n">draw</span><span class="p">(</span><span class="o">*</span><span class="n">sprite</span><span class="p">,</span> <span class="n">x_</span><span class="p">,</span> <span class="n">y_</span><span class="p">);</span>
+<span class="w">  </span><span class="n">graphics</span><span class="p">.</span><span class="n">draw</span><span class="p">(</span><span class="o">*</span><span class="n">sprite</span><span class="p">,</span><span class="w"> </span><span class="n">x_</span><span class="p">,</span><span class="w"> </span><span class="n">y_</span><span class="p">);</span>
 <span class="p">}</span>
-</pre></div>
+</code></pre></div>
 
-
-<p>它读取操纵杆以确定如何加速面包师。
-然后，用物理引擎解析新位置。
-最后，将Bjorn渲染至屏幕。</p>
-<p>这里的示例实现平凡而简单。
-没有重力，动画，或任何让人物有趣的其他细节。
-即便如此，我们可以看到，已经出现了同时消耗多个程序员时间的函数，而它开始变得有点混乱。
-想象增加到一千行，你就知道这会有多难受了。</p>
+<p>它读取操纵杆以确定如何让面包师加速。
+然后，用物理引擎算出它的新位置。
+最后，将Bjorn绘制到屏幕上。</p>
+<p>这里的示例实现非常简单。
+没有重力、动画，或任何其他让角色玩起来有趣的细节。
+即便如此，也能看到，团队里好几位程序员可能都得花时间在这个函数上，而它已经开始变得有些混乱了。
+想象把它扩展到一千行，你就知道这会有多难受了。</p>
 <h3><a href="#分离领域" name="分离领域">分离领域</a></h3>
-<p>从一个领域开始，将<code>Bjorn</code>的代码去除一部分，归入分离的组件类。
-我们从首个执行的领域开始：输入。
-<code>Bjorn</code>做的头件事就是读取玩家的输入，然后基于此调整它的速度。
-让我们将这部分逻辑移入一个分离的类：</p>
-<div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">InputComponent</span>
+<p>从一个领域开始，我们从<code>Bjorn</code>里抽出一部分代码，放入一个独立的组件类。
+我们从首个被处理的领域开始：输入。
+<code>Bjorn</code>做的头件事就是读取玩家输入，然后基于此调整他的速度。
+让我们将这部分逻辑移入一个独立的类：</p>
+<div class="codehilite"><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">InputComponent</span>
 <span class="p">{</span>
 <span class="k">public</span><span class="o">:</span>
-  <span class="kt">void</span> <span class="n">update</span><span class="p">(</span><span class="n">Bjorn</span><span class="o">&amp;</span> <span class="n">bjorn</span><span class="p">)</span>
-  <span class="p">{</span>
-    <span class="k">switch</span> <span class="p">(</span><span class="n">Controller</span><span class="o">::</span><span class="n">getJoystickDirection</span><span class="p">())</span>
-    <span class="p">{</span>
-      <span class="k">case</span> <span class="nl">DIR_LEFT</span><span class="p">:</span>
-        <span class="n">bjorn</span><span class="p">.</span><span class="n">velocity</span> <span class="o">-=</span> <span class="n">WALK_ACCELERATION</span><span class="p">;</span>
-        <span class="k">break</span><span class="p">;</span>
+<span class="w">  </span><span class="kt">void</span><span class="w"> </span><span class="n">update</span><span class="p">(</span><span class="n">Bjorn</span><span class="o">&amp;</span><span class="w"> </span><span class="n">bjorn</span><span class="p">)</span>
+<span class="w">  </span><span class="p">{</span>
+<span class="w">    </span><span class="k">switch</span><span class="w"> </span><span class="p">(</span><span class="n">Controller</span><span class="o">::</span><span class="n">getJoystickDirection</span><span class="p">())</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">      </span><span class="k">case</span><span class="w"> </span><span class="no">DIR_LEFT</span><span class="p">:</span>
+<span class="w">        </span><span class="n">bjorn</span><span class="p">.</span><span class="n">velocity</span><span class="w"> </span><span class="o">-=</span><span class="w"> </span><span class="n">WALK_ACCELERATION</span><span class="p">;</span>
+<span class="w">        </span><span class="k">break</span><span class="p">;</span>
 
-      <span class="k">case</span> <span class="nl">DIR_RIGHT</span><span class="p">:</span>
-        <span class="n">bjorn</span><span class="p">.</span><span class="n">velocity</span> <span class="o">+=</span> <span class="n">WALK_ACCELERATION</span><span class="p">;</span>
-        <span class="k">break</span><span class="p">;</span>
-    <span class="p">}</span>
-  <span class="p">}</span>
+<span class="w">      </span><span class="k">case</span><span class="w"> </span><span class="no">DIR_RIGHT</span><span class="p">:</span>
+<span class="w">        </span><span class="n">bjorn</span><span class="p">.</span><span class="n">velocity</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="n">WALK_ACCELERATION</span><span class="p">;</span>
+<span class="w">        </span><span class="k">break</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">}</span>
 
 <span class="k">private</span><span class="o">:</span>
-  <span class="k">static</span> <span class="k">const</span> <span class="kt">int</span> <span class="n">WALK_ACCELERATION</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+<span class="w">  </span><span class="k">static</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">WALK_ACCELERATION</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span>
 <span class="p">};</span>
-</pre></div>
-
+</code></pre></div>
 
 <p>很简单吧。我们将<code>Bjorn</code>的<code>update()</code>的第一部分取出，放入这个类中。
 对<code>Bjorn</code>的改变也很直接：</p>
-<div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">Bjorn</span>
+<div class="codehilite"><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Bjorn</span>
 <span class="p">{</span>
 <span class="k">public</span><span class="o">:</span>
-  <span class="kt">int</span> <span class="n">velocity</span><span class="p">;</span>
-  <span class="kt">int</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">;</span>
+<span class="w">  </span><span class="kt">int</span><span class="w"> </span><span class="n">velocity</span><span class="p">;</span>
+<span class="w">  </span><span class="kt">int</span><span class="w"> </span><span class="n">x</span><span class="p">,</span><span class="w"> </span><span class="n">y</span><span class="p">;</span>
 
-  <span class="kt">void</span> <span class="nf">update</span><span class="p">(</span><span class="n">World</span><span class="o">&amp;</span> <span class="n">world</span><span class="p">,</span> <span class="n">Graphics</span><span class="o">&amp;</span> <span class="n">graphics</span><span class="p">)</span>
-  <span class="p">{</span>
-    <span class="n">input_</span><span class="p">.</span><span class="n">update</span><span class="p">(</span><span class="o">*</span><span class="k">this</span><span class="p">);</span>
+<span class="w">  </span><span class="kt">void</span><span class="w"> </span><span class="nf">update</span><span class="p">(</span><span class="n">World</span><span class="o">&amp;</span><span class="w"> </span><span class="n">world</span><span class="p">,</span><span class="w"> </span><span class="n">Graphics</span><span class="o">&amp;</span><span class="w"> </span><span class="n">graphics</span><span class="p">)</span>
+<span class="w">  </span><span class="p">{</span>
+<span class="w">    </span><span class="n">input_</span><span class="p">.</span><span class="n">update</span><span class="p">(</span><span class="o">*</span><span class="k">this</span><span class="p">);</span>
 
-    <span class="c1">// 根据速度修改位置</span>
-    <span class="n">x</span> <span class="o">+=</span> <span class="n">velocity</span><span class="p">;</span>
-    <span class="n">world</span><span class="p">.</span><span class="n">resolveCollision</span><span class="p">(</span><span class="n">volume_</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">velocity</span><span class="p">);</span>
+<span class="w">    </span><span class="c1">// 根据速度修改位置</span>
+<span class="w">    </span><span class="n">x</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="n">velocity</span><span class="p">;</span>
+<span class="w">    </span><span class="n">world</span><span class="p">.</span><span class="n">resolveCollision</span><span class="p">(</span><span class="n">volume_</span><span class="p">,</span><span class="w"> </span><span class="n">x</span><span class="p">,</span><span class="w"> </span><span class="n">y</span><span class="p">,</span><span class="w"> </span><span class="n">velocity</span><span class="p">);</span>
 
-    <span class="c1">// 绘制合适的图形</span>
-    <span class="n">Sprite</span><span class="o">*</span> <span class="n">sprite</span> <span class="o">=</span> <span class="o">&amp;</span><span class="n">spriteStand_</span><span class="p">;</span>
-    <span class="k">if</span> <span class="p">(</span><span class="n">velocity</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">)</span>
-    <span class="p">{</span>
-      <span class="n">sprite</span> <span class="o">=</span> <span class="o">&amp;</span><span class="n">spriteWalkLeft_</span><span class="p">;</span>
-    <span class="p">}</span>
-    <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">velocity</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span>
-    <span class="p">{</span>
-      <span class="n">sprite</span> <span class="o">=</span> <span class="o">&amp;</span><span class="n">spriteWalkRight_</span><span class="p">;</span>
-    <span class="p">}</span>
+<span class="w">    </span><span class="c1">// 绘制合适的图形</span>
+<span class="w">    </span><span class="n">Sprite</span><span class="o">*</span><span class="w"> </span><span class="n">sprite</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">&amp;</span><span class="n">spriteStand_</span><span class="p">;</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">velocity</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">      </span><span class="n">sprite</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">&amp;</span><span class="n">spriteWalkLeft_</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="k">else</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">velocity</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">      </span><span class="n">sprite</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">&amp;</span><span class="n">spriteWalkRight_</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
 
-    <span class="n">graphics</span><span class="p">.</span><span class="n">draw</span><span class="p">(</span><span class="o">*</span><span class="n">sprite</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">);</span>
-  <span class="p">}</span>
+<span class="w">    </span><span class="n">graphics</span><span class="p">.</span><span class="n">draw</span><span class="p">(</span><span class="o">*</span><span class="n">sprite</span><span class="p">,</span><span class="w"> </span><span class="n">x</span><span class="p">,</span><span class="w"> </span><span class="n">y</span><span class="p">);</span>
+<span class="w">  </span><span class="p">}</span>
 
 <span class="k">private</span><span class="o">:</span>
-  <span class="n">InputComponent</span> <span class="n">input_</span><span class="p">;</span>
+<span class="w">  </span><span class="n">InputComponent</span><span class="w"> </span><span class="n">input_</span><span class="p">;</span>
 
-  <span class="n">Volume</span> <span class="n">volume_</span><span class="p">;</span>
+<span class="w">  </span><span class="n">Volume</span><span class="w"> </span><span class="n">volume_</span><span class="p">;</span>
 
-  <span class="n">Sprite</span> <span class="n">spriteStand_</span><span class="p">;</span>
-  <span class="n">Sprite</span> <span class="n">spriteWalkLeft_</span><span class="p">;</span>
-  <span class="n">Sprite</span> <span class="n">spriteWalkRight_</span><span class="p">;</span>
+<span class="w">  </span><span class="n">Sprite</span><span class="w"> </span><span class="n">spriteStand_</span><span class="p">;</span>
+<span class="w">  </span><span class="n">Sprite</span><span class="w"> </span><span class="n">spriteWalkLeft_</span><span class="p">;</span>
+<span class="w">  </span><span class="n">Sprite</span><span class="w"> </span><span class="n">spriteWalkRight_</span><span class="p">;</span>
 <span class="p">};</span>
-</pre></div>
-
+</code></pre></div>
 
 <p><code>Bjorn</code>现在拥有了一个<code>InputComponent</code>对象。
 之前它在<code>update()</code>方法中直接处理用户输入，现在委托给组件：</p>
-<div class="codehilite"><pre><span></span><span class="n">input_</span><span class="p">.</span><span class="n">update</span><span class="p">(</span><span class="o">*</span><span class="k">this</span><span class="p">);</span>
-</pre></div>
+<div class="codehilite"><pre><span></span><code><span class="n">input_</span><span class="p">.</span><span class="n">update</span><span class="p">(</span><span class="o">*</span><span class="k">this</span><span class="p">);</span>
+</code></pre></div>
 
-
-<p>我们才刚开始，但已经摆脱了一些耦合——<code>Bjorn</code>主体现在已经与<code>Controller</code>无关了。这会派上用场的。</p>
+<p>我们才刚开始，但已经摆脱了一些耦合——<code>Bjorn</code>主类现在不再有任何对<code>Controller</code>的引用了。这以后会派上用场。</p>
 <h3><a href="#将剩下的分割出来" name="将剩下的分割出来">将剩下的分割出来</a></h3>
-<p>现在让我们对物理和图像代码继续这种剪切粘贴的工作。
+<p>现在让我们对物理和图形代码继续这种剪切粘贴的工作。
 这是我们新的 <code>PhysicsComponent</code>：</p>
-<div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">PhysicsComponent</span>
+<div class="codehilite"><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">PhysicsComponent</span>
 <span class="p">{</span>
 <span class="k">public</span><span class="o">:</span>
-  <span class="kt">void</span> <span class="n">update</span><span class="p">(</span><span class="n">Bjorn</span><span class="o">&amp;</span> <span class="n">bjorn</span><span class="p">,</span> <span class="n">World</span><span class="o">&amp;</span> <span class="n">world</span><span class="p">)</span>
-  <span class="p">{</span>
-    <span class="n">bjorn</span><span class="p">.</span><span class="n">x</span> <span class="o">+=</span> <span class="n">bjorn</span><span class="p">.</span><span class="n">velocity</span><span class="p">;</span>
-    <span class="n">world</span><span class="p">.</span><span class="n">resolveCollision</span><span class="p">(</span><span class="n">volume_</span><span class="p">,</span>
-        <span class="n">bjorn</span><span class="p">.</span><span class="n">x</span><span class="p">,</span> <span class="n">bjorn</span><span class="p">.</span><span class="n">y</span><span class="p">,</span> <span class="n">bjorn</span><span class="p">.</span><span class="n">velocity</span><span class="p">);</span>
-  <span class="p">}</span>
+<span class="w">  </span><span class="kt">void</span><span class="w"> </span><span class="n">update</span><span class="p">(</span><span class="n">Bjorn</span><span class="o">&amp;</span><span class="w"> </span><span class="n">bjorn</span><span class="p">,</span><span class="w"> </span><span class="n">World</span><span class="o">&amp;</span><span class="w"> </span><span class="n">world</span><span class="p">)</span>
+<span class="w">  </span><span class="p">{</span>
+<span class="w">    </span><span class="n">bjorn</span><span class="p">.</span><span class="n">x</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="n">bjorn</span><span class="p">.</span><span class="n">velocity</span><span class="p">;</span>
+<span class="w">    </span><span class="n">world</span><span class="p">.</span><span class="n">resolveCollision</span><span class="p">(</span><span class="n">volume_</span><span class="p">,</span>
+<span class="w">        </span><span class="n">bjorn</span><span class="p">.</span><span class="n">x</span><span class="p">,</span><span class="w"> </span><span class="n">bjorn</span><span class="p">.</span><span class="n">y</span><span class="p">,</span><span class="w"> </span><span class="n">bjorn</span><span class="p">.</span><span class="n">velocity</span><span class="p">);</span>
+<span class="w">  </span><span class="p">}</span>
 
 <span class="k">private</span><span class="o">:</span>
-  <span class="n">Volume</span> <span class="n">volume_</span><span class="p">;</span>
+<span class="w">  </span><span class="n">Volume</span><span class="w"> </span><span class="n">volume_</span><span class="p">;</span>
 <span class="p">};</span>
-</pre></div>
+</code></pre></div>
 
-
-<p>为了将物理<em>行为</em>移出<code>Bjorn</code>类，你可以看到我们也移出了<em>数据</em>：<code>Volume</code>对象已经是组件的一部分了。</p>
+<p>除了把物理<em>行为</em>移出<code>Bjorn</code>主类，你可以看到我们也把<em>数据</em>移了出来：<code>Volume</code>对象现在由组件所有。</p>
 <p>最后，这是现在的渲染代码：</p>
-<div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">GraphicsComponent</span>
+<div class="codehilite"><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">GraphicsComponent</span>
 <span class="p">{</span>
 <span class="k">public</span><span class="o">:</span>
-  <span class="kt">void</span> <span class="n">update</span><span class="p">(</span><span class="n">Bjorn</span><span class="o">&amp;</span> <span class="n">bjorn</span><span class="p">,</span> <span class="n">Graphics</span><span class="o">&amp;</span> <span class="n">graphics</span><span class="p">)</span>
-  <span class="p">{</span>
-    <span class="n">Sprite</span><span class="o">*</span> <span class="n">sprite</span> <span class="o">=</span> <span class="o">&amp;</span><span class="n">spriteStand_</span><span class="p">;</span>
-    <span class="k">if</span> <span class="p">(</span><span class="n">bjorn</span><span class="p">.</span><span class="n">velocity</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">)</span>
-    <span class="p">{</span>
-      <span class="n">sprite</span> <span class="o">=</span> <span class="o">&amp;</span><span class="n">spriteWalkLeft_</span><span class="p">;</span>
-    <span class="p">}</span>
-    <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">bjorn</span><span class="p">.</span><span class="n">velocity</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span>
-    <span class="p">{</span>
-      <span class="n">sprite</span> <span class="o">=</span> <span class="o">&amp;</span><span class="n">spriteWalkRight_</span><span class="p">;</span>
-    <span class="p">}</span>
+<span class="w">  </span><span class="kt">void</span><span class="w"> </span><span class="n">update</span><span class="p">(</span><span class="n">Bjorn</span><span class="o">&amp;</span><span class="w"> </span><span class="n">bjorn</span><span class="p">,</span><span class="w"> </span><span class="n">Graphics</span><span class="o">&amp;</span><span class="w"> </span><span class="n">graphics</span><span class="p">)</span>
+<span class="w">  </span><span class="p">{</span>
+<span class="w">    </span><span class="n">Sprite</span><span class="o">*</span><span class="w"> </span><span class="n">sprite</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">&amp;</span><span class="n">spriteStand_</span><span class="p">;</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">bjorn</span><span class="p">.</span><span class="n">velocity</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">      </span><span class="n">sprite</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">&amp;</span><span class="n">spriteWalkLeft_</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="k">else</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">bjorn</span><span class="p">.</span><span class="n">velocity</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">      </span><span class="n">sprite</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">&amp;</span><span class="n">spriteWalkRight_</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
 
-    <span class="n">graphics</span><span class="p">.</span><span class="n">draw</span><span class="p">(</span><span class="o">*</span><span class="n">sprite</span><span class="p">,</span> <span class="n">bjorn</span><span class="p">.</span><span class="n">x</span><span class="p">,</span> <span class="n">bjorn</span><span class="p">.</span><span class="n">y</span><span class="p">);</span>
-  <span class="p">}</span>
+<span class="w">    </span><span class="n">graphics</span><span class="p">.</span><span class="n">draw</span><span class="p">(</span><span class="o">*</span><span class="n">sprite</span><span class="p">,</span><span class="w"> </span><span class="n">bjorn</span><span class="p">.</span><span class="n">x</span><span class="p">,</span><span class="w"> </span><span class="n">bjorn</span><span class="p">.</span><span class="n">y</span><span class="p">);</span>
+<span class="w">  </span><span class="p">}</span>
 
 <span class="k">private</span><span class="o">:</span>
-  <span class="n">Sprite</span> <span class="n">spriteStand_</span><span class="p">;</span>
-  <span class="n">Sprite</span> <span class="n">spriteWalkLeft_</span><span class="p">;</span>
-  <span class="n">Sprite</span> <span class="n">spriteWalkRight_</span><span class="p">;</span>
+<span class="w">  </span><span class="n">Sprite</span><span class="w"> </span><span class="n">spriteStand_</span><span class="p">;</span>
+<span class="w">  </span><span class="n">Sprite</span><span class="w"> </span><span class="n">spriteWalkLeft_</span><span class="p">;</span>
+<span class="w">  </span><span class="n">Sprite</span><span class="w"> </span><span class="n">spriteWalkRight_</span><span class="p">;</span>
 <span class="p">};</span>
-</pre></div>
+</code></pre></div>
 
-
-<p>我们几乎将所有的东西都移出来了，所以面包师还剩下什么？没什么了：</p>
-<div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">Bjorn</span>
+<p>我们几乎把一切东西都拽了出来，那么这位谦卑的糕点师傅还剩下什么？没多少了：</p>
+<div class="codehilite"><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Bjorn</span>
 <span class="p">{</span>
 <span class="k">public</span><span class="o">:</span>
-  <span class="kt">int</span> <span class="n">velocity</span><span class="p">;</span>
-  <span class="kt">int</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">;</span>
+<span class="w">  </span><span class="kt">int</span><span class="w"> </span><span class="n">velocity</span><span class="p">;</span>
+<span class="w">  </span><span class="kt">int</span><span class="w"> </span><span class="n">x</span><span class="p">,</span><span class="w"> </span><span class="n">y</span><span class="p">;</span>
 
-  <span class="kt">void</span> <span class="nf">update</span><span class="p">(</span><span class="n">World</span><span class="o">&amp;</span> <span class="n">world</span><span class="p">,</span> <span class="n">Graphics</span><span class="o">&amp;</span> <span class="n">graphics</span><span class="p">)</span>
-  <span class="p">{</span>
-    <span class="n">input_</span><span class="p">.</span><span class="n">update</span><span class="p">(</span><span class="o">*</span><span class="k">this</span><span class="p">);</span>
-    <span class="n">physics_</span><span class="p">.</span><span class="n">update</span><span class="p">(</span><span class="o">*</span><span class="k">this</span><span class="p">,</span> <span class="n">world</span><span class="p">);</span>
-    <span class="n">graphics_</span><span class="p">.</span><span class="n">update</span><span class="p">(</span><span class="o">*</span><span class="k">this</span><span class="p">,</span> <span class="n">graphics</span><span class="p">);</span>
-  <span class="p">}</span>
+<span class="w">  </span><span class="kt">void</span><span class="w"> </span><span class="nf">update</span><span class="p">(</span><span class="n">World</span><span class="o">&amp;</span><span class="w"> </span><span class="n">world</span><span class="p">,</span><span class="w"> </span><span class="n">Graphics</span><span class="o">&amp;</span><span class="w"> </span><span class="n">graphics</span><span class="p">)</span>
+<span class="w">  </span><span class="p">{</span>
+<span class="w">    </span><span class="n">input_</span><span class="p">.</span><span class="n">update</span><span class="p">(</span><span class="o">*</span><span class="k">this</span><span class="p">);</span>
+<span class="w">    </span><span class="n">physics_</span><span class="p">.</span><span class="n">update</span><span class="p">(</span><span class="o">*</span><span class="k">this</span><span class="p">,</span><span class="w"> </span><span class="n">world</span><span class="p">);</span>
+<span class="w">    </span><span class="n">graphics_</span><span class="p">.</span><span class="n">update</span><span class="p">(</span><span class="o">*</span><span class="k">this</span><span class="p">,</span><span class="w"> </span><span class="n">graphics</span><span class="p">);</span>
+<span class="w">  </span><span class="p">}</span>
 
 <span class="k">private</span><span class="o">:</span>
-  <span class="n">InputComponent</span> <span class="n">input_</span><span class="p">;</span>
-  <span class="n">PhysicsComponent</span> <span class="n">physics_</span><span class="p">;</span>
-  <span class="n">GraphicsComponent</span> <span class="n">graphics_</span><span class="p">;</span>
+<span class="w">  </span><span class="n">InputComponent</span><span class="w"> </span><span class="n">input_</span><span class="p">;</span>
+<span class="w">  </span><span class="n">PhysicsComponent</span><span class="w"> </span><span class="n">physics_</span><span class="p">;</span>
+<span class="w">  </span><span class="n">GraphicsComponent</span><span class="w"> </span><span class="n">graphics_</span><span class="p">;</span>
 <span class="p">};</span>
-</pre></div>
+</code></pre></div>
 
-
-<p><code>Bjorn</code>类现在基本上就做两件事：拥有定义它的组件，以及在不同域间分享的数据。
-有两个原因导致位置和速度仍然在<code>Bjorn</code>的核心类中：
-首先，它们是“泛领域”状态——几乎每个组件都需要使用它们，
-所以我们想要提取它出来时，哪个组件<em>应该</em>拥有它们并不明确。</p>
-<p>第二，也是更重要的一点，它给了我们无需让组件耦合就能沟通的简易方法。
+<p><code>Bjorn</code>类现在基本上就做两件事：持有真正定义它的那组组件，以及保存在多个领域之间共享的状态。
+位置和速度仍然留在<code>Bjorn</code>核心类中有两个原因：
+首先，它们是“泛领域”状态——几乎每个组件都会用到它们，
+所以即使我们确实想把它们下放下去，也不清楚哪个组件<em>应该</em>拥有它们。</p>
+<p>第二，也是更重要的一点，它给了我们一种无需让组件彼此耦合就能沟通的简易方法。
 让我们看看能不能利用这一点。</p>
 <h3><a href="#机器人bjorn" name="机器人bjorn">机器人Bjorn</a></h3>
-<p>到目前为止，我们将行为归入了不同的组件类，但还没将行为<em>抽象</em>出来。
-<code>Bjorn</code>仍知道每个类的具体定义的行为。让我们改变这一点。</p>
-<p>取出处理输入的部件，将其藏在接口之后，将<code>InputComponent</code>变为抽象基类。</p>
-<div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">InputComponent</span>
+<p>到目前为止，我们已经把行为推到了各个组件类中，但还没把行为<em>抽象</em>出来。
+<code>Bjorn</code>仍然知道定义其行为的具体类。让我们改变这一点。</p>
+<p>取出处理用户输入的组件，把它隐藏在一个接口之后，并将<code>InputComponent</code>变成抽象基类。</p>
+<div class="codehilite"><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">InputComponent</span>
 <span class="p">{</span>
 <span class="k">public</span><span class="o">:</span>
-  <span class="k">virtual</span> <span class="o">~</span><span class="n">InputComponent</span><span class="p">()</span> <span class="p">{}</span>
-  <span class="k">virtual</span> <span class="kt">void</span> <span class="n">update</span><span class="p">(</span><span class="n">Bjorn</span><span class="o">&amp;</span> <span class="n">bjorn</span><span class="p">)</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+<span class="w">  </span><span class="k">virtual</span><span class="w"> </span><span class="o">~</span><span class="n">InputComponent</span><span class="p">()</span><span class="w"> </span><span class="p">{}</span>
+<span class="w">  </span><span class="k">virtual</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="n">update</span><span class="p">(</span><span class="n">Bjorn</span><span class="o">&amp;</span><span class="w"> </span><span class="n">bjorn</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
 <span class="p">};</span>
-</pre></div>
+</code></pre></div>
 
-
-<p>然后，将现有的处理输入的代码取出，放进一个实现接口的类中。</p>
-<div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">PlayerInputComponent</span> <span class="o">:</span> <span class="k">public</span> <span class="n">InputComponent</span>
+<p>然后，将现有的处理输入的代码取出，放进一个实现该接口的类中。</p>
+<div class="codehilite"><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">PlayerInputComponent</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="k">public</span><span class="w"> </span><span class="n">InputComponent</span>
 <span class="p">{</span>
 <span class="k">public</span><span class="o">:</span>
-  <span class="k">virtual</span> <span class="kt">void</span> <span class="n">update</span><span class="p">(</span><span class="n">Bjorn</span><span class="o">&amp;</span> <span class="n">bjorn</span><span class="p">)</span>
-  <span class="p">{</span>
-    <span class="k">switch</span> <span class="p">(</span><span class="n">Controller</span><span class="o">::</span><span class="n">getJoystickDirection</span><span class="p">())</span>
-    <span class="p">{</span>
-      <span class="k">case</span> <span class="nl">DIR_LEFT</span><span class="p">:</span>
-        <span class="n">bjorn</span><span class="p">.</span><span class="n">velocity</span> <span class="o">-=</span> <span class="n">WALK_ACCELERATION</span><span class="p">;</span>
-        <span class="k">break</span><span class="p">;</span>
+<span class="w">  </span><span class="k">virtual</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="n">update</span><span class="p">(</span><span class="n">Bjorn</span><span class="o">&amp;</span><span class="w"> </span><span class="n">bjorn</span><span class="p">)</span>
+<span class="w">  </span><span class="p">{</span>
+<span class="w">    </span><span class="k">switch</span><span class="w"> </span><span class="p">(</span><span class="n">Controller</span><span class="o">::</span><span class="n">getJoystickDirection</span><span class="p">())</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">      </span><span class="k">case</span><span class="w"> </span><span class="no">DIR_LEFT</span><span class="p">:</span>
+<span class="w">        </span><span class="n">bjorn</span><span class="p">.</span><span class="n">velocity</span><span class="w"> </span><span class="o">-=</span><span class="w"> </span><span class="n">WALK_ACCELERATION</span><span class="p">;</span>
+<span class="w">        </span><span class="k">break</span><span class="p">;</span>
 
-      <span class="k">case</span> <span class="nl">DIR_RIGHT</span><span class="p">:</span>
-        <span class="n">bjorn</span><span class="p">.</span><span class="n">velocity</span> <span class="o">+=</span> <span class="n">WALK_ACCELERATION</span><span class="p">;</span>
-        <span class="k">break</span><span class="p">;</span>
-    <span class="p">}</span>
-  <span class="p">}</span>
+<span class="w">      </span><span class="k">case</span><span class="w"> </span><span class="no">DIR_RIGHT</span><span class="p">:</span>
+<span class="w">        </span><span class="n">bjorn</span><span class="p">.</span><span class="n">velocity</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="n">WALK_ACCELERATION</span><span class="p">;</span>
+<span class="w">        </span><span class="k">break</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">}</span>
 
 <span class="k">private</span><span class="o">:</span>
-  <span class="k">static</span> <span class="k">const</span> <span class="kt">int</span> <span class="n">WALK_ACCELERATION</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+<span class="w">  </span><span class="k">static</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">WALK_ACCELERATION</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span>
 <span class="p">};</span>
-</pre></div>
-
+</code></pre></div>
 
 <p>我们将<code>Bjorn</code>改为只拥有一个指向输入组件的指针，而不是拥有一个内联的实例。</p>
-<div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">Bjorn</span>
+<div class="codehilite"><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Bjorn</span>
 <span class="p">{</span>
 <span class="k">public</span><span class="o">:</span>
-  <span class="kt">int</span> <span class="n">velocity</span><span class="p">;</span>
-  <span class="kt">int</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">;</span>
+<span class="w">  </span><span class="kt">int</span><span class="w"> </span><span class="n">velocity</span><span class="p">;</span>
+<span class="w">  </span><span class="kt">int</span><span class="w"> </span><span class="n">x</span><span class="p">,</span><span class="w"> </span><span class="n">y</span><span class="p">;</span>
 
-  <span class="n">Bjorn</span><span class="p">(</span><span class="n">InputComponent</span><span class="o">*</span> <span class="n">input</span><span class="p">)</span>
-  <span class="o">:</span> <span class="n">input_</span><span class="p">(</span><span class="n">input</span><span class="p">)</span>
-  <span class="p">{}</span>
+<span class="w">  </span><span class="n">Bjorn</span><span class="p">(</span><span class="n">InputComponent</span><span class="o">*</span><span class="w"> </span><span class="n">input</span><span class="p">)</span>
+<span class="w">  </span><span class="o">:</span><span class="w"> </span><span class="n">input_</span><span class="p">(</span><span class="n">input</span><span class="p">)</span>
+<span class="w">  </span><span class="p">{}</span>
 
-  <span class="kt">void</span> <span class="n">update</span><span class="p">(</span><span class="n">World</span><span class="o">&amp;</span> <span class="n">world</span><span class="p">,</span> <span class="n">Graphics</span><span class="o">&amp;</span> <span class="n">graphics</span><span class="p">)</span>
-  <span class="p">{</span>
-    <span class="n">input_</span><span class="o">-&gt;</span><span class="n">update</span><span class="p">(</span><span class="o">*</span><span class="k">this</span><span class="p">);</span>
-    <span class="n">physics_</span><span class="p">.</span><span class="n">update</span><span class="p">(</span><span class="o">*</span><span class="k">this</span><span class="p">,</span> <span class="n">world</span><span class="p">);</span>
-    <span class="n">graphics_</span><span class="p">.</span><span class="n">update</span><span class="p">(</span><span class="o">*</span><span class="k">this</span><span class="p">,</span> <span class="n">graphics</span><span class="p">);</span>
-  <span class="p">}</span>
+<span class="w">  </span><span class="kt">void</span><span class="w"> </span><span class="n">update</span><span class="p">(</span><span class="n">World</span><span class="o">&amp;</span><span class="w"> </span><span class="n">world</span><span class="p">,</span><span class="w"> </span><span class="n">Graphics</span><span class="o">&amp;</span><span class="w"> </span><span class="n">graphics</span><span class="p">)</span>
+<span class="w">  </span><span class="p">{</span>
+<span class="w">    </span><span class="n">input_</span><span class="o">-&gt;</span><span class="n">update</span><span class="p">(</span><span class="o">*</span><span class="k">this</span><span class="p">);</span>
+<span class="w">    </span><span class="n">physics_</span><span class="p">.</span><span class="n">update</span><span class="p">(</span><span class="o">*</span><span class="k">this</span><span class="p">,</span><span class="w"> </span><span class="n">world</span><span class="p">);</span>
+<span class="w">    </span><span class="n">graphics_</span><span class="p">.</span><span class="n">update</span><span class="p">(</span><span class="o">*</span><span class="k">this</span><span class="p">,</span><span class="w"> </span><span class="n">graphics</span><span class="p">);</span>
+<span class="w">  </span><span class="p">}</span>
 
 <span class="k">private</span><span class="o">:</span>
-  <span class="n">InputComponent</span><span class="o">*</span> <span class="n">input_</span><span class="p">;</span>
-  <span class="n">PhysicsComponent</span> <span class="n">physics_</span><span class="p">;</span>
-  <span class="n">GraphicsComponent</span> <span class="n">graphics_</span><span class="p">;</span>
+<span class="w">  </span><span class="n">InputComponent</span><span class="o">*</span><span class="w"> </span><span class="n">input_</span><span class="p">;</span>
+<span class="w">  </span><span class="n">PhysicsComponent</span><span class="w"> </span><span class="n">physics_</span><span class="p">;</span>
+<span class="w">  </span><span class="n">GraphicsComponent</span><span class="w"> </span><span class="n">graphics_</span><span class="p">;</span>
 <span class="p">};</span>
-</pre></div>
+</code></pre></div>
 
-
-<p>现在当我们实例化<code>Bjorn</code>，我们可以传入输入组件使用，就像下面这样：</p>
-<div class="codehilite"><pre><span></span><span class="n">Bjorn</span><span class="o">*</span> <span class="n">bjorn</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Bjorn</span><span class="p">(</span><span class="k">new</span> <span class="n">PlayerInputComponent</span><span class="p">());</span>
-</pre></div>
-
+<p>现在当我们实例化<code>Bjorn</code>，我们可以传入一个输入组件供它使用，就像下面这样：</p>
+<div class="codehilite"><pre><span></span><code><span class="n">Bjorn</span><span class="o">*</span><span class="w"> </span><span class="n">bjorn</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">Bjorn</span><span class="p">(</span><span class="k">new</span><span class="w"> </span><span class="n">PlayerInputComponent</span><span class="p">());</span>
+</code></pre></div>
 
 <p>这个实例可以是任何实现了抽象<code>InputComponent</code>接口的类型。
 我们为此付出了代价——<code>update()</code>现在是虚方法调用了，这会慢一些。这一代价的回报是什么？</p>
-<p>大多数的主机需要游戏支持“演示模式”。
-如果玩家停在主菜单没有做任何事情，游戏就会自动开始运行，直到接入一个玩家。
-这让屏幕上的主菜单看上去更有生机，同时也是销售商店里很好的展示。</p>
-<p>隐藏在输入组件后的类帮我们实现了这点，
-我们已经有了具体的<code>PlayerInputComponent</code>供玩游戏时使用。
-现在让我们完成另一个：</p>
-<div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">DemoInputComponent</span> <span class="o">:</span> <span class="k">public</span> <span class="n">InputComponent</span>
+<p>大多数主机都要求游戏支持“演示模式”。
+如果玩家停在主菜单什么也不做，游戏就会自动开始运行，由电脑代替玩家操作。
+这样能避免主菜单长时间显示在电视上造成烧屏，也能让游戏在商店的展示机上运行得更好看。</p>
+<p>把输入组件类隐藏在接口之后，就能让我们实现这一点。
+我们已经有了正常玩游戏时使用的具体<code>PlayerInputComponent</code>。
+现在，让我们再做一个：</p>
+<div class="codehilite"><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">DemoInputComponent</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="k">public</span><span class="w"> </span><span class="n">InputComponent</span>
 <span class="p">{</span>
 <span class="k">public</span><span class="o">:</span>
-  <span class="k">virtual</span> <span class="kt">void</span> <span class="n">update</span><span class="p">(</span><span class="n">Bjorn</span><span class="o">&amp;</span> <span class="n">bjorn</span><span class="p">)</span>
-  <span class="p">{</span>
-    <span class="c1">// 自动控制Bjorn的AI……</span>
-  <span class="p">}</span>
+<span class="w">  </span><span class="k">virtual</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="n">update</span><span class="p">(</span><span class="n">Bjorn</span><span class="o">&amp;</span><span class="w"> </span><span class="n">bjorn</span><span class="p">)</span>
+<span class="w">  </span><span class="p">{</span>
+<span class="w">    </span><span class="c1">// 自动控制Bjorn的AI……</span>
+<span class="w">  </span><span class="p">}</span>
 <span class="p">};</span>
-</pre></div>
+</code></pre></div>
 
-
-<p>当游戏进入演示模式，我们将Bjorn和一个新组件连接起来，而不像之前演示的那样构造它：</p>
-<div class="codehilite"><pre><span></span><span class="n">Bjorn</span><span class="o">*</span> <span class="n">bjorn</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Bjorn</span><span class="p">(</span><span class="k">new</span> <span class="n">DemoInputComponent</span><span class="p">());</span>
-</pre></div>
-
+<p>当游戏进入演示模式时，我们不再像之前那样构造Bjorn，而是用新组件来装配他：</p>
+<div class="codehilite"><pre><span></span><code><span class="n">Bjorn</span><span class="o">*</span><span class="w"> </span><span class="n">bjorn</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">Bjorn</span><span class="p">(</span><span class="k">new</span><span class="w"> </span><span class="n">DemoInputComponent</span><span class="p">());</span>
+</code></pre></div>
 
 <p><span name="coffee"></span></p>
-<p>现在，只需要更改组件，我们就有了为演示模式而设计的电脑控制的玩家。
-我们可以重用所有Bjorn的代码——物理和图像都不知道这里有了变化。
-也许我有些奇怪，但这就是每天能让我起床的事物。</p>
+<p>现在，只需要换掉一个组件，我们就得到了一个在演示模式下完全可用的电脑控制玩家。
+我们可以重用Bjorn其余的所有代码——物理和图形组件甚至不知道有什么区别。
+也许我有点怪，但正是这样的事让我每天早上愿意起床。</p>
 <aside name="coffee">
-<p>那个，还有咖啡。热气腾腾的咖啡。</p>
+<p>那个，还有咖啡。香甜滚烫的咖啡。</p>
 </aside>
-<h3><a href="#删掉bjorn？" name="删掉bjorn？">删掉Bjorn？</a></h3>
+<h3><a href="#完全没有bjorn？" name="完全没有bjorn？">完全没有Bjorn？</a></h3>
 <p>如果你看看现在的<code>Bjorn</code>类，你会意识到那里完全没有“Bjorn”——那只是个组件包。
-事实上，它是个好候选人，能够作为<em>每个</em>游戏中的对象都能继承的“游戏对象”基类。
-我们可以像弗兰肯斯坦一样，通过挑选拼装部件构建任何对象。</p>
-<p>让我们将剩下的两个具体组件——物理和图像——像输入那样藏到接口之后。</p>
-<div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">PhysicsComponent</span>
+事实上，它看起来很适合作为游戏中<em>每个</em>对象都能使用的“游戏对象”基类。
+我们只需传入所有组件，就能像弗兰肯斯坦博士那样，通过挑选拼装零件来构建任何对象。</p>
+<p>让我们将剩下的两个具体组件——物理和图形——像输入那样藏到接口之后。</p>
+<div class="codehilite"><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">PhysicsComponent</span>
 <span class="p">{</span>
 <span class="k">public</span><span class="o">:</span>
-  <span class="k">virtual</span> <span class="o">~</span><span class="n">PhysicsComponent</span><span class="p">()</span> <span class="p">{}</span>
-  <span class="k">virtual</span> <span class="kt">void</span> <span class="n">update</span><span class="p">(</span><span class="n">GameObject</span><span class="o">&amp;</span> <span class="n">obj</span><span class="p">,</span> <span class="n">World</span><span class="o">&amp;</span> <span class="n">world</span><span class="p">)</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+<span class="w">  </span><span class="k">virtual</span><span class="w"> </span><span class="o">~</span><span class="n">PhysicsComponent</span><span class="p">()</span><span class="w"> </span><span class="p">{}</span>
+<span class="w">  </span><span class="k">virtual</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="n">update</span><span class="p">(</span><span class="n">GameObject</span><span class="o">&amp;</span><span class="w"> </span><span class="n">obj</span><span class="p">,</span><span class="w"> </span><span class="n">World</span><span class="o">&amp;</span><span class="w"> </span><span class="n">world</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
 <span class="p">};</span>
 
-<span class="k">class</span> <span class="nc">GraphicsComponent</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">GraphicsComponent</span>
 <span class="p">{</span>
 <span class="k">public</span><span class="o">:</span>
-  <span class="k">virtual</span> <span class="o">~</span><span class="n">GraphicsComponent</span><span class="p">()</span> <span class="p">{}</span>
-  <span class="k">virtual</span> <span class="kt">void</span> <span class="n">update</span><span class="p">(</span><span class="n">GameObject</span><span class="o">&amp;</span> <span class="n">obj</span><span class="p">,</span> <span class="n">Graphics</span><span class="o">&amp;</span> <span class="n">graphics</span><span class="p">)</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+<span class="w">  </span><span class="k">virtual</span><span class="w"> </span><span class="o">~</span><span class="n">GraphicsComponent</span><span class="p">()</span><span class="w"> </span><span class="p">{}</span>
+<span class="w">  </span><span class="k">virtual</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="n">update</span><span class="p">(</span><span class="n">GameObject</span><span class="o">&amp;</span><span class="w"> </span><span class="n">obj</span><span class="p">,</span><span class="w"> </span><span class="n">Graphics</span><span class="o">&amp;</span><span class="w"> </span><span class="n">graphics</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
 <span class="p">};</span>
-</pre></div>
-
+</code></pre></div>
 
 <p><span name="id"></span></p>
-<p>然后将<code>Bjorn</code>改为使用这些接口的通用<code>GameObject</code>类。</p>
-<div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">GameObject</span>
+<p>然后我们把<code>Bjorn</code>重新命名为通用的<code>GameObject</code>类，并使用这些接口。</p>
+<div class="codehilite"><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">GameObject</span>
 <span class="p">{</span>
 <span class="k">public</span><span class="o">:</span>
-  <span class="kt">int</span> <span class="n">velocity</span><span class="p">;</span>
-  <span class="kt">int</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">;</span>
+<span class="w">  </span><span class="kt">int</span><span class="w"> </span><span class="n">velocity</span><span class="p">;</span>
+<span class="w">  </span><span class="kt">int</span><span class="w"> </span><span class="n">x</span><span class="p">,</span><span class="w"> </span><span class="n">y</span><span class="p">;</span>
 
-  <span class="n">GameObject</span><span class="p">(</span><span class="n">InputComponent</span><span class="o">*</span> <span class="n">input</span><span class="p">,</span>
-             <span class="n">PhysicsComponent</span><span class="o">*</span> <span class="n">physics</span><span class="p">,</span>
-             <span class="n">GraphicsComponent</span><span class="o">*</span> <span class="n">graphics</span><span class="p">)</span>
-  <span class="o">:</span> <span class="n">input_</span><span class="p">(</span><span class="n">input</span><span class="p">),</span>
-    <span class="n">physics_</span><span class="p">(</span><span class="n">physics</span><span class="p">),</span>
-    <span class="n">graphics_</span><span class="p">(</span><span class="n">graphics</span><span class="p">)</span>
-  <span class="p">{}</span>
+<span class="w">  </span><span class="n">GameObject</span><span class="p">(</span><span class="n">InputComponent</span><span class="o">*</span><span class="w"> </span><span class="n">input</span><span class="p">,</span>
+<span class="w">             </span><span class="n">PhysicsComponent</span><span class="o">*</span><span class="w"> </span><span class="n">physics</span><span class="p">,</span>
+<span class="w">             </span><span class="n">GraphicsComponent</span><span class="o">*</span><span class="w"> </span><span class="n">graphics</span><span class="p">)</span>
+<span class="w">  </span><span class="o">:</span><span class="w"> </span><span class="n">input_</span><span class="p">(</span><span class="n">input</span><span class="p">),</span>
+<span class="w">    </span><span class="n">physics_</span><span class="p">(</span><span class="n">physics</span><span class="p">),</span>
+<span class="w">    </span><span class="n">graphics_</span><span class="p">(</span><span class="n">graphics</span><span class="p">)</span>
+<span class="w">  </span><span class="p">{}</span>
 
-  <span class="kt">void</span> <span class="n">update</span><span class="p">(</span><span class="n">World</span><span class="o">&amp;</span> <span class="n">world</span><span class="p">,</span> <span class="n">Graphics</span><span class="o">&amp;</span> <span class="n">graphics</span><span class="p">)</span>
-  <span class="p">{</span>
-    <span class="n">input_</span><span class="o">-&gt;</span><span class="n">update</span><span class="p">(</span><span class="o">*</span><span class="k">this</span><span class="p">);</span>
-    <span class="n">physics_</span><span class="o">-&gt;</span><span class="n">update</span><span class="p">(</span><span class="o">*</span><span class="k">this</span><span class="p">,</span> <span class="n">world</span><span class="p">);</span>
-    <span class="n">graphics_</span><span class="o">-&gt;</span><span class="n">update</span><span class="p">(</span><span class="o">*</span><span class="k">this</span><span class="p">,</span> <span class="n">graphics</span><span class="p">);</span>
-  <span class="p">}</span>
+<span class="w">  </span><span class="kt">void</span><span class="w"> </span><span class="n">update</span><span class="p">(</span><span class="n">World</span><span class="o">&amp;</span><span class="w"> </span><span class="n">world</span><span class="p">,</span><span class="w"> </span><span class="n">Graphics</span><span class="o">&amp;</span><span class="w"> </span><span class="n">graphics</span><span class="p">)</span>
+<span class="w">  </span><span class="p">{</span>
+<span class="w">    </span><span class="n">input_</span><span class="o">-&gt;</span><span class="n">update</span><span class="p">(</span><span class="o">*</span><span class="k">this</span><span class="p">);</span>
+<span class="w">    </span><span class="n">physics_</span><span class="o">-&gt;</span><span class="n">update</span><span class="p">(</span><span class="o">*</span><span class="k">this</span><span class="p">,</span><span class="w"> </span><span class="n">world</span><span class="p">);</span>
+<span class="w">    </span><span class="n">graphics_</span><span class="o">-&gt;</span><span class="n">update</span><span class="p">(</span><span class="o">*</span><span class="k">this</span><span class="p">,</span><span class="w"> </span><span class="n">graphics</span><span class="p">);</span>
+<span class="w">  </span><span class="p">}</span>
 
 <span class="k">private</span><span class="o">:</span>
-  <span class="n">InputComponent</span><span class="o">*</span> <span class="n">input_</span><span class="p">;</span>
-  <span class="n">PhysicsComponent</span><span class="o">*</span> <span class="n">physics_</span><span class="p">;</span>
-  <span class="n">GraphicsComponent</span><span class="o">*</span> <span class="n">graphics_</span><span class="p">;</span>
+<span class="w">  </span><span class="n">InputComponent</span><span class="o">*</span><span class="w"> </span><span class="n">input_</span><span class="p">;</span>
+<span class="w">  </span><span class="n">PhysicsComponent</span><span class="o">*</span><span class="w"> </span><span class="n">physics_</span><span class="p">;</span>
+<span class="w">  </span><span class="n">GraphicsComponent</span><span class="o">*</span><span class="w"> </span><span class="n">graphics_</span><span class="p">;</span>
 <span class="p">};</span>
-</pre></div>
-
+</code></pre></div>
 
 <aside name="id">
-<p>有些人走的更远。
+<p>有些组件系统走得更远。
 不使用包含组件的<code>GameObject</code>，游戏实体只是一个ID，一个数字。
-每个组件都知道它们连接的实体ID，然后管理分离的组件。</p>
-<p>这些<a href="http://en.wikipedia.org/wiki/Entity_component_system">实体组件系统</a>将组件发挥到了极致，让你向实体添加组件而无需通知实体。
+然后你维护若干独立的组件集合，其中每个组件都知道它所属实体的ID。</p>
+<p>这些<a href="http://en.wikipedia.org/wiki/Entity_component_system">实体组件系统</a>把组件之间的解耦推向了极致，让你向实体添加新组件而实体甚至毫不知情。
 <a href="data-locality.html" class="pattern">数据局部性</a>一章有更多细节。</p>
 </aside>
 <p>我们现有的具体类被重命名并实现这些接口：</p>
-<div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">BjornPhysicsComponent</span> <span class="o">:</span> <span class="k">public</span> <span class="n">PhysicsComponent</span>
+<div class="codehilite"><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">BjornPhysicsComponent</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="k">public</span><span class="w"> </span><span class="n">PhysicsComponent</span>
 <span class="p">{</span>
 <span class="k">public</span><span class="o">:</span>
-  <span class="k">virtual</span> <span class="kt">void</span> <span class="n">update</span><span class="p">(</span><span class="n">GameObject</span><span class="o">&amp;</span> <span class="n">obj</span><span class="p">,</span> <span class="n">World</span><span class="o">&amp;</span> <span class="n">world</span><span class="p">)</span>
-  <span class="p">{</span>
-    <span class="c1">// 物理代码……</span>
-  <span class="p">}</span>
+<span class="w">  </span><span class="k">virtual</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="n">update</span><span class="p">(</span><span class="n">GameObject</span><span class="o">&amp;</span><span class="w"> </span><span class="n">obj</span><span class="p">,</span><span class="w"> </span><span class="n">World</span><span class="o">&amp;</span><span class="w"> </span><span class="n">world</span><span class="p">)</span>
+<span class="w">  </span><span class="p">{</span>
+<span class="w">    </span><span class="c1">// 物理代码……</span>
+<span class="w">  </span><span class="p">}</span>
 <span class="p">};</span>
 
-<span class="k">class</span> <span class="nc">BjornGraphicsComponent</span> <span class="o">:</span> <span class="k">public</span> <span class="n">GraphicsComponent</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">BjornGraphicsComponent</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="k">public</span><span class="w"> </span><span class="n">GraphicsComponent</span>
 <span class="p">{</span>
 <span class="k">public</span><span class="o">:</span>
-  <span class="k">virtual</span> <span class="kt">void</span> <span class="n">update</span><span class="p">(</span><span class="n">GameObject</span><span class="o">&amp;</span> <span class="n">obj</span><span class="p">,</span> <span class="n">Graphics</span><span class="o">&amp;</span> <span class="n">graphics</span><span class="p">)</span>
-  <span class="p">{</span>
-    <span class="c1">// 图形代码……</span>
-  <span class="p">}</span>
+<span class="w">  </span><span class="k">virtual</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="n">update</span><span class="p">(</span><span class="n">GameObject</span><span class="o">&amp;</span><span class="w"> </span><span class="n">obj</span><span class="p">,</span><span class="w"> </span><span class="n">Graphics</span><span class="o">&amp;</span><span class="w"> </span><span class="n">graphics</span><span class="p">)</span>
+<span class="w">  </span><span class="p">{</span>
+<span class="w">    </span><span class="c1">// 图形代码……</span>
+<span class="w">  </span><span class="p">}</span>
 <span class="p">};</span>
-</pre></div>
-
+</code></pre></div>
 
 <p>现在我们无需为Bjorn建立具体类，就能构建拥有所有Bjorn行为的对象。</p>
 <p><span name="factory"></span></p>
-<div class="codehilite"><pre><span></span><span class="n">GameObject</span><span class="o">*</span> <span class="nf">createBjorn</span><span class="p">()</span>
+<div class="codehilite"><pre><span></span><code><span class="n">GameObject</span><span class="o">*</span><span class="w"> </span><span class="nf">createBjorn</span><span class="p">()</span>
 <span class="p">{</span>
-  <span class="k">return</span> <span class="k">new</span> <span class="n">GameObject</span><span class="p">(</span><span class="k">new</span> <span class="n">PlayerInputComponent</span><span class="p">(),</span>
-                        <span class="k">new</span> <span class="n">BjornPhysicsComponent</span><span class="p">(),</span>
-                        <span class="k">new</span> <span class="n">BjornGraphicsComponent</span><span class="p">());</span>
+<span class="w">  </span><span class="k">return</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">GameObject</span><span class="p">(</span><span class="k">new</span><span class="w"> </span><span class="n">PlayerInputComponent</span><span class="p">(),</span>
+<span class="w">                        </span><span class="k">new</span><span class="w"> </span><span class="n">BjornPhysicsComponent</span><span class="p">(),</span>
+<span class="w">                        </span><span class="k">new</span><span class="w"> </span><span class="n">BjornGraphicsComponent</span><span class="p">());</span>
 <span class="p">}</span>
-</pre></div>
-
+</code></pre></div>
 
 <aside name="factory">
-<p>这个<code>createBjorn()</code>函数当然就是经典的GoF<a class="gof-pattern" href="http://c2.com/cgi/wiki?FactoryMethod">工厂模式</a>的例子。</p>
+<p>这个<code>createBjorn()</code>函数当然就是经典GoF<a class="gof-pattern" href="http://c2.com/cgi/wiki?FactoryMethod">工厂方法模式</a>的例子。</p>
 </aside>
-<p>通过用不同组件实例化<code>GameObject</code>，我们可以构建游戏需要的任何对象。</p>
+<p>通过定义其他用不同组件实例化<code>GameObject</code>的函数，我们可以创建游戏所需的各类对象。</p>
 <h2><a href="#设计决策" name="设计决策">设计决策</a></h2>
-<p>这章中你最需要回答的设计问题是“我需要什么样的组件？”
-回答取决于你游戏的需求和风格。
-引擎越大越复杂，你就越想将组件划分得更细。</p>
-<p>除此之外，还有几个更具体的选项要回答：</p>
+<p>使用这个模式时，你需要回答的最重要的设计问题是“我需要什么样的组件？”
+答案取决于你游戏的需求和类型。
+引擎越大越复杂，你多半就越想将组件切得更细。</p>
+<p>除此之外，还有几个更具体的选项需要考虑：</p>
 <h3><a href="#对象如何获取组件？" name="对象如何获取组件？">对象如何获取组件？</a></h3>
 <p>一旦将单块对象分割为多个分离的组件，就需要决定谁将它们拼到一起。</p>
 <ul>
@@ -683,10 +664,10 @@ delete the font style for english.
 <ul>
 <li>
 <p><em>这保证了对象总是能拿到需要的组件。</em>
-  你永远不必担心某人忘记连接正确的组件然后破坏了整个游戏。容器类自己会处理这个问题。</p>
+  你永远不必担心有人忘了给对象接上正确的组件而破坏了游戏。容器对象自己会替你处理好。</p>
 </li>
 <li>
-<p><em>重新设置对象比较困难。</em>
+<p><em>重新配置对象比较困难。</em>
   这个模式的强力特性之一就是只需重新组合组件就可以创建新的对象。
   如果对象总是用硬编码的组件组装自己，我们就无法利用这个特性。</p>
 </li>
@@ -698,22 +679,22 @@ delete the font style for english.
 <li>
 <p><em>对象更加灵活。</em>
    我们可以提供不同的组件，这样就能改变对象的行为。
-   通过共用组件，对象变成了组件容器，我们可以为不同目的一遍又一遍地重用它。</p>
+   发挥到极致时，我们的对象会变成一个通用的组件容器，可以一遍又一遍地用于不同目的。</p>
 </li>
 <li>
 <p><em>对象可以与具体的组件类型解耦。</em></p>
 </li>
 </ul>
-<p>如果我们允许外部代码提供组件，好处是也可以传递<em>派生</em>的组件类型。
-   这样，对象只知道组件<em>接口</em>而不知道组件的具体类型。这是一个很好的封装结构。</p>
+<p>如果我们允许外部代码传入组件，那很可能也会让它传入<em>派生</em>的组件类型。
+   这样，对象只知道组件<em>接口</em>而不知道组件的具体类型。这可以形成一个封装良好的架构。</p>
 </li>
 </ul>
 <h3><a href="#组件之间如何通信？" name="组件之间如何通信？">组件之间如何通信？</a></h3>
-<p>完美解耦的组件不需要考虑这个问题，但在真正的实践中行不通。
-事实上组件属于<em>同一</em>对象暗示它们属于需要相互协同的更大整体的一部分。
+<p>完美解耦、各自独立运作的组件是个美好的理想，但在实践中并不真正行得通。
+这些组件同属<em>一个</em>对象这一事实，意味着它们是一个更大整体的一部分，需要彼此协调。
 这就意味着通信。</p>
-<p>所以组件如何相互通信呢？
-这里有很多选项，但不像这本书中其他的“选项”，它们相互并不冲突——你可以在一个设计中支持多种方案。</p>
+<p>那么组件如何相互通信呢？
+这里有好几种选择，但与本书中大多数设计“备选方案”不同，它们并不互斥——你很可能在一个设计中同时支持多种方案。</p>
 <ul>
 <li>
 <p><em>通过修改容器对象的状态：</em></p>
@@ -724,78 +705,75 @@ delete the font style for english.
   这两个组件都不知道对方的存在。在它们的理解中，Bjorn的速度是被黑魔法改变的。</p>
 </li>
 <li>
-<p><em>需要将组件分享的任何数据存储在容器类中。</em>
-  通常状态只在几个组件间共享。比如，动画组件和渲染组件需要共享图形专用的信息。
-  将信息存入容器类会让<em>所有</em>组件都获得这样的信息。</p>
-<p>更糟的是，如果我们为不同组件配置使用相同的容器类，最终会浪费内存存储不被<em>任何</em>对象组件需要的状态。
-如果我们将渲染专用的数据放入容器对象中，任何隐形对象都会无益地消耗内存。</p>
+<p><em>需要把组件要共享的所有信息都上移到容器对象中。</em>
+  通常有些状态其实只有一部分组件需要。比如，动画组件和渲染组件可能需要共享图形专用的信息。
+  把这些信息上移到容器对象会让<em>所有</em>组件都能访问它，从而把对象类弄得一团糟。</p>
+<p>更糟的是，如果我们为不同的组件配置使用同一个容器类，最终可能会在<em>任何</em>组件都不需要的状态上浪费内存。
+如果我们将渲染专用的数据放入容器对象中，任何不可见对象都会白白消耗内存。</p>
 </li>
 <li>
-<p><em>这让组件的通信基于组件运行的顺序。</em>
-  在同样的代码中，原先一整块的<code>update()</code>代码小心地排列这些操作。
-  玩家的输入修改了速度，速度被物理代码使用并修改位置，位置被渲染代码使用将Bjorn绘制到所在之处。
-  当我们将这些代码划入组件时，还是得小心翼翼地保持这种操作顺序。</p>
+<p><em>这让通信变得隐式，并且依赖于组件被处理的顺序。</em>
+  在我们的示例代码中，原先一整块的<code>update()</code>方法小心地排列了这些操作的顺序。
+  玩家的输入修改了速度，速度被物理代码用来修改位置，位置又被渲染代码用来把Bjorn绘制到正确位置。
+  当我们将这些代码拆分成组件时，我们小心翼翼地保持了这种操作顺序。</p>
 <p><span name="pure"></span></p>
-<p>如果我们不那么做，就引入了微妙而难以追踪的漏洞。
-比如，我们<em>先</em>更新图形组件，就错误地将Bjorn渲染在他<em>上一帧</em>而不是这一帧所处的位置上。
+<p>如果我们不那么做，就会引入微妙而难以追踪的缺陷。
+比如，我们<em>先</em>更新图形组件，就会错误地把Bjorn渲染在他<em>上一帧</em>而不是这一帧所处的位置上。
 如果你考虑更多的组件和更多的代码，那你可以想象要避免这样的错误有多么困难了。</p>
 <aside name="pure">
-
-<p>这样被大量代码读写相同数据的共享状态很难保持正确。
-这就是为什么学术界花时间研究完全函数式语言，比如Haskell，那里根本没有可变状态。</p>
+<p>像这样被大量代码同时读写的共享可变状态，是出了名的难以保证正确。
+这就是为什么学术界花大量时间研究Haskell这样的纯函数式语言——那里根本没有可变状态。</p>
 </aside>
-
 </li>
 </ul>
 </li>
 <li>
-<p><em>通过它们之间相互引用：</em></p>
-<p>这里的思路是组件有要交流的组件的引用，这样它们直接交流，无需通过容器类。</p>
-<p>假设我们想让Bjorn跳跃。图形代码想知道它需要用跳跃图像还是不用。
-这可以通过询问物理引擎它当前是否在地上来确定。一种简单的方式是图形组件直接知道物理组件的存在：</p>
-<div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">BjornGraphicsComponent</span>
+<p><em>通过直接相互引用：</em></p>
+<p>这里的思路是，需要交流的组件直接持有彼此的引用，完全不必经过容器对象。</p>
+<p>假设我们想让Bjorn跳跃。图形代码需要知道他是否应该使用跳跃精灵来绘制。
+这可以通过询问物理引擎他当前是否在地上来确定。一种简单的方式是让图形组件直接知道物理组件的存在：</p>
+<div class="codehilite"><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">BjornGraphicsComponent</span>
 <span class="p">{</span>
 <span class="k">public</span><span class="o">:</span>
-  <span class="n">BjornGraphicsComponent</span><span class="p">(</span><span class="n">BjornPhysicsComponent</span><span class="o">*</span> <span class="n">physics</span><span class="p">)</span>
-  <span class="o">:</span> <span class="n">physics_</span><span class="p">(</span><span class="n">physics</span><span class="p">)</span>
-  <span class="p">{}</span>
+<span class="w">  </span><span class="n">BjornGraphicsComponent</span><span class="p">(</span><span class="n">BjornPhysicsComponent</span><span class="o">*</span><span class="w"> </span><span class="n">physics</span><span class="p">)</span>
+<span class="w">  </span><span class="o">:</span><span class="w"> </span><span class="n">physics_</span><span class="p">(</span><span class="n">physics</span><span class="p">)</span>
+<span class="w">  </span><span class="p">{}</span>
 
-  <span class="kt">void</span> <span class="n">Update</span><span class="p">(</span><span class="n">GameObject</span><span class="o">&amp;</span> <span class="n">obj</span><span class="p">,</span> <span class="n">Graphics</span><span class="o">&amp;</span> <span class="n">graphics</span><span class="p">)</span>
-  <span class="p">{</span>
-    <span class="n">Sprite</span><span class="o">*</span> <span class="n">sprite</span><span class="p">;</span>
-    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">physics_</span><span class="o">-&gt;</span><span class="n">isOnGround</span><span class="p">())</span>
-    <span class="p">{</span>
-      <span class="n">sprite</span> <span class="o">=</span> <span class="o">&amp;</span><span class="n">spriteJump_</span><span class="p">;</span>
-    <span class="p">}</span>
-    <span class="k">else</span>
-    <span class="p">{</span>
-      <span class="c1">// 现存的图形代码……</span>
-    <span class="p">}</span>
+<span class="w">  </span><span class="kt">void</span><span class="w"> </span><span class="n">Update</span><span class="p">(</span><span class="n">GameObject</span><span class="o">&amp;</span><span class="w"> </span><span class="n">obj</span><span class="p">,</span><span class="w"> </span><span class="n">Graphics</span><span class="o">&amp;</span><span class="w"> </span><span class="n">graphics</span><span class="p">)</span>
+<span class="w">  </span><span class="p">{</span>
+<span class="w">    </span><span class="n">Sprite</span><span class="o">*</span><span class="w"> </span><span class="n">sprite</span><span class="p">;</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">physics_</span><span class="o">-&gt;</span><span class="n">isOnGround</span><span class="p">())</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">      </span><span class="n">sprite</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">&amp;</span><span class="n">spriteJump_</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="k">else</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">      </span><span class="c1">// 现存的图形代码……</span>
+<span class="w">    </span><span class="p">}</span>
 
-    <span class="n">graphics</span><span class="p">.</span><span class="n">draw</span><span class="p">(</span><span class="o">*</span><span class="n">sprite</span><span class="p">,</span> <span class="n">obj</span><span class="p">.</span><span class="n">x</span><span class="p">,</span> <span class="n">obj</span><span class="p">.</span><span class="n">y</span><span class="p">);</span>
-  <span class="p">}</span>
+<span class="w">    </span><span class="n">graphics</span><span class="p">.</span><span class="n">draw</span><span class="p">(</span><span class="o">*</span><span class="n">sprite</span><span class="p">,</span><span class="w"> </span><span class="n">obj</span><span class="p">.</span><span class="n">x</span><span class="p">,</span><span class="w"> </span><span class="n">obj</span><span class="p">.</span><span class="n">y</span><span class="p">);</span>
+<span class="w">  </span><span class="p">}</span>
 
 <span class="k">private</span><span class="o">:</span>
-  <span class="n">BjornPhysicsComponent</span><span class="o">*</span> <span class="n">physics_</span><span class="p">;</span>
+<span class="w">  </span><span class="n">BjornPhysicsComponent</span><span class="o">*</span><span class="w"> </span><span class="n">physics_</span><span class="p">;</span>
 
-  <span class="n">Sprite</span> <span class="n">spriteStand_</span><span class="p">;</span>
-  <span class="n">Sprite</span> <span class="n">spriteWalkLeft_</span><span class="p">;</span>
-  <span class="n">Sprite</span> <span class="n">spriteWalkRight_</span><span class="p">;</span>
-  <span class="n">Sprite</span> <span class="n">spriteJump_</span><span class="p">;</span>
+<span class="w">  </span><span class="n">Sprite</span><span class="w"> </span><span class="n">spriteStand_</span><span class="p">;</span>
+<span class="w">  </span><span class="n">Sprite</span><span class="w"> </span><span class="n">spriteWalkLeft_</span><span class="p">;</span>
+<span class="w">  </span><span class="n">Sprite</span><span class="w"> </span><span class="n">spriteWalkRight_</span><span class="p">;</span>
+<span class="w">  </span><span class="n">Sprite</span><span class="w"> </span><span class="n">spriteJump_</span><span class="p">;</span>
 <span class="p">};</span>
-</pre></div>
-
+</code></pre></div>
 
 <p>当构建Bjorn的<code>GraphicsComponent</code>时，我们给它相应的<code>PhysicsComponent</code>引用。</p>
 <ul>
 <li>
 <p><em>简单快捷。</em>
-  通信是一个对象到另一个的直接方法调用。组件可以调用任一引用对象的方法。做什么都可以。</p>
+  通信就是一个对象对另一个对象的直接方法调用。组件可以调用它所引用组件支持的任何方法，完全不受约束。</p>
 </li>
 <li>
 <p><em>两个组件紧绑在一起。</em>
-  这是做什么都可以带来的坏处。我们向使用整块类又退回了一步。
-  这比只用单一类好一点，至少我们现在只是把需要通信的类绑在一起。</p>
+  这是不受约束带来的坏处。我们基本上朝着原本的整块类倒退了一步。
+  不过它没有原来那个单一类那么糟，至少我们把耦合限制在了确实需要交互的那些组件对之间。</p>
 </li>
 </ul>
 </li>
@@ -803,50 +781,46 @@ delete the font style for english.
 <p><em>通过发送消息：</em></p>
 <ul>
 <li>
-<p>这是最复杂的选项。我们可以在容器类中建小小的消息系统，允许组件相互发送消息。</p>
-<p>下面是一种可能的实现。我们从每个组件都会实现的<code>Component</code>接口开始：</p>
-<div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">Component</span>
+<p>这是最复杂的选项。我们可以在容器对象中构建一个小型消息系统，让组件向彼此广播信息。</p>
+<p>下面是一种可能的实现。我们从定义所有组件都会实现的<code>Component</code>基接口开始：</p>
+<div class="codehilite"><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Component</span>
 <span class="p">{</span>
 <span class="k">public</span><span class="o">:</span>
-  <span class="k">virtual</span> <span class="o">~</span><span class="n">Component</span><span class="p">()</span> <span class="p">{}</span>
-  <span class="k">virtual</span> <span class="kt">void</span> <span class="n">receive</span><span class="p">(</span><span class="kt">int</span> <span class="n">message</span><span class="p">)</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+<span class="w">  </span><span class="k">virtual</span><span class="w"> </span><span class="o">~</span><span class="n">Component</span><span class="p">()</span><span class="w"> </span><span class="p">{}</span>
+<span class="w">  </span><span class="k">virtual</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="n">receive</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">message</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
 <span class="p">};</span>
-</pre></div>
+</code></pre></div>
 
-
-<p>它有一个简单的<code>receive()</code>方法，每个需要接受消息的组件类都要实现它。
-这里，我们使用一个<code>int</code>来定义消息，但更完整的消息实现应该可以附加数据。</p>
+<p>它只有一个<code>receive()</code>方法，组件类通过实现它来监听传入的消息。
+这里，我们只用一个<code>int</code>来标识消息，但更完整的实现还可以在消息上附加数据。</p>
 <p>然后，向容器类添加发送消息的方法。</p>
-<div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">ContainerObject</span>
+<div class="codehilite"><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">ContainerObject</span>
 <span class="p">{</span>
 <span class="k">public</span><span class="o">:</span>
-  <span class="kt">void</span> <span class="n">send</span><span class="p">(</span><span class="kt">int</span> <span class="n">message</span><span class="p">)</span>
-  <span class="p">{</span>
-    <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">MAX_COMPONENTS</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span>
-    <span class="p">{</span>
-      <span class="k">if</span> <span class="p">(</span><span class="n">components_</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">!=</span> <span class="nb">NULL</span><span class="p">)</span>
-      <span class="p">{</span>
-        <span class="n">components_</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">-&gt;</span><span class="n">receive</span><span class="p">(</span><span class="n">message</span><span class="p">);</span>
-      <span class="p">}</span>
-    <span class="p">}</span>
-  <span class="p">}</span>
+<span class="w">  </span><span class="kt">void</span><span class="w"> </span><span class="n">send</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">message</span><span class="p">)</span>
+<span class="w">  </span><span class="p">{</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">MAX_COMPONENTS</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">      </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">components_</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="nb">NULL</span><span class="p">)</span>
+<span class="w">      </span><span class="p">{</span>
+<span class="w">        </span><span class="n">components_</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">-&gt;</span><span class="n">receive</span><span class="p">(</span><span class="n">message</span><span class="p">);</span>
+<span class="w">      </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">}</span>
 
 <span class="k">private</span><span class="o">:</span>
-  <span class="k">static</span> <span class="k">const</span> <span class="kt">int</span> <span class="n">MAX_COMPONENTS</span> <span class="o">=</span> <span class="mi">10</span><span class="p">;</span>
-  <span class="n">Component</span><span class="o">*</span> <span class="n">components_</span><span class="p">[</span><span class="n">MAX_COMPONENTS</span><span class="p">];</span>
+<span class="w">  </span><span class="k">static</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">MAX_COMPONENTS</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">10</span><span class="p">;</span>
+<span class="w">  </span><span class="n">Component</span><span class="o">*</span><span class="w"> </span><span class="n">components_</span><span class="p">[</span><span class="n">MAX_COMPONENTS</span><span class="p">];</span>
 <span class="p">};</span>
-</pre></div>
-
+</code></pre></div>
 
 <p><span name="queue"></span></p>
-<p>现在，如果组件能够接触容器，它就能向容器发送消息，直接向所有的组件广播。
-（包括了原先发送消息的组件，小心别陷入无限的消息循环中！）这会造成一些结果：</p>
+<p>现在，如果组件能访问它的容器，它就能向容器发送消息，容器再把消息重新广播给所有包含的组件。
+（这包括最初发送消息的那个组件；小心别陷入反馈循环！）这会带来一些结果：</p>
 <aside name="queue">
-
-<p>如果你真的乐意，甚至可以将消息存储在<em>队列</em>中，晚些发送。
-要知道更多，看看<a href="event-queue.html" class="pattern">事件队列</a>。</p>
+<p>如果你真想玩出花样，甚至可以让这个消息系统把消息放入<em>队列</em>，稍后再投递。
+想了解更多，请看<a href="event-queue.html" class="pattern">事件队列</a>。</p>
 </aside>
-
 </li>
 </ul>
 <p><span name="mediator"></span></p>
@@ -854,45 +828,43 @@ delete the font style for english.
 <li>
 <p><em>同级组件解耦。</em>
   通过父级容器对象，就像共享状态的方案一样，我们保证了组件之间仍然是解耦的。
-  使用了这套系统，组件之间唯一的耦合是它们发送的消息。</p>
+  使用这套系统后，它们之间唯一的耦合就是消息值本身。</p>
 <aside name="mediator">
-
-<p>GoF称之为<a class="gof-pattern" href="http://c2.com/cgi-bin/wiki?MediatorPattern">中介</a>模式——两个或更多的对象通过中介对象通信。
+<p>GoF称之为<a class="gof-pattern" href="http://c2.com/cgi-bin/wiki?MediatorPattern">中介</a>模式——两个或更多的对象通过中间对象间接路由消息来通信。
 现在这种情况下，容器对象本身就是中介。</p>
 </aside>
-
 </li>
 <li>
-<p><em>容器类很简单。</em>
-    不像使用共享状态那样，容器类无需知道组件使用了什么数据，它只是将消息发送出去。
-     这可以让组件发送领域特有的数据而无需打扰容器对象。</p>
+<p><em>容器对象很简单。</em>
+    和共享状态方案不同（在那里，容器对象自己拥有并了解组件所用的数据），这里它只是盲目地把消息传递下去。
+     这有助于让两个组件在彼此之间传递非常领域化的信息，而不会让这些信息渗入容器对象。</p>
 </li>
 </ul>
 </li>
 </ul>
-<p>不出意料的，这里没有最好的答案。这些方法你最终可能都会使用一些。
-共享状态对于每个对象都有的数据是很好用的——比如位置和大小。</p>
-<p>有些不同领域仍然紧密相关。想想动画和渲染，输入和AI，或物理和粒子。
-如果你有这样一对分离的组件，你会发现直接相互引用也许更加容易。</p>
-<p>消息对于“不那么重要”的通信很有用。对物理组件发现事物碰撞后发送消息让音乐组件播放声音这种事情来说，发送后不管的特性是很有效的。</p>
+<p>不出意料，这里没有唯一的最佳答案。你最终很可能会把这些方法都用上一点。
+共享状态对于每个对象都理所当然具备的基本数据很好用——比如位置和大小。</p>
+<p>有些领域彼此不同，但仍紧密相关。想想动画和渲染、用户输入和AI，或者物理和碰撞。
+如果你为这些成对领域各准备了一个独立组件，你可能会发现让它们直接了解彼此的另一半是最容易的。</p>
+<p>消息对于“不那么重要”的通信很有用。它的“即发即忘”特性很适合这类事情：物理组件发现对象与某物碰撞后发出消息，让音频组件播放声音。</p>
 <p>就像以前一样，我建议你从简单的开始，然后如果需要的话，加入其他的通信路径。</p>
 <h2><a href="#参见" name="参见">参见</a></h2>
 <ul>
 <li>
-<p><a href="http://unity3d.com">Unity</a>核心架构中<a href="http://docs.unity3d.com/Documentation/Manual/GameObjects.html"><code>GameObject</code></a>类完全根据这样的原则设计<a href="http://docs.unity3d.com/Manual/UsingComponents.html">components</a>。</p>
+<p><a href="http://unity3d.com">Unity</a>框架的核心<a href="http://docs.unity3d.com/Documentation/Manual/GameObjects.html"><code>GameObject</code></a>类完全围绕<a href="http://docs.unity3d.com/Manual/UsingComponents.html">组件</a>设计。</p>
 </li>
 <li>
-<p>开源的<a href="http://www.delta3d.org">Delta3D</a>引擎有<code>GameActor</code>基类通过<code>ActorComponent</code>实现了这种模式。</p>
+<p>开源的<a href="http://www.delta3d.org">Delta3D</a>引擎有一个<code>GameActor</code>基类，通过名字贴切的<code>ActorComponent</code>基类实现了这种模式。</p>
 </li>
 <li>
-<p>微软的<a href="http://creators.xna.com/en-US/">XNA</a>游戏框架有一个核心的<code>Game</code>类。它拥有一系列<code>GameComponent</code>对象。我们在游戏实体层使用组件，XNA在游戏主对象上实现了这种模式，但意图是一样的。</p>
+<p>微软的<a href="http://creators.xna.com/en-US/">XNA</a>游戏框架有一个核心的<code>Game</code>类。它拥有一组<code>GameComponent</code>对象。我们的示例是在单个游戏实体层面使用组件，XNA则在主游戏对象本身的层面实现了这种模式，但目的是一样的。</p>
 </li>
 <li>
 <p>这种模式与GoF的<a class="gof-pattern" href="http://c2.com/cgi-bin/wiki?StrategyPattern">策略模式</a>类似。
-  两种模式都是将对象的行为取出，划入单独的重述对象。
-  与对象模式不同的是，分离的策略模式通常是无状态的——它封装了算法，而没有数据。
+  两种模式都是把对象的一部分行为取出，委派给一个独立的附属对象。
+  不同之处在于，使用策略模式时，那个独立的“策略”对象通常是无状态的——它封装了算法，但不包含数据。
   它定义了对象<em>如何</em>行动，但没有定义对象<em>是</em>什么。</p>
-<p>组件更加重要。它们经常保存了对象的状态，这有助于确定其真正的身份。
+<p>组件则更“拿自己当回事”一些。它们经常保存着描述对象的状态，这有助于确定其真正的身份。
 但是，这条界限很模糊。有一些组件也许根本没有任何状态。
 在这种情况下，你可以在不同的容器对象中使用相同的组件<em>实例</em>。这样看来，它的行为确实更像一种策略。</p>
 </li>

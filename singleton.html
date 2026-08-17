@@ -85,600 +85,577 @@ delete the font style for english.
 </nav>
 <h1>单例模式</h1>
 <h1 class="book"><a href="/">游戏设计模式</a><span class="section"><a href="design-patterns-revisited.html">Design Patterns Revisited</a></span></h1>
-<p>这个章节不同寻常。
+<p>这一章是个异类。
 其他章节展示如何使用某个设计模式。
 这个章节展示如何<em>避免</em>使用某个设计模式。</p>
 <p><span name="instance"></span>
-尽管它的意图是好的，GoF描述的<a class="gof-pattern" href="http://c2.com/cgi/wiki?SingletonPattern">单例模式</a>通常弊大于利。
-他们强调应该谨慎使用这个模式，但在游戏业界的口口相传中，这一提示经常被无视了。</p>
+尽管本意是好的，但GoF所描述的<a class="gof-pattern" href="http://c2.com/cgi/wiki?SingletonPattern">单例模式</a>通常弊大于利。
+他们强调应当谨慎使用这个模式，但这一忠告传到游戏业界时往往就丢了。</p>
 <p>就像其他模式一样，在不合适的地方使用单例模式就好像用夹板处理子弹伤口。
 由于它被滥用得太严重了，这章的大部分都在讲如何<em>回避</em>单例模式，
 但首先，让我们看看模式本身。</p>
 <aside name="instance">
-<p>当业界从C语言迁移到面向对象的语言，他们遇到的首个问题是“如何访问实例？”
-他们知道有要调用的方法，但是找不到实例提供这个方法。
-单例（换言之，全局化）是一条简单的解决方案。</p>
+<p>当业界从C语言迁移到面向对象编程时，他们遇到的一个问题是“如何获取实例？”
+他们想调用某个方法，但手头没有提供该方法的对象实例。
+单例（换言之，把它变成全局的）是一条简单的出路。</p>
 </aside>
 <h2><a href="#单例模式" name="单例模式">单例模式</a></h2>
-<p><em>设计模式</em> 像这样描述单例模式：</p>
+<p><em>《设计模式：可复用面向对象软件的基础》</em>这样概括单例模式：</p>
 <blockquote>
 <p>保证一个类只有一个实例，并且提供了访问该实例的全局访问点。</p>
 </blockquote>
-<p>我们从“并且”那里将句子分为两部分，分别进行考虑。</p>
+<p>我们在“并且”处把这句话拆成两半，分别讨论。</p>
 <h3><a href="#保证一个类只有一个实例" name="保证一个类只有一个实例">保证一个类只有一个实例</a></h3>
-<p>有时候，如果类存在多个实例就不能正确的运行。
-通常发生在类与保存全局状态的外部系统互动时。</p>
-<p>考虑封装文件系统的API类。
-因为文件操作需要一段时间完成，所以类使用异步操作。
-这就意味着可以同时运行多个操作，必须让它们相互协调。
-如果一个操作创建文件，另一个操作删除同一文件，封装器类需要同时考虑，保证它们没有相互妨碍。</p>
-<p>为了实现这点，对我们封装器类的调用必须接触之前的每个操作。
-如果用户可以自由地创建类的实例，这个实例就无法知道另一实例之前的操作。
-而单例模式提供的构建类的方式，在编译时保证类只有单一实例。</p>
+<p>有时候，如果类有多个实例就无法正确运行。
+常见情况是，类与一个维护着自身全局状态的外部系统交互。</p>
+<p>考虑一个封装了底层文件系统API的类。
+因为文件操作可能要花点时间才能完成，所以这个类会异步地执行操作。
+这就意味着可能有多个操作同时运行，必须让它们相互协调。
+如果我们发起一个创建文件的调用，又发起一个删除同一文件的调用，封装器类就需要同时了解这两个操作，确保它们不会相互干扰。</p>
+<p>为此，对封装器类的每次调用都需要能访问此前的所有操作。
+如果用户可以随意创建该类的实例，那么某个实例就无法知道其他实例发起的操作。
+这时候单例就登场了。它提供了一种方式，让类能在编译时就确保只有一个实例。</p>
 <h3><a href="#提供了访问该实例的全局访问点" name="提供了访问该实例的全局访问点">提供了访问该实例的全局访问点</a></h3>
-<p>游戏中的不同系统都会使用文件系统封装类：日志，内容加载，游戏状态保存，等等。
-如果这些系统不能创建文件系统封装类的实例，它们如何访问该实例呢？</p>
-<p>单例为这点也提供了解决方案。
-除了创建单一实例以外，它也提供了一种获得它的全局方法。
-使用这种范式，无论何处何人都可以访问实例。
-综合起来，经典的实现方案如下：</p>
-<div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">FileSystem</span>
+<p>游戏中的不同系统都会用到我们的文件系统封装类：日志、内容加载、游戏状态保存等等。
+如果这些系统不能创建自己的文件系统封装类实例，它们又怎么拿到一个呢？</p>
+<p>单例同样为此提供了解决方案。
+除了创建那唯一的实例之外，它还提供了一种全局可用的方法来获取它。
+这样一来，任何人在任何地方都能把爪子伸向那个“神圣”的实例。
+综合起来，经典实现如下：</p>
+<div class="codehilite"><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">FileSystem</span>
 <span class="p">{</span>
 <span class="k">public</span><span class="o">:</span>
-  <span class="k">static</span> <span class="n">FileSystem</span><span class="o">&amp;</span> <span class="n">instance</span><span class="p">()</span>
-  <span class="p">{</span>
-    <span class="c1">// 惰性初始化</span>
-    <span class="k">if</span> <span class="p">(</span><span class="n">instance_</span> <span class="o">==</span> <span class="nb">NULL</span><span class="p">)</span> <span class="n">instance_</span> <span class="o">=</span> <span class="k">new</span> <span class="n">FileSystem</span><span class="p">();</span>
-    <span class="k">return</span> <span class="o">*</span><span class="n">instance_</span><span class="p">;</span>
-  <span class="p">}</span>
+<span class="w">  </span><span class="k">static</span><span class="w"> </span><span class="n">FileSystem</span><span class="o">&amp;</span><span class="w"> </span><span class="n">instance</span><span class="p">()</span>
+<span class="w">  </span><span class="p">{</span>
+<span class="w">    </span><span class="c1">// 惰性初始化</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">instance_</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="nb">NULL</span><span class="p">)</span><span class="w"> </span><span class="n">instance_</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">FileSystem</span><span class="p">();</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="o">*</span><span class="n">instance_</span><span class="p">;</span>
+<span class="w">  </span><span class="p">}</span>
 
 <span class="k">private</span><span class="o">:</span>
-  <span class="n">FileSystem</span><span class="p">()</span> <span class="p">{}</span>
+<span class="w">  </span><span class="n">FileSystem</span><span class="p">()</span><span class="w"> </span><span class="p">{}</span>
 
-  <span class="k">static</span> <span class="n">FileSystem</span><span class="o">*</span> <span class="n">instance_</span><span class="p">;</span>
+<span class="w">  </span><span class="k">static</span><span class="w"> </span><span class="n">FileSystem</span><span class="o">*</span><span class="w"> </span><span class="n">instance_</span><span class="p">;</span>
 <span class="p">};</span>
-</pre></div>
+</code></pre></div>
 
-
-<p>静态的<code>instance_</code>成员保存了一个类的实例，
-私有的构造器保证了它是<em>唯一</em>的。
-公开的静态方法<code>instance()</code>让任何地方的代码都能访问实例。
-在首次被请求时，它同样负责惰性实例化该单例。</p>
+<p>静态成员<code>instance_</code>保存着该类的一个实例，
+私有构造函数保证了它是<em>唯一</em>的那个。
+公开的静态方法<code>instance()</code>让代码库中任何地方都能访问该实例。
+它还负责在首次有人请求时，惰性地实例化这个单例。</p>
 <p>现代的实现方案看起来是这样的：</p>
-<div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">FileSystem</span>
+<div class="codehilite"><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">FileSystem</span>
 <span class="p">{</span>
 <span class="k">public</span><span class="o">:</span>
-  <span class="k">static</span> <span class="n">FileSystem</span><span class="o">&amp;</span> <span class="n">instance</span><span class="p">()</span>
-  <span class="p">{</span>
-    <span class="k">static</span> <span class="n">FileSystem</span> <span class="o">*</span><span class="n">instance</span> <span class="o">=</span> <span class="k">new</span> <span class="n">FileSystem</span><span class="p">();</span>
-    <span class="k">return</span> <span class="o">*</span><span class="n">instance</span><span class="p">;</span>
-  <span class="p">}</span>
+<span class="w">  </span><span class="k">static</span><span class="w"> </span><span class="n">FileSystem</span><span class="o">&amp;</span><span class="w"> </span><span class="n">instance</span><span class="p">()</span>
+<span class="w">  </span><span class="p">{</span>
+<span class="w">    </span><span class="k">static</span><span class="w"> </span><span class="n">FileSystem</span><span class="w"> </span><span class="o">*</span><span class="n">instance</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">FileSystem</span><span class="p">();</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="o">*</span><span class="n">instance</span><span class="p">;</span>
+<span class="w">  </span><span class="p">}</span>
 
 <span class="k">private</span><span class="o">:</span>
-  <span class="n">FileSystem</span><span class="p">()</span> <span class="p">{}</span>
+<span class="w">  </span><span class="n">FileSystem</span><span class="p">()</span><span class="w"> </span><span class="p">{}</span>
 <span class="p">};</span>
-</pre></div>
-
+</code></pre></div>
 
 <p><span name="thread"></span>
-哪怕是在多线程情况下，C++11标准也保证了本地静态变量只会初始化一次，
+哪怕是在多线程情况下，C++11标准也保证了局部静态变量的初始化器只会运行一次，
 因此，假设你有一个现代C++编译器，这段代码是线程安全的，而前面的那个例子不是。</p>
 <aside name="thread">
-<p>当然，单例类本身的线程安全是个不同的问题！这里只保证了它的<em>初始化</em>没问题。</p>
+<p>当然，单例类本身的线程安全完全是另一个问题！这里只保证了它的<em>初始化</em>是线程安全的。</p>
 </aside>
 <h2><a href="#为什么我们使用它" name="为什么我们使用它">为什么我们使用它</a></h2>
-<p>看起来已有成效。
-文件系统封装类在任何需要的地方都可用，而无需笨重地到处传递。
-类本身巧妙地保证了我们不会实例化多个实例而搞砸。它还具有很多其他的优良性质：</p>
+<p>看起来我们找到了不错的方案。
+文件系统封装类在任何需要的地方都可用，省去了到处传递的麻烦。
+类本身也巧妙地保证了我们不会因为多实例化几个实例而把事情搞砸。它还有一些其他不错的特性：</p>
 <ul>
 <li>
 <p><strong>如果没人用，就不必创建实例。</strong>
     节约内存和CPU循环总是好的。
-    由于单例只在第一次被请求时实例化，如果游戏永远不请求，那么它不会被实例化。</p>
+    由于单例只在第一次被访问时才初始化，如果游戏从不请求它，它根本不会被实例化。</p>
 </li>
 <li>
-<p><strong>它在运行时实例化。</strong>
+<p><strong>它在运行时初始化。</strong>
     通常的替代方案是使用含有静态成员变量的类。
     我喜欢简单的解决方案，因此我尽可能使用静态类而不是单例，但是静态成员有个限制：自动初始化。
-    编译器在<code>main()</code>运行前初始化静态变量。
-    这就意味着不能使用在程序加载时才获取的信息（举个例子，从文件加载的配置）。
-    这也意味着它们的相互依赖是不可靠的——编译器可不保证以什么样的顺序初始化静态变量。</p>
-<p>惰性初始化解决了以上两个问题。
-单例会尽可能晚地初始化，所以那时它需要的所有信息都应该可用了。
-只要没有环状依赖，一个单例在初始化它自己的时甚至可以引用另一个单例。</p>
-</li>
-<li>
-<p><strong>可继承单例。</strong>
-    这是个很有用但通常被忽视的能力。
-    假设我们需要跨平台的文件系统封装类。
-    为了达到这一点，我们需要它变成文件系统抽象出来的接口，而子类为每个平台实现接口。
-    这是基类：</p>
-<div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">FileSystem</span>
-<span class="p">{</span>
-<span class="k">public</span><span class="o">:</span>
-  <span class="k">virtual</span> <span class="o">~</span><span class="n">FileSystem</span><span class="p">()</span> <span class="p">{}</span>
-  <span class="k">virtual</span> <span class="kt">char</span><span class="o">*</span> <span class="n">readFile</span><span class="p">(</span><span class="kt">char</span><span class="o">*</span> <span class="n">path</span><span class="p">)</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
-  <span class="k">virtual</span> <span class="kt">void</span>  <span class="nf">writeFile</span><span class="p">(</span><span class="kt">char</span><span class="o">*</span> <span class="n">path</span><span class="p">,</span> <span class="kt">char</span><span class="o">*</span> <span class="n">contents</span><span class="p">)</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
-<span class="p">};</span>
-</pre></div>
-
-
-<p>然后为一堆平台定义子类：</p>
-<div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">PS3FileSystem</span> <span class="o">:</span> <span class="k">public</span> <span class="n">FileSystem</span>
-<span class="p">{</span>
-<span class="k">public</span><span class="o">:</span>
-  <span class="k">virtual</span> <span class="kt">char</span><span class="o">*</span> <span class="n">readFile</span><span class="p">(</span><span class="kt">char</span><span class="o">*</span> <span class="n">path</span><span class="p">)</span>
-  <span class="p">{</span>
-    <span class="c1">// 使用索尼的文件读写API……</span>
-  <span class="p">}</span>
-
-  <span class="k">virtual</span> <span class="kt">void</span> <span class="n">writeFile</span><span class="p">(</span><span class="kt">char</span><span class="o">*</span> <span class="n">path</span><span class="p">,</span> <span class="kt">char</span><span class="o">*</span> <span class="n">contents</span><span class="p">)</span>
-  <span class="p">{</span>
-    <span class="c1">// 使用索尼的文件读写API……</span>
-  <span class="p">}</span>
-<span class="p">};</span>
-
-<span class="k">class</span> <span class="nc">WiiFileSystem</span> <span class="o">:</span> <span class="k">public</span> <span class="n">FileSystem</span>
-<span class="p">{</span>
-<span class="k">public</span><span class="o">:</span>
-  <span class="k">virtual</span> <span class="kt">char</span><span class="o">*</span> <span class="n">readFile</span><span class="p">(</span><span class="kt">char</span><span class="o">*</span> <span class="n">path</span><span class="p">)</span>
-  <span class="p">{</span>
-    <span class="c1">// 使用任天堂的文件读写API……</span>
-  <span class="p">}</span>
-
-  <span class="k">virtual</span> <span class="kt">void</span> <span class="n">writeFile</span><span class="p">(</span><span class="kt">char</span><span class="o">*</span> <span class="n">path</span><span class="p">,</span> <span class="kt">char</span><span class="o">*</span> <span class="n">contents</span><span class="p">)</span>
-  <span class="p">{</span>
-    <span class="c1">// 使用任天堂的文件读写API……</span>
-  <span class="p">}</span>
-<span class="p">};</span>
-</pre></div>
-
-
-<p>下一步，我们把<code>FileSystem</code>变成单例：</p>
-<div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">FileSystem</span>
-<span class="p">{</span>
-<span class="k">public</span><span class="o">:</span>
-  <span class="k">static</span> <span class="n">FileSystem</span><span class="o">&amp;</span> <span class="n">instance</span><span class="p">();</span>
-
-  <span class="k">virtual</span> <span class="o">~</span><span class="n">FileSystem</span><span class="p">()</span> <span class="p">{}</span>
-  <span class="k">virtual</span> <span class="kt">char</span><span class="o">*</span> <span class="n">readFile</span><span class="p">(</span><span class="kt">char</span><span class="o">*</span> <span class="n">path</span><span class="p">)</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
-  <span class="k">virtual</span> <span class="kt">void</span>  <span class="nf">writeFile</span><span class="p">(</span><span class="kt">char</span><span class="o">*</span> <span class="n">path</span><span class="p">,</span> <span class="kt">char</span><span class="o">*</span> <span class="n">contents</span><span class="p">)</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
-
-<span class="k">protected</span><span class="o">:</span>
-  <span class="n">FileSystem</span><span class="p">()</span> <span class="p">{}</span>
-<span class="p">};</span>
-</pre></div>
-
-
-<p>灵巧之处在于如何创建实例：</p>
-<div class="codehilite"><pre><span></span><span class="n">FileSystem</span><span class="o">&amp;</span> <span class="n">FileSystem</span><span class="o">::</span><span class="n">instance</span><span class="p">()</span>
-<span class="p">{</span>
-  <span class="cp">#if PLATFORM == PLAYSTATION3</span>
-    <span class="k">static</span> <span class="n">FileSystem</span> <span class="o">*</span><span class="n">instance</span> <span class="o">=</span> <span class="k">new</span> <span class="n">PS3FileSystem</span><span class="p">();</span>
-  <span class="cp">#elif PLATFORM == WII</span>
-    <span class="k">static</span> <span class="n">FileSystem</span> <span class="o">*</span><span class="n">instance</span> <span class="o">=</span> <span class="k">new</span> <span class="n">WiiFileSystem</span><span class="p">();</span>
-  <span class="cp">#endif</span>
-
-  <span class="k">return</span> <span class="o">*</span><span class="n">instance</span><span class="p">;</span>
-<span class="p">}</span>
-</pre></div>
-
-
-<p>通过一个简单的编译器转换，我们把文件系统包装类绑定到合适的具体类型上。
-整个代码库都可以使用<code>FileSystem::instance()</code>接触到文件系统，而无需和任何平台相关的代码耦合。耦合发生在为特定平台写的<code>FileSystem</code>类实现文件中。</p>
+编译器会在<code>main()</code>运行之前初始化静态变量。
+这就意味着它们无法使用程序运行起来之后才能得知的信息（举个例子，从文件加载的配置）。
+这也意味着它们不能可靠地相互依赖——编译器不保证静态变量之间的初始化顺序。</p>
 </li>
 </ul>
-<p>大多数人解决问题到这个程度就已经够了。
+<p>惰性初始化解决了这两个问题。
+单例会尽可能晚地被初始化，到那时它需要的所有信息应该都已可用。
+只要没有循环依赖，一个单例在初始化自己时甚至可以引用另一个单例。</p>
+<ul>
+<li>
+<p><strong>你可以继承单例。</strong>
+    这是个强大却常被忽视的能力。
+    假设我们需要一个跨平台的文件系统封装类。
+    为了做到这一点，我们希望它成为文件系统的抽象接口，并为每个平台提供实现该接口的子类。
+    这是基类：</p>
+<div class="codehilite"><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">FileSystem</span>
+<span class="p">{</span>
+<span class="k">public</span><span class="o">:</span>
+<span class="w">  </span><span class="k">virtual</span><span class="w"> </span><span class="o">~</span><span class="n">FileSystem</span><span class="p">()</span><span class="w"> </span><span class="p">{}</span>
+<span class="w">  </span><span class="k">virtual</span><span class="w"> </span><span class="kt">char</span><span class="o">*</span><span class="w"> </span><span class="n">readFile</span><span class="p">(</span><span class="kt">char</span><span class="o">*</span><span class="w"> </span><span class="n">path</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">  </span><span class="k">virtual</span><span class="w"> </span><span class="kt">void</span><span class="w">  </span><span class="nf">writeFile</span><span class="p">(</span><span class="kt">char</span><span class="o">*</span><span class="w"> </span><span class="n">path</span><span class="p">,</span><span class="w"> </span><span class="kt">char</span><span class="o">*</span><span class="w"> </span><span class="n">contents</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="p">};</span>
+</code></pre></div>
+
+<p>然后为一堆平台定义子类：</p>
+<div class="codehilite"><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">PS3FileSystem</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="k">public</span><span class="w"> </span><span class="n">FileSystem</span>
+<span class="p">{</span>
+<span class="k">public</span><span class="o">:</span>
+<span class="w">  </span><span class="k">virtual</span><span class="w"> </span><span class="kt">char</span><span class="o">*</span><span class="w"> </span><span class="n">readFile</span><span class="p">(</span><span class="kt">char</span><span class="o">*</span><span class="w"> </span><span class="n">path</span><span class="p">)</span>
+<span class="w">  </span><span class="p">{</span>
+<span class="w">    </span><span class="c1">// 使用索尼的文件读写API……</span>
+<span class="w">  </span><span class="p">}</span>
+
+<span class="w">  </span><span class="k">virtual</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="n">writeFile</span><span class="p">(</span><span class="kt">char</span><span class="o">*</span><span class="w"> </span><span class="n">path</span><span class="p">,</span><span class="w"> </span><span class="kt">char</span><span class="o">*</span><span class="w"> </span><span class="n">contents</span><span class="p">)</span>
+<span class="w">  </span><span class="p">{</span>
+<span class="w">    </span><span class="c1">// 使用索尼的文件读写API……</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">};</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">WiiFileSystem</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="k">public</span><span class="w"> </span><span class="n">FileSystem</span>
+<span class="p">{</span>
+<span class="k">public</span><span class="o">:</span>
+<span class="w">  </span><span class="k">virtual</span><span class="w"> </span><span class="kt">char</span><span class="o">*</span><span class="w"> </span><span class="n">readFile</span><span class="p">(</span><span class="kt">char</span><span class="o">*</span><span class="w"> </span><span class="n">path</span><span class="p">)</span>
+<span class="w">  </span><span class="p">{</span>
+<span class="w">    </span><span class="c1">// 使用任天堂的文件读写API……</span>
+<span class="w">  </span><span class="p">}</span>
+
+<span class="w">  </span><span class="k">virtual</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="n">writeFile</span><span class="p">(</span><span class="kt">char</span><span class="o">*</span><span class="w"> </span><span class="n">path</span><span class="p">,</span><span class="w"> </span><span class="kt">char</span><span class="o">*</span><span class="w"> </span><span class="n">contents</span><span class="p">)</span>
+<span class="w">  </span><span class="p">{</span>
+<span class="w">    </span><span class="c1">// 使用任天堂的文件读写API……</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">};</span>
+</code></pre></div>
+
+<p>下一步，我们把<code>FileSystem</code>变成单例：</p>
+<div class="codehilite"><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">FileSystem</span>
+<span class="p">{</span>
+<span class="k">public</span><span class="o">:</span>
+<span class="w">  </span><span class="k">static</span><span class="w"> </span><span class="n">FileSystem</span><span class="o">&amp;</span><span class="w"> </span><span class="n">instance</span><span class="p">();</span>
+
+<span class="w">  </span><span class="k">virtual</span><span class="w"> </span><span class="o">~</span><span class="n">FileSystem</span><span class="p">()</span><span class="w"> </span><span class="p">{}</span>
+<span class="w">  </span><span class="k">virtual</span><span class="w"> </span><span class="kt">char</span><span class="o">*</span><span class="w"> </span><span class="n">readFile</span><span class="p">(</span><span class="kt">char</span><span class="o">*</span><span class="w"> </span><span class="n">path</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">  </span><span class="k">virtual</span><span class="w"> </span><span class="kt">void</span><span class="w">  </span><span class="nf">writeFile</span><span class="p">(</span><span class="kt">char</span><span class="o">*</span><span class="w"> </span><span class="n">path</span><span class="p">,</span><span class="w"> </span><span class="kt">char</span><span class="o">*</span><span class="w"> </span><span class="n">contents</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+
+<span class="k">protected</span><span class="o">:</span>
+<span class="w">  </span><span class="n">FileSystem</span><span class="p">()</span><span class="w"> </span><span class="p">{}</span>
+<span class="p">};</span>
+</code></pre></div>
+
+<p>巧妙之处在于如何创建实例：</p>
+<div class="codehilite"><pre><span></span><code><span class="n">FileSystem</span><span class="o">&amp;</span><span class="w"> </span><span class="nf">FileSystem::instance</span><span class="p">()</span>
+<span class="p">{</span>
+<span class="w">  </span><span class="cp">#if PLATFORM == PLAYSTATION3</span>
+<span class="w">    </span><span class="k">static</span><span class="w"> </span><span class="n">FileSystem</span><span class="w"> </span><span class="o">*</span><span class="n">instance</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">PS3FileSystem</span><span class="p">();</span>
+<span class="w">  </span><span class="cp">#elif PLATFORM == WII</span>
+<span class="w">    </span><span class="k">static</span><span class="w"> </span><span class="n">FileSystem</span><span class="w"> </span><span class="o">*</span><span class="n">instance</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">WiiFileSystem</span><span class="p">();</span>
+<span class="w">  </span><span class="cp">#endif</span>
+
+<span class="w">  </span><span class="k">return</span><span class="w"> </span><span class="o">*</span><span class="n">instance</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div>
+
+</li>
+</ul>
+<p>通过一个简单的编译开关，我们把文件系统封装类绑定到合适的具体类型上。
+整个代码库都可以通过<code>FileSystem::instance()</code>访问文件系统，而不必与任何平台相关的代码耦合。这种耦合被封装在<code>FileSystem</code>类自己的实现文件中。</p>
+<p>我们大多数人解决这类问题时，通常也就走到这一步。
 我们得到了一个文件系统封装类。
-它工作可靠，它全局有效，只要请求就能获取。
-是时候提交代码，开怀畅饮了。</p>
+它工作可靠，而且全局可用，每个需要它的地方都能访问它。
+是时候提交代码，开瓶好喝的庆祝一下了。</p>
 <h2><a href="#为什么我们后悔使用它" name="为什么我们后悔使用它">为什么我们后悔使用它</a></h2>
-<p>短期来看，单例模式是相对良性的。
-就像其他设计决策一样，我们需要从长期考虑。
-这里是一旦我们将一些不必要的单例写进代码，会给自己带来的麻烦：</p>
+<p>短期来看，单例模式相对无害。
+但和许多设计决策一样，代价要在长期才显现。
+一旦我们把几个不必要的单例固化进冰冷的代码，就会给自己买来这些麻烦：</p>
 <h3><a href="#它是一个全局变量" name="它是一个全局变量">它是一个全局变量</a></h3>
-<p>当游戏还是由几个家伙在车库中完成时，榨干硬件性能比象牙塔里的软件工程原则更重要。
-C语言和汇编程序员前辈能毫无问题地使用全局变量和静态变量，发布好游戏。
-但随着游戏变得越来越大，越来越复杂，架构和管理开始变成瓶颈，
-阻碍我们发布游戏的，除了硬件限制，还有<em>生产力</em>限制。</p>
-<p>所以我们迁移到了像C++这样的语言，
-开始将一些从软件工程师前辈那里学到的智慧应用于实际。
-其中一课是全局变量有害的诸多原因：</p>
+<p>当游戏还由几个家伙在车库里完成时，榨干硬件性能比象牙塔里的软件工程原则更重要。
+老派的C语言和汇编程序员能毫无问题地使用全局变量和静态变量，并发布好游戏。
+但随着游戏变得越来越大、越来越复杂，架构和可维护性开始成为瓶颈。
+我们难以发布游戏，不是因为硬件限制，而是因为<em>生产力</em>限制。</p>
+<p>于是我们迁移到C++这样的语言，
+开始运用软件工程师前辈们辛苦得来的智慧。
+我们学到的其中一课是：全局变量之所以有害，原因有很多：</p>
 <p><span name="pure"></span></p>
 <ul>
 <li>
-<p><strong>理解代码更加困难。</strong>
-    假设我们在查找其他人所写函数中的漏洞。
-    如果函数没有碰到任何全局状态，脑子只需围着函数转，
-    只需搞懂函数和传给函数的变量。</p>
+<p><strong>它们让人更难理解代码。</strong>
+    假设我们在排查别人写的函数里的bug。
+    如果这个函数不接触任何全局状态，我们只需理解函数体以及传给它的参数，
+    就能把它弄明白。</p>
 <aside name="pure">
-
-<p>计算机科学家称不接触不修改全局状态的函数为“纯”函数。
-纯函数易于理解，易于编译器优化，
-易于完成优雅的任务，比如记住缓存的情况并继续上次调用。</p>
-<p>完全使用纯函数是有难度的，但其好处足以引诱科学家创造像Haskell这样<em>只</em>使用纯函数的语言。</p>
+<p>计算机科学家把不访问、不修改全局状态的函数称为“纯”函数。
+纯函数更容易理解，更容易被编译器优化，
+还能让你做记忆化这类巧妙的事——缓存并复用函数之前调用的结果。</p>
+<p>虽然完全只使用纯函数会带来挑战，但它的好处太诱人，以至于计算机科学家创造了像Haskell这样<em>只</em>允许纯函数的语言。</p>
 </aside>
-
-<p>现在考虑函数中间是个对<code>SomeClass::getSomeGlobalData()</code>的调用。为了查明发生了什么，得追踪整个代码库来看看什么修改了全局变量。你真的不需要讨厌全局变量，直到你在凌晨三点使用<code>grep</code>搜索数百万行代码，搞清楚哪一个错误的调用将一个静态变量设为了错误的值。</p>
+<p>现在想象一下，这个函数中间有一个对<code>SomeClass::getSomeGlobalData()</code>的调用。为了弄清发生了什么，我们得翻遍整个代码库，看看有哪些地方会碰这块全局数据。只有当你凌晨三点还在<code>grep</code>上百万行代码，只为揪出那个把静态变量改成错误值的捣乱调用时，你才会真正痛恨全局状态。</p>
 </li>
 <li>
-<p><strong>促进了耦合的发生。</strong>
-    新加入团队的程序员也许不熟悉你们完美、可维护、松散耦合的游戏架构，
-    但还是刚刚获得了第一个任务：在岩石撞击地面时播放声音。
-    你我都知道这不需要将物理和<em>音频</em>代码耦合，但是他只想着把任务完成。
-    不幸的是，我们的<code>AudioPlayer</code>是全局可见的。
-    所以之后一个小小的<code>#include</code>，新队员就打乱了整个精心设计的架构。</p>
-<p>如果不用全局实例实现音频播放器，那么哪怕他<em>确实</em>用<code>#include</code>包含了头文件，他还是啥也做不了。
-这种阻碍给他发送了一个明确的信号，这两个模块不该接触，他需要另辟蹊径。<em>通过控制对实例的访问，你控制了耦合。</em></p>
+<p><strong>它们助长耦合。</strong>
+    团队里的新程序员也许不熟悉你那优雅、可维护、松耦合的游戏架构，
+    而他刚接到第一个任务：让岩石撞击地面时播放声音。
+    你我都知道我们可不想让物理代码和<em>音频</em>耦合在一起，但他只想把任务完成。
+    对我们来说不幸的是，我们的<code>AudioPlayer</code>实例是全局可见的。
+    于是，一个简简单单的<code>#include</code>之后，新同事就破坏了精心构建的架构。</p>
+<p>如果没有音频播放器的全局实例，那么哪怕他<em>确实</em><code>#include</code>了头文件，他还是什么都做不了。
+这种阻碍向他传递了明确的信号：这两个模块不应该互相知道对方，他需要另找解决办法。<em>通过控制对实例的访问，你就控制了耦合。</em></p>
 </li>
 <li>
-<p><strong>对并行不友好。</strong>
-    那些在单核CPU上运行游戏的日子已经远去。
-    哪怕完全不需要并行的优势，现代的代码至少也应考虑在多线程环境下<em>工作</em>。
-    当我们将某些东西转为全局变量时，我们创建了一块每个线程都能看到并访问的内存，
-    却不知道其他线程是否正在使用那块内存。
-    这种方式带来了死锁，竞争状态，以及其他很难解决的线程同步问题。</p>
+<p><strong>它们对并发不友好。</strong>
+    游戏在简单的单核CPU上运行的日子早已基本结束。
+    即便不能充分利用并发，如今的代码至少也得能在多线程环境下<em>工作</em>。
+    当我们把某个东西变成全局的，就相当于创建了一块每个线程都能看到、都能摆弄的内存，
+    而它们并不知道其他线程正在对这块内存做什么。
+    这条路通向死锁、竞态条件，以及其他修起来让人抓狂的线程同步bug。</p>
 </li>
 </ul>
-<p>像这样的问题足够吓阻我们声明全局变量了，
-同理单例模式也是一样，但是那还没有告诉我们<em>应该</em>如何设计游戏。
-怎样不使用全局变量构建游戏？</p>
-<p>有几个对这个问题的答案（这本书的大部分都<em>是</em>由答案构成），
-但是它们并非显而易见。
-与此同时，我们得发布游戏。
-单例模式看起来是万能药。
-它被写进了一本关于面向对象设计模式的书中，因此它<em>肯定</em>是个好的设计模式，对吧？
-况且我们已经借助它做了很多年软件设计了。</p>
-<p>不幸的是，它不是解药，它是安慰剂。
-如果浏览全局变量造成的问题列表，你会注意到单例模式解决不了其中任何一个。
-因为单例<em>确实是</em>全局状态——它只是被封装在一个类中。</p>
-<h3><a href="#它能在你只有一个问题的时候解决两个" name="它能在你只有一个问题的时候解决两个">它能在你只有一个问题的时候解决两个</a></h3>
+<p>像这样的问题足以让我们不敢声明全局变量，
+进而也不敢用单例模式，但这仍然没有告诉我们<em>应该</em>如何设计游戏。
+如何在没有全局状态的情况下构建游戏？</p>
+<p>对这个问题有一些详尽的答案（这本书的大部分内容在很多方面<em>就是</em>对这个问题的回答），
+但它们并不显而易见，也不容易找到。
+与此同时，我们还得把游戏做出来发布。
+单例模式看起来像是万能药。
+它出现在一本讲面向对象设计模式的书里，所以它在架构上<em>一定</em>是合理的，对吧？
+而且它让我们能像多年来一直做的那样设计软件。</p>
+<p>不幸的是，它与其说是解药，不如说是安慰剂。
+如果浏览一下全局变量造成的问题列表，你会注意到单例模式没有解决其中任何一个。
+因为单例<em>就是</em>全局状态——只是被封装在了类里。</p>
+<h3><a href="#哪怕你只有一个问题，它也要解决两个问题" name="哪怕你只有一个问题，它也要解决两个问题">哪怕你只有一个问题，它也要解决两个问题</a></h3>
 <p>在GoF对单例模式的描述中，“并且”这个词有点奇怪。
-这个模式解决了一个问题还是两个问题呢？如果我们只有其中一个问题呢？
-保证实例是唯一存在的是很有用的，但是谁告诉我们要让<em>每个人</em>都能接触到它？
-同样，全局接触很方便，但是必须禁止存在多个实例吗？</p>
-<p>这两个问题中的后者，便利的访问，几乎是使用单例模式的全部原因。
-想想日志类。大部分模块都能从记录诊断日志中获益。
-但是，如果将<code>Log</code>类的实例传给每个需要这个方法的函数，那就混杂了产生的数据，模糊了代码的意图。</p>
-<p>明显的解决方案是让<code>Log</code>类成为单例。
-每个函数都能从类那里获得一个实例。
-但当我们这样做时，我们无意地制造了一个奇怪的小约束。
-突然之间，我们不再能创建多个日志记录者了。</p>
-<p>起初，这不是一个问题。
-我们记录单独的日志文件，所以只需要一个实例。
-然后，随着开发周期的逐次循环，我们遇到了麻烦。
-每个团队的成员都使用日志记录各自的诊断信息，大量的日志倾泻在文件里。
-程序员需要翻过很多页代码来找到他关心的记录。</p>
+这个模式解决的是一个问题，还是两个问题？如果我们只有其中一个问题呢？
+确保只有一个实例是有用的，但谁规定我们必须让<em>每个人</em>都能碰它呢？
+同样，全局访问很方便，但即便一个类允许多个实例，这一点也成立。</p>
+<p>这两个问题中的后者——便利的访问——几乎总是我们使用单例模式的原因。
+想想日志类。游戏中的大多数模块都能从记录诊断日志中获益。
+然而，把<code>Log</code>类的实例传给每一个函数，会让方法签名变得杂乱，并分散对代码意图的注意力。</p>
+<p>显而易见的办法是把<code>Log</code>类变成单例。
+这样每个函数都能直接到类本身那里获取实例。
+但当我们这样做时，我们无意中给自己加上了一个奇怪的小限制。
+突然之间，我们不能再创建多个日志器了。</p>
+<p>起初，这不是问题。
+我们只写一个日志文件，所以本来也只需要一个实例。
+然后，在开发周期进行到深处时，我们遇到了麻烦。
+团队里的每个人都用这个日志器记录自己的诊断信息，日志文件变成了一个巨大的垃圾场。
+程序员不得不在一页页文本里跋涉，只为找到自己关心的那一条记录。</p>
 <p><span name="worse"></span>
-我们想将日志分散到多个文件中来解决这点。
-为了达到这点，我们得为游戏的不同领域创造单独的日志记录者：
-网络，UI，声音，游戏，玩法。
-但是我们做不到。
-<code>Log</code>类不再允许我们创建多个实例，而且调用的方式也保证了这一点：</p>
-<div class="codehilite"><pre><span></span><span class="nt">Log</span><span class="p">::</span><span class="nd">instance</span><span class="o">()</span><span class="p">.</span><span class="nc">write</span><span class="o">(</span><span class="s2">&quot;Some event.&quot;</span><span class="o">);</span>
-</pre></div>
+我们想把日志分到多个文件里来解决这个问题。
+为此，我们得为游戏的不同领域创建单独的日志器：
+在线、UI、音频、玩法。
+但我们做不到。
+<code>Log</code>类不再允许我们创建多个实例，而且这一设计限制已经固化在每一个使用它的调用点里：</p>
+<div class="codehilite"><pre><span></span><code><span class="nt">Log</span><span class="p">::</span><span class="nd">instance</span><span class="o">()</span><span class="p">.</span><span class="nc">write</span><span class="o">(</span><span class="s2">&quot;Some event.&quot;</span><span class="o">);</span>
+</code></pre></div>
 
-
-<p>为了让<code>Log</code>类支持多个实例（就像它原来的那样），
-我们需要修改类和提及它的每一行代码。
-之前便利的访问就不再那么便利了。</p>
+<p>为了让<code>Log</code>类支持多个实例（就像它最初那样），
+我们得同时修改类本身和每一处提到它的代码。
+原本便利的访问就不再那么便利了。</p>
 <aside name="worse">
-<p>这可能更糟。想象一下你的<code>Log</code>类是在多个<em>游戏</em>间共享的库中。
-现在，为了改变设计，需要在多组人之间协调改变，
-他们中的大多数既没有时间，也没有动机修复它。</p>
+<p>情况还可能更糟。想象一下你的<code>Log</code>类在一个被多个<em>游戏</em>共享的库里。
+现在，为了改变设计，你需要在多组人之间协调这次改动，
+而他们中的大多数既没有时间，也没有动机去修复它。</p>
 </aside>
 <h3><a href="#惰性初始化从你那里剥夺了控制权" name="惰性初始化从你那里剥夺了控制权">惰性初始化从你那里剥夺了控制权</a></h3>
-<p>在拥有虚拟内存和软性性能需求的PC里，惰性初始化是一个小技巧。
-游戏则是另一种状况。初始化系统需要消耗时间：分配内存，加载资源，等等。
-如果初始化音频系统消耗了几百个毫秒，我们需要控制它何时发生。
-如果在第一次声音播放时惰性初始化它自己，这可能发生在游戏的高潮部分，导致可见的掉帧和断续的游戏体验。</p>
+<p>在有虚拟内存和宽松性能要求的桌面PC世界里，惰性初始化是个聪明的小技巧。
+游戏则是另一回事。初始化系统可能需要时间：分配内存、加载资源等等。
+如果音频系统的初始化需要几百毫秒，我们就需要控制它何时发生。
+如果我们让它第一次播放声音时才惰性初始化自己，这件事可能发生在游戏里动作最密集的时刻，导致肉眼可见的掉帧和卡顿。</p>
 <p><span name="fragment"></span>
-同样，游戏通常需要严格管理在堆上分配的内存来避免碎片。
-如果音频系统在初始化时分配到了堆上，我们需要知道初始化在<em>何时</em>发生，
-这样我们可以控制内存待在堆的<em>哪里</em>。</p>
+同样，游戏通常需要严格控制内存在堆中的布局，以避免碎片化。
+如果音频系统在初始化时会分配一块堆内存，我们就需要知道初始化<em>何时</em>发生，
+这样我们才能控制这块内存在堆中的<em>位置</em>。</p>
 <aside name="fragment">
-<p><a class="pattern" href="object-pool.html">对象池模式</a>一节中有内存碎片的其他细节。</p>
+<p>关于内存碎片的详细解释，参见<a class="pattern" href="object-pool.html">对象池模式</a>。</p>
 </aside>
 <p>因为这两个原因，我见到的大多数游戏都不使用惰性初始化。
 相反，它们像这样实现单例模式：</p>
-<div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">FileSystem</span>
+<div class="codehilite"><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">FileSystem</span>
 <span class="p">{</span>
 <span class="k">public</span><span class="o">:</span>
-  <span class="k">static</span> <span class="n">FileSystem</span><span class="o">&amp;</span> <span class="n">instance</span><span class="p">()</span> <span class="p">{</span> <span class="k">return</span> <span class="n">instance_</span><span class="p">;</span> <span class="p">}</span>
+<span class="w">  </span><span class="k">static</span><span class="w"> </span><span class="n">FileSystem</span><span class="o">&amp;</span><span class="w"> </span><span class="n">instance</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="n">instance_</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
 
 <span class="k">private</span><span class="o">:</span>
-  <span class="n">FileSystem</span><span class="p">()</span> <span class="p">{}</span>
+<span class="w">  </span><span class="n">FileSystem</span><span class="p">()</span><span class="w"> </span><span class="p">{}</span>
 
-  <span class="k">static</span> <span class="n">FileSystem</span> <span class="n">instance_</span><span class="p">;</span>
+<span class="w">  </span><span class="k">static</span><span class="w"> </span><span class="n">FileSystem</span><span class="w"> </span><span class="n">instance_</span><span class="p">;</span>
 <span class="p">};</span>
-</pre></div>
+</code></pre></div>
 
-
-<p>这解决了惰性初始化问题，但是损失了几个单例<em>确实</em>比原生的全局变量优良的特性。
-静态实例中，我们不能使用多态，在静态初始化时，类也必须是可构建的。
-我们也不能在不需要这个实例的时候，释放实例所占的内存。</p>
+<p>这解决了惰性初始化的问题，但代价是丢掉了几个单例<em>确实</em>优于普通全局变量的特性。
+有了静态实例，我们就不能再使用多态，而且类必须在静态初始化时就能被构造。
+我们也不能在不需要时释放该实例占用的内存。</p>
 <p><span name="static"></span>
-与创建一个单例不同，这里实际上是一个简单的静态类。
-这并非坏事，但是如果你需要的是静态类，为什么不完全摆脱<code>instance()</code>方法，
+我们这里实际得到的不是一个单例，而是一个简单的静态类。
+这未必是坏事，但如果一个静态类就能满足你，为什么不彻底去掉<code>instance()</code>方法，
 直接使用静态函数呢？调用<code>Foo::bar()</code>比<code>Foo::instance().bar()</code>更简单，
-也更明确地表明你在处理静态内存。</p>
+也更能清楚地表明你在处理静态内存。</p>
 <aside name="static">
 <p>通常使用单例而不是静态类的理由是，
 如果你后来决定将静态类改为非静态的，你需要修改每一个调用点。
 理论上，用单例就不必那么做，因为你可以将实例传来传去，像普通的实例方法一样使用。</p>
-<p>实践中，我从未见过这种情况。
-每个人都在使用<code>Foo::instance().bar()</code>。
-如果我们将Foo改成非单例，我们还是得修改每一个调用点。
-鉴于此，我更喜欢简单的类和简单的调用语法。</p>
+<p>实践中，我从未见它真这么运作过。
+每个人都是一行<code>Foo::instance().bar()</code>。
+如果我们把<code>Foo</code>改成非单例，还是得修改每一个调用点。
+鉴于此，我更喜欢简单的类和更简单的调用语法。</p>
 </aside>
 <h2><a href="#那该如何是好" name="那该如何是好">那该如何是好</a></h2>
-<p>如果我现在达到了目标，你在下次遇到问题使用单例模式之前就会三思而后行。
-但是你还是有问题需要解决。你<em>应该</em>使用什么工具呢？
-这取决于你试图做什么，我有一些你可以考虑的选项，但是首先……</p>
-<h3><a href="#看看你是不是真正地需要类" name="看看你是不是真正地需要类">看看你是不是真正地需要类</a></h3>
-<p>我在游戏中看到的很多单例类都是“管理器”——那些类存在的意义就是照顾其他对象。
-我曾看到一些代码库中，几乎<em>所有</em>类都有管理器：
-怪物，怪物管理器，粒子，粒子管理器，声音，声音管理器，管理管理器的管理器。
-有时候，它们被叫做“系统”或“引擎”，但是思路还是一样的。</p>
-<p>管理器类有时是有用的，但通常它们只是反映出作者对OOP的不熟悉。思考这两个特制的类：</p>
-<div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">Bullet</span>
+<p>如果到目前为止我达成了目标，那么下次遇到问题时，你在把单例模式从工具箱里掏出来之前就会三思。
+但你的问题仍然需要解决。你<em>应该</em>掏出什么工具呢？
+这取决于你想做什么，我有几个选项供你考虑，不过首先……</p>
+<h3><a href="#看看你是否真的需要这个类" name="看看你是否真的需要这个类">看看你是否真的需要这个类</a></h3>
+<p>我在游戏中看到的很多单例类都是“管理器”——那些含义模糊、存在就是为了给其他对象当保姆的类。
+我曾看到一些代码库，里面几乎<em>每个</em>类都有管理器：
+Monster、MonsterManager、Particle、ParticleManager、Sound、SoundManager、ManagerManager。
+有时候，为了换换花样，它们会叫“系统”或“引擎”，但思路还是一样的。</p>
+<p>这类照管类有时是有用的，但往往它们只是反映出对OOP的不熟悉。看看这两个人为编造的类：</p>
+<div class="codehilite"><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Bullet</span>
 <span class="p">{</span>
 <span class="k">public</span><span class="o">:</span>
-  <span class="kt">int</span> <span class="n">getX</span><span class="p">()</span> <span class="k">const</span> <span class="p">{</span> <span class="k">return</span> <span class="n">x_</span><span class="p">;</span> <span class="p">}</span>
-  <span class="kt">int</span> <span class="n">getY</span><span class="p">()</span> <span class="k">const</span> <span class="p">{</span> <span class="k">return</span> <span class="n">y_</span><span class="p">;</span> <span class="p">}</span>
+<span class="w">  </span><span class="kt">int</span><span class="w"> </span><span class="n">getX</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="n">x_</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
+<span class="w">  </span><span class="kt">int</span><span class="w"> </span><span class="n">getY</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="n">y_</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
 
-  <span class="kt">void</span> <span class="n">setX</span><span class="p">(</span><span class="kt">int</span> <span class="n">x</span><span class="p">)</span> <span class="p">{</span> <span class="n">x_</span> <span class="o">=</span> <span class="n">x</span><span class="p">;</span> <span class="p">}</span>
-  <span class="kt">void</span> <span class="n">setY</span><span class="p">(</span><span class="kt">int</span> <span class="n">y</span><span class="p">)</span> <span class="p">{</span> <span class="n">y_</span> <span class="o">=</span> <span class="n">y</span><span class="p">;</span> <span class="p">}</span>
+<span class="w">  </span><span class="kt">void</span><span class="w"> </span><span class="n">setX</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">x</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">x_</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">x</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
+<span class="w">  </span><span class="kt">void</span><span class="w"> </span><span class="n">setY</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">y</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">y_</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">y</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
 
 <span class="k">private</span><span class="o">:</span>
-  <span class="kt">int</span> <span class="n">x_</span><span class="p">,</span> <span class="n">y_</span><span class="p">;</span>
+<span class="w">  </span><span class="kt">int</span><span class="w"> </span><span class="n">x_</span><span class="p">,</span><span class="w"> </span><span class="n">y_</span><span class="p">;</span>
 <span class="p">};</span>
 
-<span class="k">class</span> <span class="nc">BulletManager</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">BulletManager</span>
 <span class="p">{</span>
 <span class="k">public</span><span class="o">:</span>
-  <span class="n">Bullet</span><span class="o">*</span> <span class="n">create</span><span class="p">(</span><span class="kt">int</span> <span class="n">x</span><span class="p">,</span> <span class="kt">int</span> <span class="n">y</span><span class="p">)</span>
-  <span class="p">{</span>
-    <span class="n">Bullet</span><span class="o">*</span> <span class="n">bullet</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Bullet</span><span class="p">();</span>
-    <span class="n">bullet</span><span class="o">-&gt;</span><span class="n">setX</span><span class="p">(</span><span class="n">x</span><span class="p">);</span>
-    <span class="n">bullet</span><span class="o">-&gt;</span><span class="n">setY</span><span class="p">(</span><span class="n">y</span><span class="p">);</span>
+<span class="w">  </span><span class="n">Bullet</span><span class="o">*</span><span class="w"> </span><span class="n">create</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">x</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">y</span><span class="p">)</span>
+<span class="w">  </span><span class="p">{</span>
+<span class="w">    </span><span class="n">Bullet</span><span class="o">*</span><span class="w"> </span><span class="n">bullet</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">Bullet</span><span class="p">();</span>
+<span class="w">    </span><span class="n">bullet</span><span class="o">-&gt;</span><span class="n">setX</span><span class="p">(</span><span class="n">x</span><span class="p">);</span>
+<span class="w">    </span><span class="n">bullet</span><span class="o">-&gt;</span><span class="n">setY</span><span class="p">(</span><span class="n">y</span><span class="p">);</span>
 
-    <span class="k">return</span> <span class="n">bullet</span><span class="p">;</span>
-  <span class="p">}</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">bullet</span><span class="p">;</span>
+<span class="w">  </span><span class="p">}</span>
 
-  <span class="kt">bool</span> <span class="n">isOnScreen</span><span class="p">(</span><span class="n">Bullet</span><span class="o">&amp;</span> <span class="n">bullet</span><span class="p">)</span>
-  <span class="p">{</span>
-    <span class="k">return</span> <span class="n">bullet</span><span class="p">.</span><span class="n">getX</span><span class="p">()</span> <span class="o">&gt;=</span> <span class="mi">0</span> <span class="o">&amp;&amp;</span>
-           <span class="n">bullet</span><span class="p">.</span><span class="n">getX</span><span class="p">()</span> <span class="o">&lt;</span> <span class="n">SCREEN_WIDTH</span> <span class="o">&amp;&amp;</span>
-           <span class="n">bullet</span><span class="p">.</span><span class="n">getY</span><span class="p">()</span> <span class="o">&gt;=</span> <span class="mi">0</span> <span class="o">&amp;&amp;</span>
-           <span class="n">bullet</span><span class="p">.</span><span class="n">getY</span><span class="p">()</span> <span class="o">&lt;</span> <span class="n">SCREEN_HEIGHT</span><span class="p">;</span>
-  <span class="p">}</span>
+<span class="w">  </span><span class="kt">bool</span><span class="w"> </span><span class="n">isOnScreen</span><span class="p">(</span><span class="n">Bullet</span><span class="o">&amp;</span><span class="w"> </span><span class="n">bullet</span><span class="p">)</span>
+<span class="w">  </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">bullet</span><span class="p">.</span><span class="n">getX</span><span class="p">()</span><span class="w"> </span><span class="o">&gt;=</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="o">&amp;&amp;</span>
+<span class="w">           </span><span class="n">bullet</span><span class="p">.</span><span class="n">getX</span><span class="p">()</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">SCREEN_WIDTH</span><span class="w"> </span><span class="o">&amp;&amp;</span>
+<span class="w">           </span><span class="n">bullet</span><span class="p">.</span><span class="n">getY</span><span class="p">()</span><span class="w"> </span><span class="o">&gt;=</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="o">&amp;&amp;</span>
+<span class="w">           </span><span class="n">bullet</span><span class="p">.</span><span class="n">getY</span><span class="p">()</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">SCREEN_HEIGHT</span><span class="p">;</span>
+<span class="w">  </span><span class="p">}</span>
 
-  <span class="kt">void</span> <span class="n">move</span><span class="p">(</span><span class="n">Bullet</span><span class="o">&amp;</span> <span class="n">bullet</span><span class="p">)</span>
-  <span class="p">{</span>
-    <span class="n">bullet</span><span class="p">.</span><span class="n">setX</span><span class="p">(</span><span class="n">bullet</span><span class="p">.</span><span class="n">getX</span><span class="p">()</span> <span class="o">+</span> <span class="mi">5</span><span class="p">);</span>
-  <span class="p">}</span>
+<span class="w">  </span><span class="kt">void</span><span class="w"> </span><span class="n">move</span><span class="p">(</span><span class="n">Bullet</span><span class="o">&amp;</span><span class="w"> </span><span class="n">bullet</span><span class="p">)</span>
+<span class="w">  </span><span class="p">{</span>
+<span class="w">    </span><span class="n">bullet</span><span class="p">.</span><span class="n">setX</span><span class="p">(</span><span class="n">bullet</span><span class="p">.</span><span class="n">getX</span><span class="p">()</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">5</span><span class="p">);</span>
+<span class="w">  </span><span class="p">}</span>
 <span class="p">};</span>
-</pre></div>
+</code></pre></div>
 
-
-<p>也许这个例子有些蠢，但是我见过很多代码，在剥离了外部的细节后是一样的设计。
-如果你看看这个代码，<code>BulletManager</code>很自然应是一个单例。
-无论如何，任何有<code>Bullet</code>的对象都需要管理，而你又需要多少个<code>BulletManager</code>实例呢？</p>
+<p>也许这个例子有点蠢，但我见过很多代码，在刮掉那些繁杂的细节后，暴露出的设计和这一模一样。
+看到这段代码，你会很自然地认为<code>BulletManager</code>应该是个单例。
+毕竟，任何持有<code>Bullet</code>的东西都需要管理器，而你又需要多少个<code>BulletManager</code>实例呢？</p>
 <p>事实上，这里的答案是<em>零</em>。
 这里是我们如何为管理类解决“单例”问题：</p>
-<div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">Bullet</span>
+<div class="codehilite"><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Bullet</span>
 <span class="p">{</span>
 <span class="k">public</span><span class="o">:</span>
-  <span class="n">Bullet</span><span class="p">(</span><span class="kt">int</span> <span class="n">x</span><span class="p">,</span> <span class="kt">int</span> <span class="n">y</span><span class="p">)</span> <span class="o">:</span> <span class="n">x_</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="n">y_</span><span class="p">(</span><span class="n">y</span><span class="p">)</span> <span class="p">{}</span>
+<span class="w">  </span><span class="n">Bullet</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">x</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">y</span><span class="p">)</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="n">x_</span><span class="p">(</span><span class="n">x</span><span class="p">),</span><span class="w"> </span><span class="n">y_</span><span class="p">(</span><span class="n">y</span><span class="p">)</span><span class="w"> </span><span class="p">{}</span>
 
-  <span class="kt">bool</span> <span class="n">isOnScreen</span><span class="p">()</span>
-  <span class="p">{</span>
-    <span class="k">return</span> <span class="n">x_</span> <span class="o">&gt;=</span> <span class="mi">0</span> <span class="o">&amp;&amp;</span> <span class="n">x_</span> <span class="o">&lt;</span> <span class="n">SCREEN_WIDTH</span> <span class="o">&amp;&amp;</span>
-           <span class="n">y_</span> <span class="o">&gt;=</span> <span class="mi">0</span> <span class="o">&amp;&amp;</span> <span class="n">y_</span> <span class="o">&lt;</span> <span class="n">SCREEN_HEIGHT</span><span class="p">;</span>
-  <span class="p">}</span>
+<span class="w">  </span><span class="kt">bool</span><span class="w"> </span><span class="n">isOnScreen</span><span class="p">()</span>
+<span class="w">  </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">x_</span><span class="w"> </span><span class="o">&gt;=</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">x_</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">SCREEN_WIDTH</span><span class="w"> </span><span class="o">&amp;&amp;</span>
+<span class="w">           </span><span class="n">y_</span><span class="w"> </span><span class="o">&gt;=</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">y_</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">SCREEN_HEIGHT</span><span class="p">;</span>
+<span class="w">  </span><span class="p">}</span>
 
-  <span class="kt">void</span> <span class="n">move</span><span class="p">()</span> <span class="p">{</span> <span class="n">x_</span> <span class="o">+=</span> <span class="mi">5</span><span class="p">;</span> <span class="p">}</span>
+<span class="w">  </span><span class="kt">void</span><span class="w"> </span><span class="n">move</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">x_</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="mi">5</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
 
 <span class="k">private</span><span class="o">:</span>
-  <span class="kt">int</span> <span class="n">x_</span><span class="p">,</span> <span class="n">y_</span><span class="p">;</span>
+<span class="w">  </span><span class="kt">int</span><span class="w"> </span><span class="n">x_</span><span class="p">,</span><span class="w"> </span><span class="n">y_</span><span class="p">;</span>
 <span class="p">};</span>
-</pre></div>
+</code></pre></div>
 
-
-<p>好了。没有管理器，也没有问题。
-糟糕设计的单例通常会“帮助”另一个类增加代码。
-如果可以，把所有的行为都移到单例帮助的类中。
-毕竟，OOP就是让对象管理好自己。</p>
-<p>但是在管理器之外，还有其他问题我们需要寻求单例模式帮助。
-对于每种问题，都有一些后续方案可供参考。</p>
+<p>这就对了。没有管理器，就没有问题。
+设计糟糕的单例通常是给另一个类添加功能的“帮手”。
+如果可以，就把所有这些行为都移到它所帮助的那个类中。
+毕竟，OOP的核心就是让对象自己照顾自己。</p>
+<p>不过，除了管理器之外，还有其他问题会让我们想用单例模式来解决。
+对于每一类问题，都有一些替代方案可以考虑。</p>
 <h3><a href="#将类限制为单一的实例" name="将类限制为单一的实例">将类限制为单一的实例</a></h3>
 <p><span name="wrapper"></span>
-这是单例模式帮你解决的一个问题。
-就像在文件系统的例子中那样，保证类只有一个实例是很重要的。
-但是，这不意味着我们需要提供对实例的<em>公众</em>，<em>全局</em>访问。
-我们想要减少某部分代码的公众部分，甚至让它在类中是私有的。
-在这些情况下，提供一个全局接触点消弱了整体架构。</p>
+这是单例模式所提供的一半能力。
+就像文件系统的例子那样，确保类只有一个实例可能很关键。
+但是，这不意味着我们还要提供对实例的<em>公开</em>、<em>全局</em>访问。
+我们可能想把访问限制在代码的某些区域，甚至让它只对单个类私有。
+在这些情况下，提供公开的全局访问点反而会削弱架构。</p>
 <aside name="wrapper">
-<p>举个例子，我们也许想把文件系统包在<em>另一</em>层抽象中。</p>
+<p>例如，我们也许想把文件系统封装器包在<em>另一</em>层抽象之中。</p>
 </aside>
-<p>我们希望有种方式能保证同事只有一个实例而<em>无需</em>提供全局接触点。
-有好几种方法能做到。这是其中之一：</p>
+<p>我们希望有一种方式能保证只有一个实例，而<em>无需</em>提供全局访问。
+有几种方法可以做到。这是其中一种：</p>
 <p><span name="assert"></span></p>
-<div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">FileSystem</span>
+<div class="codehilite"><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">FileSystem</span>
 <span class="p">{</span>
 <span class="k">public</span><span class="o">:</span>
-  <span class="n">FileSystem</span><span class="p">()</span>
-  <span class="p">{</span>
-    <span class="n">assert</span><span class="p">(</span><span class="o">!</span><span class="n">instantiated_</span><span class="p">);</span>
-    <span class="n">instantiated_</span> <span class="o">=</span> <span class="nb">true</span><span class="p">;</span>
-  <span class="p">}</span>
+<span class="w">  </span><span class="n">FileSystem</span><span class="p">()</span>
+<span class="w">  </span><span class="p">{</span>
+<span class="w">    </span><span class="n">assert</span><span class="p">(</span><span class="o">!</span><span class="n">instantiated_</span><span class="p">);</span>
+<span class="w">    </span><span class="n">instantiated_</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">true</span><span class="p">;</span>
+<span class="w">  </span><span class="p">}</span>
 
-  <span class="o">~</span><span class="n">FileSystem</span><span class="p">()</span> <span class="p">{</span> <span class="n">instantiated_</span> <span class="o">=</span> <span class="nb">false</span><span class="p">;</span> <span class="p">}</span>
+<span class="w">  </span><span class="o">~</span><span class="n">FileSystem</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">instantiated_</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">false</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
 
 <span class="k">private</span><span class="o">:</span>
-  <span class="k">static</span> <span class="kt">bool</span> <span class="n">instantiated_</span><span class="p">;</span>
+<span class="w">  </span><span class="k">static</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="n">instantiated_</span><span class="p">;</span>
 <span class="p">};</span>
 
-<span class="kt">bool</span> <span class="n">FileSystem</span><span class="o">::</span><span class="n">instantiated_</span> <span class="o">=</span> <span class="nb">false</span><span class="p">;</span>
-</pre></div>
+<span class="kt">bool</span><span class="w"> </span><span class="n">FileSystem</span><span class="o">::</span><span class="n">instantiated_</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">false</span><span class="p">;</span>
+</code></pre></div>
 
-
-<p>这个类允许任何人构建它，如果你试图构建超过一个实例，它会断言并失败。
-只要正确的代码首先创建了实例，那么就保证了没有其他代码可以接触实例或者创建自己的实例。
-这个类保证满足了它关注的单一实例，但是它没有指定类该如何被使用。</p>
+<p>这个类允许任何人构造它，但如果你试图构造多个实例，它就会触发断言并失败。
+只要正确的代码先创建了实例，就能确保没有其他代码可以拿到该实例或创建自己的实例。
+这个类保证了自己所关心的“单一实例”要求，但它没有规定类该如何被使用。</p>
 <aside name="assert">
-<p><em>断言</em> 函数是一种向你的代码中添加限制的方法。
-当<code>assert()</code>被调用时，它计算传入的表达式。
-如果结果为<code>true</code>，那么什么都不做，游戏继续。
-如果结果为<code>false</code>，它立刻停止游戏。
-在debug build时，这通常会启动调试器，或至少打印失败断言所在的文件和行号。</p>
-<p><code>assert()</code>表示，
-“我断言这个总该是真的。如果不是，那就是漏洞，我想<em>立刻</em>停止并处理它。”
-这使得你可以在代码区域之间定义约束。
-如果函数断言它的某个参数不能为<code>NULL</code>，那就是说，“我和调用者定下了协议：传入的参数不会<code>NULL</code>。”</p>
-<p>断言帮助我们在游戏发生预期以外的事时立刻追踪漏洞，
-而不是等到错误最终显现在用户可见的某些事物上。
-它们是代码中的栅栏，围住漏洞，这样漏洞就不能从制造它的代码边逃开。</p>
+<p><em>断言</em>函数是一种把契约嵌入代码的方式。
+当<code>assert()</code>被调用时，它会求值传入的表达式。
+如果结果为<code>true</code>，它就什么都不做，让游戏继续。
+如果结果为<code>false</code>，它会立刻让游戏停在该处。
+在调试构建中，它通常会唤出调试器，或至少打印断言失败所在的文件和行号。</p>
+<p><code>assert()</code>的意思是：
+“我断言这个应该永远为真。如果不是，那就是bug，我想<em>现在</em>就停下来，好让你修复它。”
+这让你能在代码的不同区域之间定义契约。
+如果函数断言它的某个参数不为<code>NULL</code>，那就是在说：“我和调用者之间的契约是：我不会被传入<code>NULL</code>。”</p>
+<p>断言能在游戏一做出意外行为时就帮我们追踪bug，
+而不是等到错误最终表现为用户可见的异常时才去追查。
+它们是代码库中的栅栏，把bug圈起来，让它们无法从产生它们的代码中逃出去。</p>
 </aside>
-<p>这个实现的缺点是只在<em>运行时</em>检查并阻止多重实例化。
-单例模式正相反，通过类的自然结构，在编译时就能确定实例是单一的。</p>
-<h3><a href="#为了给实例提供方便的访问方法" name="为了给实例提供方便的访问方法">为了给实例提供方便的访问方法</a></h3>
-<p>便利的访问是我们使用单例的一个主要原因。
-这让我们在不同地方获取需要的对象更加容易。
-这种便利是需要付出代价的——在我们<em>不想</em>要对象的地方，也能轻易地使用。</p>
-<p>通用原则是在能完成工作的同时，将变量写得尽可能局部。
-对象影响的范围越小，在处理它时，我们需要放在脑子里的东西就越少。
-在我们拿起有<em>全局</em>范围影响的单例对象前，先考虑考虑代码中其他获取对象的方式：</p>
+<p>这种实现的缺点是，阻止多重实例化的检查只在<em>运行时</em>进行。
+单例模式则相反，它凭借类结构本身，在编译时就保证了只有一个实例。</p>
+<h3><a href="#为了提供对实例的便利访问" name="为了提供对实例的便利访问">为了提供对实例的便利访问</a></h3>
+<p>便利的访问是我们使用单例的主要原因。
+它们让我们能在许多不同地方轻松拿到需要的对象。
+但这种便利是有代价的——在那些我们<em>不</em>希望使用该对象的地方，也能同样轻松地拿到它。</p>
+<p>通用原则是：在能完成工作的前提下，让变量的作用域尽可能窄。
+对象的作用域越小，我们处理它时需要记在脑子里的地方就越少。
+在采取“用<em>全局</em>作用域单例”这种散弹枪式做法之前，先考虑一下代码库中获取对象的其他方式：</p>
 <p><span name="di"></span></p>
 <ul>
 <li>
 <p><strong>传进来。</strong>
-    最简单的解决办法，通常也是最好的，把你需要的对象简单地作为参数传给需要它的函数。
-    在用其他更加繁杂的方法前，考虑一下这个解决方案。</p>
+    最简单、往往也是最好的办法，就是把需要的对象作为参数传给需要它的函数。
+    在因为嫌它太麻烦而放弃之前，这个方案值得先考虑一下。</p>
 <aside name="di">
-
-<p>有些人使用术语“依赖注入”来指代它。不是代码<em>出来</em>调用某些全局量来确认依赖，
-而是依赖通过参数被<em>传进</em>到需要它的代码中去。
-其他人将“依赖注入”保留为对代码提供更复杂依赖的方法。</p>
+<p>有些人用“依赖注入”这个术语来指代它。不是让代码<em>向外</em>伸手，通过调用全局对象来找到依赖，
+而是通过参数把依赖<em>注入</em>到需要它的代码中。
+另一些人则把“依赖注入”留给更复杂的、向代码提供依赖的方式。</p>
 </aside>
-
-<p>考虑渲染对象的函数。为了渲染，它需要接触一个代表图形设备的对象，管理渲染状态。
-将其传给所有渲染函数是很自然的，通常是用一个名字像<code>context</code>之类的参数。</p>
+<p>想想渲染对象的函数。为了渲染，它需要访问一个代表图形设备并维护渲染状态的对象。
+把这个对象传给所有渲染函数是很常见的，通常会用一个类似<code>context</code>这样的参数名。</p>
 <p><span name="aop"></span>
-另一方面，有些对象不该在方法的参数列表中出现。
-举个例子，处理AI的函数可能也需要写日志文件，但是日志不是它的核心关注点。
-看到<code>Log</code>出现在它的参数列表中是很奇怪的事情，像这样的情况，我们需要考虑其他的选项。</p>
+另一方面，有些对象不该出现在方法的签名里。
+例如，处理AI的函数可能也需要写日志文件，但日志不是它的核心关注点。
+看到<code>Log</code>出现在它的参数列表里会很奇怪，所以对这种情况，我们得考虑其他选项。</p>
 <aside name="aop">
-
-<p>像日志这样散布在代码库各处的是“横切关注点”(cross-cutting concern)。
-小心地处理横切关注点是架构中的持久挑战，特别是在静态类型语言中。</p>
+<p>像日志这样散布在代码库各处的事物，术语叫做“横切关注点”(cross-cutting concern)。
+优雅地处理横切关注点一直是架构上的挑战，特别是在静态类型语言中。</p>
 <p><a href="http://en.wikipedia.org/wiki/Aspect-oriented_programming">面向切面编程</a>被设计出来应对它们。</p>
 </aside>
-
 </li>
 <li>
 <p><strong>从基类中获得。</strong>
-    很多游戏架构有浅层但是宽泛的继承层次，通常只有一层深。
-    举个例子，你也许有<code>GameObject</code>基类，每个游戏中的敌人或者对象都继承它。
-    使用这样的架构，很大一部分游戏代码会存在于这些“子”推导类中。
-    这就意味着这些类已经有了对同样事物的相同获取方法：它们的<code>GameObject</code>基类。
-    我们可以利用这点：</p>
-<p><span name="gameobject"></span></p>
-<div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">GameObject</span>
+    很多游戏架构有浅而宽的继承层次，通常只有一层深。
+    例如，你也许有一个<code>GameObject</code>基类，游戏中的每个敌人或对象都有对应的派生类。
+    在这样的架构下，很大一部分游戏代码会存在于这些“叶子”派生类中。
+    这就意味着所有这些类都已经能访问同一个东西：它们的<code>GameObject</code>基类。
+    我们可以利用这一点：<span name="gameobject"></span></p>
+<div class="codehilite"><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">GameObject</span>
 <span class="p">{</span>
 <span class="k">protected</span><span class="o">:</span>
-  <span class="n">Log</span><span class="o">&amp;</span> <span class="n">getLog</span><span class="p">()</span> <span class="p">{</span> <span class="k">return</span> <span class="n">log_</span><span class="p">;</span> <span class="p">}</span>
+<span class="w">  </span><span class="n">Log</span><span class="o">&amp;</span><span class="w"> </span><span class="n">getLog</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="n">log_</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
 
 <span class="k">private</span><span class="o">:</span>
-  <span class="k">static</span> <span class="n">Log</span><span class="o">&amp;</span> <span class="n">log_</span><span class="p">;</span>
+<span class="w">  </span><span class="k">static</span><span class="w"> </span><span class="n">Log</span><span class="o">&amp;</span><span class="w"> </span><span class="n">log_</span><span class="p">;</span>
 <span class="p">};</span>
 
-<span class="k">class</span> <span class="nc">Enemy</span> <span class="o">:</span> <span class="k">public</span> <span class="n">GameObject</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">Enemy</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="k">public</span><span class="w"> </span><span class="n">GameObject</span>
 <span class="p">{</span>
-  <span class="kt">void</span> <span class="n">doSomething</span><span class="p">()</span>
-  <span class="p">{</span>
-    <span class="n">getLog</span><span class="p">().</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;I can log!&quot;</span><span class="p">);</span>
-  <span class="p">}</span>
+<span class="w">  </span><span class="kt">void</span><span class="w"> </span><span class="nf">doSomething</span><span class="p">()</span>
+<span class="w">  </span><span class="p">{</span>
+<span class="w">    </span><span class="n">getLog</span><span class="p">().</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;I can log!&quot;</span><span class="p">);</span>
+<span class="w">  </span><span class="p">}</span>
 <span class="p">};</span>
-</pre></div>
+</code></pre></div>
 
-
-<p>这保证任何<code>GameObject</code>之外的代码都不能接触<code>Log</code>对象，但是每个派生的实体都确实能使用<code>getLog()</code>。
-这种使用protected函数，让派生对象使用的模式，
-被涵盖在<a class="pattern" href="subclass-sandbox.html">子类沙箱</a>这章中。</p>
+<p>这保证了<code>GameObject</code>之外的任何代码都不能访问它的<code>Log</code>对象，但每个派生实体都能通过<code>getLog()</code>访问。
+这种让派生对象基于提供给它们的protected方法来实现自身的模式，
+会在<a class="pattern" href="subclass-sandbox.html">子类沙箱</a>一章中介绍。</p>
 <aside name="gameobject">
-
-<p>这也引出了一个新问题，“<code>GameObject</code>是怎样获得<code>Log</code>实例的？”一个简单的方案是，让基类创建并拥有静态实例。</p>
-<p>如果你不想要基类承担这些，你可以提供一个初始化函数传入<code>Log</code>实例，
-或使用<a class="pattern" href="service-locator.html">服务定位器</a>模式找到它。</p>
+<p>这又引出一个问题：“<code>GameObject</code>是怎样获得<code>Log</code>实例的？”一个简单的方案是，让基类直接创建并持有一个静态实例。</p>
+<p>如果你不想让基类承担这么主动的角色，可以提供一个初始化函数把它传进来，
+或使用<a class="pattern" href="service-locator.html">服务定位器</a>模式来找到它。</p>
 </aside>
-
 </li>
 <li>
 <p><strong>从已经是全局的东西中获取。</strong>
-    移除<em>所有</em>全局状态的目标令人钦佩，但并不实际。
-    大多数代码库仍有一些全局可用对象，比如一个代表了整个游戏状态的<code>Game</code>或<code>World</code>对象。</p>
-<p>我们可以让现有的全局对象捎带需要的东西，来减少全局变量类的数目。
-不让<code>Log</code>，<code>FileSystem</code>和<code>AudioPlayer</code>都变成单例，而是这样做：</p>
-<div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">Game</span>
+    移除<em>所有</em>全局状态的目标令人钦佩，但很少能实现。
+    大多数代码库仍会有几个全局可用对象，比如一个代表整个游戏状态的<code>Game</code>或<code>World</code>对象。</p>
+<p>我们可以借助这类已有的全局对象，来减少全局类的数量。
+不要把<code>Log</code>、<code>FileSystem</code>和<code>AudioPlayer</code>都变成单例，而是这样做：</p>
+<div class="codehilite"><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Game</span>
 <span class="p">{</span>
 <span class="k">public</span><span class="o">:</span>
-  <span class="k">static</span> <span class="n">Game</span><span class="o">&amp;</span> <span class="n">instance</span><span class="p">()</span> <span class="p">{</span> <span class="k">return</span> <span class="n">instance_</span><span class="p">;</span> <span class="p">}</span>
+<span class="w">  </span><span class="k">static</span><span class="w"> </span><span class="n">Game</span><span class="o">&amp;</span><span class="w"> </span><span class="n">instance</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="n">instance_</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
 
-  <span class="c1">// 设置log_, et. al. ……</span>
+<span class="w">  </span><span class="c1">// 设置log_, et. al. ……</span>
 
-  <span class="n">Log</span><span class="o">&amp;</span>         <span class="n">getLog</span><span class="p">()</span>         <span class="p">{</span> <span class="k">return</span> <span class="o">*</span><span class="n">log_</span><span class="p">;</span> <span class="p">}</span>
-  <span class="n">FileSystem</span><span class="o">&amp;</span>  <span class="n">getFileSystem</span><span class="p">()</span>  <span class="p">{</span> <span class="k">return</span> <span class="o">*</span><span class="n">fileSystem_</span><span class="p">;</span> <span class="p">}</span>
-  <span class="n">AudioPlayer</span><span class="o">&amp;</span> <span class="n">getAudioPlayer</span><span class="p">()</span> <span class="p">{</span> <span class="k">return</span> <span class="o">*</span><span class="n">audioPlayer_</span><span class="p">;</span> <span class="p">}</span>
+<span class="w">  </span><span class="n">Log</span><span class="o">&amp;</span><span class="w">         </span><span class="n">getLog</span><span class="p">()</span><span class="w">         </span><span class="p">{</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="o">*</span><span class="n">log_</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
+<span class="w">  </span><span class="n">FileSystem</span><span class="o">&amp;</span><span class="w">  </span><span class="n">getFileSystem</span><span class="p">()</span><span class="w">  </span><span class="p">{</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="o">*</span><span class="n">fileSystem_</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
+<span class="w">  </span><span class="n">AudioPlayer</span><span class="o">&amp;</span><span class="w"> </span><span class="n">getAudioPlayer</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="o">*</span><span class="n">audioPlayer_</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
 
 <span class="k">private</span><span class="o">:</span>
-  <span class="k">static</span> <span class="n">Game</span> <span class="n">instance_</span><span class="p">;</span>
+<span class="w">  </span><span class="k">static</span><span class="w"> </span><span class="n">Game</span><span class="w"> </span><span class="n">instance_</span><span class="p">;</span>
 
-  <span class="n">Log</span>         <span class="o">*</span><span class="n">log_</span><span class="p">;</span>
-  <span class="n">FileSystem</span>  <span class="o">*</span><span class="n">fileSystem_</span><span class="p">;</span>
-  <span class="n">AudioPlayer</span> <span class="o">*</span><span class="n">audioPlayer_</span><span class="p">;</span>
+<span class="w">  </span><span class="n">Log</span><span class="w">         </span><span class="o">*</span><span class="n">log_</span><span class="p">;</span>
+<span class="w">  </span><span class="n">FileSystem</span><span class="w">  </span><span class="o">*</span><span class="n">fileSystem_</span><span class="p">;</span>
+<span class="w">  </span><span class="n">AudioPlayer</span><span class="w"> </span><span class="o">*</span><span class="n">audioPlayer_</span><span class="p">;</span>
 <span class="p">};</span>
-</pre></div>
-
+</code></pre></div>
 
 <p><span name="demeter"></span>
 这样，只有<code>Game</code>是全局可见的。
 函数可以通过它访问其他系统。</p>
-<div class="codehilite"><pre><span></span><span class="n">Game</span><span class="o">::</span><span class="n">instance</span><span class="p">().</span><span class="n">getAudioPlayer</span><span class="p">().</span><span class="n">play</span><span class="p">(</span><span class="n">VERY_LOUD_BANG</span><span class="p">);</span>
-</pre></div>
-
+<div class="codehilite"><pre><span></span><code><span class="n">Game</span><span class="o">::</span><span class="n">instance</span><span class="p">().</span><span class="n">getAudioPlayer</span><span class="p">().</span><span class="n">play</span><span class="p">(</span><span class="n">VERY_LOUD_BANG</span><span class="p">);</span>
+</code></pre></div>
 
 <aside name="demeter">
-
-<p>纯粹主义者会声称这违反了Demeter法则。我则声称这比一大坨单例要好。</p>
+<p>纯粹主义者会说这违反了迪米特法则。我则认为这仍比堆成山的单例要好。</p>
 </aside>
-
-<p>如果，稍后，架构被改为支持多个<code>Game</code>实例（可能是为了流处理或者测试），
-<code>Log</code>，<code>FileSystem</code>，和<code>AudioPlayer</code>都不会被影响到——它们甚至不知道有什么区别。
-缺陷是，当然，更多的代码耦合到了<code>Game</code>中。
-如果一个类简单地需要播放声音，为了访问音频播放器，上例中仍然需要它知道游戏世界。</p>
-<p>我们通过混合方案解决这点。
-知道<code>Game</code>的代码可以直接从它那里访问<code>AudioPlayer</code>。
-而不知道的代码，我们用上面描述的其他选项来提供<code>AudioPlayer</code>。</p>
+<p>如果之后架构被改为支持多个<code>Game</code>实例（也许是为了流式加载或测试），
+<code>Log</code>、<code>FileSystem</code>和<code>AudioPlayer</code>都不会受影响——它们甚至察觉不到区别。
+当然，缺点是有更多代码最终耦合到了<code>Game</code>本身。
+如果一个类只是想播放声音，在我们的例子中，它仍然需要先了解整个世界，才能拿到音频播放器。</p>
+<p>我们用混合方案来解决这一点。
+已经知道<code>Game</code>的代码可以直接通过它访问<code>AudioPlayer</code>。
+对于不知道的代码，我们用前面描述的其他选项之一来提供对<code>AudioPlayer</code>的访问。</p>
 </li>
 <li>
 <p><strong>从服务定位器中获得。</strong>
-    目前为止，我们假设全局类是具体的类，比如<code>Game</code>。
-    另一种选项是定义一个类，存在的唯一目标就是为对象提供全局访问。
-    这种常见的模式被称为<a class="pattern" href="service-locator.html">服务定位器</a>模式，有单独讲它的章节。</p>
+    到目前为止，我们假设全局类是一个普通的具体类，比如<code>Game</code>。
+    另一种选择是定义一个类，其存在的唯一目的就是提供对对象的全局访问。
+    这种常见模式被称为<a class="pattern" href="service-locator.html">服务定位器</a>模式，它有专门的一章。</p>
 </li>
 </ul>
 <h2><a href="#单例中还剩下什么" name="单例中还剩下什么">单例中还剩下什么</a></h2>
-<p>剩下的问题，何处我们<em>应该</em>使用真实的单例模式？
-说实话，我从来没有在游戏中使用全部的GoF模式。
-为了保证实例是单一的，我通常简单地使用静态类。
-如果这无效，我使用静态标识位，在运行时检测是不是只有一个实例被创建了。</p>
+<p>问题仍然是：我们到底<em>该</em>在哪里使用真正的单例模式？
+说实话，我从来没在游戏里用过GoF那套完整实现。
+为了保证实例唯一，我通常直接使用静态类。
+如果这行不通，我会用一个静态标志，在运行时检查该类是否只被构造了一个实例。</p>
 <p>书中还有一些其他章节也许能有所帮助。
-<a class="pattern" href="subclass-sandbox.html">子类沙箱</a>模式通过分享状态，
-给实例以类的访问权限而无需让其全局可用。
-<a class="pattern" href="service-locator.html">服务定位器</a>模式<em>确实</em>让一个对象全局可用，
-但它给了你如何设置对象的灵活性。</p>
+<a class="pattern" href="subclass-sandbox.html">子类沙箱</a>模式让类的实例能访问某些共享状态，
+而又无需让这些状态全局可用。
+<a class="pattern" href="service-locator.html">服务定位器</a>模式<em>确实</em>会让一个对象全局可用，
+但它让你在如何配置该对象方面有更多灵活性。</p>
 <nav>
   <span class="prev">&larr; <a href="prototype.html">上一章</a></span>
   <span class="next"><a href="state.html">下一章</a> &rarr;</span>

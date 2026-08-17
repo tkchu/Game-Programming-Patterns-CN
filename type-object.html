@@ -86,115 +86,113 @@ delete the font style for english.
 <h1>类型对象</h1>
 <h1 class="book"><a href="/">游戏设计模式</a><span class="section"><a href="behavioral-patterns.html">Behavioral Patterns</a></span></h1>
 <h2><a href="#意图" name="意图">意图</a></h2>
-<p><em>创造一个类A来允许灵活地创造新“类型”，类A的每个实例都代表了不同的对象类型。</em></p>
+<p><em>通过创建一个类，让它的每个实例代表一种不同的对象类型，从而灵活地创建新的“类”。</em></p>
 <h2><a href="#动机" name="动机">动机</a></h2>
 <p>想象我们在制作一个奇幻RPG游戏。
-我们的任务是为一群想要杀死英雄的恶毒怪物编写代码。
-怪物有多个的属性：生命值，攻击力，图形效果，声音表现，等等。
-但是为了说明介绍的目的我们先只考虑前面两个。</p>
-<p>游戏中的每个怪物都有当前血值。
-开始时是满的，每次怪物受伤，它就下降。
-怪物也有一个攻击字符串。
-当怪物攻击我们的英雄，那个文本就会以某种方式展示给用户。
-（我们不在乎这里怎样实现。）</p>
-<p>设计者告诉我们怪物有不同<em>品种</em>，像“龙”或者“巨魔”。
-每个品种都描述了一<em>种</em>存在于游戏中的怪物，同时可能有多个同种怪物在地牢里游荡。</p>
-<p>品种决定了怪物的初始健康——龙开始的血量比巨魔多，它们更难被杀死。
-这也决定了攻击字符——同种的所有怪物都以相同的方式进行攻击。</p>
-<h3><a href="#传统的面向对象方案" name="传统的面向对象方案">传统的面向对象方案</a></h3>
+我们的任务是为成群结队、一心想干掉我们勇敢英雄的凶残怪物编写代码。
+怪物有很多属性：生命值、攻击、图像、声音，等等。
+但为了举例，我们只关注前两个。</p>
+<p>游戏中的每个怪物都有一个当前生命值。
+一开始是满的，每次怪物受伤就会减少。
+怪物还有一个攻击字符串。
+当怪物攻击我们的英雄时，这段文本会以某种方式展示给用户。
+（我们这里不关心怎么展示。）</p>
+<p>设计者告诉我们，怪物分为不同的<em>品种</em>，比如“龙”或“巨魔”。
+每个品种描述游戏中存在的一<em>种</em>怪物，同一品种的多个怪物可能同时在地牢中游荡。</p>
+<p>品种决定了怪物的初始生命值——龙的初始生命值比巨魔高，因此更难被杀死。
+它还决定了攻击字符串——同一品种的所有怪物都用相同的方式攻击。</p>
+<h3><a href="#典型的面向对象方案" name="典型的面向对象方案">典型的面向对象方案</a></h3>
 <p><span name="isa"></span></p>
-<p>想着这样的设计方案，我们启动了文本编辑器开始编程。
-根据设计，龙是一种怪物，巨魔是另一种，其他品种的也一样。
+<p>带着这样的游戏设计，我们打开文本编辑器开始写代码。
+根据设计，龙是怪物的一种，巨魔是另一种，其他品种以此类推。
 用面向对象的方式思考，这引导我们创建<code>Monster</code>基类。</p>
 <aside name="isa">
-<p>这是一种“是某物”的关系。
-在传统OOP思路中，由于龙“是”怪物，我们用<code>Dragon</code>是<code>Monster</code>的子类来描述这点。
-如我们将看到的，继承是一种将这种关系表示为代码的方法。</p>
+<p>这就是所谓的“is-a”（“是一个”）关系。
+在传统OOP思路中，既然龙“是一个”怪物，我们就把<code>Dragon</code>建模成<code>Monster</code>的子类。
+正如我们将看到的，子类化只是将这类概念关系固化进代码的方式之一。</p>
 </aside>
-<div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">Monster</span>
+<div class="codehilite"><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Monster</span>
 <span class="p">{</span>
 <span class="k">public</span><span class="o">:</span>
-  <span class="k">virtual</span> <span class="o">~</span><span class="n">Monster</span><span class="p">()</span> <span class="p">{}</span>
-  <span class="k">virtual</span> <span class="k">const</span> <span class="kt">char</span><span class="o">*</span> <span class="n">getAttack</span><span class="p">()</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+<span class="w">  </span><span class="k">virtual</span><span class="w"> </span><span class="o">~</span><span class="n">Monster</span><span class="p">()</span><span class="w"> </span><span class="p">{}</span>
+<span class="w">  </span><span class="k">virtual</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="o">*</span><span class="w"> </span><span class="n">getAttack</span><span class="p">()</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
 
 <span class="k">protected</span><span class="o">:</span>
-  <span class="n">Monster</span><span class="p">(</span><span class="kt">int</span> <span class="n">startingHealth</span><span class="p">)</span>
-  <span class="o">:</span> <span class="n">health_</span><span class="p">(</span><span class="n">startingHealth</span><span class="p">)</span>
-  <span class="p">{}</span>
+<span class="w">  </span><span class="n">Monster</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">startingHealth</span><span class="p">)</span>
+<span class="w">  </span><span class="o">:</span><span class="w"> </span><span class="n">health_</span><span class="p">(</span><span class="n">startingHealth</span><span class="p">)</span>
+<span class="w">  </span><span class="p">{}</span>
 
 <span class="k">private</span><span class="o">:</span>
-  <span class="kt">int</span> <span class="n">health_</span><span class="p">;</span> <span class="c1">// 当前血值</span>
+<span class="w">  </span><span class="kt">int</span><span class="w"> </span><span class="n">health_</span><span class="p">;</span><span class="w"> </span><span class="c1">// 当前血值</span>
 <span class="p">};</span>
-</pre></div>
+</code></pre></div>
 
-
-<p>在怪物攻击英雄时，公开的<code>getAttack()</code>函数让战斗代码能获得需要显示的文字。
-每个子类都需要重载它来提供不同的消息。</p>
-<p>构造器是protected的，需要传入怪物的初始血量。
-每个品种的子类的公共构造器调用这个构造器，传入对于该品种适合的起始血量。</p>
+<p>在怪物攻击英雄时，公开的<code>getAttack()</code>函数让战斗代码能获得需要显示的字符串。
+每个派生的品种类都会重写它，以提供不同的消息。</p>
+<p>构造函数是protected的，接收怪物的初始生命值。
+每个品种的派生类会提供自己的公有构造函数，它们调用这个构造函数，并传入适合该品种的初始生命值。</p>
 <p>现在让我们看看两个品种子类：</p>
 <p><span name="exclaim"></span></p>
-<div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">Dragon</span> <span class="o">:</span> <span class="k">public</span> <span class="n">Monster</span>
+<div class="codehilite"><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Dragon</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="k">public</span><span class="w"> </span><span class="n">Monster</span>
 <span class="p">{</span>
 <span class="k">public</span><span class="o">:</span>
-  <span class="n">Dragon</span><span class="p">()</span> <span class="o">:</span> <span class="n">Monster</span><span class="p">(</span><span class="mi">230</span><span class="p">)</span> <span class="p">{}</span>
+<span class="w">  </span><span class="n">Dragon</span><span class="p">()</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="n">Monster</span><span class="p">(</span><span class="mi">230</span><span class="p">)</span><span class="w"> </span><span class="p">{}</span>
 
-  <span class="k">virtual</span> <span class="k">const</span> <span class="kt">char</span><span class="o">*</span> <span class="n">getAttack</span><span class="p">()</span>
-  <span class="p">{</span>
-    <span class="k">return</span> <span class="s">&quot;The dragon breathes fire!&quot;</span><span class="p">;</span>
-  <span class="p">}</span>
+<span class="w">  </span><span class="k">virtual</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="o">*</span><span class="w"> </span><span class="n">getAttack</span><span class="p">()</span>
+<span class="w">  </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="s">&quot;The dragon breathes fire!&quot;</span><span class="p">;</span>
+<span class="w">  </span><span class="p">}</span>
 <span class="p">};</span>
 
-<span class="k">class</span> <span class="nc">Troll</span> <span class="o">:</span> <span class="k">public</span> <span class="n">Monster</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">Troll</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="k">public</span><span class="w"> </span><span class="n">Monster</span>
 <span class="p">{</span>
 <span class="k">public</span><span class="o">:</span>
-  <span class="n">Troll</span><span class="p">()</span> <span class="o">:</span> <span class="n">Monster</span><span class="p">(</span><span class="mi">48</span><span class="p">)</span> <span class="p">{}</span>
+<span class="w">  </span><span class="n">Troll</span><span class="p">()</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="n">Monster</span><span class="p">(</span><span class="mi">48</span><span class="p">)</span><span class="w"> </span><span class="p">{}</span>
 
-  <span class="k">virtual</span> <span class="k">const</span> <span class="kt">char</span><span class="o">*</span> <span class="n">getAttack</span><span class="p">()</span>
-  <span class="p">{</span>
-    <span class="k">return</span> <span class="s">&quot;The troll clubs you!&quot;</span><span class="p">;</span>
-  <span class="p">}</span>
+<span class="w">  </span><span class="k">virtual</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="o">*</span><span class="w"> </span><span class="n">getAttack</span><span class="p">()</span>
+<span class="w">  </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="s">&quot;The troll clubs you!&quot;</span><span class="p">;</span>
+<span class="w">  </span><span class="p">}</span>
 <span class="p">};</span>
-</pre></div>
-
+</code></pre></div>
 
 <aside name="exclaim">
 <p>感叹号让所有事情都更刺激！</p>
 </aside>
-<p>每个从<code>Monster</code>派生出来的类都传入起始血量，重载<code>getAttack()</code>返回那个品种的攻击字符串。
-所有事情都一如所料地运行，不久以后，我们的英雄就可以跑来跑去杀死各种野兽了。
-我们继续编程，在意识到之前，我们就有了从酸泥怪到僵尸羊的众多怪物子类。</p>
-<p>然后，很奇怪，事情陷入了困境。
-设计者最终想要<em>几百个</em>品种，但是我们发现所有的时间都花费在写这些只有七行长的子类和重新编译上。
-这会继续变糟——设计者想要协调已经编码的品种。我们之前富有产出的工作日退化成了：</p>
+<p>每个从<code>Monster</code>派生出来的类都传入起始生命值，并重写<code>getAttack()</code>返回那个品种的攻击字符串。
+一切如预期般运行，不久以后，我们的英雄就可以跑来跑去杀死各种怪物了。
+我们继续飞快地写着代码，不知不觉就有了几十个怪物子类，从酸性史莱姆到僵尸山羊。</p>
+<p>然后，说来也怪，事情开始陷入泥沼。
+设计者最终想要<em>几百个</em>品种，而我们发现自己把所有时间都花在了编写这些只有七行长的子类和重新编译上。
+事情变得更糟——设计者想要开始调整我们已经写好的品种。我们原本高效的工作日退化成了：</p>
 <ol>
-<li>收到设计者将巨魔的血量从48改到52的邮件。</li>
+<li>收到设计者的邮件，要求把巨魔的血量从48改到52。</li>
 <li>签出并修改<code>Troll.h</code>。</li>
 <li>重新编译游戏。</li>
 <li>签入修改。</li>
 <li>回复邮件。</li>
 <li>重复。</li>
 </ol>
-<p>我们度过了失意的一天，因为我们变成了填数据的猴子。
-设计者也感到挫败，因为修改一个数据就要老久。
-我们需要的是一种无需每次重新编译游戏就能修改品种的状态。
-如果设计者创建和修改品种时无需<em>任何</em>程序员的介入那就更好了。</p>
+<p>我们沮丧地度过了一天，因为我们沦为了填数据的猴子。
+设计者也感到挫败，因为调一个简单的数值都要等上老半天。
+我们需要的是无需每次重新编译整个游戏就能修改品种属性的能力。
+如果设计者创建和调整品种时无需<em>任何</em>程序员的介入，那就更好了。</p>
 <h3><a href="#为类型建类" name="为类型建类">为类型建类</a></h3>
-<p>从较高的层次看来，我们试图解决的问题非常简单。
-游戏中有很多不同的怪物，我们想要在它们之间分享属性。
-一大群怪物在攻击英雄，我们想要它们中的一些使用相同的攻击文本。
-我们声明这些怪物是相同的“品种”，而品种决定了攻击字符串。</p>
-<p>这种情况下我们很容易想到类，那就试试吧。
-龙是怪物，每条龙都是龙“类”的实例。
-定义每个品种为抽象基类<code>Monster</code> 的子类，让游戏中每个怪物都是子类的实例反映了那点。最终的类层次是这样的：</p>
+<p>从较高的层次看，我们要解决的问题非常简单。
+游戏中有很多不同的怪物，我们想在它们之间共享某些属性。
+一大群怪物正围着英雄拳打脚踢，我们想让其中一些使用相同的攻击文本。
+我们通过声明所有这些怪物属于同一“品种”，且品种决定了攻击字符串，来定义这一点。</p>
+<p>由于这与我们对“类”的直觉一致，我们决定用继承来实现这个概念。
+龙是怪物，游戏中的每条龙都是这个龙“类”的实例。
+把每个品种定义为抽象基类<code>Monster</code>的子类，并让游戏中的每个怪物都是对应的派生品种类的实例，正好映射了这一点。最终的类层次是这样的：</p>
 <p><span name="inherits-arrow"></span></p>
 <p><img src="images/type-object-subclasses.png" alt="一个怪物类，派生出龙、巨魔这样的子类。" /></p>
 <aside name="inherits-arrow">
 <p>这里的<img src="images/arrow-inherits.png" class="arrow" alt="一个代表继承的UML箭头。" />意为“从……继承”。</p>
 </aside>
-<p>每个怪物的实例属于某个继承怪物类的类型。
-我们有的品种越多，类层次越高。
-这当然是问题：添加新品种就需要添加新代码，而每个品种都需要被编译为它自己的类型。</p>
+<p>游戏中的每个怪物实例都属于某个派生的怪物类型。
+我们拥有的品种越多，类层次就越庞大。
+这当然是问题所在：添加新品种就意味着添加新代码，而且每个品种都必须作为它自己的类型编译进来。</p>
 <p>这可行，但不是唯一的选项。
 我们也可以重构代码让每个怪物<em>有</em>品种。
 不是让每个品种继承<code>Monster</code>，我们现在有单一的<code>Monster</code>类和<code>Breed</code>类。</p>
@@ -203,358 +201,326 @@ delete the font style for english.
 <aside name="references-arrow">
 <p>这里<img src="images/arrow-references.png" class="arrow" alt="一个代表引用的UML箭头。" />意为“被……引用”。</p>
 </aside>
-<p>这就成了，就两个类。注意这里完全没有继承。
-通过这个系统，游戏中的每个怪物都是<code>Monster</code>的实例。
-<code>Breed</code>类包含了在不同品种怪物间分享的信息：开始血量和攻击字符串。</p>
-<p>为了将怪物与品种相关联，我们给了每个<code>Monster</code>实例对包含品种信息的<code>Breed</code>对象的引用。
-为了获得攻击字符串，一个怪兽可以调用它品种的方法。
-<code>Breed</code>类本质上定义了一个怪物的<em>类型</em>，这就是为啥这个模式叫做类型对象。</p>
-<p>这个模式特别有用的一点是，我们现在可以定义全新的<em>类型</em>而无需搅乱代码库。
-我们本质上将部分的类型系统从硬编码的继承结构中拉出，放到可以在运行时定义的数据中去。</p>
-<p>我们可以通过用不同值实例化<code>Monster</code>来创建成百上千的新品种。
-如果从配置文件读取不同的数据初始化品种，我们就有能力完全靠数据定义新怪物品种。
-这么容易，设计者也可以做到！</p>
+<p>就这么简单，两个类。注意这里完全没有继承。
+通过这个系统，游戏中的每个怪物都只是<code>Monster</code>类的一个实例。
+<code>Breed</code>类包含了同一品种的所有怪物之间共享的信息：起始生命值和攻击字符串。</p>
+<p>为了将怪物与品种关联起来，我们给每个<code>Monster</code>实例一个指向<code>Breed</code>对象的引用，该对象包含该品种的信息。
+为了获得攻击字符串，怪物只需调用其品种上的方法。
+<code>Breed</code>类本质上定义了一个怪物的“类型”。每个品种实例都是一个<em>对象</em>，代表一种不同的概念上的<em>类型</em>，因此这个模式叫做类型对象。</p>
+<p>这个模式尤其强大的地方在于，我们现在可以定义新的事物<em>类型</em>，而完全不会让代码库变得更复杂。
+我们实质上把类型系统的一部分从硬编码的类层次中抽离出来，放进了可以在运行时定义的数据里。</p>
+<p>我们可以通过用不同的值实例化更多<code>Breed</code>实例来创建数百种不同的品种。
+如果我们通过从某个配置文件中读取数据来初始化品种，我们就有能力完全靠数据定义新类型的怪物。
+如此简单，设计者也能做到！</p>
 <h2><a href="#模式" name="模式">模式</a></h2>
 <p>定义<strong>类型对象</strong>类和<strong>有类型的对象</strong>类。每个类型对象实例代表一种不同的逻辑类型。
-每种有类型的对象保存<strong>对描述它类型的类型对象的引用</strong>。</p>
-<p>实例相关的数据被存储在有类型对象的实例中，被同种类分享的数据或者行为存储在类型对象中。
-引用同一类型对象的对象将会像同一类型一样运作。
-这让我们在一组相同的对象间分享行为和数据，就像子类让我们做的那样，但没有固定的硬编码子类集合。</p>
+每个有类型的对象保存<strong>对描述它类型的类型对象的引用</strong>。</p>
+<p>实例相关的数据存储在有类型对象的实例中，而应该在同一个概念类型的所有实例之间共享的数据或行为存储在类型对象中。
+引用同一类型对象的对象会表现得像同一类型一样。
+这让我们能在一组相似的对象之间共享数据和行为，就像子类化让我们做的那样，但不需要一组固定的硬编码子类。</p>
 <h2><a href="#何时使用" name="何时使用">何时使用</a></h2>
-<p>在任何你需要定义不同“种”事物，但是语言自身的类型系统过于僵硬的时候使用该模式。尤其是下面两者之一成立时：</p>
+<p>在任何你需要定义多种不同的“种”事物，但把这些“种”固化到你所用语言的类型系统中又太过死板的时候，这个模式都很有用。尤其是当以下任一条件成立时：</p>
 <ul>
 <li>
-<p>你不知道你后面还需要什么类型。（举个例子，如果你的游戏需要支持资料包，而资料包有新的怪物品种呢？）</p>
+<p>你不知道将来会需要什么类型。（例如，如果我们的游戏需要支持下载包含新怪物品种的内容呢？）</p>
 </li>
 <li>
-<p>想不改变代码或者重新编译就能修改或添加新类型。</p>
+<p>你希望能修改或添加新类型，而无需重新编译或修改代码。</p>
 </li>
 </ul>
 <h2><a href="#记住" name="记住">记住</a></h2>
-<p>这个模型是关于将“类型”的定义从命令式僵硬的语言世界移到灵活但是缺少行为的对象内存世界。
-灵活性很好，但是将类型提到数据丧失了一些东西。</p>
+<p>这个模式是把“类型”的定义从命令式但僵硬的代码语言世界，搬到内存中对象的世界——那里更灵活，但行为也更少。
+灵活性很好，但把类型提升为数据会让你失去一些东西。</p>
 <h3><a href="#需要手动追踪类型对象" name="需要手动追踪类型对象">需要手动追踪类型对象</a></h3>
 <p><span name="vtable"></span></p>
-<p>使用像C++类型系统这种东西的好处之一就是编译器自动记录类的注册。
-定义类的数据自动编译到可执行的静态内存段然后就运作起来了。</p>
-<p>使用类型对象模式，我们现在不但要负责管理内存中的怪物，同时要管理它们的<em>类型</em>
-——我们要保证，只要我的怪物需要，所有的品种对象都能实例化并保存在内存中。
-无论何时创建新的怪物，由我们来保证能初始化为含有品种的引用。</p>
-<p>我们从编译器的限制中解放了自己，但是代价是需要重新实现一些它以前为我们做的事情。</p>
+<p>使用像C++的类型系统这种东西的好处之一，就是编译器会自动处理类的所有簿记工作。
+定义每个类的数据会被自动编译进可执行文件的静态内存段，然后直接就能工作。</p>
+<p>使用类型对象模式后，我们现在不仅要负责管理内存中的怪物，还要管理它们的<em>类型</em>——
+我们必须确保，只要我们的怪物还需要它们，所有品种对象就都被实例化并保留在内存中。
+每当我们创建新怪物时，都有责任确保它被正确地初始化，带有一个指向有效品种的引用。</p>
+<p>我们从编译器的一些限制中解放了自己，但代价是必须重新实现它以前为我们做的一些事情。</p>
 <aside name="vtable">
-<p>C++内部使用了“虚函数表”（“vtable”）实现虚方法。
-虚函数表是个简单的<code>struct</code>，包含了一集合函数指针，每个对应一个类中的虚方法。
-在内存中每个类有一个虚函数表。每个类的实例有一个指针指向它的类的虚函数表。</p>
-<p>当你调用一个虚函数，代码首先在虚函数表中查找对象，然后调用表中函数指针指向的函数。</p>
-<p>听起来很熟悉？虚函数表就是个品种对象，而指向虚函数表的指针是怪物保留的、指向品种的引用。
-C++的类是C中的类型对象，由编译器自动处理。</p>
+<p>在底层，C++的虚方法是使用一种叫做“虚函数表”（简称“vtable”）的东西实现的。
+虚函数表是个简单的<code>struct</code>，包含一组函数指针，每个对应类中的一个虚方法。
+内存中每个类都有一个虚函数表。每个类的实例都有一个指向它所属类的虚函数表的指针。</p>
+<p>当你调用虚函数时，代码首先查找该对象对应的虚函数表，然后调用表中相应函数指针所存储的函数。</p>
+<p>听起来很熟悉？虚函数表就是我们的品种对象，而指向虚函数表的指针就是怪物所持有的指向其品种的那个引用。
+C++类就是把类型对象模式应用在C上的结果，由编译器自动处理。</p>
 </aside>
 <h3><a href="#更难为每种类型定义*行为*" name="更难为每种类型定义*行为*">更难为每种类型定义<em>行为</em></a></h3>
-<p>使用子类派生，你可以重载方法，然后做你想做的事——用程序计算值，调用其他代码，等等。
-天高任鸟飞。如果我们想的话，可以定义一个怪物子类，根据月亮的阶段改变它的攻击字符串。（我觉得就像狼人。）</p>
-<p>当我们使用类型对象模式时，我们将重载的方法替换成了成员变量。
-不再让怪物的子类重载方法，用不同的<em>代码</em>来<em>计算</em>攻击字符串，而是让我们的品种对象在不同的<em>变量</em>中<em>存储</em>攻击字符串。</p>
-<p>这让使用类型对象定义类型相关的<em>数据</em>变得容易，但是定义类型相关的<em>行为</em>变得困难。
-如果，举个例子，不同品种的怪物需要使用不同的AI算法，使用这个模式就面临着挑战。</p>
+<p>使用子类派生，你可以重写方法，然后做任何你想做的事——用程序计算值，调用其他代码，等等。
+天空才是极限。如果我们想的话，可以定义一个怪物子类，让它的攻击字符串根据月相变化。（我猜，这对狼人来说倒是挺方便。）</p>
+<p>当我们使用类型对象模式时，我们把被重写的方法替换成了成员变量。
+不再让怪物子类重写方法，用不同的<em>代码</em>来<em>计算</em>攻击字符串，而是让品种对象在不同的<em>变量</em>中<em>存储</em>攻击字符串。</p>
+<p>这让使用类型对象定义类型特定的<em>数据</em>变得很容易，但定义类型特定的<em>行为</em>变得困难。
+例如，如果不同品种的怪物需要使用不同的AI算法，使用这个模式就变得更具挑战性。</p>
 <p><span name="fn"></span></p>
-<p>有很多方式可以让我们跨越这个限制。
-一个简单的方式是使用预先定义的固定行为，
-然后类型对象中的数据简单地<em>选择</em>它们中的一个。
-举例，假设我们的怪物AI总是处于“站着不动”、“追逐英雄”或者“恐惧地呜咽颤抖”（嘿，他们不可能都是强势的龙）状态。
+<p>有几种方法可以让我们绕开这个限制。
+一个简单的办法是准备一组固定的预定义行为，然后用类型对象中的数据简单地<em>选择</em>其中一个。
+例如，假设我们的怪物AI永远是“站着不动”、“追逐英雄”或“恐惧地呜咽颤抖”（嘿，它们不可能都是强大的龙）。
 我们可以定义函数来实现每种行为。
-然后，我们在方法中存储合适函数的引用，将AI算法与品种相关联。</p>
+然后，我们可以让品种存储指向合适函数的指针，从而将AI算法与品种关联起来。</p>
 <aside name="fn">
-<p>听起来很熟悉？这是在<em>我们的</em>类型对象中实现虚函数表。</p>
+<p>听起来又很熟悉？这下我们又回到在<em>我们的</em>类型对象里真正实现虚函数表了。</p>
 </aside>
 <p><span name="data"></span></p>
-<p>另一个更加彻底的解决方案是真正地在数据中支持定义行为。
-<a class="gof-pattern" href="http://c2.com/cgi-bin/wiki?InterpreterPattern">解释器</a>模式和<a class="pattern" href="bytecode.html">字节码</a>模式让我们定义有行为的对象。
-如果我们读取数据文件并用上面两种模式之一构建数据结构，我们就将行为完全从代码中移出，放入了数据之中。</p>
+<p>另一个更强大的解决方案是真正支持完全在数据中定义行为。
+<a class="gof-pattern" href="http://c2.com/cgi-bin/wiki?InterpreterPattern">解释器</a>模式和<a class="pattern" href="bytecode.html">字节码</a>模式都能让我们构建代表行为的对象。
+如果我们读取数据文件，并用它来为其中一种模式创建数据结构，我们就把行为的定义完全从代码中移出，放进了内容里。</p>
 <aside name="data">
-<p>时过境迁，游戏越来越多地由数据驱动。
-硬件变得更为强大，我们发现比起能榨干多少硬件的性能，瓶颈更多于在能完成多少内容。
-使用64K软盘的时代，挑战是将游戏<em>塞入</em>其中。
-而在使用双面DVD的时代，挑战是用游戏<em>填满</em>它。</p>
-<p>脚本语言和其他定义游戏行为的高层方式能给我们提供必要的生产力，同时只消耗可预期的运行时性能。
-由于硬件越来越好，而大脑并非如此，这种交换越来越有意义。</p>
+<p>随着时间推移，游戏越来越多地由数据驱动。
+硬件变得更强大，而我们发现自己受限制的更多是能创作多少内容，而不是能把硬件压榨到多狠。
+在64K卡带的时代，挑战是把游戏<em>塞进</em>卡带里。
+而在双面DVD的时代，挑战是用游戏<em>填满</em>它。</p>
+<p>脚本语言和其他定义游戏行为的更高层方式能给我们带来急需的生产力提升，代价是运行时性能不那么理想。
+由于硬件一直在变强，而我们的大脑却没有，这种取舍也就越来越说得通了。</p>
 </aside>
 <h2><a href="#示例代码" name="示例代码">示例代码</a></h2>
-<p>在第一遍实现中，让我们从简单的开始，只构建动机那节提到的基础系统。
+<p>在第一遍实现中，让我们从简单的开始，只构建动机一节中描述的基础系统。
 我们从<code>Breed</code>类开始：</p>
-<div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">Breed</span>
+<div class="codehilite"><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Breed</span>
 <span class="p">{</span>
 <span class="k">public</span><span class="o">:</span>
-  <span class="n">Breed</span><span class="p">(</span><span class="kt">int</span> <span class="n">health</span><span class="p">,</span> <span class="k">const</span> <span class="kt">char</span><span class="o">*</span> <span class="n">attack</span><span class="p">)</span>
-  <span class="o">:</span> <span class="n">health_</span><span class="p">(</span><span class="n">health</span><span class="p">),</span>
-    <span class="n">attack_</span><span class="p">(</span><span class="n">attack</span><span class="p">)</span>
-  <span class="p">{}</span>
+<span class="w">  </span><span class="n">Breed</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">health</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="o">*</span><span class="w"> </span><span class="n">attack</span><span class="p">)</span>
+<span class="w">  </span><span class="o">:</span><span class="w"> </span><span class="n">health_</span><span class="p">(</span><span class="n">health</span><span class="p">),</span>
+<span class="w">    </span><span class="n">attack_</span><span class="p">(</span><span class="n">attack</span><span class="p">)</span>
+<span class="w">  </span><span class="p">{}</span>
 
-  <span class="kt">int</span> <span class="n">getHealth</span><span class="p">()</span> <span class="p">{</span> <span class="k">return</span> <span class="n">health_</span><span class="p">;</span> <span class="p">}</span>
-  <span class="k">const</span> <span class="kt">char</span><span class="o">*</span> <span class="n">getAttack</span><span class="p">()</span> <span class="p">{</span> <span class="k">return</span> <span class="n">attack_</span><span class="p">;</span> <span class="p">}</span>
+<span class="w">  </span><span class="kt">int</span><span class="w"> </span><span class="n">getHealth</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="n">health_</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
+<span class="w">  </span><span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="o">*</span><span class="w"> </span><span class="n">getAttack</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="n">attack_</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
 
 <span class="k">private</span><span class="o">:</span>
-  <span class="kt">int</span> <span class="n">health_</span><span class="p">;</span> <span class="c1">// 初始血值</span>
-  <span class="k">const</span> <span class="kt">char</span><span class="o">*</span> <span class="n">attack_</span><span class="p">;</span>
+<span class="w">  </span><span class="kt">int</span><span class="w"> </span><span class="n">health_</span><span class="p">;</span><span class="w"> </span><span class="c1">// 初始血值</span>
+<span class="w">  </span><span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="o">*</span><span class="w"> </span><span class="n">attack_</span><span class="p">;</span>
 <span class="p">};</span>
-</pre></div>
+</code></pre></div>
 
-
-<p>很简单。它基本上只是两个数据字段的容器：起始血量和攻击字符串。
+<p>很简单。它基本上只是两个数据字段的容器：起始生命值和攻击字符串。
 让我们看看怪物怎么使用它：</p>
-<div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">Monster</span>
+<div class="codehilite"><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Monster</span>
 <span class="p">{</span>
 <span class="k">public</span><span class="o">:</span>
-  <span class="n">Monster</span><span class="p">(</span><span class="n">Breed</span><span class="o">&amp;</span> <span class="n">breed</span><span class="p">)</span>
-  <span class="o">:</span> <span class="n">health_</span><span class="p">(</span><span class="n">breed</span><span class="p">.</span><span class="n">getHealth</span><span class="p">()),</span>
-    <span class="n">breed_</span><span class="p">(</span><span class="n">breed</span><span class="p">)</span>
-  <span class="p">{}</span>
+<span class="w">  </span><span class="n">Monster</span><span class="p">(</span><span class="n">Breed</span><span class="o">&amp;</span><span class="w"> </span><span class="n">breed</span><span class="p">)</span>
+<span class="w">  </span><span class="o">:</span><span class="w"> </span><span class="n">health_</span><span class="p">(</span><span class="n">breed</span><span class="p">.</span><span class="n">getHealth</span><span class="p">()),</span>
+<span class="w">    </span><span class="n">breed_</span><span class="p">(</span><span class="n">breed</span><span class="p">)</span>
+<span class="w">  </span><span class="p">{}</span>
 
-  <span class="k">const</span> <span class="kt">char</span><span class="o">*</span> <span class="n">getAttack</span><span class="p">()</span>
-  <span class="p">{</span>
-    <span class="k">return</span> <span class="n">breed_</span><span class="p">.</span><span class="n">getAttack</span><span class="p">();</span>
-  <span class="p">}</span>
+<span class="w">  </span><span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="o">*</span><span class="w"> </span><span class="n">getAttack</span><span class="p">()</span>
+<span class="w">  </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">breed_</span><span class="p">.</span><span class="n">getAttack</span><span class="p">();</span>
+<span class="w">  </span><span class="p">}</span>
 
 <span class="k">private</span><span class="o">:</span>
-  <span class="kt">int</span>    <span class="n">health_</span><span class="p">;</span> <span class="c1">// 当前血值</span>
-  <span class="n">Breed</span><span class="o">&amp;</span> <span class="n">breed_</span><span class="p">;</span>
+<span class="w">  </span><span class="kt">int</span><span class="w">    </span><span class="n">health_</span><span class="p">;</span><span class="w"> </span><span class="c1">// 当前血值</span>
+<span class="w">  </span><span class="n">Breed</span><span class="o">&amp;</span><span class="w"> </span><span class="n">breed_</span><span class="p">;</span>
 <span class="p">};</span>
-</pre></div>
+</code></pre></div>
 
-
-<p>当我们建构怪物时，我们给它一个品种对象的引用。
-它定义了怪物的品种，取代了之前的子类。
-在构造函数中，<code>Monster</code>使用的品种决定了起始血量。
-为了获得攻击字符串，怪物简单地将调用转发给它的品种。</p>
-<p>这段非常简单的代码是这章的核心思路。剩下的任何东西都是红利。</p>
+<p>当我们构造怪物时，我们给它一个指向品种对象的引用。
+这定义了怪物的品种，取代了之前使用的子类。
+在构造函数中，<code>Monster</code>使用品种来决定其起始生命值。
+为了获得攻击字符串，怪物只需把调用转发给它的品种。</p>
+<p>这段非常简单的代码就是这个模式的核心思想。从这里再往后的一切，都算是白赚的。</p>
 <h3><a href="#让类型对象更像类型：构造器" name="让类型对象更像类型：构造器">让类型对象更像类型：构造器</a></h3>
-<p>现在，我们可以直接构造怪物并负责传入它的品种。
-和常用的OOP语言实现的对象相比这有些退步——我们通常不会分配一块空白内存，然后<em>赋予</em>它类型。
-相反，我们根据类调用构造器，它负责创建一个新实例。</p>
+<p>按照现在的方式，我们直接构造怪物，并负责传入它的品种。
+这与大多数OOP语言中普通对象的实例化方式有点反过来了——我们通常不会先分配一块空白内存，然后再<em>赋予</em>它所属的类。
+相反，我们在类本身上调用构造函数，它负责给我们一个新实例。</p>
 <p><span name="pattern"></span></p>
 <p>我们可以在类型对象上应用同样的模式。</p>
-<div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">Breed</span>
+<div class="codehilite"><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Breed</span>
 <span class="p">{</span>
 <span class="k">public</span><span class="o">:</span>
-  <span class="n">Monster</span><span class="o">*</span> <span class="n">newMonster</span><span class="p">()</span> <span class="p">{</span> <span class="k">return</span> <span class="k">new</span> <span class="n">Monster</span><span class="p">(</span><span class="o">*</span><span class="k">this</span><span class="p">);</span> <span class="p">}</span>
+<span class="w">  </span><span class="n">Monster</span><span class="o">*</span><span class="w"> </span><span class="n">newMonster</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">Monster</span><span class="p">(</span><span class="o">*</span><span class="k">this</span><span class="p">);</span><span class="w"> </span><span class="p">}</span>
 
-  <span class="c1">// Previous Breed code...</span>
+<span class="w">  </span><span class="c1">// Previous Breed code...</span>
 <span class="p">};</span>
-</pre></div>
-
+</code></pre></div>
 
 <aside name="pattern">
-<p>“模式”一词用在这里正合适。我们讨论的是设计模式中经典的模式：<a class="gof-pattern" href="http://c2.com/cgi/wiki?FactoryMethodPattern">工厂方法</a>。</p>
+<p>“模式”一词用在这里正合适。我们讨论的是《设计模式：可复用面向对象软件的基础》中的经典模式之一：<a class="gof-pattern" href="http://c2.com/cgi/wiki?FactoryMethodPattern">工厂方法</a>。</p>
 <p>在一些语言中，这个模式被用来构造<em>所有</em>的对象。
 在Ruby，Smalltalk，Objective-C以及其他类是对象的语言中，你通过在类对象本身上调用方法来构建实例。</p>
 </aside>
 <p>以及那个使用它们的类：</p>
-<div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">Monster</span>
+<div class="codehilite"><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Monster</span>
 <span class="p">{</span>
-  <span class="k">friend</span> <span class="k">class</span> <span class="nc">Breed</span><span class="p">;</span>
+<span class="w">  </span><span class="k">friend</span><span class="w"> </span><span class="k">class</span><span class="w"> </span><span class="nc">Breed</span><span class="p">;</span>
 
 <span class="k">public</span><span class="o">:</span>
-  <span class="k">const</span> <span class="kt">char</span><span class="o">*</span> <span class="n">getAttack</span><span class="p">()</span> <span class="p">{</span> <span class="k">return</span> <span class="n">breed_</span><span class="p">.</span><span class="n">getAttack</span><span class="p">();</span> <span class="p">}</span>
+<span class="w">  </span><span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="o">*</span><span class="w"> </span><span class="n">getAttack</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="n">breed_</span><span class="p">.</span><span class="n">getAttack</span><span class="p">();</span><span class="w"> </span><span class="p">}</span>
 
 <span class="k">private</span><span class="o">:</span>
-  <span class="n">Monster</span><span class="p">(</span><span class="n">Breed</span><span class="o">&amp;</span> <span class="n">breed</span><span class="p">)</span>
-  <span class="o">:</span> <span class="n">health_</span><span class="p">(</span><span class="n">breed</span><span class="p">.</span><span class="n">getHealth</span><span class="p">()),</span>
-    <span class="n">breed_</span><span class="p">(</span><span class="n">breed</span><span class="p">)</span>
-  <span class="p">{}</span>
+<span class="w">  </span><span class="n">Monster</span><span class="p">(</span><span class="n">Breed</span><span class="o">&amp;</span><span class="w"> </span><span class="n">breed</span><span class="p">)</span>
+<span class="w">  </span><span class="o">:</span><span class="w"> </span><span class="n">health_</span><span class="p">(</span><span class="n">breed</span><span class="p">.</span><span class="n">getHealth</span><span class="p">()),</span>
+<span class="w">    </span><span class="n">breed_</span><span class="p">(</span><span class="n">breed</span><span class="p">)</span>
+<span class="w">  </span><span class="p">{}</span>
 
-  <span class="kt">int</span> <span class="n">health_</span><span class="p">;</span> <span class="c1">// 当前血值</span>
-  <span class="n">Breed</span><span class="o">&amp;</span> <span class="n">breed_</span><span class="p">;</span>
+<span class="w">  </span><span class="kt">int</span><span class="w"> </span><span class="n">health_</span><span class="p">;</span><span class="w"> </span><span class="c1">// 当前血值</span>
+<span class="w">  </span><span class="n">Breed</span><span class="o">&amp;</span><span class="w"> </span><span class="n">breed_</span><span class="p">;</span>
 <span class="p">};</span>
-</pre></div>
-
+</code></pre></div>
 
 <p><span name="friend"></span></p>
-<p>不同的关键点在于<code>Breed</code>中的<code>newMonster()</code>。
-这是我们的“构造器”工厂方法。使用我们原先的实现，就像这样创建怪物：</p>
+<p>关键的区别在于<code>Breed</code>中的<code>newMonster()</code>函数。
+这是我们的“构造器”工厂方法。使用我们原先的实现，创建怪物看起来像：</p>
 <aside name="friend">
 <p>这里还有一个小小的不同。
-因为样例代码由C++写就，我们可以使用一个小小的特性：<em>友类</em>。</p>
-<p>我们让<code>Monster</code>的构造器成为私有，防止了任何人直接调用它。
-友类放松了这个限制，<code>Breed</code>仍可接触它。
-这意味着构造怪物的<em>唯一</em>方法是通过<code>newMonster()</code>。</p>
+因为示例代码是用C++写的，我们可以使用一个方便的小特性：<em>友元类</em>。</p>
+<p>我们让<code>Monster</code>的构造函数成为私有，防止任何人直接调用它。
+友元类绕过了这个限制，<code>Breed</code>仍能访问它。
+这意味着创建怪物的<em>唯一</em>方法是通过<code>newMonster()</code>。</p>
 </aside>
-<div class="codehilite"><pre><span></span><span class="n">Monster</span><span class="o">*</span> <span class="n">monster</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Monster</span><span class="p">(</span><span class="n">someBreed</span><span class="p">);</span>
-</pre></div>
-
+<div class="codehilite"><pre><span></span><code><span class="n">Monster</span><span class="o">*</span><span class="w"> </span><span class="n">monster</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">Monster</span><span class="p">(</span><span class="n">someBreed</span><span class="p">);</span>
+</code></pre></div>
 
 <p>在我们改动后，它看上去是这样：</p>
-<div class="codehilite"><pre><span></span><span class="n">Monster</span><span class="o">*</span> <span class="n">monster</span> <span class="o">=</span> <span class="n">someBreed</span><span class="p">.</span><span class="n">newMonster</span><span class="p">();</span>
-</pre></div>
-
+<div class="codehilite"><pre><span></span><code><span class="n">Monster</span><span class="o">*</span><span class="w"> </span><span class="n">monster</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">someBreed</span><span class="p">.</span><span class="n">newMonster</span><span class="p">();</span>
+</code></pre></div>
 
 <p>所以，为什么这么做？创建一个对象分为两步：内存分配和初始化。
-<code>Monster</code>的构造器让我们做完了所有需要的初始化。
-在例子中，那只存储了类型；但是在完整的游戏中，那需要加载图形，初始化怪物AI以及做其他的设置工作。</p>
-<p>但是，那都发生在内存分配<em>之后</em>。
-在构造器调用前，我们已经找到了内存放置怪物。
-在游戏中，我们通常也想控制对象创造这一环节：
-我们通常使用自定义的分配器或者<a class="pattern" href="object-pool.html">对象池</a>模式来控制对象最终在内存中的位置。</p>
-<p>在<code>Breed</code>中定义“构造器”函数给了我们地方实现这些逻辑。
-不是简单地调用<code>new</code>,<code>newMonster()</code>函数可以在将控制权传递给<code>Monster</code>初始化之前，从池中或堆中获取内存。
-通过在<em>唯一</em>有能力创建怪物的<code>Breed</code>函数中放置这些逻辑，
-我们保证了所有怪物变量遵守了内存管理规范。</p>
-<h3><a href="#通过继承分享数据" name="通过继承分享数据">通过继承分享数据</a></h3>
-<p>我们现在已经实现了能完美服务的类型对象系统，但是它非常基础。
-我们的游戏最终有<em>上百</em>种不同品种，每种都有成打的特性。
-如果设计者想要协调30种不同的巨魔，让它们变得强壮一点，他会得处理很多数据。</p>
-<p>能帮上忙的是在不同<em>品种</em>间分享属性的能力，一如品种在不同的<em>怪物</em>间分享属性的能力。
-就像我们在之前OOP方案中做的那样，我们可以使用派生完成这点。
-只是，这次，不使用语言的继承机制，我们用类型对象实现它。</p>
+<code>Monster</code>的构造函数让我们做完了所有需要的初始化。
+在我们的例子中，那只是存储品种；但在完整的游戏中，还需要加载图形、初始化怪物AI以及做其他设置工作。</p>
+<p>但是，那一切都发生在内存分配<em>之后</em>。
+在构造函数被调用之前，我们已经有一块可以放入怪物的内存。
+在游戏中，我们通常也想控制对象创建的这一方面：
+我们通常会使用自定义分配器或<a class="pattern" href="object-pool.html">对象池</a>模式来控制对象最终位于内存中的什么位置。</p>
+<p>在<code>Breed</code>中定义“构造器”函数，给了我们放置这些逻辑的地方。
+<code>newMonster()</code>函数不再简单地调用<code>new</code>，它可以在把控制权交给<code>Monster</code>进行初始化之前，从池或自定义堆中获取内存。
+通过把这段逻辑放进<code>Breed</code>中这个唯一有能力创建怪物的函数里，我们确保所有怪物都经过我们想要的内存管理方案。</p>
+<h3><a href="#通过继承共享数据" name="通过继承共享数据">通过继承共享数据</a></h3>
+<p>我们现在已经实现了一个完全可用的类型对象系统，但它非常基础。
+我们的游戏最终会有<em>数百</em>种不同的品种，每种都有几十个属性。
+如果设计者想要调整全部三十种不同的巨魔品种，让它们变得强壮一点，她将面对大量繁琐的数据录入工作。</p>
+<p>能帮上忙的是在多个<em>品种</em>之间共享属性的能力，正如品种让我们在多个<em>怪物</em>之间共享属性一样。
+就像我们之前的OOP方案那样，我们可以用继承来解决这个问题。
+只是这一次，我们不再使用语言的继承机制，而是在类型对象内部自己实现它。</p>
 <p>简单起见，我们只支持单继承。
 就像类可以有一个父类，我们允许品种有一个父品种：</p>
-<div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">Breed</span>
+<div class="codehilite"><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Breed</span>
 <span class="p">{</span>
 <span class="k">public</span><span class="o">:</span>
-  <span class="n">Breed</span><span class="p">(</span><span class="n">Breed</span><span class="o">*</span> <span class="n">parent</span><span class="p">,</span> <span class="kt">int</span> <span class="n">health</span><span class="p">,</span> <span class="k">const</span> <span class="kt">char</span><span class="o">*</span> <span class="n">attack</span><span class="p">)</span>
-  <span class="o">:</span> <span class="n">parent_</span><span class="p">(</span><span class="n">parent</span><span class="p">),</span>
-    <span class="n">health_</span><span class="p">(</span><span class="n">health</span><span class="p">),</span>
-    <span class="n">attack_</span><span class="p">(</span><span class="n">attack</span><span class="p">)</span>
-  <span class="p">{}</span>
+<span class="w">  </span><span class="n">Breed</span><span class="p">(</span><span class="n">Breed</span><span class="o">*</span><span class="w"> </span><span class="n">parent</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">health</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="o">*</span><span class="w"> </span><span class="n">attack</span><span class="p">)</span>
+<span class="w">  </span><span class="o">:</span><span class="w"> </span><span class="n">parent_</span><span class="p">(</span><span class="n">parent</span><span class="p">),</span>
+<span class="w">    </span><span class="n">health_</span><span class="p">(</span><span class="n">health</span><span class="p">),</span>
+<span class="w">    </span><span class="n">attack_</span><span class="p">(</span><span class="n">attack</span><span class="p">)</span>
+<span class="w">  </span><span class="p">{}</span>
 
-  <span class="kt">int</span>         <span class="n">getHealth</span><span class="p">();</span>
-  <span class="k">const</span> <span class="kt">char</span><span class="o">*</span> <span class="nf">getAttack</span><span class="p">();</span>
+<span class="w">  </span><span class="kt">int</span><span class="w">         </span><span class="n">getHealth</span><span class="p">();</span>
+<span class="w">  </span><span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="o">*</span><span class="w"> </span><span class="nf">getAttack</span><span class="p">();</span>
 
 <span class="k">private</span><span class="o">:</span>
-  <span class="n">Breed</span><span class="o">*</span>      <span class="n">parent_</span><span class="p">;</span>
-  <span class="kt">int</span>         <span class="n">health_</span><span class="p">;</span> <span class="c1">// 初始血值</span>
-  <span class="k">const</span> <span class="kt">char</span><span class="o">*</span> <span class="n">attack_</span><span class="p">;</span>
+<span class="w">  </span><span class="n">Breed</span><span class="o">*</span><span class="w">      </span><span class="n">parent_</span><span class="p">;</span>
+<span class="w">  </span><span class="kt">int</span><span class="w">         </span><span class="n">health_</span><span class="p">;</span><span class="w"> </span><span class="c1">// 初始血值</span>
+<span class="w">  </span><span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="o">*</span><span class="w"> </span><span class="n">attack_</span><span class="p">;</span>
 <span class="p">};</span>
-</pre></div>
+</code></pre></div>
 
-
-<p>当我们构建一个品种，我们先传入它继承的父品种。
-我们可以为基础品种传入<code>NULL</code>表明它没有祖先。</p>
-<p>为了让这有用，子品种需要控制它从父品种继承了哪些属性，以及哪些属性需要重载并由自己指定。
-在我们的示例系统中，我们可以说品种用非零值重载了怪物的健康，用非空字符串重载了攻击字符串。
-否则，这些属性要从它的父品种里继承。</p>
+<p>当我们构造一个品种时，我们给它一个它要继承的父品种。
+对于没有祖先的基础品种，我们可以传入<code>NULL</code>。</p>
+<p>为了让这变得有用，子品种需要控制哪些属性从父品种继承，哪些属性由自己重写并指定。
+在我们的示例系统中，我们说品种通过一个非零值来重写怪物的生命值，通过一个非<code>NULL</code>字符串来重写攻击。
+否则，属性就会从父品种继承。</p>
 <p>实现方式有两种。
 一种是每次属性被请求时动态处理委托，就像这样：</p>
-<div class="codehilite"><pre><span></span><span class="kt">int</span> <span class="n">Breed</span><span class="o">::</span><span class="n">getHealth</span><span class="p">()</span>
+<div class="codehilite"><pre><span></span><code><span class="kt">int</span><span class="w"> </span><span class="nf">Breed::getHealth</span><span class="p">()</span>
 <span class="p">{</span>
-  <span class="c1">// 重载</span>
-  <span class="k">if</span> <span class="p">(</span><span class="n">health_</span> <span class="o">!=</span> <span class="mi">0</span> <span class="o">||</span> <span class="n">parent_</span> <span class="o">==</span> <span class="nb">NULL</span><span class="p">)</span> <span class="k">return</span> <span class="n">health_</span><span class="p">;</span>
+<span class="w">  </span><span class="c1">// 重载</span>
+<span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">health_</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="n">parent_</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="nb">NULL</span><span class="p">)</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="n">health_</span><span class="p">;</span>
 
-  <span class="c1">// 继承</span>
-  <span class="k">return</span> <span class="n">parent_</span><span class="o">-&gt;</span><span class="n">getHealth</span><span class="p">();</span>
+<span class="w">  </span><span class="c1">// 继承</span>
+<span class="w">  </span><span class="k">return</span><span class="w"> </span><span class="n">parent_</span><span class="o">-&gt;</span><span class="n">getHealth</span><span class="p">();</span>
 <span class="p">}</span>
 
-<span class="k">const</span> <span class="kt">char</span><span class="o">*</span> <span class="n">Breed</span><span class="o">::</span><span class="n">getAttack</span><span class="p">()</span>
+<span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="o">*</span><span class="w"> </span><span class="nf">Breed::getAttack</span><span class="p">()</span>
 <span class="p">{</span>
-  <span class="c1">// 重载</span>
-  <span class="k">if</span> <span class="p">(</span><span class="n">attack_</span> <span class="o">!=</span> <span class="nb">NULL</span> <span class="o">||</span> <span class="n">parent_</span> <span class="o">==</span> <span class="nb">NULL</span><span class="p">)</span> <span class="k">return</span> <span class="n">attack_</span><span class="p">;</span>
+<span class="w">  </span><span class="c1">// 重载</span>
+<span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">attack_</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="nb">NULL</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="n">parent_</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="nb">NULL</span><span class="p">)</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="n">attack_</span><span class="p">;</span>
 
-  <span class="c1">// 继承</span>
-  <span class="k">return</span> <span class="n">parent_</span><span class="o">-&gt;</span><span class="n">getAttack</span><span class="p">();</span>
+<span class="w">  </span><span class="c1">// 继承</span>
+<span class="w">  </span><span class="k">return</span><span class="w"> </span><span class="n">parent_</span><span class="o">-&gt;</span><span class="n">getAttack</span><span class="p">();</span>
 <span class="p">}</span>
-</pre></div>
+</code></pre></div>
 
-
-<p>如果品种在运行时修改种类，不再重载，或者不再继承某些属性时，这能保证做正确的事。
-另一方面，这要更多的内存（它需要保存指向它的父品种的指针）而且更慢。
-每次你查找属性都需要回溯继承链。</p>
-<p>如果我们可以保证品种的属性不变，一个更快的解决方案是在<em>构造时</em>使用继承。
-这被称为“复制”委托，因为在创建对象时，我们<em>复制</em>继承的属性<em>到</em>推导的类型。它看上去是这样的：</p>
-<div class="codehilite"><pre><span></span><span class="n">Breed</span><span class="p">(</span><span class="n">Breed</span><span class="o">*</span> <span class="n">parent</span><span class="p">,</span> <span class="kt">int</span> <span class="n">health</span><span class="p">,</span> <span class="k">const</span> <span class="kt">char</span><span class="o">*</span> <span class="n">attack</span><span class="p">)</span>
-<span class="o">:</span> <span class="n">health_</span><span class="p">(</span><span class="n">health</span><span class="p">),</span>
-  <span class="n">attack_</span><span class="p">(</span><span class="n">attack</span><span class="p">)</span>
+<p>这样做的好处是：如果品种在运行时被修改为不再重写或不再继承某个属性，它也能正确地处理。
+另一方面，它要多占用一些内存（它必须保留一个指向父品种的指针），而且更慢。
+每次查找属性时，它都必须沿着继承链向上回溯。</p>
+<p>如果我们能保证品种的属性不会改变，一个更快的解决方案是在<em>构造时</em>应用继承。
+这被称为“向下复制”委托，因为我们在创建派生类型时，把继承来的属性<em>向下复制</em>进去。它看上去是这样的：</p>
+<div class="codehilite"><pre><span></span><code><span class="n">Breed</span><span class="p">(</span><span class="n">Breed</span><span class="o">*</span><span class="w"> </span><span class="n">parent</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">health</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="o">*</span><span class="w"> </span><span class="n">attack</span><span class="p">)</span>
+<span class="o">:</span><span class="w"> </span><span class="n">health_</span><span class="p">(</span><span class="n">health</span><span class="p">),</span>
+<span class="w">  </span><span class="n">attack_</span><span class="p">(</span><span class="n">attack</span><span class="p">)</span>
 <span class="p">{</span>
-  <span class="c1">// 继承没有重载的属性</span>
-  <span class="k">if</span> <span class="p">(</span><span class="n">parent</span> <span class="o">!=</span> <span class="nb">NULL</span><span class="p">)</span>
-  <span class="p">{</span>
-    <span class="k">if</span> <span class="p">(</span><span class="n">health</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span> <span class="n">health_</span> <span class="o">=</span> <span class="n">parent</span><span class="o">-&gt;</span><span class="n">getHealth</span><span class="p">();</span>
-    <span class="k">if</span> <span class="p">(</span><span class="n">attack</span> <span class="o">==</span> <span class="nb">NULL</span><span class="p">)</span> <span class="n">attack_</span> <span class="o">=</span> <span class="n">parent</span><span class="o">-&gt;</span><span class="n">getAttack</span><span class="p">();</span>
-  <span class="p">}</span>
+<span class="w">  </span><span class="c1">// 继承没有重载的属性</span>
+<span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">parent</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="nb">NULL</span><span class="p">)</span>
+<span class="w">  </span><span class="p">{</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">health</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="w"> </span><span class="n">health_</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">parent</span><span class="o">-&gt;</span><span class="n">getHealth</span><span class="p">();</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">attack</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="nb">NULL</span><span class="p">)</span><span class="w"> </span><span class="n">attack_</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">parent</span><span class="o">-&gt;</span><span class="n">getAttack</span><span class="p">();</span>
+<span class="w">  </span><span class="p">}</span>
 <span class="p">}</span>
-</pre></div>
+</code></pre></div>
 
-
-<p>注意现在我们不再需要给父品种的字段了。
-一旦构造器完成，我们可以忘了父品种，因为我们已经拷贝了它的所有属性。
-为了获得品种的属性，我们现在直接返回字段：</p>
-<div class="codehilite"><pre><span></span><span class="kt">int</span>         <span class="nf">getHealth</span><span class="p">()</span> <span class="p">{</span> <span class="k">return</span> <span class="n">health_</span><span class="p">;</span> <span class="p">}</span>
-<span class="k">const</span> <span class="kt">char</span><span class="o">*</span> <span class="nf">getAttack</span><span class="p">()</span> <span class="p">{</span> <span class="k">return</span> <span class="n">attack_</span><span class="p">;</span> <span class="p">}</span>
-</pre></div>
-
+<p>注意，现在我们不再需要指向父品种的字段了。
+一旦构造函数完成，我们就可以忘掉父品种，因为我们已经把它的所有属性都复制了进来。
+为了访问品种的属性，现在我们只需直接返回字段：</p>
+<div class="codehilite"><pre><span></span><code><span class="kt">int</span><span class="w">         </span><span class="nf">getHealth</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="n">health_</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
+<span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="o">*</span><span class="w"> </span><span class="nf">getAttack</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="n">attack_</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
+</code></pre></div>
 
 <p>又好又快！</p>
-<p>假设游戏引擎从品种的JSON文件加载设置然后创建类型。它看上去是这样的：</p>
-<div class="codehilite"><pre><span></span><span class="p">{</span>
-  <span class="nt">&quot;Troll&quot;</span><span class="p">:</span> <span class="p">{</span>
-    <span class="nt">&quot;health&quot;</span><span class="p">:</span> <span class="mi">25</span><span class="p">,</span>
-    <span class="nt">&quot;attack&quot;</span><span class="p">:</span> <span class="s2">&quot;The troll hits you!&quot;</span>
-  <span class="p">},</span>
-  <span class="nt">&quot;Troll Archer&quot;</span><span class="p">:</span> <span class="p">{</span>
-    <span class="nt">&quot;parent&quot;</span><span class="p">:</span> <span class="s2">&quot;Troll&quot;</span><span class="p">,</span>
-    <span class="nt">&quot;health&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
-    <span class="nt">&quot;attack&quot;</span><span class="p">:</span> <span class="s2">&quot;The troll archer fires an arrow!&quot;</span>
-  <span class="p">},</span>
-  <span class="nt">&quot;Troll Wizard&quot;</span><span class="p">:</span> <span class="p">{</span>
-    <span class="nt">&quot;parent&quot;</span><span class="p">:</span> <span class="s2">&quot;Troll&quot;</span><span class="p">,</span>
-    <span class="nt">&quot;health&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
-    <span class="nt">&quot;attack&quot;</span><span class="p">:</span> <span class="s2">&quot;The troll wizard casts a spell on you!&quot;</span>
-  <span class="p">}</span>
+<p>假设我们的游戏引擎通过加载一个定义品种的JSON文件来创建这些品种。它看上去是这样的：</p>
+<div class="codehilite"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;Troll&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;health&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">25</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;attack&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;The troll hits you!&quot;</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="w">  </span><span class="nt">&quot;Troll Archer&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;parent&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Troll&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;health&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;attack&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;The troll archer fires an arrow!&quot;</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="w">  </span><span class="nt">&quot;Troll Wizard&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;parent&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Troll&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;health&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;attack&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;The troll wizard casts a spell on you!&quot;</span>
+<span class="w">  </span><span class="p">}</span>
 <span class="p">}</span>
+</code></pre></div>
 
-<span class="err">:::json</span>
-<span class="p">{</span>
-  <span class="nt">&quot;Troll&quot;</span><span class="p">:</span> <span class="p">{</span>
-    <span class="nt">&quot;health&quot;</span><span class="p">:</span> <span class="mi">25</span><span class="p">,</span>
-    <span class="nt">&quot;attack&quot;</span><span class="p">:</span> <span class="s2">&quot;The troll hits you!&quot;</span>
-  <span class="p">},</span>
-  <span class="nt">&quot;Troll Archer&quot;</span><span class="p">:</span> <span class="p">{</span>
-    <span class="nt">&quot;parent&quot;</span><span class="p">:</span> <span class="s2">&quot;Troll&quot;</span><span class="p">,</span>
-    <span class="nt">&quot;health&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
-    <span class="nt">&quot;attack&quot;</span><span class="p">:</span> <span class="s2">&quot;The troll archer fires an arrow!&quot;</span>
-  <span class="p">},</span>
-  <span class="nt">&quot;Troll Wizard&quot;</span><span class="p">:</span> <span class="p">{</span>
-    <span class="nt">&quot;parent&quot;</span><span class="p">:</span> <span class="s2">&quot;Troll&quot;</span><span class="p">,</span>
-    <span class="nt">&quot;health&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
-    <span class="nt">&quot;attack&quot;</span><span class="p">:</span> <span class="s2">&quot;The troll wizard casts a spell on you!&quot;</span>
-  <span class="p">}</span>
-<span class="p">}</span>
-</pre></div>
-
-
-<p>我们有一段代码读取每个品种，用新数据实例化品种实例。
-就像你从<code>"parent": "Troll"</code>字段看到的， <code>Troll Archer</code>和<code>Troll Wizard</code>品种都由基础<code>Troll</code>品种继承而来。</p>
-<p>由于派生类的初始血量都是0，所以该值从基础<code>Troll</code>品种继承。
-这意味着无论怎么调整<code>Troll</code>的血量，三个品种的血量都会被更新。
-随着品种的数量和属性的数量增加，这节约了很多时间。
-现在，通过一小块代码，系统给了设计者控制权，让他们能好好利用时间。
-与此同时，我们可以回去编码其他特性了。</p>
+<p>我们会有一段代码，读取每个品种条目，并用其数据实例化新的品种实例。
+正如你从<code>"parent": "Troll"</code>字段中看到的，<code>Troll Archer</code>和<code>Troll Wizard</code>品种都继承自基础<code>Troll</code>品种。</p>
+<p>由于这两个品种的生命值都是0，所以它们会从基础<code>Troll</code>品种继承该值。
+这意味着现在我们的设计者只需调整<code>Troll</code>的生命值，三个品种就都会被更新。
+随着品种数量以及每个品种属性数量的增加，这能节省大量时间。
+现在，通过一小块代码，我们有了一个开放的系统，把控制权交到设计者手中，并充分利用他们的时间。
+与此同时，我们可以回去编写其他功能了。</p>
 <h2><a href="#设计决策" name="设计决策">设计决策</a></h2>
 <p>类型对象模式让我们建立类型系统，就好像在设计自己的编程语言。
 设计空间是开放的，我们可以做很多有趣的事情。</p>
-<p>在实践中，有些东西打破了我们的幻想。
-时间和可维护性阻止我们创建特别复杂的东西。
-更重要的是，无论如何设计类型系统，用户（通常不是程序员）要能轻松地理解它。
-我们将其做得越简单，它就越有用。
-所以我们在这里谈到的是已经反复探索的领域，开辟新路就留给学者和探索者吧。</p>
+<p>在实践中，有一些因素会抑制我们的奇思妙想。
+时间和可维护性会阻止我们做出特别复杂的设计。
+更重要的是，无论我们设计出什么样的类型对象系统，用户（通常不是程序员）都要能轻松地理解它。
+我们把它做得越简单，它就越有用。
+所以我们在这里要讨论的是已被反复探索的设计空间，而把遥远的边界留给学者和探索者。</p>
 <h3><a href="#类型对象是封装的还是暴露的？" name="类型对象是封装的还是暴露的？">类型对象是封装的还是暴露的？</a></h3>
-<p>在我们的简单实现中，<code>Monster</code>有一个对品种的引用，但是它没有显式暴露这个引用。
+<p>在我们的示例实现中，<code>Monster</code>有一个对品种的引用，但它没有公开暴露这个引用。
 外部代码不能直接获取怪物的品种。
-从代码库的角度看来，怪物事实上是没有类型的，事实上它们拥有品种只是个实现细节。</p>
+从代码库的角度看，怪物本质上没有类型，它们拥有品种这一事实只是一个实现细节。</p>
 <p>我们可以很容易地改变这点，让<code>Monster</code>返回它的<code>Breed</code>：</p>
 <p><span name="null"></span></p>
-<div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">Monster</span>
+<div class="codehilite"><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Monster</span>
 <span class="p">{</span>
 <span class="k">public</span><span class="o">:</span>
-  <span class="n">Breed</span><span class="o">&amp;</span> <span class="n">getBreed</span><span class="p">()</span> <span class="p">{</span> <span class="k">return</span> <span class="n">breed_</span><span class="p">;</span> <span class="p">}</span>
+<span class="w">  </span><span class="n">Breed</span><span class="o">&amp;</span><span class="w"> </span><span class="n">getBreed</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="n">breed_</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
 
-  <span class="c1">// 当前的代码……</span>
+<span class="w">  </span><span class="c1">// 当前的代码……</span>
 <span class="p">};</span>
-</pre></div>
-
+</code></pre></div>
 
 <aside name="null">
-<p>在本书的另一个例子中，我们遵守了惯例，返回对象的引用而不是对象的指针，保证了永远不会返回<code>NULL</code>。</p>
+<p>与本书中的其他示例一样，我们遵循一个惯例：返回对象的引用而不是指针，向用户表明永远不会返回<code>NULL</code>。</p>
 </aside>
 <p>这样做改变了<code>Monster</code>的设计。
-事实是所有怪物都拥有品种是API的可见部分了，下面是这两者各自的好处：</p>
+所有怪物都拥有品种这一事实现在成了其API中公开可见的一部分。两种选择各有好处：</p>
 <ul>
 <li>
 <p><strong>如果类型对象是封装的：</strong></p>
@@ -564,26 +530,25 @@ C++的类是C中的类型对象，由编译器自动处理。</p>
   它成为了只有有类型的对象才需要考虑的实现细节。</p>
 </li>
 <li>
-<p><em>有类型的对象可以选择性地修改类型对象的重载行为</em>。
-  假设我们想要怪物在它接近死亡时改变它的攻击字符串。
-  由于攻击字符串总是通过<code>Monster</code>获取的，我们有一个方便的地方放置代码：</p>
-<div class="codehilite"><pre><span></span><span class="k">const</span> <span class="kt">char</span><span class="o">*</span> <span class="n">Monster</span><span class="o">::</span><span class="n">getAttack</span><span class="p">()</span>
+<p><em>有类型的对象可以选择性地重写来自类型对象的行为</em>。
+  假设我们想要怪物在濒临死亡时改变它的攻击字符串。
+  由于攻击字符串总是通过<code>Monster</code>访问的，我们有一个方便的地方放置这段代码：</p>
+<div class="codehilite"><pre><span></span><code><span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="o">*</span><span class="w"> </span><span class="nf">Monster::getAttack</span><span class="p">()</span>
 <span class="p">{</span>
-  <span class="k">if</span> <span class="p">(</span><span class="n">health_</span> <span class="o">&lt;</span> <span class="n">LOW_HEALTH</span><span class="p">)</span>
-  <span class="p">{</span>
-    <span class="k">return</span> <span class="s">&quot;The monster flails weakly.&quot;</span><span class="p">;</span>
-  <span class="p">}</span>
+<span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">health_</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">LOW_HEALTH</span><span class="p">)</span>
+<span class="w">  </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="s">&quot;The monster flails weakly.&quot;</span><span class="p">;</span>
+<span class="w">  </span><span class="p">}</span>
 
-  <span class="k">return</span> <span class="n">breed_</span><span class="p">.</span><span class="n">getAttack</span><span class="p">();</span>
+<span class="w">  </span><span class="k">return</span><span class="w"> </span><span class="n">breed_</span><span class="p">.</span><span class="n">getAttack</span><span class="p">();</span>
 <span class="p">}</span>
-</pre></div>
-
+</code></pre></div>
 
 <p>如果外部代码直接调用品种的<code>getAttack()</code>，我们就没有机会能插入逻辑。</p>
 </li>
 <li>
-<p><em>我们得为每个类型对象暴露的方法写转发。</em>
-  这是这个设计的冗长之处。如果类型对象有很多方法，对象类也得为每一个方法建立属于自己的公共可见方法。</p>
+<p><em>我们得为类型对象暴露的每一样东西编写转发方法。</em>
+  这是这个设计繁琐的地方。如果类型对象类有大量方法，对象类就不得不为每一个我们想要公开可见的方法都拥有自己的方法。</p>
 </li>
 </ul>
 </li>
@@ -591,59 +556,59 @@ C++的类是C中的类型对象，由编译器自动处理。</p>
 <p><strong>如果类型对象是暴露的：</strong></p>
 <ul>
 <li>
-<p><em>外部代码可以与类型对象直接交互，无需拥有类型对象的实例。</em>
-  如果类型对象是封装的，那么没有一个拥有它的对象就没法使用它。
-  这阻止我们使用构造器模式这样的方法，在品种上调用方法来创建新怪物。
-  如果用户不能直接获得品种，他们就没办法调用它。</p>
+<p><em>外部代码可以在没有有类型类实例的情况下直接与类型对象交互。</em>
+  如果类型对象是封装的，那么除非有一个包裹它的有类型对象，否则没法使用它。
+  例如，这会阻止我们使用构造器模式——即通过在品种上调用方法来创建新怪物。
+  如果用户不能直接拿到品种，他们就没办法调用它。</p>
 </li>
 <li>
 <p><em>类型对象现在是对象公共API的一部分了。</em>
-  大体上，窄接口比宽接口更容易掌控——你暴露给代码库其他部分的越少，你需要处理的复杂度和维护工作就越少。
-  通过暴露类型对象，我们扩宽了对象的API，包含了所有类型对象提供的东西。</p>
+  大体上，窄接口比宽接口更容易维护——你暴露给代码库其他部分的东西越少，需要处理的复杂度和维护工作就越少。
+  通过暴露类型对象，我们扩大了对象的API，使其包含类型对象提供的所有东西。</p>
 </li>
 </ul>
 </li>
 </ul>
 <h3><a href="#有类型的对象是如何创建的？" name="有类型的对象是如何创建的？">有类型的对象是如何创建的？</a></h3>
-<p>使用这个模式，每个“对象”现在都是一对对象：主对象和它的类型对象。
-所以我们怎样创建并绑定两者呢？</p>
+<p>使用这个模式，每个“对象”现在都是一对对象：主对象和它所使用的类型对象。
+那么我们如何把这两者创建并绑定在一起呢？</p>
 <ul>
 <li>
 <p><strong>构造对象然后传入类型对象：</strong></p>
 <ul>
 <li><em>外部代码可以控制分配。</em>
-  由于调用代码也是构建对象的代码，它可以控制其内存位置。
-  如果我们想要UI在多种内存场景中使用（不同的分配器，在栈中，等等），这给了完成它的灵活性。</li>
+  由于调用代码自己构造两个对象，它可以控制这发生在内存中的什么位置。
+  如果我们希望对象能用于各种不同的内存场景（不同的分配器、在栈上，等等），这给了我们这样做的灵活性。</li>
 </ul>
 </li>
 <li>
 <p><strong>在类型对象上调用“构造器”函数：</strong></p>
 <ul>
-<li><em>类型对象控制了内存分配。</em>
-  这是硬币的另一面。如果我们<em>不想</em>让用户选择在内存中何处创建对象，
-  在类型对象上调用工厂方法可以达到这一点。
-  如果我们想保证所有的对象都来自具体的<a class="pattern" href="object-pool.html">对象池</a>或者其他的内存分配器时也有用。</li>
+<li><em>类型对象控制内存分配。</em>
+  这是硬币的另一面。如果我们<em>不想</em>让用户选择对象在内存中的创建位置，
+  要求他们通过类型对象上的工厂方法，我们就能控制这一点。
+  如果我们想确保所有对象都来自某个<a class="pattern" href="object-pool.html">对象池</a>或其他内存分配器，这也很有用。</li>
 </ul>
 </li>
 </ul>
 <h3><a href="#能改变类型吗？" name="能改变类型吗？">能改变类型吗？</a></h3>
-<p>到目前为止，我们假设一旦对象创建并绑定到类型对象上，这永远不会改变。
-对象创建时的类型就是它销毁时的类型。这其实没有必要。
+<p>到目前为止，我们假设一旦对象创建并绑定到它的类型对象上，这种绑定就永远不会改变。
+对象创建时的类型就是它死亡时的类型。这并非严格必需。
 我们<em>可以</em>允许对象随着时间改变它的类型。</p>
-<p>让我们回想下我们的例子。
-当怪物死去时，设计者告诉我们，有时它的尸体会复活成僵尸。
-我们可以通过在怪物死亡时产生僵尸类型的新怪兽，但另一个选项是拿到现有的怪物，然后将它的品种改为僵尸。</p>
+<p>让我们回头看看我们的例子。
+当怪物死亡时，设计者告诉我们，有时他们希望它的尸体变成一具复活的僵尸。
+我们可以通过在怪物死亡时生成一个带有僵尸品种的新怪物来实现，但另一个选项是直接拿到现有怪物，把它的品种改成僵尸品种。</p>
 <ul>
 <li>
 <p><strong>如果类型不改变：</strong></p>
 <ul>
 <li>
-<p><em>编码和理解都更容易。</em>
-  在概念上，大多数人不期望“类型”会改变。这符合大多数人的理解。</p>
+<p><em>编写和理解起来都更简单。</em>
+  在概念上，大多数人大概都不会期望“类型”会改变。这就把这一假设固化了下来。</p>
 </li>
 <li>
-<p><em>更容易查找漏洞。</em>
-  如果我们试图追踪怪物进入奇怪状态时的漏洞，<em>现在</em>看到的品种就是怪物始终保持的品种可以大大简化工作。</p>
+<p><em>更容易调试。</em>
+  如果我们试图追踪一个怪物进入某种奇怪状态的bug，那么能假定我们现在看到的品种就是怪物一直以来的品种，可以大大简化工作。</p>
 </li>
 </ul>
 </li>
@@ -652,16 +617,16 @@ C++的类是C中的类型对象，由编译器自动处理。</p>
 <ul>
 <li>
 <p><em>需要创建的对象更少。</em>
-  在我们的例子中，如果类型不能改变，我们需要消耗CPU循环创建新的僵尸怪物对象，
-  把原先对象中需要保留的属性都拷贝过来，然后删除它。
-  如果我们可以改变类型，所有的工作都被一个简单的声明取代。</p>
+  在我们的例子中，如果类型不能改变，我们就被迫耗费CPU周期创建一个新的僵尸怪物，
+  把原怪物中需要保留的属性都拷贝过来，然后再删除它。
+  如果我们可以改变类型，所有这些工作就被一次简单的赋值取代。</p>
 </li>
 <li>
-<p><em>我们需要小心地做约束。</em>
-  在对象和它的类型间有强耦合是很自然的事情。
-  举个例子，一个品种也许假设怪物<em>当前的</em>血量永远高于品种中的初始血量。</p>
-<p>如果我们允许品种改变，我们需要确保已存对象满足新品种的需求。
-当我们改变类型时，我们也许需要执行一些验证代码保证对象现在的状态对新类型是有意义的。</p>
+<p><em>我们需要小心确保假设成立。</em>
+  对象和它的类型之间有着相当紧密的耦合。
+  例如，一个品种可能假设怪物<em>当前的</em>生命值永远不会高于来自该品种的起始生命值。</p>
+<p>如果我们允许品种改变，就需要确保现有对象满足新类型的要求。
+当我们改变类型时，可能还需要执行一些验证代码，确保对象现在处于对新类型有意义的状态。</p>
 </li>
 </ul>
 </li>
@@ -677,8 +642,8 @@ C++的类是C中的类型对象，由编译器自动处理。</p>
 </li>
 <li>
 <p><em>这会带来重复的工作。</em>
-  我从未见过哪个编码系统中设计者<em>不</em>想要继承的。
-  当你有十五种不同的精灵时，协调血量就要修改十五处同样的数字真是糟透了。</p>
+  我从未见过哪个创作系统中设计者<em>不</em>想要某种继承的。
+  当你有五十种不同的精灵时，要调整它们的生命值就得在五十个地方改同一个数字，真是糟透了。</p>
 </li>
 </ul>
 </li>
@@ -686,14 +651,14 @@ C++的类是C中的类型对象，由编译器自动处理。</p>
 <p><strong>单继承：</strong></p>
 <ul>
 <li>
-<p><em>还是相对简单。</em>
-  它易于实现，但是，更重要的是，也易于理解。如果非技术用户正在使用这个系统，要操作的部分越少越好。
-  这就是很多编程语言只支持单继承的原因。这看起来是能力和简洁之间的平衡点。</p>
+<p><em>仍然相对简单。</em>
+  它易于实现，但更重要的是，它也相当容易理解。如果非技术用户要使用这个系统，活动部件越少越好。
+  这就是很多编程语言只支持单继承的原因。它似乎正处在能力与简洁之间的最佳平衡点上。</p>
 </li>
 <li>
-<p><em>查询属性更慢。</em>
-  为了在类型对象中获取一块数据，我们也许需要回溯继承链寻找是哪一个类型最终决定了值。
-  在性能攸关的代码上，我们也许不想花时间在这上面。</p>
+<p><em>查找属性更慢。</em>
+  为了从类型对象中获取某块数据，我们可能需要在继承链上向上回溯，找到最终决定该值的那个类型。
+  在性能关键的代码中，我们可能不想把时间花在这上面。</p>
 </li>
 </ul>
 </li>
@@ -701,18 +666,18 @@ C++的类是C中的类型对象，由编译器自动处理。</p>
 <p><strong>多重继承：</strong></p>
 <ul>
 <li>
-<p><em>可以避免绝大多数代码重复。</em>
-  使用优良的多继承系统，用户可以为类型对象建立几乎没有冗余的层次。
-  改变数值时，我们可以避免很多复制和粘贴。</p>
+<p><em>几乎可以避免所有数据重复。</em>
+  使用一个良好的多重继承系统，用户可以为类型对象建立几乎没有冗余的层次。
+  到了调整数值的时候，我们可以避免大量的复制粘贴。</p>
 </li>
 <li>
 <p><em>复杂。</em>
-  不幸的是，它的好处更多地是理论上的而非实际上的。多重继承很难理解。</p>
-<p>如果僵尸龙继承僵尸和龙，哪些属性来自僵尸，哪些来自于龙？
-为了使用系统，用户需要理解如何遍历继承图，还需要有设计优秀层次的远见。</p>
-<p>我看到的大多数C++编码标准趋向于禁止多重继承，Java和C#完全移除了它。
-这承认了一个悲伤的事实：它太难掌握了，最好根本不要用。
-尽管值得考虑，但你很少想要在类型对象上实现多重继承。就像往常一样，简单的总是最好的。</p>
+  不幸的是，它的好处似乎更多是理论上的而非实际上的。多重继承难以理解和推理。</p>
+<p>如果我们的僵尸龙类型同时继承自僵尸和龙，哪些属性来自僵尸，哪些来自龙？
+为了使用系统，用户需要理解继承图是如何遍历的，还要有设计出合理层次的远见。</p>
+<p>我今天看到的大多数C++编码标准都倾向于禁止多重继承，Java和C#则完全没有它。
+这承认了一个令人悲伤的事实：它太难做对了，所以通常最好完全不用。
+虽然值得考虑，但你很少会想为游戏中的类型对象使用多重继承。和往常一样，越简单越好。</p>
 </li>
 </ul>
 </li>
@@ -720,20 +685,20 @@ C++的类是C中的类型对象，由编译器自动处理。</p>
 <h2><a href="#参见" name="参见">参见</a></h2>
 <ul>
 <li>
-<p>这个模式处理的高层问题是在多个对象间分享数据和行为。
-  另一个用另一种方式解决了相同问题的模式是<a class="gof-pattern" href="prototype.html">原型</a>模式。</p>
+<p>这个模式解决的高层问题是在多个对象之间共享数据和行为。
+  另一个用不同方式解决相同问题的模式是<a class="gof-pattern" href="prototype.html">原型</a>模式。</p>
 </li>
 <li>
 <p>类型对象是<a class="gof-pattern" href="flyweight.html">享元</a>模式的近亲。
-  两者都让你在实例间分享代码。使用享元，意图是节约内存，而分享的数据也许不代表任何概念上对象的“类型”。
-  使用类型对象模式，焦点在组织性和灵活性。</p>
+  两者都让你在实例之间共享数据。使用享元时，意图是节省内存，而共享的数据可能并不代表对象任何概念上的“类型”。
+  使用类型对象模式时，重点在于组织和灵活性。</p>
 </li>
 <li>
 <p>这个模式和<a class="gof-pattern" href="state.html">状态</a>模式有很多相似之处。
-  两者都委托对象的部分定义给另外一个对象。
-  通过类型对象，我们通常委托了对象<em>是</em>什么：不变的数据概括描述对象。
-  通过状态，我们委托了对象<em>现在是什么</em>：暂时描述对象当前状态的数据。</p>
-<p>当我们讨论对象改变它的类型时，你可以认为类型对象起到了和状态相似的职责。</p>
+  两者都让对象把定义自身的部分内容委托给另一个对象。
+  通过类型对象，我们通常委托的是对象<em>是</em>什么：宽泛地描述对象的不变数据。
+  通过状态，我们委托的是对象<em>现在是什么</em>：描述对象当前配置的临时数据。</p>
+<p>当我们讨论让对象改变它的类型时，你可以把它看作让类型对象同时兼任状态模式。</p>
 </li>
 </ul>
 <nav>

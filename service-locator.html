@@ -85,303 +85,294 @@ delete the font style for english.
 </nav>
 <h1>服务定位器</h1>
 <h1 class="book"><a href="/">游戏设计模式</a><span class="section"><a href="decoupling-patterns.html">Decoupling Patterns</a></span></h1>
+<h2><a href="#意图" name="意图">意图</a></h2>
 <p><em>提供服务的全局接入点，避免使用者和实现服务的具体类耦合。</em></p>
 <h2><a href="#动机" name="动机">动机</a></h2>
-<p>一些游戏中的对象或者系统几乎出现在程序库中的每一个角落。
-很难找到游戏中的哪部分永远<em>不</em>需要内存分配，记录日志，或者随机数字。
+<p>游戏中的一些对象或者系统几乎跑遍代码库的每一个角落。
+很难找到游戏中的哪一部分在某个时刻<em>不</em>需要内存分配器、日志或者随机数。
 像这样的东西可以被视为整个游戏都需要的<em>服务</em>。</p>
-<p>我们考虑音频作为例子。
-它不需要接触像内存分配这么底层的东西，但是仍然要接触一大堆游戏系统。
-滚石撞击地面（物理）。
-NPC狙击手开了一枪，射出子弹（AI）。
-用户选择菜单项需要响一声确认（用户界面）。</p>
-<p>每处都需要用像下面这样的东西调用音频系统：</p>
-<div class="codehilite"><pre><span></span><span class="c1">// 使用静态类？</span>
+<p>我们以音频为例。
+它的触达范围不像内存分配器这类底层设施那么广，但仍然会触及一大堆游戏系统。
+坠落的岩石轰然砸在地面上（物理）。
+NPC狙击手扣动扳机，枪声响起（AI）。
+用户选中菜单项时，伴随一声确认的哔哔声（用户界面）。</p>
+<p>这些地方都需要能用下面这样的方式调用音频系统：</p>
+<div class="codehilite"><pre><span></span><code><span class="c1">// 使用静态类？</span>
 <span class="n">AudioSystem</span><span class="o">::</span><span class="n">playSound</span><span class="p">(</span><span class="n">VERY_LOUD_BANG</span><span class="p">);</span>
 
 <span class="c1">// 还是使用单例？</span>
 <span class="n">AudioSystem</span><span class="o">::</span><span class="n">instance</span><span class="p">()</span><span class="o">-&gt;</span><span class="n">playSound</span><span class="p">(</span><span class="n">VERY_LOUD_BANG</span><span class="p">);</span>
-</pre></div>
+</code></pre></div>
 
-
-<p>尽管每种都能获得想要的结果，但是我们会绊倒在一些微妙的耦合上。
-每个调用音频系统的游戏部分直接引用了具体的<code>AudioSystem</code>类，和访问它的机制——是静态类还是一个<a class="gof-pattern" href="singleton.html">单例。</a></p>
-<p>这些调用点，当然，需要耦合到<em>某些东西</em>上来播放声音，
-但是直接接触到具体的音频实现，就好像给了一百个陌生人你家的地址，只是为了让他们在门口放一封信。
-这不仅仅是<em>隐私</em>问题，在你搬家后，需要告诉每个人新地址是个更加痛苦的问题。</p>
-<p>有个更好的解决办法：一本电话薄。
-需要联系我们的人可以在上面查找并找到现在的地址。
+<p>这两种方式都能带我们到达目的地，但一路上我们会陷入一些棘手的耦合。
+游戏中每一处调用音频系统的地方都直接引用了具体的<code>AudioSystem</code>类，以及访问它的机制——无论是作为静态类还是<a class="gof-pattern" href="singleton.html">单例</a>。</p>
+<p>这些调用点当然需要耦合到<em>某些东西</em>才能播放声音，
+但让它们直接摆弄具体的音频实现，就好像给了一百个陌生人你家的路线，只是为了让他们在门口放一封信。
+这不只是有点<em>过于</em>私密；等你搬家时，还得挨个告诉每个人新的路线，那才叫真的麻烦。</p>
+<p>有个更好的解决办法：一本电话簿。
+需要联系我们的人可以按名字查找到我们，并获取我们当前的地址。
 当我们搬家时，我们通知电话公司。
-他们更新电话薄，每个人都知道了新地址。
+他们更新电话簿，每个人就都知道了新地址。
 事实上，我们甚至无需给出真实的地址。
-我们可以列一个转发信箱或者其他“代表”我们的东西。
-通过让调用者查询电话薄找我们，我们获得了一个<em>控制找我们的方法的方便地方</em>。</p>
-<p>这就是服务定位模式的简短介绍——它解耦了需要服务的代码和服务由<em>谁</em>提供（哪个具体的实现类）以及服务在<em>哪里</em>（我们如何获得它的实例）。</p>
+我们可以列一个邮政信箱或者其他“代表”我们的东西。
+通过让调用者查询电话簿来找我们，我们就有了一个<em>方便的单一地点，用来控制别人如何找到我们</em>。</p>
+<p>简而言之，这就是服务定位器模式——它把需要服务的代码与服务<em>是谁</em>（具体实现类型）以及服务在<em>哪里</em>（如何拿到它的实例）解耦开来。</p>
 <h2><a href="#模式" name="模式">模式</a></h2>
-<p><strong>服务</strong> 类定义了一堆操作的抽象接口。
+<p><strong>服务</strong>类定义了一组操作的抽象接口。
 具体的<strong>服务提供者</strong>实现这个接口。
-分离的<strong>服务定位器</strong>提供了通过查询获取服务的方法，同时隐藏了服务提供者的具体细节和定位它的过程。</p>
+独立的<strong>服务定位器</strong>通过查找合适的提供者来提供对服务的访问，同时隐藏提供者的具体类型和定位它的过程。</p>
 <h2><a href="#何时使用" name="何时使用">何时使用</a></h2>
-<p>当你需要让某物在程序的各处都能被访问时，你就是在找麻烦。
-这是<a class="gof-pattern" href="singleton.html">单例</a>模式的主要问题，这个模式也没有什么不同。
+<p>每当你让某物在程序的各处都能被访问时，你就是在自找麻烦。
+这是<a class="gof-pattern" href="singleton.html">单例</a>模式的主要问题，这个模式也不例外。
 我对何时使用服务定位器的最简单建议是：<em>少用</em>。</p>
-<p>与其使用全局机制让某些代码接触到它，不如首先考虑<em>将它传给代码</em>。
-这超简单，也明显保持了解耦，能覆盖你大部分的需求。</p>
-<p><em>但是……</em> 有时候手动传入对象是不可能的或者会让代码难以阅读。
+<p>与其使用全局机制让某些代码访问它所需的对象，不如首先考虑<em>把对象传给它</em>。
+这再简单不过了，而且它让耦合一目了然。这就能满足你大部分的需求。</p>
+<p><em>但是……</em> 有时候手动把对象传来传去是多余的，甚至反而会让代码更难阅读。
 有些系统，比如日志或内存管理，不该是模块公开API的一部分。
-传给渲染代码的参数应该与<em>渲染</em>相关，而不是与日志之类的相关。</p>
-<p>同样，代表外设的系统通常只存在一个。
-你的游戏可能只有一个音频设备或者显示设备。
-这是周围环境的属性，所以将它传过十个函数让一个底层调用能够使用它会为代码增加不必要的复杂度。</p>
+传给渲染代码的参数应该与<em>渲染</em>相关，而不是与日志之类的东西相关。</p>
+<p>同样，还有些系统代表本质上就是独一无二的设施。
+你的游戏很可能只有一个可以通信的音频设备或显示系统。
+它是环境固有的属性，所以仅仅为了让一个深层嵌套的调用能用上它，就把它一路传过十层方法，只会给代码增加不必要的复杂度。</p>
 <p><span name="well"></span></p>
-<p>如果是那样，这个模式可以帮忙。
-就像我们将看到的那样，它是更加灵活、更加可配置的单例模式。
-如果用得好，它能以很小的运行时开销，换取很大的灵活性。</p>
+<p>在这种情况下，这个模式能帮上忙。
+正如我们将看到的，它就像单例模式的一个更加灵活、更加可配置的表亲。
+如果用得好，它能让你的代码库更灵活，而运行时开销很小。</p>
 <aside name="well">
-<p>相反，如果用得不好，它会带来单例模式的所有缺点以及更多的运行时开销。</p>
+<p>相反，如果用得不好，它会带来单例模式的所有包袱，而且运行时性能更差。</p>
 </aside>
 <h2><a href="#记住" name="记住">记住</a></h2>
-<p>使用服务定位器的核心难点是它将依赖——在两块代码之间的一点耦合——推迟到运行时再连接。
-这有了更大的灵活度，但是代价是更难在阅读代码时理解你依赖的是什么。</p>
+<p>使用服务定位器的核心难点在于，它把一项依赖——两块代码之间的一点耦合——推迟到运行时才进行连接。
+这带来了灵活性，但代价是，仅靠阅读代码更难理解你的依赖是什么。</p>
 <h3><a href="#服务必须真的可定位" name="服务必须真的可定位">服务必须真的可定位</a></h3>
 <p>如果使用单例或者静态类，我们需要的实例不可能<em>不</em>可用。
-调用代码保证了它就在那里。但是由于这个模式是在<em>定位</em>服务，我们也许要处理失败的情况。
-幸运的是，我们之后会介绍一种处理它的策略，保证我们在需要时总能获得<em>某些</em>服务。</p>
+调用代码可以想当然地认为它就在那里。但由于这个模式需要<em>定位</em>服务，我们也许要处理失败的情况。
+幸运的是，我们之后会介绍一种处理它的策略，保证我们在需要时总能获得<em>某个</em>服务。</p>
 <h3><a href="#服务不知道谁在定位它" name="服务不知道谁在定位它">服务不知道谁在定位它</a></h3>
-<p>由于定位器是全局可访问的，任何游戏中的代码都可以请求服务，然后使用它。
-这就意味着服务必须在任何环境下正确工作。
-举个例子，如果一个类只能在游戏循环的模拟部分使用，而不能在渲染部分使用，那它不适合作为服务——我们不能保证在正确的时间使用它。
-所以，如果你的类只期望在特定上下文中使用，避免模式将它暴露给整个世界更安全。</p>
+<p>由于定位器是全局可访问的，游戏中的任何代码都可以请求服务，然后摆弄它。
+这就意味着服务必须在任何环境下都能正确工作。
+举个例子，如果一个类只能在游戏循环的模拟部分使用，而不能在渲染部分使用，那它可能不适合作为服务——它无法确保自己在正确的时间被使用。
+所以，如果你的类只期望在特定上下文中使用，最安全的做法是避免用这个模式把它暴露给整个世界。</p>
 <h2><a href="#示例代码" name="示例代码">示例代码</a></h2>
-<p>重回我们的音频系统问题，让我们通过服务定位器将代码暴露给代码库的剩余部分。</p>
+<p>让我们回到音频系统的问题，通过服务定位器把这个系统暴露给代码库的其余部分。</p>
 <h3><a href="#服务" name="服务">服务</a></h3>
 <p>我们从音频API开始。这是我们服务要暴露的接口：</p>
-<div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">Audio</span>
+<div class="codehilite"><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Audio</span>
 <span class="p">{</span>
 <span class="k">public</span><span class="o">:</span>
-  <span class="k">virtual</span> <span class="o">~</span><span class="n">Audio</span><span class="p">()</span> <span class="p">{}</span>
-  <span class="k">virtual</span> <span class="kt">void</span> <span class="n">playSound</span><span class="p">(</span><span class="kt">int</span> <span class="n">soundID</span><span class="p">)</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
-  <span class="k">virtual</span> <span class="kt">void</span> <span class="nf">stopSound</span><span class="p">(</span><span class="kt">int</span> <span class="n">soundID</span><span class="p">)</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
-  <span class="k">virtual</span> <span class="kt">void</span> <span class="nf">stopAllSounds</span><span class="p">()</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+<span class="w">  </span><span class="k">virtual</span><span class="w"> </span><span class="o">~</span><span class="n">Audio</span><span class="p">()</span><span class="w"> </span><span class="p">{}</span>
+<span class="w">  </span><span class="k">virtual</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="n">playSound</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">soundID</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">  </span><span class="k">virtual</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">stopSound</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">soundID</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">  </span><span class="k">virtual</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">stopAllSounds</span><span class="p">()</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
 <span class="p">};</span>
-</pre></div>
-
+</code></pre></div>
 
 <p>当然，一个真实的音频引擎比这复杂得多，但这展示了基本的理念。
-要点在于它是个没有实现绑定的抽象接口类。</p>
+要点在于它是一个没有绑定任何实现的抽象接口类。</p>
 <h3><a href="#服务提供者" name="服务提供者">服务提供者</a></h3>
 <p>只靠它自己，我们的音频接口不是很有用。
-我们需要具体的实现。这本书不是关于如何为游戏主机写音频代码，所以你得想象这些函数中有实际的代码，了解原理就好：</p>
-<div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">ConsoleAudio</span> <span class="o">:</span> <span class="k">public</span> <span class="n">Audio</span>
+我们需要具体的实现。本书不讨论如何为游戏主机编写音频代码，所以你得想象这些函数体中有实际的代码，了解原理就好：</p>
+<div class="codehilite"><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">ConsoleAudio</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="k">public</span><span class="w"> </span><span class="n">Audio</span>
 <span class="p">{</span>
 <span class="k">public</span><span class="o">:</span>
-  <span class="k">virtual</span> <span class="kt">void</span> <span class="n">playSound</span><span class="p">(</span><span class="kt">int</span> <span class="n">soundID</span><span class="p">)</span>
-  <span class="p">{</span>
-    <span class="c1">// 使用主机音频API播放声音……</span>
-  <span class="p">}</span>
+<span class="w">  </span><span class="k">virtual</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="n">playSound</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">soundID</span><span class="p">)</span>
+<span class="w">  </span><span class="p">{</span>
+<span class="w">    </span><span class="c1">// 使用主机音频API播放声音……</span>
+<span class="w">  </span><span class="p">}</span>
 
-  <span class="k">virtual</span> <span class="kt">void</span> <span class="n">stopSound</span><span class="p">(</span><span class="kt">int</span> <span class="n">soundID</span><span class="p">)</span>
-  <span class="p">{</span>
-    <span class="c1">// 使用主机音频API停止声音……</span>
-  <span class="p">}</span>
+<span class="w">  </span><span class="k">virtual</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="n">stopSound</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">soundID</span><span class="p">)</span>
+<span class="w">  </span><span class="p">{</span>
+<span class="w">    </span><span class="c1">// 使用主机音频API停止声音……</span>
+<span class="w">  </span><span class="p">}</span>
 
-  <span class="k">virtual</span> <span class="kt">void</span> <span class="n">stopAllSounds</span><span class="p">()</span>
-  <span class="p">{</span>
-    <span class="c1">// 使用主机音频API停止所有声音……</span>
-  <span class="p">}</span>
+<span class="w">  </span><span class="k">virtual</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="n">stopAllSounds</span><span class="p">()</span>
+<span class="w">  </span><span class="p">{</span>
+<span class="w">    </span><span class="c1">// 使用主机音频API停止所有声音……</span>
+<span class="w">  </span><span class="p">}</span>
 <span class="p">};</span>
-</pre></div>
-
+</code></pre></div>
 
 <p>现在我们有接口和实现了。
-剩下的部分是服务定位器——那个将两者绑在一起的类</p>
+剩下的部分是服务定位器——那个将两者绑在一起的类。</p>
 <h3><a href="#一个简单的定位器" name="一个简单的定位器">一个简单的定位器</a></h3>
 <p>下面的实现是你可以定义的最简单的服务定位器：</p>
 <p><span name="di"></span></p>
-<div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">Locator</span>
+<div class="codehilite"><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Locator</span>
 <span class="p">{</span>
 <span class="k">public</span><span class="o">:</span>
-  <span class="k">static</span> <span class="n">Audio</span><span class="o">*</span> <span class="n">getAudio</span><span class="p">()</span> <span class="p">{</span> <span class="k">return</span> <span class="n">service_</span><span class="p">;</span> <span class="p">}</span>
+<span class="w">  </span><span class="k">static</span><span class="w"> </span><span class="n">Audio</span><span class="o">*</span><span class="w"> </span><span class="n">getAudio</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="n">service_</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
 
-  <span class="k">static</span> <span class="kt">void</span> <span class="n">provide</span><span class="p">(</span><span class="n">Audio</span><span class="o">*</span> <span class="n">service</span><span class="p">)</span>
-  <span class="p">{</span>
-    <span class="n">service_</span> <span class="o">=</span> <span class="n">service</span><span class="p">;</span>
-  <span class="p">}</span>
+<span class="w">  </span><span class="k">static</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="n">provide</span><span class="p">(</span><span class="n">Audio</span><span class="o">*</span><span class="w"> </span><span class="n">service</span><span class="p">)</span>
+<span class="w">  </span><span class="p">{</span>
+<span class="w">    </span><span class="n">service_</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">service</span><span class="p">;</span>
+<span class="w">  </span><span class="p">}</span>
 
 <span class="k">private</span><span class="o">:</span>
-  <span class="k">static</span> <span class="n">Audio</span><span class="o">*</span> <span class="n">service_</span><span class="p">;</span>
+<span class="w">  </span><span class="k">static</span><span class="w"> </span><span class="n">Audio</span><span class="o">*</span><span class="w"> </span><span class="n">service_</span><span class="p">;</span>
 <span class="p">};</span>
-</pre></div>
-
+</code></pre></div>
 
 <aside name="di">
-<p>这里用的技术被称为<em>依赖注入</em>，一个简单思路的复杂行话表示。
-假设你有一个类依赖另一个。
-在例子中，是我们的<code>Locator</code>类需要<code>Audio</code>的实例。
-通常，定位器负责构造实例。
-依赖注入与之相反，它指外部代码负责向对象<em>注入</em>它需要的依赖。</p>
+<p>这里用的技术被称为<em>依赖注入</em>，一个非常简单的想法，却套了个别扭的术语。
+假设你有一个类依赖另一个类。
+在我们的例子中，是<code>Locator</code>类需要<code>Audio</code>服务的一个实例。
+通常，定位器会负责自己构造那个实例。
+依赖注入则反过来，由外部代码负责把该依赖<em>注入</em>到需要它的对象中。</p>
 </aside>
 <p>静态函数<code>getAudio()</code>完成了定位工作。
 我们可以从代码库的任何地方调用它，它会给我们一个<code>Audio</code>服务实例使用：</p>
-<div class="codehilite"><pre><span></span><span class="n">Audio</span> <span class="o">*</span><span class="n">audio</span> <span class="o">=</span> <span class="n">Locator</span><span class="o">::</span><span class="n">getAudio</span><span class="p">();</span>
+<div class="codehilite"><pre><span></span><code><span class="n">Audio</span><span class="w"> </span><span class="o">*</span><span class="n">audio</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Locator</span><span class="o">::</span><span class="n">getAudio</span><span class="p">();</span>
 <span class="n">audio</span><span class="o">-&gt;</span><span class="n">playSound</span><span class="p">(</span><span class="n">VERY_LOUD_BANG</span><span class="p">);</span>
-</pre></div>
+</code></pre></div>
 
-
-<p>它“定位”的方式十分简单——依靠一些外部代码在任何东西使用服务前已注册了服务提供者。
-当游戏开始时，它调用一些这样的代码：</p>
-<div class="codehilite"><pre><span></span><span class="n">ConsoleAudio</span> <span class="o">*</span><span class="n">audio</span> <span class="o">=</span> <span class="k">new</span> <span class="n">ConsoleAudio</span><span class="p">();</span>
+<p>它“定位”的方式十分简单——依靠一些外部代码在任何代码试图使用服务之前就注册了服务提供者。
+当游戏启动时，它会调用一些这样的代码：</p>
+<div class="codehilite"><pre><span></span><code><span class="n">ConsoleAudio</span><span class="w"> </span><span class="o">*</span><span class="n">audio</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">ConsoleAudio</span><span class="p">();</span>
 <span class="n">Locator</span><span class="o">::</span><span class="n">provide</span><span class="p">(</span><span class="n">audio</span><span class="p">);</span>
-</pre></div>
+</code></pre></div>
 
-
-<p>这里需要注意的关键部分是调用<code>playSound()</code>的代码没有意识到任何具体的<code>ConsoleAudio</code>类；
+<p>这里要注意的关键点是，调用<code>playSound()</code>的代码并不知道具体的<code>ConsoleAudio</code>类；
 它只知道抽象的<code>Audio</code>接口。
-同样重要的是，<em>定位器</em> 类没有与具体的服务提供者耦合。
-代码中只有初始化代码<em>唯一</em>知道哪个具体类提供了服务。</p>
-<p>这里有更高层次的解耦：
-<code>Audio</code>接口没有意识到它在通过服务定位器来接受访问。
-据它所知，它只是常见的抽象基类。
-这很有用，因为这意味着我们可以将这个模式应用到<em>现有的</em>类上，而那些类无需为此特殊设计。
-这与<a class="gof-pattern" href="singleton.html">单例</a>形成了对比，那个会影响“服务”类本身的设计。</p>
+同样重要的是，连<em>定位器</em>类都没有与具体的服务提供者耦合。
+代码中<em>唯一</em>知道具体类的地方，就是提供服务的初始化代码。</p>
+<p>这里还有一层解耦：
+<code>Audio</code>接口并没有意识到，在大多数地方它是通过服务定位器被访问的。
+就它自己而言，它只是一个普通的抽象基类。
+这很有用，因为这意味着我们可以把这个模式应用到<em>现有的</em>类上，而那些类不必专门为它设计。
+这与<a class="gof-pattern" href="singleton.html">单例</a>形成了对比，后者会影响“服务”类本身的设计。</p>
 <h3><a href="#一个空服务" name="一个空服务">一个空服务</a></h3>
 <p><span name="temporal"></span></p>
 <p>我们现在的实现很简单，而且也很灵活。
-但是它有巨大的缺点：如果我们在服务提供者注册前使用服务，它会返回<code>NULL</code>。
+但它有一个很大的缺点：如果我们在服务提供者注册之前就使用服务，它会返回<code>NULL</code>。
 如果调用代码没有检查，游戏就崩溃了。</p>
 <aside name="temporal">
 <p>我有时听说这被称为“时序耦合”——两块分离的代码必须以正确的顺序调用，才能让程序正确运行。
-有状态的软件某种程度上都有这种情况，但是就像其他耦合一样，减少时序耦合让代码库更容易管理。</p>
+有状态的软件在某种程度上都有这种情况，但是就像其他耦合一样，减少时序耦合会让代码库更容易管理。</p>
 </aside>
-<p>幸运的是，还有一种设计模式叫做“空对象”，我们可用它处理这个。
-基本思路是在我们没能找到服务或者程序没以正确的顺序调用时，不返回<code>NULL</code>，
-而是返回一个特定的，实现了请求对象一样接口的对象。
-它的实现什么也不做，但是它保证调用服务的代码能获取到对象，保证代码就像收到了“真的”服务对象一样安全运行。</p>
+<p>幸运的是，还有一种设计模式叫做“空对象”，我们可以用它来处理这个问题。
+基本思路是，在那些找不到或创建不了对象、原本会返回<code>NULL</code>的地方，
+改为返回一个特殊对象，它实现了与所需对象相同的接口。
+它的实现基本上什么也不做，但能让收到该对象的代码安全地继续运行，就像收到的是“真的”对象一样。</p>
 <p>为了使用它，我们定义另一个“空”服务提供者：</p>
-<div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">NullAudio</span><span class="o">:</span> <span class="k">public</span> <span class="n">Audio</span>
+<div class="codehilite"><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">NullAudio</span><span class="o">:</span><span class="w"> </span><span class="k">public</span><span class="w"> </span><span class="n">Audio</span>
 <span class="p">{</span>
 <span class="k">public</span><span class="o">:</span>
-  <span class="k">virtual</span> <span class="kt">void</span> <span class="n">playSound</span><span class="p">(</span><span class="kt">int</span> <span class="n">soundID</span><span class="p">)</span> <span class="p">{</span> <span class="cm">/* 什么也不做 */</span> <span class="p">}</span>
-  <span class="k">virtual</span> <span class="kt">void</span> <span class="n">stopSound</span><span class="p">(</span><span class="kt">int</span> <span class="n">soundID</span><span class="p">)</span> <span class="p">{</span> <span class="cm">/* 什么也不做 */</span> <span class="p">}</span>
-  <span class="k">virtual</span> <span class="kt">void</span> <span class="n">stopAllSounds</span><span class="p">()</span>        <span class="p">{</span> <span class="cm">/* 什么也不做 */</span> <span class="p">}</span>
+<span class="w">  </span><span class="k">virtual</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="n">playSound</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">soundID</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="cm">/* 什么也不做 */</span><span class="w"> </span><span class="p">}</span>
+<span class="w">  </span><span class="k">virtual</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="n">stopSound</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">soundID</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="cm">/* 什么也不做 */</span><span class="w"> </span><span class="p">}</span>
+<span class="w">  </span><span class="k">virtual</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="n">stopAllSounds</span><span class="p">()</span><span class="w">        </span><span class="p">{</span><span class="w"> </span><span class="cm">/* 什么也不做 */</span><span class="w"> </span><span class="p">}</span>
 <span class="p">};</span>
-</pre></div>
+</code></pre></div>
 
-
-<p>就像你看到的那样，它实现了服务接口，但是没有干任何实事。
-现在，我们将服务定位器改成这样：</p>
+<p>就像你看到的那样，它实现了服务接口，但没有实际做任何事情。
+现在，我们把定位器改成这样：</p>
 <p><span name="ref"></span></p>
-<div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">Locator</span>
+<div class="codehilite"><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Locator</span>
 <span class="p">{</span>
 <span class="k">public</span><span class="o">:</span>
-  <span class="k">static</span> <span class="kt">void</span> <span class="n">initialize</span><span class="p">()</span> <span class="p">{</span> <span class="n">service_</span> <span class="o">=</span> <span class="o">&amp;</span><span class="n">nullService_</span><span class="p">;</span> <span class="p">}</span>
+<span class="w">  </span><span class="k">static</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="n">initialize</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">service_</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">&amp;</span><span class="n">nullService_</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
 
-  <span class="k">static</span> <span class="n">Audio</span><span class="o">&amp;</span> <span class="n">getAudio</span><span class="p">()</span> <span class="p">{</span> <span class="k">return</span> <span class="o">*</span><span class="n">service_</span><span class="p">;</span> <span class="p">}</span>
+<span class="w">  </span><span class="k">static</span><span class="w"> </span><span class="n">Audio</span><span class="o">&amp;</span><span class="w"> </span><span class="n">getAudio</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="o">*</span><span class="n">service_</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
 
-  <span class="k">static</span> <span class="kt">void</span> <span class="n">provide</span><span class="p">(</span><span class="n">Audio</span><span class="o">*</span> <span class="n">service</span><span class="p">)</span>
-  <span class="p">{</span>
-    <span class="k">if</span> <span class="p">(</span><span class="n">service</span> <span class="o">==</span> <span class="nb">NULL</span><span class="p">)</span>
-    <span class="p">{</span>
-      <span class="c1">// 退回空服务</span>
-      <span class="n">service_</span> <span class="o">=</span> <span class="o">&amp;</span><span class="n">nullService_</span><span class="p">;</span>
-    <span class="p">}</span>
-    <span class="k">else</span>
-    <span class="p">{</span>
-      <span class="n">service_</span> <span class="o">=</span> <span class="n">service</span><span class="p">;</span>
-    <span class="p">}</span>
-  <span class="p">}</span>
+<span class="w">  </span><span class="k">static</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="n">provide</span><span class="p">(</span><span class="n">Audio</span><span class="o">*</span><span class="w"> </span><span class="n">service</span><span class="p">)</span>
+<span class="w">  </span><span class="p">{</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">service</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="nb">NULL</span><span class="p">)</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">      </span><span class="c1">// 退回空服务</span>
+<span class="w">      </span><span class="n">service_</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">&amp;</span><span class="n">nullService_</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="k">else</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">      </span><span class="n">service_</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">service</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">}</span>
 
 <span class="k">private</span><span class="o">:</span>
-  <span class="k">static</span> <span class="n">Audio</span><span class="o">*</span> <span class="n">service_</span><span class="p">;</span>
-  <span class="k">static</span> <span class="n">NullAudio</span> <span class="n">nullService_</span><span class="p">;</span>
+<span class="w">  </span><span class="k">static</span><span class="w"> </span><span class="n">Audio</span><span class="o">*</span><span class="w"> </span><span class="n">service_</span><span class="p">;</span>
+<span class="w">  </span><span class="k">static</span><span class="w"> </span><span class="n">NullAudio</span><span class="w"> </span><span class="n">nullService_</span><span class="p">;</span>
 <span class="p">};</span>
-</pre></div>
-
+</code></pre></div>
 
 <aside name="ref">
-<p>你也许注意到我们用引用而非指针返回服务。
-由于C++中的引用（理论上）永远不是<code>NULL</code>，返回引用是提示用户：总可以期待获得一个合法的对象。</p>
-<p>另一件值得注意的事是我们在<code>provide()</code>而不是访问者中检查<code>NULL</code>。
-那需要我们早早调用<code>initialize()</code>，保证定位器可以正确找到默认的空服务提供者。
-作为回报，它将分支移出了<code>getAudio()</code>，这在每次使用服务时节约了检查开销。</p>
+<p>你也许注意到，我们现在用引用而非指针返回服务。
+由于C++中的引用（理论上！）永远不是<code>NULL</code>，返回引用是在向代码的使用者暗示：他们可以期待总能拿到一个有效的对象。</p>
+<p>另一件值得注意的是，我们在<code>provide()</code>函数里检查<code>NULL</code>，而不是在访问函数里检查。
+这要求我们尽早调用<code>initialize()</code>，确保定位器一开始就正确地默认使用空提供者。
+作为回报，它把分支移出了<code>getAudio()</code>，每次访问服务时都能省下几个时钟周期。</p>
 </aside>
 <p>调用代码永远不知道“真正的”服务没找到，也不必担心处理<code>NULL</code>。
 这保证了它永远能获得有效的对象。</p>
 <p><span name="disable"></span></p>
 <p>这对<em>故意</em>找不到服务也很有用。
-如果我们想暂时停用系统，现在有更简单的方式来实现这点了：
-很简单，不要在定位器中注册服务，定位器会默认使用空服务提供器。</p>
+如果我们想暂时停用某个系统，现在有了一个简单的办法：
+不注册该服务的提供者，定位器就会默认使用空提供者。</p>
 <aside name="disable">
-<p>在开发中能关闭音频是很便利的。它释放了一些内存和CPU循环。
-更重要的是，当你使用debugger时正好爆发巨响，它能防止你的鼓膜爆裂。
-没有什么东西比二十毫秒的最高音量尖叫循环更能让你血液逆流的了。</p>
+<p>在开发中能关闭音频是很便利的。它释放了一些内存和CPU周期。
+更重要的是，当你在巨响开始播放时正好闯入调试器，它能让你免受鼓膜被撕碎之苦。
+没有什么比二十毫秒的尖叫音效以最大音量循环播放，更能让你大清早血液沸腾的了。</p>
 </aside>
 <h3><a href="#日志装饰器" name="日志装饰器">日志装饰器</a></h3>
-<p>现在我们的系统非常强健了，让我们讨论这个模式允许的另一个好处——装饰服务。
+<p>现在我们的系统相当健壮了，让我们讨论这个模式带来的另一种改进——装饰服务。
 我会举例说明。</p>
-<p>在开发过程中，记录有趣事情发生的小小日志系统可助你查出游戏引擎正处于何种状态。
-如果你在处理AI，你要知道哪个实体改变了AI状态。
-如果你是音频程序员，你也许想记录每个播放的声音，这样你可以检查它们是否是以正确的顺序触发。</p>
-<p>通常的解决方案是向代码中丢些对<code>log()</code>函数的调用。
-不幸的是，这是用一个问题取代了另一个——现在我们有<em>太多</em>日志了。
-AI程序员不关心声音在什么时候播放，声音程序员也不在乎AI状态转换，但是现在都得在对方的日志中跋涉。</p>
-<p>理念上，我们应该可以选择性地为关心的事物启动日志，而游戏成品中，不应该有任何日志。
-如果将不同的系统条件日志改写为服务，那么我们就可以用<a class="gof-pattern" href="http://www.c2.com/cgi/wiki?DecoratorPattern">装饰器</a>模式。
+<p>在开发过程中，当有趣的事件发生时记录一点日志，能帮你弄清楚游戏引擎内部发生了什么。
+如果你在处理AI，你会想知道哪个实体改变了AI状态。
+如果你是音频程序员，你也许想记录每个播放的声音，以便检查它们是否按正确的顺序触发。</p>
+<p>通常的解决方案是向代码里到处散布对某个<code>log()</code>函数的调用。
+不幸的是，这是用一个问题取代另一个——现在我们有<em>太多</em>日志了。
+AI程序员不关心声音在什么时候播放，声音程序员也不在乎AI状态转换，但现在他们都得在对方的消息里跋涉。</p>
+<p>理想情况下，我们应该能够只为关心的事物有选择地启用日志，而在最终的成品游戏里完全没有日志。
+如果我们想有条件地记录日志的不同系统都被暴露为服务，那么我们就可以用<a class="gof-pattern" href="http://www.c2.com/cgi/wiki?DecoratorPattern">装饰器</a>模式来解决这个问题。
 让我们定义另一个音频服务提供者的实现：</p>
-<div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">LoggedAudio</span> <span class="o">:</span> <span class="k">public</span> <span class="n">Audio</span>
+<div class="codehilite"><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">LoggedAudio</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="k">public</span><span class="w"> </span><span class="n">Audio</span>
 <span class="p">{</span>
 <span class="k">public</span><span class="o">:</span>
-  <span class="n">LoggedAudio</span><span class="p">(</span><span class="n">Audio</span> <span class="o">&amp;</span><span class="n">wrapped</span><span class="p">)</span>
-  <span class="o">:</span> <span class="n">wrapped_</span><span class="p">(</span><span class="n">wrapped</span><span class="p">)</span>
-  <span class="p">{}</span>
+<span class="w">  </span><span class="n">LoggedAudio</span><span class="p">(</span><span class="n">Audio</span><span class="w"> </span><span class="o">&amp;</span><span class="n">wrapped</span><span class="p">)</span>
+<span class="w">  </span><span class="o">:</span><span class="w"> </span><span class="n">wrapped_</span><span class="p">(</span><span class="n">wrapped</span><span class="p">)</span>
+<span class="w">  </span><span class="p">{}</span>
 
-  <span class="k">virtual</span> <span class="kt">void</span> <span class="n">playSound</span><span class="p">(</span><span class="kt">int</span> <span class="n">soundID</span><span class="p">)</span>
-  <span class="p">{</span>
-    <span class="n">log</span><span class="p">(</span><span class="s">&quot;play sound&quot;</span><span class="p">);</span>
-    <span class="n">wrapped_</span><span class="p">.</span><span class="n">playSound</span><span class="p">(</span><span class="n">soundID</span><span class="p">);</span>
-  <span class="p">}</span>
+<span class="w">  </span><span class="k">virtual</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="n">playSound</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">soundID</span><span class="p">)</span>
+<span class="w">  </span><span class="p">{</span>
+<span class="w">    </span><span class="n">log</span><span class="p">(</span><span class="s">&quot;play sound&quot;</span><span class="p">);</span>
+<span class="w">    </span><span class="n">wrapped_</span><span class="p">.</span><span class="n">playSound</span><span class="p">(</span><span class="n">soundID</span><span class="p">);</span>
+<span class="w">  </span><span class="p">}</span>
 
-  <span class="k">virtual</span> <span class="kt">void</span> <span class="n">stopSound</span><span class="p">(</span><span class="kt">int</span> <span class="n">soundID</span><span class="p">)</span>
-  <span class="p">{</span>
-    <span class="n">log</span><span class="p">(</span><span class="s">&quot;stop sound&quot;</span><span class="p">);</span>
-    <span class="n">wrapped_</span><span class="p">.</span><span class="n">stopSound</span><span class="p">(</span><span class="n">soundID</span><span class="p">);</span>
-  <span class="p">}</span>
+<span class="w">  </span><span class="k">virtual</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="n">stopSound</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">soundID</span><span class="p">)</span>
+<span class="w">  </span><span class="p">{</span>
+<span class="w">    </span><span class="n">log</span><span class="p">(</span><span class="s">&quot;stop sound&quot;</span><span class="p">);</span>
+<span class="w">    </span><span class="n">wrapped_</span><span class="p">.</span><span class="n">stopSound</span><span class="p">(</span><span class="n">soundID</span><span class="p">);</span>
+<span class="w">  </span><span class="p">}</span>
 
-  <span class="k">virtual</span> <span class="kt">void</span> <span class="n">stopAllSounds</span><span class="p">()</span>
-  <span class="p">{</span>
-    <span class="n">log</span><span class="p">(</span><span class="s">&quot;stop all sounds&quot;</span><span class="p">);</span>
-    <span class="n">wrapped_</span><span class="p">.</span><span class="n">stopAllSounds</span><span class="p">();</span>
-  <span class="p">}</span>
+<span class="w">  </span><span class="k">virtual</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="n">stopAllSounds</span><span class="p">()</span>
+<span class="w">  </span><span class="p">{</span>
+<span class="w">    </span><span class="n">log</span><span class="p">(</span><span class="s">&quot;stop all sounds&quot;</span><span class="p">);</span>
+<span class="w">    </span><span class="n">wrapped_</span><span class="p">.</span><span class="n">stopAllSounds</span><span class="p">();</span>
+<span class="w">  </span><span class="p">}</span>
 
 <span class="k">private</span><span class="o">:</span>
-  <span class="kt">void</span> <span class="n">log</span><span class="p">(</span><span class="k">const</span> <span class="kt">char</span><span class="o">*</span> <span class="n">message</span><span class="p">)</span>
-  <span class="p">{</span>
-    <span class="c1">// 记录日志的代码……</span>
-  <span class="p">}</span>
+<span class="w">  </span><span class="kt">void</span><span class="w"> </span><span class="n">log</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="o">*</span><span class="w"> </span><span class="n">message</span><span class="p">)</span>
+<span class="w">  </span><span class="p">{</span>
+<span class="w">    </span><span class="c1">// 记录日志的代码……</span>
+<span class="w">  </span><span class="p">}</span>
 
-  <span class="n">Audio</span> <span class="o">&amp;</span><span class="n">wrapped_</span><span class="p">;</span>
+<span class="w">  </span><span class="n">Audio</span><span class="w"> </span><span class="o">&amp;</span><span class="n">wrapped_</span><span class="p">;</span>
 <span class="p">};</span>
-</pre></div>
-
+</code></pre></div>
 
 <p>如你所见，它包装了另一个音频提供者，暴露同样的接口。
 它将实际的音频行为转发给内部的提供者，但它也同时记录每个音频调用。
 如果程序员需要启动音频日志，他们可以这样调用：</p>
-<div class="codehilite"><pre><span></span><span class="kt">void</span> <span class="nf">enableAudioLogging</span><span class="p">()</span>
+<div class="codehilite"><pre><span></span><code><span class="kt">void</span><span class="w"> </span><span class="nf">enableAudioLogging</span><span class="p">()</span>
 <span class="p">{</span>
-  <span class="c1">// 装饰现有的服务</span>
-  <span class="n">Audio</span> <span class="o">*</span><span class="n">service</span> <span class="o">=</span> <span class="k">new</span> <span class="n">LoggedAudio</span><span class="p">(</span><span class="n">Locator</span><span class="o">::</span><span class="n">getAudio</span><span class="p">());</span>
+<span class="w">  </span><span class="c1">// 装饰现有的服务</span>
+<span class="w">  </span><span class="n">Audio</span><span class="w"> </span><span class="o">*</span><span class="n">service</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">LoggedAudio</span><span class="p">(</span><span class="n">Locator</span><span class="o">::</span><span class="n">getAudio</span><span class="p">());</span>
 
-  <span class="c1">// 将它换进来</span>
-  <span class="n">Locator</span><span class="o">::</span><span class="n">provide</span><span class="p">(</span><span class="n">service</span><span class="p">);</span>
+<span class="w">  </span><span class="c1">// 将它换进来</span>
+<span class="w">  </span><span class="n">Locator</span><span class="o">::</span><span class="n">provide</span><span class="p">(</span><span class="n">service</span><span class="p">);</span>
 <span class="p">}</span>
-</pre></div>
+</code></pre></div>
 
-
-<p>现在，对音频服务的任何调用在运行前都会记录下去。
-同时，当然，它和我们的空服务也能很好地相处，你能<em>启用</em>音频，也能继续记录音频被启用时<em>将会</em>播放的声音。</p>
+<p>现在，任何对音频服务的调用都会先被记录，然后照常继续。
+而且，当然，这还能与我们的空服务很好地配合，所以你既可以<em>禁用</em>音频，同时仍然记录下如果音频启用时它<em>本该</em>播放的声音。</p>
 <h2><a href="#设计决策" name="设计决策">设计决策</a></h2>
-<p>我们讨论了一种典型的实现，但是对核心问题的不同回答有着不同的实现方式：</p>
+<p>我们已经讲了一种典型实现，但它可以基于几个核心问题的不同答案而有几种变化：</p>
 <h3><a href="#服务是如何被定位的？" name="服务是如何被定位的？">服务是如何被定位的？</a></h3>
 <ul>
 <li>
@@ -390,107 +381,104 @@ AI程序员不关心声音在什么时候播放，声音程序员也不在乎AI�
 <ul>
 <li>
 <p><em>简单快捷。</em>
-  <code>getAudio()</code>函数简单地返回指针。这通常会被编译器内联，所以我们几乎没有付出性能损失就获得了很好的抽象层。</p>
+  <code>getAudio()</code>函数简单地返回一个指针。它通常会被编译器内联，所以我们几乎没付出性能损失，就获得了一个很好的抽象层。</p>
 </li>
 <li>
 <p><em>可以控制如何构建提供者。</em>
-  想想一个接触游戏控制器的服务。我们使用两个具体的提供者：一个是给常规游戏，另一个给在线游戏。
-  在线游戏跨过网络提供控制器的输入，这样，对游戏的其他部分，远程玩家好像是在使用本地控制器。</p>
-<p>为了能正常工作，在线的服务提供者需要知道其他远程玩家的IP。
-如果定位器本身构建对象，它怎么知道传进来什么？
+  考虑一个用于访问游戏控制器的服务。我们有两个具体的提供者：一个用于常规游戏，另一个用于在线游戏。
+  在线提供者通过网络传递控制器的输入，这样，对游戏的其他部分来说，远程玩家就好像在使用本地控制器。</p>
+<p>为了能正常工作，在线的具体提供者需要知道其他远程玩家的IP地址。
+如果定位器本身构建对象，它怎么知道该传入什么？
 <code>Locator</code>类对在线的情况一无所知，更不用说其他用户的IP地址了。</p>
-<p>外部注册的提供者闪避了这个问题。定位器不再构造类，游戏的网络代码实例化特定的在线服务提供器，
-传给它需要的IP地址。然后把服务提供给定位器，而定位器只知道服务的抽象接口。</p>
+<p>外部注册的提供者避开了这个问题。不再由定位器构造类，而是由游戏的网络代码实例化在线专用的服务提供者，
+传入它需要的IP地址。然后把它交给定位器，而定位器只知道服务的抽象接口。</p>
 </li>
 <li>
 <p><em>可以在游戏运行时改变服务。</em>
-  我们也许在最终的游戏版本中不会用到这个，但是这是个在开发过程中有效的技巧。
-  举个例子，在测试时，即使游戏正在运行，我们也可以切换音频服务为早先提到的空服务来临时地关闭声音。</p>
+  我们也许不会在最终的游戏版本中用到这个，但这是开发过程中很实用的技巧。
+  举个例子，在测试时，即使游戏正在运行，我们也可以把音频服务换成早先提到的空服务，临时关闭声音。</p>
 </li>
 <li>
 <p><em>定位器依赖外部代码。</em>
-  这是缺点。任何访问服务的代码必须假定在某处的代码已经注册过服务了。
-  如果没有做初始化，要么游戏会崩溃，要么服务会神秘地不工作。</p>
+  这是缺点。任何访问服务的代码都假定某处的代码已经注册过它了。
+  如果没有进行初始化，要么游戏会崩溃，要么服务会莫名地不工作。</p>
 </li>
 </ul>
 </li>
 <li>
 <p><strong>在编译时绑定：</strong></p>
-<p>这里的思路是使用预处理器，在编译时间处理“定位”。就像这样：</p>
-<div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">Locator</span>
+<p>这里的思路是，通过预处理器宏让“定位”过程实际发生在编译期。就像这样：</p>
+<div class="codehilite"><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Locator</span>
 <span class="p">{</span>
 <span class="k">public</span><span class="o">:</span>
-  <span class="k">static</span> <span class="n">Audio</span><span class="o">&amp;</span> <span class="n">getAudio</span><span class="p">()</span> <span class="p">{</span> <span class="k">return</span> <span class="n">service_</span><span class="p">;</span> <span class="p">}</span>
+<span class="w">  </span><span class="k">static</span><span class="w"> </span><span class="n">Audio</span><span class="o">&amp;</span><span class="w"> </span><span class="n">getAudio</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="n">service_</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
 
 <span class="k">private</span><span class="o">:</span>
-  <span class="cp">#if DEBUG</span>
-    <span class="k">static</span> <span class="n">DebugAudio</span> <span class="n">service_</span><span class="p">;</span>
-  <span class="cp">#else</span>
-    <span class="k">static</span> <span class="n">ReleaseAudio</span> <span class="n">service_</span><span class="p">;</span>
-  <span class="cp">#endif</span>
+<span class="w">  </span><span class="cp">#if DEBUG</span>
+<span class="w">    </span><span class="k">static</span><span class="w"> </span><span class="n">DebugAudio</span><span class="w"> </span><span class="n">service_</span><span class="p">;</span>
+<span class="w">  </span><span class="cp">#else</span>
+<span class="w">    </span><span class="k">static</span><span class="w"> </span><span class="n">ReleaseAudio</span><span class="w"> </span><span class="n">service_</span><span class="p">;</span>
+<span class="w">  </span><span class="cp">#endif</span>
 <span class="p">};</span>
-</pre></div>
+</code></pre></div>
 
-
-<p>像这样定位服务暗示了一些事情：</p>
+<p>像这样定位服务意味着几件事：</p>
 <ul>
 <li>
 <p><em>快速。</em>
-  所有的工作都在编译时完成，在运行时无需完成任何东西。
-  编译器很可能会内联<code>getAudio()</code>调用，这是我们能达到的最快方案。</p>
+  所有真正的工作都在编译时完成，运行时无需再做任何事。
+  编译器很可能会内联<code>getAudio()</code>调用，这给了我们一个能想到的最快的方案。</p>
 </li>
 <li>
 <p><em>能保证服务是可用的。</em>
-  由于定位器现在拥有服务，在编译时就进行了定位，我们可以保证游戏如果能完成编译，就不必担心服务不可用。</p>
+  由于现在定位器拥有服务，并在编译期选定它，我们可以确信，只要游戏能编译通过，就不必担心服务不可用。</p>
 </li>
 <li>
 <p><em>无法轻易改变服务。</em>
-  这是主要的缺点。由于绑定发生在编译时，任何时候你想要改变服务，都得重新编译并重启游戏。</p>
+  这是主要的缺点。由于绑定发生在构建时，任何时候你想要改变服务，都得重新编译并重启游戏。</p>
 </li>
 </ul>
 </li>
 <li>
-<p><strong>在运行时设置：</strong></p>
+<p><strong>在运行时配置：</strong></p>
 <p><span name="reflection"></span></p>
-<p>企业级软件中，如果你说“服务定位器”，他们脑中第一反应就是这个方法。
-当服务被请求时，定位器在运行时做一些魔法般的事情来追踪请求的真实实现。</p>
+<p>在企业级商业软件那个满眼卡其裤的国度里，如果你说“服务定位器”，他们想到的就会是这个。
+当服务被请求时，定位器会在运行时施展一些“魔法”，搜寻被请求的实际实现。</p>
 <aside name="reflection">
-
-<p><em>反射</em> 是一些编程语言在运行时与类型系统打交道的能力。
-举个例子，我们可以通过名字找到类，找到它的构造器，然后创建实例。</p>
-<p>像Lisp，Smalltalk和Python这样的动态类型语言自然有这样的特性，但新的静态语言比如C#和Java同样支持它。</p>
+<p><em>反射</em>是一些编程语言在运行时与类型系统打交道的能力。
+举个例子，我们可以根据给定的名字找到类，找到它的构造函数，然后调用它来创建实例。</p>
+<p>像Lisp、Smalltalk和Python这样的动态类型语言天生就有这种能力，但较新的静态语言比如C#和Java同样支持它。</p>
 </aside>
-
-<p>通常而言，这意味着加载设置文件确认提供者，然后使用反射在运行时实例化这个类。这为我们做了一些事情：</p>
+<p>通常，这意味着加载一个标识提供者的配置文件，然后用反射在运行时实例化那个类。这为我们带来几点好处：</p>
 <ul>
 <li>
 <p><em>我们可以更换服务而无需重新编译。</em>
-  这比编译时绑定多了小小的灵活性，但是不像注册那样灵活，那里你可以真正地在运行游戏的时候改变服务。</p>
+  这比编译时绑定的服务稍微灵活一点，但不如注册方式灵活，因为后者你可以在游戏运行中真正改变服务。</p>
 </li>
 <li>
 <p><em>非程序员也可改变服务。</em>
-  这对于设计师是很好的，他们想要开关某项游戏特性，但修改源代码并不舒服。
-  （或者，更可能的，<em>编程者</em> 对设计者介入感到不舒服。）</p>
+  这对设计师很有用，当他们想要开关某些游戏特性、又不习惯在源代码里翻来翻去时。
+  （或者，更可能的是，<em>程序员</em>不放心让他们在源代码里翻来翻去。）</p>
 </li>
 <li>
-<p><em>同样的代码库可以同时支持多种设置。</em>
-  由于从代码库中完全移出了定位处理，我们可以使用相同的代码来同时支持多种服务设置。</p>
-<p>这就是这个模型在企业网站上广泛应用的原因之一：
-只需要修改设置，你就可以在不同的服务器上发布相同的应用。
-历史上看来，这在游戏中没什么用，因为主机硬件本身是好好标准化了的，
-但是很多游戏的目标是大杂烩般的移动设备，这点就很有关系了。</p>
+<p><em>同样的代码库可以同时支持多种配置。</em>
+  由于定位过程被完全移出了代码库，我们可以使用相同的代码来同时支持多种服务配置。</p>
+<p>这就是这个模型在企业级Web领域具有吸引力的原因之一：
+只需要修改一些配置，你就可以在不同的服务器环境上部署同一个应用。
+从历史上看，这在游戏中用处较小，因为主机硬件相当标准化，
+但随着越来越多游戏面向五花八门的移动设备，这一点正变得越来越重要。</p>
 </li>
 <li>
 <p><em>复杂。</em>
-    不像前面的解决方案，这个方案是重量级的。
-     你得创建设置系统，也许要写代码来加载和粘贴文件，通常<em>要做些事情</em>来定位服务。
-     花时间写这些代码，就没法花时间写其他的游戏特性。</p>
+    不像前面的解决方案，这个方案相当重量级。
+     你得创建某种配置系统，也许还要写代码来加载和解析文件，通常<em>还得鼓捣一番</em>才能定位服务。
+     花在写这些代码上的时间，就不能再花在其他的游戏特性上。</p>
 </li>
 <li>
-<p><em>加载服务需要时间。</em>
-  现在你会眉头紧蹙了。在运行时设置意味着你在消耗CPU循环加载服务。
-  缓存可以最小化消耗，但是仍暗示着在首次使用服务时，游戏需要暂停花点时间完成。
-  游戏开发者<em>讨厌</em>消耗CPU循环在不能提高游戏体验的地方。</p>
+<p><em>定位服务需要时间。</em>
+  现在笑容真的要变成愁容了。采用运行时配置意味着你在消耗CPU周期来定位服务。
+  缓存可以把这点降到最低，但那仍然意味着首次使用服务时，游戏得花点时间去找到它。
+  游戏开发者<em>讨厌</em>把CPU周期消耗在不能提升玩家游戏体验的事情上。</p>
 </li>
 </ul>
 </li>
@@ -499,161 +487,155 @@ AI程序员不关心声音在什么时候播放，声音程序员也不在乎AI�
 <ul>
 <li>
 <p><strong>让使用者处理它：</strong></p>
-<p>最简单的解决方案就是把责任推回去。如果定位器不能找到服务，只需返回<code>NULL</code>。这暗示着：</p>
+<p>最简单的解决方案就是把皮球踢回去。如果定位器不能找到服务，只需返回<code>NULL</code>。这意味着：</p>
 <ul>
 <li>
-<p><em>让使用者决定如何掌控失败。</em>
-    使用者也许在收到找不到服务的关键错误时应该暂停游戏。
-     其他时候可能可以安全地忽视并继续。
-     如果定位器不能定义全面的策略应对所有的情况，那么就将失败传回去，让每个使用者决定什么是正确的回应。</p>
+<p><em>让使用者决定如何应对失败。</em>
+    某些使用者可能认为找不到服务是应该中止游戏的关键错误。
+     其他使用者则可能可以安全地忽略它并继续。
+     如果定位器无法定义一条适用于所有情况的统一策略，那么把失败传下去，让每个调用点自己决定正确的响应是什么。</p>
 </li>
 <li>
-<p><em>使用服务的用户必须处理失败。</em>
-    当然，这个的必然结果是每个使用者都<em>必须</em>检查服务的失败。
-     如果它们都以相同方式来处理，在代码库中就有很多重复的代码。
-     如果一百个中有一个忘了检查，游戏就会崩溃。</p>
+<p><em>服务的使用者必须处理失败。</em>
+    当然，随之而来的必然结果是每个调用点都<em>必须</em>检查是否没找到服务。
+     如果几乎所有调用点都以相同方式处理失败，那代码库里就会散布大量重复代码。
+     如果潜在的数百处使用服务的地方中有一处忘了检查，我们的游戏就会崩溃。</p>
 </li>
 </ul>
 </li>
 <li>
-<p><strong>挂起游戏：</strong></p>
-<p>我说过，我们不能<em>保证</em>服务在编译时总是可用的，但是不意味着我们不能<em>声明</em>可用性是游戏定位器运行的一部分。
+<p><strong>中止游戏：</strong></p>
+<p>我说过，我们无法<em>证明</em>服务在编译期总是可用，但这并不意味着我们不能<em>声明</em>可用性是定位器运行时契约的一部分。
 最简单的方法就是使用断言：</p>
-<div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">Locator</span>
+<div class="codehilite"><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Locator</span>
 <span class="p">{</span>
 <span class="k">public</span><span class="o">:</span>
-  <span class="k">static</span> <span class="n">Audio</span><span class="o">&amp;</span> <span class="n">getAudio</span><span class="p">()</span>
-  <span class="p">{</span>
-    <span class="n">Audio</span><span class="o">*</span> <span class="n">service</span> <span class="o">=</span> <span class="nb">NULL</span><span class="p">;</span>
+<span class="w">  </span><span class="k">static</span><span class="w"> </span><span class="n">Audio</span><span class="o">&amp;</span><span class="w"> </span><span class="n">getAudio</span><span class="p">()</span>
+<span class="w">  </span><span class="p">{</span>
+<span class="w">    </span><span class="n">Audio</span><span class="o">*</span><span class="w"> </span><span class="n">service</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">NULL</span><span class="p">;</span>
 
-    <span class="c1">// Code here to locate service...</span>
+<span class="w">    </span><span class="c1">// Code here to locate service...</span>
 
-    <span class="n">assert</span><span class="p">(</span><span class="n">service</span> <span class="o">!=</span> <span class="nb">NULL</span><span class="p">);</span>
-    <span class="k">return</span> <span class="o">*</span><span class="n">service</span><span class="p">;</span>
-  <span class="p">}</span>
+<span class="w">    </span><span class="n">assert</span><span class="p">(</span><span class="n">service</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="nb">NULL</span><span class="p">);</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="o">*</span><span class="n">service</span><span class="p">;</span>
+<span class="w">  </span><span class="p">}</span>
 <span class="p">};</span>
-</pre></div>
-
+</code></pre></div>
 
 <p><span name="assert"></span></p>
-<p>如果服务没有被找到，游戏停在试图使用它的后续代码之前。
-这里的<code>assert()</code>调用没有解决无法定位服务的问题，但是它确实明确了问题是什么。
-通过这里的断言，我们表明，“无法定位服务是定位器的漏洞。”</p>
+<p>如果服务没有被定位，游戏会在任何后续代码试图使用它之前停下来。
+这里的<code>assert()</code>调用没有解决无法定位服务的问题，但它确实把这是谁的问题说清楚了。
+通过在这里断言，我们在说：“无法定位服务是定位器里的缺陷。”</p>
 <aside name="assert">
-
 <p>如果你没见过<code>assert()</code>函数，<a href="singleton.html" class="pattern">单例</a>模式一章中有解释。</p>
 </aside>
-
 <p>那么这为我们做了什么呢？</p>
 <ul>
 <li>
 <p><em>使用者不必处理缺失的服务。</em>
-  简单的服务可能在成百上千的地方被使用，这节约了很多代码。
-  通过声明定位器永远能够提供服务，我们节约了使用者处理它的精力。</p>
+  单个服务可能被用在成百上千个地方，这能显著节省代码。
+  通过声明始终提供服务是定位器的职责，我们让服务的使用者不必再去填补这个空缺。</p>
 </li>
 <li>
-<p><em>如果服务没有找到，游戏会挂起。</em>
-    在极少的情况下，服务真的找不到，游戏就会挂起。
-     强迫我们解决定位服务的漏洞是好事（比如一些本该调用的初始化代码没有被调用），
-     但被阻塞的所有人都得等到漏洞修复时。与大型开发团队工作时，当这种事情发生，会增加痛苦的停工时间。</p>
+<p><em>如果服务没有找到，游戏会中止。</em>
+    在极少数情况下，服务真的找不到，游戏就会中止。
+     好处在于它迫使我们解决阻碍服务被定位的缺陷（很可能是某些初始化代码没有在应该调用时被调用），
+     但对其他所有被它卡住、直到修复为止的人来说，这真的很磨人。在大开发团队中，这类问题可能导致程序员痛苦的停工时间。</p>
 </li>
 </ul>
 </li>
 <li>
 <p><strong>返回空服务：</strong></p>
-<p>我们在样例中实现中展示了这种修复。使用它意味着：</p>
+<p>我们在示例实现中展示过这种改进。使用它意味着：</p>
 <ul>
 <li>
 <p><em>使用者不必处理缺失的服务。</em>
-  就像前面的选项一样，我们保证了总是会返回可用的服务，简化了使用服务的代码。</p>
+  就像前面的选项一样，我们保证总是会返回一个有效的服务对象，从而简化使用服务的代码。</p>
 </li>
 <li>
 <p><em>如果服务不可用，游戏仍将继续。</em>
-  这有利有弊。让我们在没有服务的情况下依然能运行游戏是很有用的。
-  在大团队中，当我们工作依赖的其他特性或者依赖的其他系统还没有就位时，这也是很有用的。</p>
+  这既有利也有弊。好处在于，即使服务不在，我们也能继续运行游戏。
+  在大型团队里，当我们正在做的功能依赖的某个系统尚未就绪时，这会非常有帮助。</p>
 <p><span name="null"></span></p>
-<p>缺点在于，较难查找<em>无意</em>缺失服务的漏洞。
-假设游戏用服务去获取数据，然后基于数据做出决策。
-如果我们无法注册真正的服务，代码获得了空服务，游戏也许不会像期望的那样行动。
-需要在这个问题上花一些时间，才能发现我们以为可用的服务是不存在的。</p>
+<p>缺点在于，调试<em>无意中</em>缺失的服务会更难。
+假设游戏用某个服务获取数据，然后基于这些数据做出决策。
+如果我们没有注册真正的服务，那段代码拿到的是空服务，游戏可能不会按我们期望的方式运行。
+需要花一些工夫，才能把问题追溯到“我们以为服务在，其实它并不在”这个事实上。</p>
 <aside name="null">
-
-<p>我们可以让空服务被调用时打印一些debug信息来缓和这点。</p>
+<p>我们可以让空服务在每次被使用时打印一些调试输出，来缓解这个问题。</p>
 </aside>
-
 </li>
 </ul>
 </li>
 </ul>
-<p>在这些选项中，我看到最常使用的是会找到服务的简单断言。
-在游戏发布的时候，它经历了严格的测试，会在可信赖的硬件上运行。
-无法找到服务的机会非常小。</p>
-<p>在更大的团队中，我推荐使用空服务。
-这不会花太多时间实现，可以减少开发中服务不可用的缺陷。
-这也给你了一个简单的方式去关闭服务，无论它是有漏洞还是干扰到了现在的工作。</p>
-<h3><a href="#服务的服务范围有多大？" name="服务的服务范围有多大？">服务的服务范围有多大？</a></h3>
-<p>到目前为止，我们假设定位器给<em>任何</em>需要服务的地方提供服务。
-当然这是这个模式的典型的使用方式，另一选项是服务范围限制到类和它的依赖类中，就像这样：</p>
-<div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">Base</span>
+<p>在这些选项里，我看到最常用的就是简单地断言服务一定能被找到。
+等到游戏发布时，它已经被充分测试过了，而且很可能会运行在可靠的硬件上。
+到那时，服务找不到的几率已经很小了。</p>
+<p>在更大的团队中，我鼓励你加一个空服务。
+它实现起来不费多少力气，还能让你在开发中服务不可用时少受一些停工之苦。
+它也给了你一个简单的方式去关闭服务，无论它是有缺陷，还是只是干扰了你手头的工作。</p>
+<h3><a href="#服务的范围有多大？" name="服务的范围有多大？">服务的范围有多大？</a></h3>
+<p>到目前为止，我们一直假设定位器会向<em>任何</em>想要它的人提供服务的访问。
+虽然这是这个模式的典型用法，但另一个选项是把访问限制到单个类及其子类，就像这样：</p>
+<div class="codehilite"><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Base</span>
 <span class="p">{</span>
-  <span class="c1">// 定位和设置服务的代码……</span>
+<span class="w">  </span><span class="c1">// 定位和设置服务的代码……</span>
 
 <span class="k">protected</span><span class="o">:</span>
-  <span class="c1">// 派生类可以使用服务</span>
-  <span class="k">static</span> <span class="n">Audio</span><span class="o">&amp;</span> <span class="n">getAudio</span><span class="p">()</span> <span class="p">{</span> <span class="k">return</span> <span class="o">*</span><span class="n">service_</span><span class="p">;</span> <span class="p">}</span>
+<span class="w">  </span><span class="c1">// 派生类可以使用服务</span>
+<span class="w">  </span><span class="k">static</span><span class="w"> </span><span class="n">Audio</span><span class="o">&amp;</span><span class="w"> </span><span class="n">getAudio</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="o">*</span><span class="n">service_</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
 
 <span class="k">private</span><span class="o">:</span>
-  <span class="k">static</span> <span class="n">Audio</span><span class="o">*</span> <span class="n">service_</span><span class="p">;</span>
+<span class="w">  </span><span class="k">static</span><span class="w"> </span><span class="n">Audio</span><span class="o">*</span><span class="w"> </span><span class="n">service_</span><span class="p">;</span>
 <span class="p">};</span>
-</pre></div>
+</code></pre></div>
 
-
-<p>通过这样，对服务的访问被收缩到了继承<code>Base</code>的类。这两种各有千秋：</p>
+<p>这样一来，对服务的访问就被限制在继承了<code>Base</code>的类中。两种方式各有利弊：</p>
 <ul>
 <li>
 <p><strong>如果全局可访问：</strong></p>
 <ul>
 <li>
 <p><em>鼓励整个代码库使用同样的服务。</em>
-  大多数服务都被设计成单一的。
-  通过允许整个代码库接触到相同的服务，我们可以避免代码因不能获取“真正的”服务而到处实例化提供者。</p>
+  大多数服务本来就该是独一无二的。
+  通过允许整个代码库访问同一个服务，我们可以避免代码里一些地方因为拿不到“真正的”服务而各自实例化自己的提供者。</p>
 </li>
 <li>
 <p><em>我们失去了何时何地使用服务的控制权。</em>
-  这是让某物全局化的明显代价——任何东西都能接触它。<a class="gof-pattern" href="singleton.html">单例</a>模式一章讲了全局变量是多么的糟糕。</p>
+  这是让某物全局化的明显代价——任何东西都能接触到它。<a class="gof-pattern" href="singleton.html">单例</a>一章为全局作用域可能引发的恐怖剧列出了全套角色。</p>
 </li>
 </ul>
 </li>
 <li>
-<p><strong>如果接触被限制在某个类中：</strong></p>
+<p><strong>如果访问被限制在某个类中：</strong></p>
 <ul>
 <li>
 <p><em>我们控制了耦合。</em>
-  这是主要的优点。通过显式限制服务到继承树的一个分支上，应该解耦的系统保持了解耦。</p>
+  这是主要的优点。通过把服务限制在继承树的某个分支上，我们可以确保本应解耦的系统保持解耦。</p>
 </li>
 <li>
 <p><em>可能导致重复的付出。</em>
-  潜在的缺点是如果一对无关的类<em>确实</em>需要接触服务，每个类都要拥有服务的引用。
-  无论是谁定位或者注册服务，它也需要在这些类之间重复处理。</p>
-<p>另一个选项是改变类的继承层次，给这些类一个公共的基类，但这引起的麻烦也许多于收益。）</p>
+  潜在的缺点是，如果一对无关的类<em>确实</em>需要访问服务，它们各自都需要持有对服务的引用。
+  无论用什么流程来定位或注册服务，都不得不在这些类之间重复。</p>
+<p>（另一个选项是调整类的继承层次，给这些类一个公共的基类，但那可能得不偿失。）</p>
 </li>
 </ul>
 </li>
 </ul>
-<p>我的通用准则是，如果服务局限在游戏的一个领域中，那么限制它的服务范围在一个类上面。
-举个例子，获取网络接口的服务可能限制于在线联网类中。
-像日志这样应用更加广泛的服务应该是全局的。</p>
+<p>我的通用准则是，如果服务局限在游戏的某一个领域中，那就把它的范围限制在一个类上。
+举个例子，用于访问网络的服务大概可以限制在联网类中。
+像日志这样被更广泛使用的服务则应该是全局的。</p>
 <h2><a href="#参见" name="参见">参见</a></h2>
 <ul>
 <li>
-<p>服务定位模式在很多方面是<a class="gof-pattern" href="singleton.html">单例</a>模式的兄弟，在应用前值得看看哪个更适合你的需求。</p>
+<p>服务定位器模式在很多方面是<a class="gof-pattern" href="singleton.html">单例</a>模式的兄弟，因此值得两者都看看，以确定哪个最适合你的需求。</p>
 </li>
 <li>
-<p><a href="http://unity3d.com">Unity</a>框架在它的<a href="http://docs.unity3d.com/412/Documentation/ScriptReference/Component.GetComponent.html?from=index"><code>GetComponent()</code></a>方法中使用这个模式，协调它的<a href="component.html" class="pattern">组件</a>模式</p>
+<p><a href="http://unity3d.com">Unity</a>框架在其<a href="http://docs.unity3d.com/412/Documentation/ScriptReference/Component.GetComponent.html?from=index"><code>GetComponent()</code></a>方法中配合<a href="component.html" class="pattern">组件</a>模式使用了这个模式。</p>
 </li>
 <li>
 <p>微软的<a href="http://msdn.microsoft.com/en-us/library/microsoft.xna.framework.game.services.aspx">XNA</a>游戏开发框架在它的核心<code>Game</code>类中内建了这种模式。
-  每个实体都有一个<code>GameServices</code>对象可以用来注册和定位任何种类的服务。</p>
+  每个实例都有一个<code>GameServices</code>对象，可用来注册和定位任何类型的服务。</p>
 </li>
 </ul>
 <nav>
